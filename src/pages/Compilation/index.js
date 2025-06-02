@@ -205,22 +205,26 @@ function CompilationPage() {
                 <TableCell align="center">
                   {moment(row?.["created_at"]).format("YYYY/MM/DD")}
                 </TableCell>
-                <TableCell align="center">{row?.["uraian-spp"]}</TableCell>
+                <TableCell align="center">{row?.["description"]}</TableCell>
                 <TableCell
                   align="center"
                   onClick={() => {
-                    setIsOpenModal(true);
-                    setPDFtoOpen(row?.document?.url);
+                    if (typeof row.document.url === "string") {
+                      setIsOpenModal(true);
+                      setPDFtoOpen(row.document?.url);
+                    }
                   }}
                   style={{
                     color: themeColors.primary.light,
+                    cursor:
+                      typeof row.document.url === "string"
+                        ? "pointer"
+                        : "default",
                   }}
                 >
-                  <span style={{ cursor: "pointer" }}>
-                    {row.document.filename}
-                  </span>
+                    {row.document?.filename}
                 </TableCell>
-                <TableCell align="center">{row.description}</TableCell>
+                <TableCell align="center">Revisi ke-{row.rev}</TableCell>
               </TableRow>
             ))}
           </TableBody>

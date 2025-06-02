@@ -376,7 +376,7 @@ function ListSatuanKerjaPage() {
                 >
                   {row.document?.filename}
                 </TableCell>
-                <TableCell align="center">{row.keterangan}</TableCell>
+                <TableCell align="center">Revisi ke-{row?.rev}</TableCell>
                 <TableCell align="center">
                   <Button
                     onClick={() => {
@@ -437,6 +437,7 @@ function ListSatuanKerjaPage() {
             value={formData?.["no_spp"]}
             onChange={handleChange}
             required
+            validate={validationSchema.onlyNumber}
             placeholder="Masukkan nomor SPP"
           />
           <Input
@@ -469,12 +470,12 @@ function ListSatuanKerjaPage() {
             value={formData?.document}
           />
           <Textarea
-            label="Keterangan"
+            label="Uraian SPP"
             name="keterangan"
             value={formData?.keterangan}
             required
             onChange={handleChange}
-            placeholder="Masukkan keterangan tambahan"
+            placeholder="Masukkan uraian tambahan"
             rows={5}
           />
           <Button type="submit" style={{ float: "right" }}>
