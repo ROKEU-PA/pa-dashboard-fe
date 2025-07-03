@@ -77,17 +77,16 @@ function Sidebar({ isAdmin }) {
         width: "200px",
         height: "100vh",
         background: "#15406A",
-        padding: "1rem",
         display: "flex",
         flexDirection: "column",
-        justifyContent: "space-between",
         position: "fixed",
         top: 0,
         left: 0,
-        color: "#fff",
+        color: "#fff"
       }}
     >
-      <div>
+      {/* Bagian atas: Logo & Menu (scrollable jika penuh) */}
+      <div style={{ padding: "1rem", flex: 1, overflowY: "auto" }}>
         <img
           src="/logo-kemnaker.png"
           alt="logo"
@@ -101,27 +100,20 @@ function Sidebar({ isAdmin }) {
               if (item.children) {
                 return (
                   <div key={index}>
+                    {/* Dropdown toggle */}
                     <div
+                      className={`dropdown-parent${openDropdown === item.name ? " open": ""}`}
                       onClick={() => toggleDropdown(item.name)}
-                      style={{
-                        cursor: "pointer",
-                        position: "relative",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        padding: "10px",
-                        backgroundColor: openDropdown === item.name ? "#1F5B8A" : "transparent",
-                        borderRadius: "5px",
-                      }}
                     >
-                      <div style={{display: "flex", alignItems: "center", gap: "8px"}}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         {item.icon}
                         <span>{item.name}</span>
-                        <div style={{ position: "absolute", right: "10px"}}>  
-                          {openDropdown === item.name ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                        </div>
+                      </div>
+                      <div style={{ position: "absolute", right: "-5px" }}>
+                        {openDropdown === item.name ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                       </div>
                     </div>
+                    {/* Submenu */}
                     {openDropdown === item.name && (
                       <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
                         {item.children.map((subItem) => (
@@ -175,19 +167,26 @@ function Sidebar({ isAdmin }) {
             })}
         </nav>
       </div>
-      <span
-        onClick={handleLogout}
+      <div
         style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          cursor: "pointer",
-          color: "#fff",
+          padding: "1rem",
+          borderTop: "1px solid #1F5B8A",
         }}
       >
-        <LogOut />
-        Logout
-      </span>
+        <span
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            cursor: "pointer",
+            color: "#fff",
+          }}
+        >
+          <LogOut />
+          Logout
+        </span>
+      </div>
     </div>
   );
 }

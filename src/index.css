@@ -164,14 +164,18 @@ th:hover .sort-icon,
   opacity: 1 !important;
 }
 
-.sidebar-link {
-  transition: background 0.2s ease;
-}
-.sidebar-link:hover {
-  background-color: #1F5B8A;
+.dropdown-parent {
+  display: flex;
+  align-items: center;
+  position: relative;
+  padding: 10px;
+  cursor: pointer;
   border-radius: 5px;
+  transition: backgroud 0.2 ease;
 }
-.sidebar-link.active {
+.dropdown-parent:hover {
   background-color: #1F5B8A;
-  font-weight: bold;
+}
+.dropdown-parent.open {
+  background-color: #1F5B8A;
 }
