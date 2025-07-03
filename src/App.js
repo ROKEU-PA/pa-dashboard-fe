@@ -5,6 +5,7 @@ import AppLayout from "./Layouts/AppLayout";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
 import CompilationPage from "./pages/Compilation";
+import SoonPage from "./pages/Soon";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -65,6 +66,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <UserManagementPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/soon"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <SoonPage />
               </AppLayout>
             </PrivateRoute>
           }

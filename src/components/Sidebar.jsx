@@ -1,34 +1,74 @@
 import { useAuth } from "@/contexts/AuthContexts";
-import { Building, Layers, LogOut, UserRoundCog } from "lucide-react";
-import React from "react";
+import { Building, Layers, LogOut, UserRoundCog, ChevronDown, ChevronUp } from "lucide-react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 
 const menuItems = [
   {
-    name: "Satuan Kerja",
-    path: "/satuan-kerja",
-    icon: <Building />,
-    adminOnly: false,
+    name: "Pelaksanaan Anggaran",
+    children: [
+      {
+        name: "Satuan Kerja",
+        path: "/satuan-kerja",
+        icon: <Building />,
+      },
+      {
+        name: "Kompilasi",
+        path: "/compilation",
+        icon: <Layers />,
+        adminOnly: true,
+      },
+      {
+        name: "Manajemen Akun",
+        path: "/user-management",
+        icon: <UserRoundCog />,
+        adminOnly: true
+      },
+    ],
   },
   {
-    name: "Kompilasi",
-    path: "/compilation",
-    icon: <Layers />,
+    name: "Akuntansi Laporan",
     adminOnly: true,
+    children: [
+      {
+        name: "Home",
+        path: "/soon",
+        icon: <Building />,
+      },
+    ],
   },
   {
-    name: "Manajemen Akun",
-    path: "/user-management",
-    icon: <UserRoundCog />,
+    name: "Barang Milik Negara",
     adminOnly: true,
+    children: [
+      {
+        name: "Home",
+        path: "/soon",
+        icon: <Building />,
+      },
+    ],
+  },
+  {
+    name: "PTUK & TU",
+    adminOnly: true,
+    children: [
+      {
+        name: "Home",
+        path: "/soon",
+        icon: <Building />,
+      },
+    ],
   },
 ];
 
 function Sidebar({ isAdmin }) {
   const { logout } = useAuth();
-  const handleLogout = () => {
-    logout();
-    // Optionally navigate to "/" or "/login"
+  const handleLogout = () => logout();
+
+  const [openDropdown, setOpenDropdown] = useState(null);
+
+  const toggleDropdown = (name) => {
+    setOpenDropdown(openDropdown === name ? null : name);
   };
 
   return (
@@ -44,34 +84,107 @@ function Sidebar({ isAdmin }) {
         position: "fixed",
         top: 0,
         left: 0,
+        color: "#fff",
       }}
     >
-      <div style={{ justifyItems: "center" }}>
+      <div>
         <img
           src="/logo-kemnaker.png"
           alt="logo"
           width="160"
           style={{ marginBottom: "2rem" }}
-        ></img>
+        />
         <nav>
           {menuItems
-            .filter((item) => isAdmin || !item.adminOnly) // show all if admin, only non-admin if not
-            .map((item) => (
-              <div key={item.path}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `sidebar-link${isActive ? " active" : ""}`
-                  }
-                >
-                  {item.icon}
-                  {item.name}
-                </NavLink>
-              </div>
-            ))}
+            .filter((item) => isAdmin || !item.adminOnly)
+            .map((item, index) => {
+              if (item.children) {
+                return (
+                  <div key={index}>
+                    <div
+                      onClick={() => toggleDropdown(item.name)}
+                      style={{
+                        cursor: "pointer",
+                        position: "relative",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        padding: "10px",
+                        backgroundColor: openDropdown === item.name ? "#1F5B8A" : "transparent",
+                        borderRadius: "5px",
+                      }}
+                    >
+                      <div style={{display: "flex", alignItems: "center", gap: "8px"}}>
+                        {item.icon}
+                        <span>{item.name}</span>
+                        <div style={{ position: "absolute", right: "10px"}}>  
+                          {openDropdown === item.name ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </div>
+                      </div>
+                    </div>
+                    {openDropdown === item.name && (
+                      <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
+                        {item.children.map((subItem) => (
+                          <NavLink
+                            to={subItem.path}
+                            key={subItem.path}
+                            className={({ isActive }) =>
+                              `sidebar-link${isActive ? " active" : ""}`
+                            }
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              color: "#fff",
+                              padding: "6px 0",
+                              textDecoration: "none",
+                              fontSize: "0.9rem",
+                            }}
+                          >
+                            {subItem.icon}
+                            {subItem.name}
+                          </NavLink>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              } else {
+                return (
+                  <NavLink
+                    to={item.path}
+                    key={item.path}
+                    className={({ isActive }) =>
+                      `sidebar-link${isActive ? " active" : ""}`
+                    }
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      padding: "10px",
+                      color: "#fff",
+                      textDecoration: "none",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    {item.icon}
+                    {item.name}
+                  </NavLink>
+                );
+              }
+            })}
         </nav>
       </div>
-      <span className="logout-button" onClick={handleLogout}>
+      <span
+        onClick={handleLogout}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          cursor: "pointer",
+          color: "#fff",
+        }}
+      >
         <LogOut />
         Logout
       </span>

@@ -22,6 +22,7 @@ const PrivateRoute = ({ children }) => {
       { path: "/" },
       { path: "/compilation" },
       { path: "/user-management" },
+      { path: "/soon" },
     ];
 
     const allowed = isAuthorizedRoute(location.pathname, userData, menus);

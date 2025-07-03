@@ -163,3 +163,15 @@ th:hover .sort-icon,
 .sort-icon-active {
   opacity: 1 !important;
 }
+
+.sidebar-link {
+  transition: background 0.2s ease;
+}
+.sidebar-link:hover {
+  background-color: #1F5B8A;
+  border-radius: 5px;
+}
+.sidebar-link.active {
+  background-color: #1F5B8A;
+  font-weight: bold;
+}
