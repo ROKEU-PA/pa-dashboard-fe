@@ -486,9 +486,9 @@ function ListSatuanKerjaPage() {
       <Modal open={isOpenPDF} onClose={() => setIsOpenPDF(false)} title="">
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
         {/* <CustomPDFViewer pdfSource={pdfToOpen} /> */}
-        {/* <CustomPDFViewer pdfSource="https://api.rokeubmn-pa.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
+        {/* <CustomPDFViewer pdfSource="https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
         {/* <iframe
-          src={`https://api.rokeubmn-pa.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf`}
+          src={`https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf`}
           style={{ width: "100%", height: "500px" }}
           title="PDF Viewer"
         /> */}

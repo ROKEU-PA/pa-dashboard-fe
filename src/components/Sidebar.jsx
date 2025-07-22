@@ -8,13 +8,24 @@ const menuItems = [
     name: "Pelaksanaan Anggaran",
     children: [
       {
-        name: "Satuan Kerja",
-        path: "/satuan-kerja",
-        icon: <Building />,
+        name: "Arsip",
+        children: [
+          {
+            name: "Satuan Kerja",
+            path: "/satuan-kerja",
+            icon: <Building />,
+          },
+          {
+            name: "Kompilasi",
+            path: "/compilation",
+            icon: <Layers />,
+            adminOnly: true,
+          }
+        ]
       },
       {
-        name: "Kompilasi",
-        path: "/compilation",
+        name: "IKPA",
+        path: "/ikpa",
         icon: <Layers />,
         adminOnly: true,
       },

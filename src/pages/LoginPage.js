@@ -36,7 +36,7 @@ function LoginPage() {
 
     try {
       const response = await fetchHelper(
-        "https://api.rokeubmn-pa.id/api/auth/login",
+        "https://rokeubmn.kemnaker.go.id/api/auth/login",
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
