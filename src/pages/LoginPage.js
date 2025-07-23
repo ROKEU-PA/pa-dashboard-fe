@@ -89,7 +89,10 @@ function LoginPage() {
             }}
           >
             <span style={{ fontWeight: 600, fontSize: 28 }}>
-              Selamat Datang di Arsip ROKEU BMN
+              Selamat Datang di SiAKBAR
+            </span><br></br>
+            <span style={{ fontWeight: 600, fontSize: 16 }}>
+              Anggaran, Keuangan, dan Barang
             </span>
           </div>
           <form

@@ -8,32 +8,21 @@ const menuItems = [
     name: "Pelaksanaan Anggaran",
     children: [
       {
-        name: "Arsip",
-        children: [
-          {
-            name: "Satuan Kerja",
-            path: "/satuan-kerja",
-            icon: <Building />,
-          },
-          {
-            name: "Kompilasi",
-            path: "/compilation",
-            icon: <Layers />,
-            adminOnly: true,
-          }
-        ]
-      },
+        name: "Pengajuan SPP",
+        path: "/satuan-kerja",
+        icon: <Building />,
+      },    
       {
         name: "IKPA",
-        path: "/ikpa",
+        path: "/soon",
         icon: <Layers />,
         adminOnly: true,
       },
       {
-        name: "Manajemen Akun",
-        path: "/user-management",
-        icon: <UserRoundCog />,
-        adminOnly: true
+        name: "Kompilasi",
+        path: "/compilation",
+        icon: <Layers />,
+        adminOnly: true,
       },
     ],
   },
@@ -60,7 +49,7 @@ const menuItems = [
     ],
   },
   {
-    name: "PTUK & TU",
+    name: "PTUK",
     adminOnly: true,
     children: [
       {
@@ -69,6 +58,23 @@ const menuItems = [
         icon: <Building />,
       },
     ],
+  },
+  {
+    name: "TU",
+    adminOnly: true,
+    children: [
+      {
+        name: "Home",
+        path: "/soon",
+        icon: <Building />,
+      },
+    ],
+  },
+  {
+    name: "Manajemen Akun",
+    path: "/user-management",
+    icon: <UserRoundCog />,
+    adminOnly: true
   },
 ];
 
