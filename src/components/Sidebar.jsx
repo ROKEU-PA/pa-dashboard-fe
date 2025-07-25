@@ -17,6 +17,7 @@ import {
   GaugeCircle,
   LayoutDashboard,
   MessageSquare,
+  Network,
 } from "lucide-react";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -101,6 +102,11 @@ const menuItems = [
       },
     ],
     icon: <BookUser />,
+  },
+  {
+    name: "Struktur Organisasi",
+    path: "/dashboard/struktur-organisasi",
+    icon: <Network />,
   },
   {
     name: "Helpdesk",

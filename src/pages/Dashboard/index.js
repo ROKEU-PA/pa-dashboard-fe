@@ -18,6 +18,7 @@ function DashboardPage() {
     "barang-milik-negara": "BMNP",
     "akuntansi-laporan": "ALP",
     "tata-usaha": "TUP",
+    "struktur-organisasi": "SOP",
     helpdesk: "HDP",
   };
 
@@ -27,16 +28,22 @@ function DashboardPage() {
     "barang-milik-negara": "Barang Milik Negara",
     "akuntansi-laporan": "Akuntansi Laporan",
     "tata-usaha": "Tata Usaha",
+    "struktur-organisasi": "Struktur Organisasi",
     helpdesk: "Helpdesk",
   };
 
   useEffect(() => {
     const fetchImage = async () => {
       try {
+        const justLoggedIn = sessionStorage.getItem("justLoggedIn");
+        if (justLoggedIn) {
+          sessionStorage.removeItem("justLoggedIn");
+          window.location.reload();
+        }
         const id = imageMap[subPage] || "UTM";
         const response = await apiRequest({ url: `/api/dashboard/${id}` });
         const isTitle =
-          subPage === "helpdesk"
+          subPage === "helpdesk" || subPage === "struktur-organisasi"
             ? titleMap[subPage]
             : `Dashboard ${titleMap[subPage] || "Utama"}`;
         setTitle(isTitle);

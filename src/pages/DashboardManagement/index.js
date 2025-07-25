@@ -105,10 +105,11 @@ function DashboardManagementPage() {
               options={[
                 { label: "Dashboard Utama", value: "UTM" },
                 { label: "PTUK", value: "PTUKP" },
-                { label: "Pelaksaan Anggaran", value: "PAP" },
+                { label: "Pelaksanaan Anggaran", value: "PAP" },
                 { label: "Barang Milik Negara", value: "BMNP" },
                 { label: "Akuntansi Laporan", value: "ALP" },
                 { label: "Tata Usaha", value: "TUP" },
+                { label: "Struktur Organisasi", value: "SOP"},
                 { label: "Helpdesk", value: "HDP"}
               ]}
             />

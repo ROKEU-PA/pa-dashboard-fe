@@ -43,6 +43,7 @@ function LoginPage() {
       console.log(response);
       if (response?.success) {
         login(response?.data?.access_token);
+        sessionStorage.setItem("justLoggedIn", "true");
         navigate("/dashboard");
         setErrorMessage(null);
       } else {
