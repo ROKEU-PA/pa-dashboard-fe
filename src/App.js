@@ -13,6 +13,8 @@ import UserManagementPage from "./pages/UserManagement";
 import MenuPage from "./pages/Menu";
 import { AppContext } from "./contexts/AppContext";
 import PrivateRoute from "./components/PrivateRoute";
+import DashboardPage from "./pages/Dashboard";
+import DashboardManagementPage from "./pages/DashboardManagement";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -76,6 +78,36 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <SoonPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <DashboardPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/:subPage"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <DashboardPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard-management"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <DashboardManagementPage />
               </AppLayout>
             </PrivateRoute>
           }

@@ -65,3 +65,6 @@
 .react-pdf__Page__annotations {
   display: none;
 }
+.sidebar-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
