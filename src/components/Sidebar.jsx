@@ -214,27 +214,29 @@ function Sidebar({ isAdmin }) {
                     {/* Submenu */}
                     {openDropdown === item.name && (
                       <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
-                        {item.children.map((subItem) => (
-                          <NavLink
-                            to={subItem.path}
-                            key={subItem.path}
-                            className={({ isActive }) =>
-                              `sidebar-link${isActive ? " active" : ""}`
-                            }
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                              color: "#fff",
-                              padding: "6px 6px",
-                              textDecoration: "none",
-                              fontSize: "0.9rem",
-                            }}
-                          >
-                            {subItem.icon}
-                            {subItem.name}
-                          </NavLink>
-                        ))}
+                        {item.children
+                          .filter((subItem) => isAdmin || !subItem.adminOnly)
+                          .map((subItem) => (
+                            <NavLink
+                              to={subItem.path}
+                              key={subItem.path}
+                              className={({ isActive }) =>
+                                `sidebar-link${isActive ? " active" : ""}`
+                              }
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                color: "#fff",
+                                padding: "6px 6px",
+                                textDecoration: "none",
+                                fontSize: "0.9rem",
+                              }}
+                            >
+                              {subItem.icon}
+                              {subItem.name}
+                            </NavLink>
+                          ))}
                       </div>
                     )}
                   </div>

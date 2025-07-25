@@ -27,7 +27,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={token ? <Navigate to="/satuan-kerja" /> : <LoginPage />}
+          element={token ? <Navigate to="/dashboard" /> : <LoginPage />}
         />
         <Route
           path="/satuan-kerja"

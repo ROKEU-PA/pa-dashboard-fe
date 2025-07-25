@@ -43,7 +43,7 @@ function LoginPage() {
       console.log(response);
       if (response?.success) {
         login(response?.data?.access_token);
-        navigate("/satuan-kerja");
+        navigate("/dashboard");
         setErrorMessage(null);
       } else {
         console.log(response);
