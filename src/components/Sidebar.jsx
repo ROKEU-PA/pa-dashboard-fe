@@ -18,6 +18,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Network,
+  Archive,
 } from "lucide-react";
 import React, { useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -34,8 +35,8 @@ const menuItems = [
     adminOnly: true,
     children: [
       {
-        name: "Home",
-        path: "/soon",
+        name: "Tuntutan Ganti Rugi",
+        path: "/ptuk/tuntutan-ganti-rugi",
         icon: <Building />,
       },
     ],
@@ -47,13 +48,18 @@ const menuItems = [
     children: [
       {
         name: "Pengajuan SPP",
-        path: "/satuan-kerja",
+        path: "/satuan-kerja/pengajuan",
         icon: <FolderCheck />,
       },
       {
         name: "IKPA",
-        path: "/soon",
+        path: "/ikpa",
         icon: <AlignEndHorizontal />,
+      },
+      {
+        name: "Arsip SPM",
+        path: "/satuan-kerja",
+        icon: <Archive />,
       },
       {
         name: "Kompilasi",
@@ -78,9 +84,9 @@ const menuItems = [
     icon: <Package />,
   },
   {
-    name: "Akuntansi Laporan",
+    name: "Akuntansi Pelaporan",
     adminOnly: true,
-    path: "/dashboard/akuntansi-laporan",
+    path: "/dashboard/akuntansi-pelaporan",
     children: [
       {
         name: "Home",
@@ -225,6 +231,7 @@ function Sidebar({ isAdmin }) {
                           .map((subItem) => (
                             <NavLink
                               to={subItem.path}
+                              end
                               key={subItem.path}
                               className={({ isActive }) =>
                                 `sidebar-link${isActive ? " active" : ""}`
@@ -251,6 +258,7 @@ function Sidebar({ isAdmin }) {
                 return (
                   <NavLink
                     to={item.path}
+                    end
                     key={item.path}
                     className={({ isActive }) =>
                       `sidebar-link${isActive ? " active" : ""}`

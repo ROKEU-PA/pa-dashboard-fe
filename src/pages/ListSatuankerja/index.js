@@ -27,11 +27,12 @@ import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import moment from "moment";
 import {
   columns,
   getCurrentSatuanKerja,
+  isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
 
 function ListSatuanKerjaPage() {
@@ -100,9 +101,12 @@ function ListSatuanKerjaPage() {
 
   const fetchTable = async () => {
     try {
+      const now = isPengajuanPath(location.pathname)
+        ? new Date().getFullYear()
+        : filter.tahun;
       const query = buildQueryString({
         biro_code: currentMenu?.code,
-        tahun: filter.tahun,
+        tahun: now,
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -264,18 +268,33 @@ function ListSatuanKerjaPage() {
             justifyContent: "space-between",
           }}
         >
-          <Button
-            onClick={() => {
-              setIsOpenModal(true);
-              setFormData((prev) => ({ ...prev, tahun: moment().year() }));
-              setVariantModal("Add");
-            }}
-            style={{ width: "fit-content" }}
-            variant="danger"
-            icon={<Plus size={20} />}
-          >
-            Tambah Arsip
-          </Button>
+          {!isPengajuanPath(location.pathname) ? (
+            <Button
+              onClick={() => {
+                setIsOpenModal(true);
+                setFormData((prev) => ({ ...prev, tahun: moment().year() }));
+                setVariantModal("Add");
+              }}
+              style={{ width: "fit-content" }}
+              variant="danger"
+              icon={<Plus size={20} />}
+            >
+              Tambah Arsip
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                setIsOpenModal(true);
+                setFormData((prev) => ({ ...prev, tahun: moment().year() }));
+                setVariantModal("Add-Pengajuan");
+              }}
+              style={{ width: "fit-content" }}
+              variant="danger"
+              icon={<Plus size={20} />}
+            >
+              Tambah Pengajuan
+            </Button>
+          )}
           <div
             style={{
               width: "calc(100vw/2.2)",
@@ -291,14 +310,16 @@ function ListSatuanKerjaPage() {
               value={filter.searchKey}
               onChange={(e) => handleDateChange("searchKey", e.target.value)}
             />
-            <Input
-              label="Tahun"
-              style={{ width: "200px" }}
-              name="Tahun"
-              value={filter.tahun}
-              validate={validationSchema.tahun}
-              onChange={(e) => handleDateChange("tahun", e.target.value)}
-            />
+            {!isPengajuanPath(location.pathname) ? (
+              <Input
+                label="Tahun"
+                style={{ width: "200px" }}
+                name="Tahun"
+                value={filter.tahun}
+                validate={validationSchema.tahun}
+                onChange={(e) => handleDateChange("tahun", e.target.value)}
+              />
+            ) : null}
             <DatePickerInput
               label="Start Date"
               selected={filter.startDate}
@@ -321,77 +342,122 @@ function ListSatuanKerjaPage() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHeader>
             <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  component="th"
-                  scope="col"
-                  align="center"
-                  onClick={() => col.sortable && handleSortChange(col.key)}
-                  style={{ cursor: col.sortable ? "pointer" : "default" }}
-                >
-                  {col.sortable ? (
-                    <TableSortLabel
-                      active={sortBy === col.key}
-                      direction={sortDir}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  ) : (
-                    col.label
-                  )}
-                </TableCell>
-              ))}
+              {columns
+                .filter(
+                  (col) =>
+                    !(col.hiddenInArsip && !isPengajuanPath(location.pathname))
+                )
+                .map((col) => (
+                  <TableCell
+                    key={col.key}
+                    component="th"
+                    scope="col"
+                    align="center"
+                    onClick={() => col.sortable && handleSortChange(col.key)}
+                    style={{ cursor: col.sortable ? "pointer" : "default" }}
+                  >
+                    {col.sortable ? (
+                      <TableSortLabel
+                        active={sortBy === col.key}
+                        direction={sortDir}
+                      >
+                        {col.label}
+                      </TableSortLabel>
+                    ) : (
+                      col.label
+                    )}
+                  </TableCell>
+                ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {dataTable.map((row, index) => (
-              <TableRow
-                key={index + 1}
-                sx={{
-                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
-                }}
-              >
-                <TableCell align="center">{row?.["no_spp"]}</TableCell>
-                <TableCell align="center">
-                  {moment(row?.["created_at"]).format("YYYY/MM/DD")}
-                </TableCell>
-                <TableCell align="center">{row.jenis_spp}</TableCell>
-                <TableCell align="center">{row.tahun}</TableCell>
-                <TableCell
-                  align="center"
-                  onClick={() => {
-                    if (typeof row.document.url === "string") {
-                      setIsOpenPDF(true);
-                      setPDFtoOpen(row.document?.url);
+              <TableRow key={index}>
+                {columns
+                  .filter(
+                    (col) =>
+                      !(
+                        col.hiddenInArsip && !isPengajuanPath(location.pathname)
+                      )
+                  )
+                  .map((col) => {
+                    if (col.key == "spp_number") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          {row?.['no_spp']}
+                        </TableCell>
+                      );
                     }
-                  }}
-                  style={{
-                    color: themeColors.primary.light,
-                    cursor:
-                      typeof row.document.url === "string"
-                        ? "pointer"
-                        : "default",
-                  }}
-                >
-                  {row.document?.filename}
-                </TableCell>
-                <TableCell align="center">Revisi ke-{row?.rev}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    onClick={() => {
-                      setVariantModal("Edit");
-                      setFormData({
-                        ...row,
-                        type: row.jenis_spp,
-                      });
-                      setIsOpenModal(true);
-                    }}
-                    style={{ width: "fit-content" }}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
+                    if (col.key === "created_at") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          {moment(row?.[col.key]).format("YYYY/MM/DD")}
+                        </TableCell>
+                      );
+                    }
+                    if (col.key === "keterangan") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          Revisi ke-{row?.[col.key]}
+                        </TableCell>
+                      );
+                    }
+
+                    if (col.key === "document") {
+                      return (
+                        <TableCell
+                          key={col.key}
+                          align="center"
+                          onClick={() => {
+                            if (typeof row.document?.url === "string") {
+                              setIsOpenPDF(true);
+                              setPDFtoOpen(row.document?.url);
+                            }
+                          }}
+                          style={{
+                            color: themeColors.primary.light,
+                            cursor:
+                              typeof row.document?.url === "string"
+                                ? "pointer"
+                                : "default",
+                          }}
+                        >
+                          {row.document?.filename || "-"}
+                        </TableCell>
+                      );
+                    }
+
+                    if (col.key === "action") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          <Button
+                            onClick={() => {
+                              isPengajuanPath(location.pathname)
+                                ? setVariantModal("Checklist")
+                                : setVariantModal("Edit");
+                              setFormData({
+                                ...row,
+                                type: row.jenis_spp,
+                              });
+                              setIsOpenModal(true);
+                            }}
+                            style={{ width: "fit-content" }}
+                          >
+                            {isPengajuanPath(location.pathname)
+                              ? "Checklist"
+                              : "Edit"}
+                          </Button>
+                        </TableCell>
+                      );
+                    }
+
+                    // Default rendering
+                    return (
+                      <TableCell key={col.key} align="center">
+                        {row[col.key] ?? "-"}
+                      </TableCell>
+                    );
+                  })}
               </TableRow>
             ))}
           </TableBody>

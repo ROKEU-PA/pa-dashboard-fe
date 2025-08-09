@@ -15,6 +15,8 @@ import { AppContext } from "./contexts/AppContext";
 import PrivateRoute from "./components/PrivateRoute";
 import DashboardPage from "./pages/Dashboard";
 import DashboardManagementPage from "./pages/DashboardManagement";
+import IkpaPage from "./pages/Ikpa";
+import PTUKSub1Page from "./pages/PTUKSub1";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -43,6 +45,34 @@ function App() {
           <Route
             key={data?.id}
             path={`${data?.path}`}
+            element={
+              <PrivateRoute>
+                <AppLayout isAdmin={isAdmin}>
+                  <ListSatuanKerjaPage />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
+        ))}
+        <Route
+          path="/satuan-kerja/:subPage"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <MenuPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        {listMenu.map((data) => (
+          <Route
+            key={data?.id}
+            path={(() => {
+              const pathParts = data.path.split("/").filter(Boolean);
+              const base = "/" + pathParts[0];
+              const end = pathParts.slice(1).join("/");
+              return `${base}/pengajuan/${end}`;
+            })()}
             element={
               <PrivateRoute>
                 <AppLayout isAdmin={isAdmin}>
@@ -108,6 +138,26 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <DashboardManagementPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ikpa"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <IkpaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+      <Route
+          path="/ptuk/tuntutan-ganti-rugi"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <PTUKSub1Page />
               </AppLayout>
             </PrivateRoute>
           }

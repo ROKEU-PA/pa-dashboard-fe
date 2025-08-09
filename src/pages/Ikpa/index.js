@@ -11,27 +11,32 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import Modal from "@/components/Modal";
 import themeColors from "@/constants/color";
 import Input from "@/components/Input";
-import Select from "@/components/Select";
-import DatePickerInput from "@/components/DatePickerInput";
+import Button from "@/components/Button";
 import TableSortLabel from "@/components/TableSortLabel";
-import { buildQueryString, validationSchema } from "@/services/GeneralHelper";
+import { buildQueryString } from "@/services/GeneralHelper";
 import moment from "moment";
 import { apiRequest } from "@/services/APIHelper";
 import { AppContext } from "@/contexts/AppContext";
+import { Download, Upload } from "lucide-react";
+import { fetchHelperGET } from "@/services/FetchHelper";
+import { toast } from "react-toastify";
+import FileInput from "@/components/FileInput";
 
 const columns = [
-  { key: "no", label: "No" },
-  { key: "eselon_code", label: "Eselon 1/Satker" },
+  { key: "kode_satker", label: "Kode Satker" },
+  { key: "eselon", label: "Eselon 1/Satker" },
   { key: "revisi_dipa", label: "Revisi DIPA" },
-  { key: "type", label: "Deviasi Hal III Dipa", sortable: true },
-  { key: "year", label: "Tahun", sortable: true },
-  { key: "created_at", label: "Tanggal Pengiriman", sortable: true },
-  { key: "uraian-spp", label: "Uraian SPP" },
-  { key: "document", label: "Dokumen" },
-  { key: "description", label: "Keterangan" },
+  { key: "deviasi_hal3_dipa", label: "Deviasi Hal III Dipa" },
+  { key: "realisasi_anggaran", label: "Realisasi Anggaran" },
+  { key: "belanja_kontraktual", label: "Belanja Kontraktual" },
+  { key: "penyelesaian_tagihan", label: "Penyelesaian Tagihan" },
+  { key: "pengelolaan_up_tup", label: "Pengelolaan UP TUP" },
+  { key: "capaian_output", label: "Capaian Output" },
+  { key: "nilai_ikpa", label: "Nilai IKPA" },
+  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data" },
 ];
 
-function CompilationPage() {
+function IkpaPage() {
   const { userData } = useContext(AppContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
@@ -40,12 +45,11 @@ function CompilationPage() {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
   const [dataTable, setDataTable] = useState([]);
-  const [pdfToOpen, setPDFtoOpen] = useState(null);
   const [filter, setFilter] = useState({
-    year: "",
     searchKey: "",
-    startDate: "",
-    endDate: "",
+  });
+  const [formData, setFormData] = useState({
+    dokumen: null,
   });
 
   const handleSortChange = (key) => {
@@ -73,6 +77,27 @@ function CompilationPage() {
     });
   };
 
+  const fetchTemplateDownload = async () => {
+    try {
+      const response = await fetchHelperGET(
+        process.env.REACT_APP_API_BASE_URL + `/api/pa/ikpa/format/download`,
+        "GET",
+        localStorage.getItem("token"),
+        "blob"
+      );
+      const url = window.URL.createObjectURL(response);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "format_template_import_ikpa.xlsx";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Gagal fetch template:", error);
+    }
+  };
+
   const fetchTable = async () => {
     try {
       const query = buildQueryString({
@@ -90,11 +115,11 @@ function CompilationPage() {
           ? moment(filter.endDate).format("YYYY-MM-DD").toString()
           : "",
       });
-      const data = [];
-      // await apiRequest({
-      //   url: `/api/archive/compilation?${query}`,
-      // });
+      const data = await apiRequest({
+        url: `/api/pa/ikpa/all?`,
+      });
       let result = data?.data;
+      console.log(result);
       if (data.success) {
         setTotalPages(result?.last_page);
         setDataTable(result?.data);
@@ -103,6 +128,75 @@ function CompilationPage() {
       console.error(error);
     }
   };
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files ? files[0] : value,
+    }));
+  };
+
+  const submitData = async (formData) => {
+    try {
+      const payload = new FormData();
+      payload.append("excel", formData.dokumen);
+
+      const result = await apiRequest({
+        url: "/api/pa/ikpa/import",
+        method: "POST",
+        options: {
+          body: payload,
+        },
+        isMultiType: true,
+      });
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log(formData);
+
+    let isAnyFile = formData?.dokumen || formData?.document;
+
+    try {
+      if (isAnyFile) {
+        if (!formData.dokumen) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      }
+
+      submitData(formData);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("Data berhasil disimpan!");
+      setIsOpenModal(false);
+      setFormData({
+        dokumen: null,
+      });
+      fetchTable();
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+    }
+  };
+
+  const groupedData = dataTable.reduce((acc, row) => {
+    const group = row.eselon_code;
+    if (!acc[group]) acc[group] = { parent: null, children: [] };
+
+    if (!row.satker_code) {
+      acc[group].parent = row;
+    } else {
+      acc[group].children.push(row);
+    }
+
+    return acc;
+  }, {});
 
   useEffect(() => {
     fetchTable();
@@ -127,10 +221,10 @@ function CompilationPage() {
       >
         <div
           style={{
-            float: "left",
             display: "flex",
             gap: 10,
             marginBottom: "1rem",
+            justifyContent: "space-between",
           }}
         >
           <Input
@@ -140,14 +234,32 @@ function CompilationPage() {
             value={filter.searchKey}
             onChange={(e) => handleDateChange("searchKey", e.target.value)}
           />
-          <Input
+          <div style={{ display: "flex", gap: 10 }}>
+            <Button
+              onClick={() => setIsOpenModal(true)}
+              style={{ width: "fit-content" }}
+              variant="secondary"
+              icon={<Upload size={20} />}
+            >
+              Import Data IKPA
+            </Button>
+            <Button
+              onClick={fetchTemplateDownload}
+              style={{ width: "fit-content" }}
+              variant="primary"
+              icon={<Download size={20} />}
+            >
+              Download Template
+            </Button>
+          </div>
+          {/* <Input
             label="Tahun"
             style={{ width: "200px" }}
             name="Tahun"
             value={filter.year}
             validate={validationSchema.tahun}
             onChange={(e) => handleDateChange("year", e.target.value)}
-          />
+          /> 
           <DatePickerInput
             label="Start Date"
             selected={filter.startDate}
@@ -164,7 +276,7 @@ function CompilationPage() {
             startDate={filter.startDate}
             endDate={filter.endDate}
             minDate={filter.startDate}
-          />
+          /> */}
         </div>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHeader>
@@ -192,7 +304,7 @@ function CompilationPage() {
               ))}
             </TableRow>
           </TableHeader>
-          <TableBody>
+          {/* <TableBody>
             {dataTable.map((row) => (
               <TableRow
                 key={row.no}
@@ -200,34 +312,103 @@ function CompilationPage() {
                   "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                 }}
               >
-                <TableCell align="center">{row?.["biro_code"]}</TableCell>
-                <TableCell align="center">{row?.["spp_number"]}</TableCell>
-                <TableCell align="center">{row?.["type"]}</TableCell>
-                <TableCell align="center">{row?.["year"]}</TableCell>
+                <TableCell align="center">1</TableCell>
+                <TableCell align="center">Sekretariat Jenderal</TableCell>
+                <TableCell align="center">{row?.["revisi_dipa"]}</TableCell>
                 <TableCell align="center">
-                  {moment(row?.["created_at"]).format("YYYY/MM/DD")}
+                  {row?.["deviasi_hal3_dipa"]}
                 </TableCell>
-                <TableCell align="center">{row?.["description"]}</TableCell>
-                <TableCell
-                  align="center"
-                  onClick={() => {
-                    if (typeof row.document.url === "string") {
-                      setIsOpenModal(true);
-                      setPDFtoOpen(row.document?.url);
-                    }
-                  }}
-                  style={{
-                    color: themeColors.primary.light,
-                    cursor:
-                      typeof row.document.url === "string"
-                        ? "pointer"
-                        : "default",
-                  }}
-                >
-                    {row.document?.filename}
+                <TableCell align="center">
+                  {row?.["realisasi_anggaran"]}
                 </TableCell>
-                <TableCell align="center">Revisi ke-{row.rev}</TableCell>
+                <TableCell align="center">
+                  {row?.["belanja_kontraktual"]}
+                </TableCell>
+                <TableCell align="center">
+                  {row?.["penyelesaian_tagihan"]}
+                </TableCell>
+                <TableCell align="center">
+                  {row?.["pengelolaan_up_tup"]}
+                </TableCell>
+                <TableCell align="center">{row?.["capaian_output"]}</TableCell>
+                <TableCell align="center">{row?.["nilai_ikpa"]}</TableCell>
+                <TableCell align="center">
+                  {moment(row?.["updated_at"]).format("YYYY/MM/DD")}
+                </TableCell>
               </TableRow>
+            ))}
+          </TableBody> */}
+          <TableBody>
+            {Object.entries(groupedData).map(([eselonCode, group], index) => (
+              <React.Fragment key={eselonCode}>
+                {/* Row utama (group) */}
+                {group.parent && (
+                  <TableRow
+                    sx={{ backgroundColor: "#f0f0f0", fontWeight: "bold" }}
+                  >
+                    <TableCell align="center">{group.parent.eselon_code}</TableCell>
+                    <TableCell align="center">
+                      {group.parent.name}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.revisi_dipa}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.deviasi_hal3_dipa}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.realisasi_anggaran}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.belanja_kontraktual}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.penyelesaian_tagihan}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.pengelolaan_up_tup}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.capaian_output}
+                    </TableCell>
+                    <TableCell align="center">
+                      {group.parent.nilai_ikpa}
+                    </TableCell>
+                    <TableCell align="center">
+                      {moment(group.parent.updated_at).format("YYYY/MM/DD")}
+                    </TableCell>
+                  </TableRow>
+                )}
+
+                {/* Row anak (satker) */}
+                {group.children.map((row, idx) => (
+                  <TableRow key={row.id}>
+                    <TableCell align="center">{row.satker_code}</TableCell>
+                    <TableCell align="center">{row.name}</TableCell>
+                    <TableCell align="center">{row.revisi_dipa}</TableCell>
+                    <TableCell align="center">
+                      {row.deviasi_hal3_dipa}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.realisasi_anggaran}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.belanja_kontraktual}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.penyelesaian_tagihan}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.pengelolaan_up_tup}
+                    </TableCell>
+                    <TableCell align="center">{row.capaian_output}</TableCell>
+                    <TableCell align="center">{row.nilai_ikpa}</TableCell>
+                    <TableCell align="center">
+                      {moment(row.updated_at).format("YYYY/MM/DD")}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
@@ -242,18 +423,40 @@ function CompilationPage() {
           }}
         />
       </Paper>
-      <Modal open={isOpenModal} onClose={() => setIsOpenModal(false)} title="">
-        <iframe
-          src={pdfToOpen}
-          style={{ width: "100%", height: "500px" }}
-          title="PDF Viewer"
-        />
-        {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
-        {/* <CustomPDFViewer pdfSource="http://localhost:3000/pdf-tester.pdf" /> */}
-        {/* <CustomPDFViewer pdfSource="https://drive.google.com/uc?export=download&id=1a3XHkey6ROiKEBxXV1sjnPeiTbRPZfyP" /> */}
+      <Modal
+        open={isOpenModal}
+        onClose={() => {
+          setIsOpenModal(false);
+          setFormData({
+            dokumen: null,
+          });
+        }}
+        title="Form Upload Excel"
+      >
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            gap: 20,
+          }}
+        >
+          <FileInput
+            accept=".xlsx"
+            label="Dokumen"
+            name="dokumen"
+            onChange={handleChange}
+            required
+            value={formData?.dokumen}
+          />
+          <Button type="submit" style={{ float: "right" }}>
+            Submit
+          </Button>
+        </form>
       </Modal>
     </div>
   );
 }
 
-export default CompilationPage;
+export default IkpaPage;

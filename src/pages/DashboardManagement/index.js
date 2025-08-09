@@ -107,7 +107,7 @@ function DashboardManagementPage() {
                 { label: "PTUK", value: "PTUKP" },
                 { label: "Pelaksanaan Anggaran", value: "PAP" },
                 { label: "Barang Milik Negara", value: "BMNP" },
-                { label: "Akuntansi Laporan", value: "ALP" },
+                { label: "Akuntansi Pelaporan", value: "ALP" },
                 { label: "Tata Usaha", value: "TUP" },
                 { label: "Struktur Organisasi", value: "SOP"},
                 { label: "Helpdesk", value: "HDP"}

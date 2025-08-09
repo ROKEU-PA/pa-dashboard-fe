@@ -114,6 +114,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
   if (pathname === "/dashboard/helpdesk") return true;
   if (pathname === "/soon") return true;
+  if (pathname === "/ptuk/tuntutan-ganti-rugi") return true;
 
   // 3. Hanya admin yang bisa akses /compilation dan /user-management
   if (pathname === "/compilation" || pathname === "/user-management")
