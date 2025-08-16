@@ -103,28 +103,43 @@ export function filterDataByCode(dataArray, targetCode) {
 
 export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   const isAdmin = userData?.role === "admin";
+  const isUser = userData?.role === "user";
+  const isPIC = userData?.role === "pic";
+  const isGuest = userData?.role === "guest";
 
   // 1. Admin bisa akses semua
   if (isAdmin) return true;
 
-  // 2. User bisa akses /satuan-kerja
-  if (pathname === "/") return true;
-  if (pathname === "/satuan-kerja") return true;
-  if (pathname === "/dashboard") return true;
-  if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
-  if (pathname === "/dashboard/helpdesk") return true;
-  if (pathname === "/soon") return true;
-  if (pathname === "/ptuk/tuntutan-ganti-rugi") return true;
+  // 2. User bisa akses Pelaksanaan Anggaran (aktualisasi)
+  if (isUser) {
+    if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
+    if (pathname.startsWith("/satuan-kerja")) return true;
 
-  // 3. Hanya admin yang bisa akses /compilation dan /user-management
+    // Validasi berdasarkan listMenu dan biro_code
+    const matched = menus.find((menu) => menu.path === pathname);
+    if (!matched) return false;
+
+    return matched.code === userData?.biro_code;
+  }
+
+  if (isPIC) {
+    if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
+    if (pathname.startsWith("/satuan-kerja")) return true;
+  }
+
+  // 3. Guest bisa akses /satuan-kerja
+  if (isGuest) {
+    if (pathname.startsWith("/dashboard")) return true;
+    if (pathname.startsWith("/ptuk")) return true;
+    if (pathname.startsWith("/pa")) return true;
+    if (pathname.startsWith("/dashboard")) return true;
+  }
+
+  if (pathname === "/") return true;
+
+  // 4. Hanya admin yang bisa akses /compilation dan /user-management
   if (pathname === "/compilation" || pathname === "/user-management")
     return false;
-
-  // 4. Validasi berdasarkan listMenu dan biro_code
-  const matched = menus.find((menu) => menu.path === pathname);
-  if (!matched) return false;
-
-  return matched.code === userData?.biro_code;
 };
 
 export const cryptoEncrypter = (string) => {

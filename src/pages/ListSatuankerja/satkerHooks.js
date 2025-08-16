@@ -4,9 +4,10 @@ export const columns = [
   { key: "jenis_spp", label: "Jenis SPP", sortable: true },
   { key: "tahun", label: "Tahun", sortable: true },
   { key: "document", label: "Dokumen" },
+  { key: "revisi", label: "Revisi"},
   { key: "status", label: "Status", hiddenInArsip: true },
   { key: "kelengkapan", label: "Kelengkapan", hiddenInArsip: true },
-  { key: "keterangan", label: "Keterangan" },
+  { key: "catatan", label: "Catatan"},
   { key: "action", label: "Action" },
 ];
 

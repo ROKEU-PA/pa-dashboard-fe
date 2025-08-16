@@ -20,8 +20,9 @@ import {
   Network,
   Archive,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { AppContext } from "@/contexts/AppContext";
 
 const menuItems = [
   {
@@ -138,17 +139,41 @@ const menuItems = [
   },
 ];
 
-function Sidebar({ isAdmin }) {
+function Sidebar() {
+  const { userData } = useContext(AppContext);
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const role = userData?.role;
+
   const handleLogout = () => logout();
 
-  const [openDropdown, setOpenDropdown] = useState(null);
+  // 🔍 Filter menu berdasarkan role
+  const getFilteredMenuItems = () => {
+    if (role === "admin") return menuItems;
+
+    if (role === "user" || role === "pic") {
+      return menuItems
+        .filter((item) => item.name === "Pelaksanaan Anggaran")
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
+          ),
+        }));
+    }
+
+    if (role === "guest") {
+      return menuItems.filter((item) => item.name !== "Management");
+    }
+
+    return [];
+  };
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
     if (!isOpen && item.path) {
-      navigate(item.path); // Navigasi ke path parent
+      navigate(item.path);
     }
     setOpenDropdown(isOpen ? null : item.name);
   };
@@ -167,7 +192,7 @@ function Sidebar({ isAdmin }) {
         color: "#fff",
       }}
     >
-      {/* Bagian atas: Logo & Menu (scrollable jika penuh) */}
+      {/* Logo dan isi menu */}
       <div
         style={{
           padding: "1rem",
@@ -185,102 +210,101 @@ function Sidebar({ isAdmin }) {
           style={{ marginBottom: "2rem" }}
         />
         <nav>
-          {menuItems
-            .filter((item) => isAdmin || !item.adminOnly)
-            .map((item, index) => {
-              if (item.children) {
-                return (
-                  <div key={index}>
-                    {/* Dropdown toggle */}
-                    <div
-                      className={`dropdown-parent${
-                        openDropdown === item.name ? " open" : ""
-                      }`}
-                      onClick={() => toggleDropdown(item)}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "10px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        {item.icon}
-                        <span>{item.name}</span>
-                      </div>
-                      <div>
-                        {openDropdown === item.name ? (
-                          <ChevronUp size={16} />
-                        ) : (
-                          <ChevronDown size={16} />
-                        )}
-                      </div>
-                    </div>
-                    {/* Submenu */}
-                    {openDropdown === item.name && (
-                      <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
-                        {item.children
-                          .filter((subItem) => isAdmin || !subItem.adminOnly)
-                          .map((subItem) => (
-                            <NavLink
-                              to={subItem.path}
-                              end
-                              key={subItem.path}
-                              className={({ isActive }) =>
-                                `sidebar-link${isActive ? " active" : ""}`
-                              }
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                                color: "#fff",
-                                padding: "6px 6px",
-                                textDecoration: "none",
-                                fontSize: "0.9rem",
-                              }}
-                            >
-                              {subItem.icon}
-                              {subItem.name}
-                            </NavLink>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              } else {
-                return (
-                  <NavLink
-                    to={item.path}
-                    end
-                    key={item.path}
-                    className={({ isActive }) =>
-                      `sidebar-link${isActive ? " active" : ""}`
-                    }
+          {getFilteredMenuItems().map((item, index) => {
+            if (item.children) {
+              return (
+                <div key={index}>
+                  {/* Parent dropdown */}
+                  <div
+                    className={`dropdown-parent${
+                      openDropdown === item.name ? " open" : ""
+                    }`}
+                    onClick={() => toggleDropdown(item)}
                     style={{
                       display: "flex",
+                      justifyContent: "space-between",
                       alignItems: "center",
-                      gap: "8px",
                       padding: "10px",
-                      color: "#fff",
-                      textDecoration: "none",
-                      borderRadius: "5px",
+                      cursor: "pointer",
                     }}
                   >
-                    {item.icon}
-                    {item.name}
-                  </NavLink>
-                );
-              }
-            })}
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
+                    >
+                      {item.icon}
+                      <span>{item.name}</span>
+                    </div>
+                    <div>
+                      {openDropdown === item.name ? (
+                        <ChevronUp size={16} />
+                      ) : (
+                        <ChevronDown size={16} />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Submenu */}
+                  {openDropdown === item.name && (
+                    <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
+                      {item.children.map((subItem) => (
+                        <NavLink
+                          to={subItem.path}
+                          end
+                          key={subItem.path}
+                          className={({ isActive }) =>
+                            `sidebar-link${isActive ? " active" : ""}`
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            color: "#fff",
+                            padding: "6px 6px",
+                            textDecoration: "none",
+                            fontSize: "0.9rem",
+                          }}
+                        >
+                          {subItem.icon}
+                          {subItem.name}
+                        </NavLink>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            } else {
+              return (
+                <NavLink
+                  to={item.path}
+                  end
+                  key={item.path}
+                  className={({ isActive }) =>
+                    `sidebar-link${isActive ? " active" : ""}`
+                  }
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    padding: "10px",
+                    color: "#fff",
+                    textDecoration: "none",
+                    borderRadius: "5px",
+                  }}
+                >
+                  {item.icon}
+                  {item.name}
+                </NavLink>
+              );
+            }
+          })}
         </nav>
       </div>
+
+      {/* Logout */}
       <div
         style={{
           padding: "1rem",

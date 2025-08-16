@@ -17,8 +17,8 @@ function PTUKSub1Page() {
           }}
         >
           <iframe
-            width="1000"
-            height="600"
+            width="80%"
+            height="1000"
             src="https://lookerstudio.google.com/embed/reporting/8036b839-dd6d-4c88-9d49-e9fb949d6f46/page/zE3TF"
             frameborder="0"
             style={{ border: 0 }}

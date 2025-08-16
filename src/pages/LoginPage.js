@@ -40,14 +40,12 @@ function LoginPage() {
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-      console.log(response);
       if (response?.success) {
         login(response?.data?.access_token);
         sessionStorage.setItem("justLoggedIn", "true");
         navigate("/dashboard");
         setErrorMessage(null);
       } else {
-        console.log(response);
         toast.error(response?.message);
       }
     } catch (err) {
