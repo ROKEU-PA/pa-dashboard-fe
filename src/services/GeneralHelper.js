@@ -151,3 +151,20 @@ export const cryptoEncrypter = (string) => {
   ).toString();
   return encryptedString;
 };
+
+export function formatCurrency(amount) {
+  return (
+    "Rp. " +
+    new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount)
+  );
+}
+
+export function formatNumber(amount) {
+  return new Intl.NumberFormat("id-ID", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amount);
+}

@@ -4,6 +4,7 @@ import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContexts";
 import { AppProvider } from "./contexts/AppContext";
+import "./index.css";
 // import "@/PDFWorkerSetup";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
