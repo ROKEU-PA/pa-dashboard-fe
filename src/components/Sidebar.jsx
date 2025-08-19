@@ -176,7 +176,7 @@ function Sidebar() {
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
+            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(child.name)
           ),
         }));
     }

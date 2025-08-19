@@ -18,7 +18,7 @@ function Select({
   validate,
   required = false,
   isOpen,
-  innerHeight = "1.1rem",
+  innerHeight = "3.0rem",
   setIsOpen,
 }) {
   // const [isOpen, setIsOpen] = useState(false);
