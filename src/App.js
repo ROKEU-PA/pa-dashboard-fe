@@ -17,6 +17,8 @@ import DashboardPage from "./pages/Dashboard";
 import DashboardManagementPage from "./pages/DashboardManagement";
 import IkpaPage from "./pages/Ikpa";
 import PTUKSub1Page from "./pages/PTUKSub1";
+import MainDashboard from "./pages/MainDashboard";
+import BudgetExecution from "./pages/BudgetExecution";
 import TandaTerimaPage from "./pages/TandaTerima";
 // import "@/PDFWorkerSetup";
 
@@ -38,6 +40,26 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <MenuPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard-utama"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <MainDashboard />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/pelaksanaan-anggaran"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <BudgetExecution />
               </AppLayout>
             </PrivateRoute>
           }

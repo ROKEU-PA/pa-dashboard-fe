@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family: "Funnel Display";
   src: url("/public/fonts/FunnelDisplay-Light.ttf") format("ttf");
@@ -174,10 +178,10 @@ th:hover .sort-icon,
   transition: backgroud 0.2 ease;
 }
 .dropdown-parent:hover {
-  background-color: #1F5B8A;
+  background-color: #1f5b8a;
 }
 .dropdown-parent.open {
-  background-color: #1F5B8A;
+  background-color: #1f5b8a;
 }
 
 .readonly-list {
@@ -192,4 +196,3 @@ th:hover .sort-icon,
   gap: 8px;
   padding: 4px 0;
 }
-

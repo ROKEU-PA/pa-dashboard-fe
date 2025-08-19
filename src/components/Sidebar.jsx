@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Network,
   Archive,
+  Axis3D,
   Table,
 } from "lucide-react";
 import React, { useState, useContext } from "react";
@@ -28,7 +29,7 @@ import { AppContext } from "@/contexts/AppContext";
 const menuItems = [
   {
     name: "Dashboard Utama",
-    path: "/dashboard",
+    path: "/dashboard-utama",
     icon: <LayoutDashboard />,
   },
   {
@@ -49,6 +50,10 @@ const menuItems = [
     path: "/dashboard/pelaksanaan-anggaran",
     children: [
       {
+        name: "Dashboard",
+        path: "/pelaksanaan-anggaran",
+        icon: <Axis3D />,
+      },
         name: "Tanda Terima SPP",
         path: "/tanda-terima",
         icon: <Table />,

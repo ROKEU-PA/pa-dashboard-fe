@@ -43,7 +43,7 @@ function LoginPage() {
       if (response?.success) {
         login(response?.data?.access_token);
         sessionStorage.setItem("justLoggedIn", "true");
-        navigate("/dashboard");
+        navigate("/dashboard-utama");
         setErrorMessage(null);
       } else {
         toast.error(response?.message);
@@ -89,7 +89,8 @@ function LoginPage() {
           >
             <span style={{ fontWeight: 600, fontSize: 28 }}>
               Selamat Datang di SiAKBAR
-            </span><br></br>
+            </span>
+            <br></br>
             <span style={{ fontWeight: 600, fontSize: 16 }}>
               Anggaran, Keuangan, dan Barang
             </span>
