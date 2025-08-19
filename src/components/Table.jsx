@@ -1,15 +1,15 @@
-function Table({ children, sx = {}, style = {}, ...props }) {
+function Table({ className, children, sx = {}, style = {}, ...props }) {
   const defaultStyle = {
+    ...sx,
+    ...style,
     width: "100%",
     borderCollapse: "collapse",
     minWidth: 650,
     fontSize: 14,
     color: "#424242",
-    ...sx,
-    ...style,
   };
   return (
-    <table style={defaultStyle} {...props}>
+    <table className={className} style={defaultStyle} {...props}>
       {children}
     </table>
   );
