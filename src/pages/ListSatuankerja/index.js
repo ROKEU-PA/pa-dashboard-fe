@@ -904,7 +904,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectOneOpen(open);
                 }}
-                disabled={formData.status === "approved"}
+                disabled={formData.status === "approved" || formData.status === "sp2d"}
               />
               <Select
                 label="Status"
@@ -947,7 +947,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectTwoOpen(open);
                 }}
-                disabled={formData.status === "approved"}
+                disabled={formData.status === "approved" || formData.status === "sp2d"}
               />
               <Textarea
                 label="Catatan"

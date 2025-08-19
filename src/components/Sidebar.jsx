@@ -20,6 +20,7 @@ import {
   Network,
   Archive,
   Axis3D,
+  Table
 } from "lucide-react";
 import React, { useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -52,6 +53,11 @@ const menuItems = [
         name: "Dashboard",
         path: "/pelaksanaan-anggaran",
         icon: <Axis3D />,
+      },
+      {
+        name: "Tanda Terima SPP",
+        path: "/tanda-terima",
+        icon: <Table />,
       },
       {
         name: "Pengajuan SPP",
