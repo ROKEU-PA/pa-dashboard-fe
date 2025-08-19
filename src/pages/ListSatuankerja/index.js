@@ -309,7 +309,7 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  console.log(formData);
+  // console.log(formData);
   useEffect(
     () => {
       fetchTable();
@@ -507,6 +507,8 @@ function ListSatuanKerjaPage() {
                             ? "Telah Diuji"
                             : row?.[col.key] === "reject"
                             ? "Ditolak"
+                            : row?.[col.key] === "sp2d"
+                            ? "SP2D"
                             : "Baru"}
                         </TableCell>
                       );
@@ -558,17 +560,20 @@ function ListSatuanKerjaPage() {
                       const showEditButton =
                         (isPengajuan &&
                           role === "user" &&
-                          row.status !== "approved") ||
+                          row.status !== "approved" &&
+                          row.status !== "sp2d") ||
                         (!isPengajuan && (role === "admin" || role === "pic"));
 
                       const showPengujianButton =
                         isPengajuan &&
                         (role === "admin" || role === "pic") &&
-                        row.status !== "approved";
+                        row.status !== "sp2d";
 
                       const showDetailButton =
                         isPengajuan &&
-                        (row.status === "approved" || row.status === "reject");
+                        (row.status === "approved" ||
+                          row.status === "reject" ||
+                          row.status === "sp2d");
 
                       const showDash = !isPengajuan && role === "user";
 
@@ -584,7 +589,7 @@ function ListSatuanKerjaPage() {
                                 });
                                 setIsOpenModal(true);
                               }}
-                              style={{ width: "fit-content" }}
+                              style={{ width: "fit-content", margin: "5px" }}
                             >
                               Edit
                             </Button>
@@ -620,16 +625,25 @@ function ListSatuanKerjaPage() {
                                   type: row.jenis_spp,
                                   kelengkapan: kelengkapanWithLabel,
                                   verifikasi: verifikasiWithLabel,
-                                  catatan: row.feedback
+                                  catatan: row.feedback,
                                 });
                                 fetchType(row.type_id);
                                 setPDFtoOpen(row.document?.url);
                                 setIsCheckModal(true);
                               }}
-                              style={{ width: "fit-content", margin: "5px"}}
+                              style={{
+                                minWidth: "100px",
+                                padding: "6px 12px",
+                                margin: "5px",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
                               variant="danger"
                             >
-                              Pengujian
+                              {row.status === "approved"
+                                ? "Ubah Status"
+                                : "Pengujian"}
                             </Button>
                           )}
 
@@ -890,6 +904,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectOneOpen(open);
                 }}
+                disabled={formData.status === "approved"}
               />
               <Select
                 label="Status"
@@ -899,6 +914,7 @@ function ListSatuanKerjaPage() {
                 options={[
                   { label: "Ditolak", value: "reject" },
                   { label: "Telah Diuji", value: "approved" },
+                  { label: "SP2D", value: "sp2d" },
                 ]}
                 isOpen={selectOpenStatus}
                 setIsOpen={(open) => {
@@ -931,6 +947,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectTwoOpen(open);
                 }}
+                disabled={formData.status === "approved"}
               />
               <Textarea
                 label="Catatan"
@@ -1007,6 +1024,7 @@ function ListSatuanKerjaPage() {
               options={[
                 { label: "Ditolak", value: "reject" },
                 { label: "Telah Diuji", value: "approved" },
+                { label: "SP2D", value: "sp2d" },
               ]}
               isOpen={selectOpenStatus}
               setIsOpen={(open) => {

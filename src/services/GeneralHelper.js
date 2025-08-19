@@ -125,6 +125,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   if (isPIC) {
     if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
     if (pathname.startsWith("/satuan-kerja")) return true;
+    if (pathname.startsWith("/tanda-terima")) return true;
   }
 
   // 3. Guest bisa akses /satuan-kerja

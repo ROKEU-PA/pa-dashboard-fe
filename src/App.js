@@ -17,6 +17,7 @@ import DashboardPage from "./pages/Dashboard";
 import DashboardManagementPage from "./pages/DashboardManagement";
 import IkpaPage from "./pages/Ikpa";
 import PTUKSub1Page from "./pages/PTUKSub1";
+import TandaTerimaPage from "./pages/TandaTerima";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -148,6 +149,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <IkpaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tanda-terima"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <TandaTerimaPage />
               </AppLayout>
             </PrivateRoute>
           }

@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Network,
   Archive,
+  Table,
 } from "lucide-react";
 import React, { useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -47,6 +48,11 @@ const menuItems = [
     name: "Pelaksanaan Anggaran",
     path: "/dashboard/pelaksanaan-anggaran",
     children: [
+      {
+        name: "Tanda Terima SPP",
+        path: "/tanda-terima",
+        icon: <Table />,
+      },
       {
         name: "Pengajuan SPP",
         path: "/satuan-kerja/pengajuan",
@@ -158,7 +164,7 @@ function Sidebar() {
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
+            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(child.name)
           ),
         }));
     }
