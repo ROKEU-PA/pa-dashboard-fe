@@ -1,5 +1,5 @@
 import { fetchMenu, fetchUser } from "@/pages/Menu/menuHooks";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export const AppContext = createContext();
 
@@ -38,18 +38,18 @@ export const AppProvider = ({ children }) => {
 
   useEffect(() => {
     if (token) {
-      const loadUser = async () => {
-        try {
-          const userData = await fetchUser();
-          setUserData(userData.data);
-        } catch (error) {
-          console.error("Error loading menu:", error);
-        }
-      };
-
-      loadUser();
+      LoadUser();
     }
-  }, [setUserData, token]);
+  }, [token]);
+
+  const LoadUser = async () => {
+    try {
+      const userData = await fetchUser();
+      setUserData(userData.data);
+    } catch (error) {
+      console.error("Error loading menu:", error);
+    }
+  };
 
   return (
     <AppContext.Provider
@@ -60,6 +60,7 @@ export const AppProvider = ({ children }) => {
         setListMenu,
         userData,
         setUserData,
+        LoadUser,
         isAdmin,
       }}
     >
@@ -67,3 +68,5 @@ export const AppProvider = ({ children }) => {
     </AppContext.Provider>
   );
 };
+
+export const useAppProvider = () => useContext(AppContext);

@@ -9,6 +9,9 @@ import BarChart from "./BarChart";
 import moment from "moment";
 import { formatCurrency } from "@/services/GeneralHelper";
 import User from "@/components/User";
+import { AssetConditions, dataTable } from "./constants";
+import Select from "@/components/Select";
+import { TableStateProperty } from "./Table";
 
 function StateProperty() {
   const dataset = [
@@ -31,10 +34,21 @@ function StateProperty() {
       <Title>Dashboard Barang Milik Negara</Title>
       <div className="grid grid-cols-[55%_45%] gap-4 mr-4">
         <Card className="">
-          <div className="flex justify-between items-center mb-4">
+          <div className="grid grid-cols-[90%_10%] items-center mb-4">
             <span className="font-bold text-xl">
               PNBP yang Berkaitan dengan Aset
             </span>
+            <Select
+              placeholder=""
+              innerHeight="3rem"
+              name="year"
+              value="2025"
+              options={[
+                { label: "2025", value: "2025" },
+                { label: "2024", value: "2024" },
+                { label: "2023", value: "2023" },
+              ]}
+            />
           </div>
           <div className="items-center">
             <BarChart data={dataset} height="h-72" />
@@ -49,46 +63,27 @@ function StateProperty() {
           <div className="grid grid-cols-[40%_60%] gap-2">
             <DonutChart data={dataset} height="h-72" />
             <div className="grid grid-cols-2 ">
-              <div key="info" className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                  <div className="w-3 h-3 bg-[#c0c0c0]"></div>
-                  <span className="text">Jumlah Temuan</span>
+              {AssetConditions.map((item) => (
+                <div key="info" className={`${item.style} flex flex-col`}>
+                  <div
+                    className={`flex gap-2 items-center font-bold ${item.containerStyle}`}
+                  >
+                    <span className="text">{item.title}</span>
+                  </div>
+                  <span className={`text-3xl font-semibold `}>
+                    {formatCurrency(item.value)}
+                  </span>
                 </div>
-                <span className="text-[40px] ml-4 font-extrabold  leading-none">
-                  2072
-                </span>
-              </div>
-              <div key="info" className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                  <div className="w-3 h-3 bg-[#47B5FF]"></div>
-                  <span className="text-sm">TL Status Belum Selesai</span>
-                </div>
-                <span className="text-[40px] ml-4 font-extrabold  leading-none">
-                  655
-                </span>
-              </div>
-              <div key="info" className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                  <div className="w-3 h-3 bg-[#EDFF00]"></div>
-                  <span className="text-sm">TPTD</span>
-                </div>
-                <span className="text-[40px] ml-4 font-extrabold  leading-none">
-                  18
-                </span>
-              </div>
-              <div key="info" className="flex flex-col">
-                <div className="flex gap-2 items-center">
-                  <div className="w-3 h-3 bg-[#616484]"></div>
-                  <span className="text-sm">TL Status Sesuai</span>
-                </div>
-                <span className="text-[40px] ml-4 font-extrabold  leading-none">
-                  1399
-                </span>
-              </div>
+              ))}
             </div>
           </div>
         </Card>
-        <Card className="flex col-span-2"> asd</Card>
+        <Card className="flex flex-col col-span-2">
+          <span className="text-xl font-bold color-[#B7B7B7] mb-4">
+            Rincian Konsisi Aset per Eselon 1
+          </span>
+          <TableStateProperty dataTable={dataTable} />
+        </Card>
       </div>
     </div>
   );

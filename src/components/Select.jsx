@@ -4,7 +4,7 @@ import { requiredValidator } from "../services/GeneralHelper";
 import themeColors from "../constants/color";
 
 function Select({
-  label,
+  label = null,
   name,
   value,
   onChange,
@@ -18,6 +18,7 @@ function Select({
   validate,
   required = false,
   isOpen,
+  innerHeight = "1.1rem",
   setIsOpen,
 }) {
   // const [isOpen, setIsOpen] = useState(false);
@@ -98,14 +99,16 @@ function Select({
 
   return (
     <div style={containerStyle}>
-      <label htmlFor={name} style={labelStyle}>
-        {label}
-      </label>
+      {label && (
+        <label htmlFor={name} style={labelStyle}>
+          {label}
+        </label>
+      )}
       <div
         onClick={() => !disabled && setIsOpen(!isOpen)}
         style={{
           padding: "0.75rem",
-          height: "1.1rem",
+          height: innerHeight,
           border: `1px solid ${error ? "#d93025" : "#ccc"}`,
           borderRadius: "4px",
           backgroundColor: disabled ? "#f5f5f5" : "#fff",

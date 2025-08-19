@@ -12,7 +12,7 @@ export default function DonutChart({
   height = "h-72", // Tailwind height: h-64 / h-72 / h-80
 }) {
   const option = {
-    color: ["#616484", "#47B5FF", "#EDFF00"], // blue, dark purple, yellow (example)
+    color: ["#616484", "#47B5FF", "#FF0000"], // blue, dark purple, yellow (example)
     legend: {
       orient: "horizontal",
       bottom: "-2%",
@@ -40,9 +40,9 @@ export default function DonutChart({
           borderWidth: 2,
         },
         data: [
-          { value: 1399, name: "TL Status Sesuai" },
-          { value: 655, name: "TL Status belum Sesuai" },
-          { value: 18, name: "TPTD" },
+          { value: 1399, name: "Baik" },
+          { value: 655, name: "Rusak Berat" },
+          { value: 100, name: "Rusak Ringan" },
         ],
       },
     ],

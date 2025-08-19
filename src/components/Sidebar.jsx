@@ -20,7 +20,6 @@ import {
   Network,
   Archive,
   Axis3D,
-  Table,
 } from "lucide-react";
 import React, { useState, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -53,10 +52,6 @@ const menuItems = [
         name: "Dashboard",
         path: "/pelaksanaan-anggaran",
         icon: <Axis3D />,
-      },
-        name: "Tanda Terima SPP",
-        path: "/tanda-terima",
-        icon: <Table />,
       },
       {
         name: "Pengajuan SPP",
@@ -161,6 +156,7 @@ function Sidebar() {
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
+  console.log(role, userData);
 
   const handleLogout = () => logout();
 
@@ -174,7 +170,7 @@ function Sidebar() {
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(child.name)
+            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
           ),
         }));
     }

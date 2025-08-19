@@ -8,15 +8,16 @@ export default function BarChart({
   const values = [888.3, 686.91, 288.1, 1893, 482.44, 394.91, 122, 998];
 
   const option = {
-    // grid: {
-    //   left: "5%",
-    //   right: "5%",
-    //   bottom: "10%",
-    //   top: "15%",
-    //   containLabel: true,
-    // },
+    grid: {
+      top: 30, // distance from top
+      right: 0, // distance from right
+      bottom: 30, // distance from bottom
+      left: 35, // distance from left
+      containLabel: true, // make sure labels are inside the chart
+    },
     xAxis: {
       type: "category",
+      gridIndex: 0,
       data: years,
       axisTick: { show: false },
       axisLine: { show: false },
@@ -24,6 +25,18 @@ export default function BarChart({
     },
     yAxis: {
       type: "value",
+      gridIndex: 0,
+      name: "Juta",
+      nameLocation: "middle",
+      nameGap: 45, // increase spacing between axis name and labels
+      nameTextStyle: {
+        fontSize: 14,
+        fontFamily: "Funnel Display",
+      },
+      axisLabel: {
+        fontSize: 12,
+        margin: 10, // spacing between labels and axis line
+      },
       // min: 0,
       // max: 100,
       splitLine: { show: false },
@@ -47,8 +60,8 @@ export default function BarChart({
             backgroundColor: "#fff",
             padding: [4, 8],
             borderRadius: 6,
-            color: idx === values.length - 1 ? "#2979FF" : "#333",
-            fontWeight: idx === values.length - 1 ? "bold" : "normal",
+            color: "#333",
+            fontWeight: "normal",
             shadowColor: "rgba(0,0,0,0.1)",
             shadowBlur: 4,
           },

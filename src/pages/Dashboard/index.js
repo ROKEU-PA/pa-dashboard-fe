@@ -1,36 +1,45 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Title from "@/components/Title";
 import Paper from "@/components/Paper";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { useParams } from "react-router-dom";
 import { apiRequest } from "@/services/APIHelper";
 
-function DashboardPage() {
+// --- Constants ---
+const IMAGE_MAP = {
+  ptuk: "PTUKP",
+  "pelaksanaan-anggaran": "PAP",
+  "barang-milik-negara": "BMNP",
+  "akuntansi-pelaporan": "ALP",
+  "tata-usaha": "TUP",
+  "struktur-organisasi": "SOP",
+  helpdesk: "HDP",
+};
+
+const TITLE_MAP = {
+  ptuk: "PTUKP",
+  "pelaksanaan-anggaran": "Pelaksanaan Anggaran",
+  "barang-milik-negara": "Barang Milik Negara",
+  "akuntansi-pelaporan": "Akuntansi Pelaporan",
+  "tata-usaha": "Tata Usaha",
+  "struktur-organisasi": "Struktur Organisasi",
+  helpdesk: "Helpdesk",
+};
+
+// --- Helpers ---
+const getTitle = (subPage) => {
+  if (!subPage) return "Dashboard Utama";
+  if (subPage === "helpdesk" || subPage === "struktur-organisasi") {
+    return TITLE_MAP[subPage] || "Dashboard Utama";
+  }
+  return `Dashboard ${TITLE_MAP[subPage] || "Utama"}`;
+};
+
+// --- Component ---
+export default function DashboardPage() {
   const { subPage } = useParams();
   const [imageUrl, setImageUrl] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [title, setTitle] = useState("");
-
-  // Mapping nama path ke ID backend
-  const imageMap = {
-    ptuk: "PTUKP",
-    "pelaksanaan-anggaran": "PAP",
-    "barang-milik-negara": "BMNP",
-    "akuntansi-pelaporan": "ALP",
-    "tata-usaha": "TUP",
-    "struktur-organisasi": "SOP",
-    helpdesk: "HDP",
-  };
-
-  const titleMap = {
-    ptuk: "PTUKP",
-    "pelaksanaan-anggaran": "Pelaksanaan Anggaran",
-    "barang-milik-negara": "Barang Milik Negara",
-    "akuntansi-pelaporan": "Akuntansi Pelaporan",
-    "tata-usaha": "Tata Usaha",
-    "struktur-organisasi": "Struktur Organisasi",
-    helpdesk: "Helpdesk",
-  };
 
   useEffect(() => {
     const fetchImage = async () => {
@@ -40,16 +49,12 @@ function DashboardPage() {
           sessionStorage.removeItem("justLoggedIn");
           window.location.reload();
         }
-        const id = imageMap[subPage] || "UTM";
+
+        const id = IMAGE_MAP[subPage] || "UTM";
         const response = await apiRequest({ url: `/api/dashboard/${id}` });
-        const isTitle =
-          subPage === "helpdesk" || subPage === "struktur-organisasi"
-            ? titleMap[subPage]
-            : `Dashboard ${titleMap[subPage] || "Utama"}`;
-        setTitle(isTitle);
         setImageUrl(response.data);
       } catch (error) {
-        console.error("Gagal fetch gambar:", error);
+        console.error("Failed to fetch dashboard image:", error);
       } finally {
         setLoading(false);
       }
@@ -58,33 +63,28 @@ function DashboardPage() {
     fetchImage();
   }, [subPage]);
 
+  const title = getTitle(subPage);
+
   return (
     <div>
       <Breadcrumbs items={[{ name: "Dashboard Utama", path: "/dashboard" }]} />
       <Title>{title}</Title>
-      <Paper elevation={3} style={{ backgroundColor: "#F5F6F7" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            minHeight: "400px",
-          }}
-        >
+
+      <Paper elevation={3} className="bg-[#F5F6F7]">
+        <div className="flex justify-center items-center min-h-[400px]">
           {loading ? (
-            <p style={{ color: "#555" }}>Memuat gambar dashboard...</p>
+            <p className="text-gray-600">Memuat gambar dashboard...</p>
           ) : imageUrl ? (
             <img
               src={imageUrl}
-              alt="Dashboard"
-              style={{ width: "100%", objectFit: "contain" }}
+              alt={`Dashboard ${title}`}
+              className="w-full object-contain"
             />
           ) : (
-            <p style={{ color: "#999" }}>Gambar tidak tersedia</p>
+            <p className="text-gray-400">Gambar tidak tersedia</p>
           )}
         </div>
       </Paper>
     </div>
   );
 }
-
-export default DashboardPage;

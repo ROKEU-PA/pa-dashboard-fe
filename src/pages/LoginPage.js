@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { fetchHelper } from "../services/FetchHelper";
 // import { useAuth } from "../auth/AuthContext";
 import { useAuth } from "../contexts/AuthContexts";
+import { useAppProvider } from "../contexts/AppContext";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import { validationSchema } from "../services/GeneralHelper";
@@ -10,6 +11,7 @@ import { toast } from "react-toastify";
 
 function LoginPage() {
   const navigate = useNavigate();
+  const { LoadUser } = useAppProvider();
   const { login } = useAuth();
   const [errorMessage, setErrorMessage] = useState(null);
   const [formData, setFormData] = useState({
@@ -43,6 +45,7 @@ function LoginPage() {
       if (response?.success) {
         login(response?.data?.access_token);
         sessionStorage.setItem("justLoggedIn", "true");
+        LoadUser();
         navigate("/dashboard-utama");
         setErrorMessage(null);
       } else {
