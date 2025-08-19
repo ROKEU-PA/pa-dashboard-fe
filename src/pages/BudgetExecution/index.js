@@ -21,7 +21,7 @@ function BudgetExecution() {
         />
         <User name={"Mas Febri"} previlege={"Administrator"} />
       </div>
-      <Title>Dashbord Pelaksanaan Anggaran</Title>
+      <Title>Dashboard Pelaksanaan Anggaran</Title>
       <div className="grid grid-cols-5 gap-4 mb-4">
         <Card className="row-span-2">
           <div className="flex flex-col items-center ">
