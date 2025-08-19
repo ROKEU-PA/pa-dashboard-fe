@@ -20,6 +20,7 @@ import PTUKSub1Page from "./pages/PTUKSub1";
 import MainDashboard from "./pages/MainDashboard";
 import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
+import TandaTerimaPage from "./pages/TandaTerima";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -181,6 +182,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <IkpaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tanda-terima"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <TandaTerimaPage />
               </AppLayout>
             </PrivateRoute>
           }
