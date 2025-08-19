@@ -6,7 +6,7 @@ function AppLayout({ children, isAdmin }) {
     <div style={{ display: "flex" }}>
       <Sidebar isAdmin={isAdmin} />
       <div style={{ flex: 1 }}>
-        <div style={{ marginLeft: "230px", padding: "1rem" }}>{children}</div>
+        <div style={{ marginLeft: "250px", padding: "1rem" }}>{children}</div>
       </div>
     </div>
   );

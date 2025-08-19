@@ -168,7 +168,7 @@ function UserManagementPage() {
   };
 
   const getListUser = async () => {
-    let urlPath = `https://api.rokeubmn-pa.id/api/user/list?page=${
+    let urlPath = `https://rokeubmn.kemnaker.go.id/api/user/list?page=${
       page + 1
     }&per_page=${rowsPerPage}`;
     if (searchKey) {

@@ -36,17 +36,16 @@ function LoginPage() {
 
     try {
       const response = await fetchHelper(
-        "https://api.rokeubmn-pa.id/api/auth/login",
+        "https://rokeubmn.kemnaker.go.id/api/auth/login",
         "POST",
         { kode_biro: parseInt(formData.satker), password: encryptedPass }
       );
-      console.log(response);
       if (response?.success) {
         login(response?.data?.access_token);
-        navigate("/satuan-kerja");
+        sessionStorage.setItem("justLoggedIn", "true");
+        navigate("/dashboard");
         setErrorMessage(null);
       } else {
-        console.log(response);
         toast.error(response?.message);
       }
     } catch (err) {
@@ -89,7 +88,10 @@ function LoginPage() {
             }}
           >
             <span style={{ fontWeight: 600, fontSize: 28 }}>
-              Selamat Datang di Arsip ROKEU BMN
+              Selamat Datang di SiAKBAR
+            </span><br></br>
+            <span style={{ fontWeight: 600, fontSize: 16 }}>
+              Anggaran, Keuangan, dan Barang
             </span>
           </div>
           <form

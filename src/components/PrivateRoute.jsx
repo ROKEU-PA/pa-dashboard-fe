@@ -22,13 +22,21 @@ const PrivateRoute = ({ children }) => {
       { path: "/" },
       { path: "/compilation" },
       { path: "/user-management" },
+      { path: "/soon" },
     ];
 
     const allowed = isAuthorizedRoute(location.pathname, userData, menus);
 
     if (!allowed) {
-      window.location.replace("/satuan-kerja");
-      return;
+      if (userData !== null) {
+        if (userData.role === "user" || userData.role === "pic") {
+          window.location.replace("/satuan-kerja/pengajuan");
+          return;
+        } else {
+          window.location.replace("/dashboard");
+          return;
+        }
+      }
     }
 
     setIsAllowed(true);

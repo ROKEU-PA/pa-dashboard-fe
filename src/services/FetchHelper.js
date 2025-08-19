@@ -20,23 +20,25 @@ export async function fetchHelper(url, method, body ) {
   }
 }
 
-export async function fetchHelperGET(url, method, token, ) {
+export async function fetchHelperGET(url, method, token, responseType) {
   try {
     const response = await fetch(url, {
       method: method,
       headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`, //
+        "Authorization": `Bearer ${token}`,
+        ...(responseType !== "blob" && { "Content-Type": "application/json" })
       },
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await response.text();
       throw new Error(errorData.message || "Login failed");
     }
+    if (responseType === "blob") {
+      return response.blob();
+    }
 
-    const result = await response.json();
-    return result;
+    return await response.json();
   } catch (error) {
     throw error;
   }

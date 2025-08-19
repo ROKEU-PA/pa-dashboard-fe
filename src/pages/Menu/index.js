@@ -1,10 +1,11 @@
 import React, { useContext, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { AppContext } from "@/contexts/AppContext";
 import { fetchMenu } from "./menuHooks";
 
 function MenuPage() {
+  const { subPage } = useParams();
   const { handleChangeMenu, listMenu, setListMenu, userData, isAdmin } =
     useContext(AppContext);
 
@@ -35,7 +36,16 @@ function MenuPage() {
         {listMenu &&
           listMenu.map((data, index) => (
             <Link
-              to={data.path}
+              to={
+                subPage
+                  ? (() => {
+                      const pathParts = data.path.split("/").filter(Boolean);
+                      const base = "/" + pathParts[0];
+                      const end = pathParts.slice(1).join("/");
+                      return `${base}/${subPage}/${end}`;
+                    })()
+                  : data.path
+              }
               style={{
                 textDecoration: "none",
                 pointerEvents: !isAdmin
