@@ -83,6 +83,11 @@ const menuItems = [
     path: "/dashboard/barang-milik-negara",
     children: [
       {
+        name: "Dashboard",
+        path: "/barang-milik-negara",
+        icon: <Axis3D />,
+      },
+      {
         name: "Home",
         path: "/soon",
         icon: <Building />,

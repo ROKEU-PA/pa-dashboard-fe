@@ -19,6 +19,7 @@ import IkpaPage from "./pages/Ikpa";
 import PTUKSub1Page from "./pages/PTUKSub1";
 import MainDashboard from "./pages/MainDashboard";
 import BudgetExecution from "./pages/BudgetExecution";
+import StateProperty from "./pages/StateProperty";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -59,6 +60,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <BudgetExecution />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/barang-milik-negara"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <StateProperty />
               </AppLayout>
             </PrivateRoute>
           }
