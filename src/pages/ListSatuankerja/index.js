@@ -166,7 +166,6 @@ function ListSatuanKerjaPage() {
       const data = await apiRequest({ url: `/api/archive/list?${query}` });
       let result = data.data;
       if (data.success) {
-        console.log(result.data);
         setTotalPages(result?.last_page);
         setDataTable(result?.data);
       }
@@ -310,7 +309,7 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  // console.log(formData)
+  // console.log(formData);
   useEffect(
     () => {
       fetchTable();
@@ -508,6 +507,8 @@ function ListSatuanKerjaPage() {
                             ? "Telah Diuji"
                             : row?.[col.key] === "reject"
                             ? "Ditolak"
+                            : row?.[col.key] === "sp2d"
+                            ? "SP2D"
                             : "Baru"}
                         </TableCell>
                       );
@@ -559,18 +560,20 @@ function ListSatuanKerjaPage() {
                       const showEditButton =
                         (isPengajuan &&
                           role === "user" &&
-                          row.status !== "approved") ||
+                          row.status !== "approved" &&
+                          row.status !== "sp2d") ||
                         (!isPengajuan && (role === "admin" || role === "pic"));
 
                       const showPengujianButton =
                         isPengajuan &&
                         (role === "admin" || role === "pic") &&
-                        row.status !== "approved";
+                        row.status !== "sp2d";
 
                       const showDetailButton =
+                        isPengajuan &&
                         (row.status === "approved" ||
-                          row.status === "reject") &&
-                        (role === "admin" || role === "pic");
+                          row.status === "reject" ||
+                          row.status === "sp2d");
 
                       const showDash = !isPengajuan && role === "user";
 
@@ -586,7 +589,7 @@ function ListSatuanKerjaPage() {
                                 });
                                 setIsOpenModal(true);
                               }}
-                              style={{ width: "fit-content" }}
+                              style={{ width: "fit-content", margin: "5px" }}
                             >
                               Edit
                             </Button>
@@ -595,27 +598,64 @@ function ListSatuanKerjaPage() {
                           {showPengujianButton && (
                             <Button
                               onClick={() => {
+                                const kelengkapanWithLabel = questions
+                                  .filter((q) =>
+                                    row.question_checklist.includes(
+                                      q.id_question
+                                    )
+                                  )
+                                  .map((q) => ({
+                                    label: q.text,
+                                    value: q.id_question,
+                                  }));
+
+                                const verifikasiWithLabel = verifications
+                                  .filter((v) =>
+                                    row.verification_checklist.includes(
+                                      v.id_question
+                                    )
+                                  )
+                                  .map((v) => ({
+                                    label: v.text,
+                                    value: v.id_question,
+                                  }));
                                 setVariantModal("Pengujian");
                                 setFormData({
                                   ...row,
                                   type: row.jenis_spp,
+                                  kelengkapan: kelengkapanWithLabel,
+                                  verifikasi: verifikasiWithLabel,
+                                  catatan: row.feedback,
                                 });
                                 fetchType(row.type_id);
                                 setPDFtoOpen(row.document?.url);
                                 setIsCheckModal(true);
                               }}
-                              style={{ width: "fit-content" }}
+                              style={{
+                                minWidth: "100px",
+                                padding: "6px 12px",
+                                margin: "5px",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                              }}
+                              variant="danger"
                             >
-                              Pengujian
+                              {row.status === "approved"
+                                ? "Ubah Status"
+                                : "Pengujian"}
                             </Button>
                           )}
 
                           {showDetailButton && (
                             <Button
                               onClick={() => {
+                                fetchType(row.type_id);
                                 setFormData({
                                   ...row,
                                   type: row.jenis_spp,
+                                  kelengkapan: row.question_checklist,
+                                  verifikasi: row.verification_checklist,
                                 });
                                 setIsDetailModal(true);
                               }}
@@ -849,7 +889,7 @@ function ListSatuanKerjaPage() {
                 onChange={(selectedOptions) =>
                   setFormData((prev) => ({
                     ...prev,
-                    kelengkapan: selectedOptions
+                    kelengkapan: selectedOptions,
                   }))
                 }
                 options={questions.map((q) => ({
@@ -864,6 +904,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectOneOpen(open);
                 }}
+                disabled={formData.status === "approved"}
               />
               <Select
                 label="Status"
@@ -873,6 +914,7 @@ function ListSatuanKerjaPage() {
                 options={[
                   { label: "Ditolak", value: "reject" },
                   { label: "Telah Diuji", value: "approved" },
+                  { label: "SP2D", value: "sp2d" },
                 ]}
                 isOpen={selectOpenStatus}
                 setIsOpen={(open) => {
@@ -890,7 +932,7 @@ function ListSatuanKerjaPage() {
                 onChange={(selectedOptions) =>
                   setFormData((prev) => ({
                     ...prev,
-                    verifikasi: selectedOptions
+                    verifikasi: selectedOptions,
                   }))
                 }
                 options={verifications.map((q) => ({
@@ -905,6 +947,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectTwoOpen(open);
                 }}
+                disabled={formData.status === "approved"}
               />
               <Textarea
                 label="Catatan"
@@ -934,69 +977,105 @@ function ListSatuanKerjaPage() {
         <div
           style={{
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             gap: 16,
             padding: 20,
-            maxHeight: "80vh",
+            maxHeight: "70vh",
             overflowY: "auto",
           }}
         >
-          <div>
-            <label>No. SPP</label>
-            <div className="readonly-box">{formData?.no_spp}</div>
-          </div>
+          <form
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
+            <Input
+              label="No. SPP"
+              name="no_spp"
+              value={formData?.["no_spp"]}
+              disabled
+            />
+            <Select
+              label="Jenis SPP"
+              name="type"
+              value={formData?.type_id}
+              disabled
+              options={types.map((q) => ({
+                label: q.type,
+                value: q.type_id,
+              }))}
+              isOpen={selectOpen}
+              setIsOpen={(open) => {
+                if (open) {
+                  setSelectOpenStatus(false);
+                }
+                setSelectOpen(open);
+              }}
+            />
 
-          <div>
-            <label>Jenis SPP</label>
-            <div className="readonly-box">
-              {types.find((t) => t.type_id === formData?.type_id)?.type ||
-                formData?.jenis_spp}
+            <Select
+              label="Status"
+              name="status"
+              value={formData?.status}
+              onChange={handleChange}
+              options={[
+                { label: "Ditolak", value: "reject" },
+                { label: "Telah Diuji", value: "approved" },
+                { label: "SP2D", value: "sp2d" },
+              ]}
+              isOpen={selectOpenStatus}
+              setIsOpen={(open) => {
+                if (open) {
+                  setMultiSelectOneOpen(false);
+                  setMultiSelectTwoOpen(false);
+                }
+                setSelectOpenStatus(open);
+              }}
+              disabled
+            />
+
+            <div>
+              <label>Kelengkapan</label>
+              <ul className="readonly-list">
+                {(questions || []).map((q) => (
+                  <li key={q.id_question}>
+                    <input
+                      type="checkbox"
+                      checked={formData?.kelengkapan?.includes(q.id_question)}
+                      readOnly
+                    />
+                    <span>{q.text}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          <div>
-            <label>Status</label>
-            <div className="readonly-box">
-              {formData?.status === "approved" ? "Telah Diuji" : "Ditolak"}
+            <div>
+              <label>Verifikasi</label>
+              <ul className="readonly-list">
+                {(verifications || []).map((v) => (
+                  <li key={v.id_question}>
+                    <input
+                      type="checkbox"
+                      checked={formData?.verifikasi?.includes(v.id_question)}
+                      readOnly
+                    />
+                    <span>{v.text}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-
-          <div>
-            <label>Kelengkapan</label>
-            <ul className="readonly-list">
-              {(questions || []).map((q) => (
-                <li key={q.id_question}>
-                  <input
-                    type="checkbox"
-                    checked={formData?.kelengkapan?.includes(q.id_question)}
-                    readOnly
-                  />
-                  <span>{q.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <label>Verifikasi</label>
-            <ul className="readonly-list">
-              {(verifications || []).map((v) => (
-                <li key={v.id_question}>
-                  <input
-                    type="checkbox"
-                    checked={formData?.verifikasi?.includes(v.id_question)}
-                    readOnly
-                  />
-                  <span>{v.text}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <label>Catatan</label>
-            <div className="readonly-box">{formData?.feedback || "-"}</div>
-          </div>
+            <Textarea
+              label="Catatan"
+              name="catatan"
+              value={formData?.feedback ?? "-"}
+              onChange={handleChange}
+              disabled
+            />
+          </form>
         </div>
       </Modal>
     </div>

@@ -19,6 +19,7 @@ import IkpaPage from "./pages/Ikpa";
 import PTUKSub1Page from "./pages/PTUKSub1";
 import MainDashboard from "./pages/MainDashboard";
 import BudgetExecution from "./pages/BudgetExecution";
+import TandaTerimaPage from "./pages/TandaTerima";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -175,6 +176,16 @@ function App() {
           }
         />
         <Route
+          path="/tanda-terima"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <TandaTerimaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+      <Route
           path="/ptuk/tuntutan-ganti-rugi"
           element={
             <PrivateRoute>
