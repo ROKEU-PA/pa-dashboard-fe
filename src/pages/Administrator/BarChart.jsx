@@ -1,31 +1,39 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-export default function BarChartIPA({
+export default function BarChart({
   height = "h-72", // Tailwind height: h-64 / h-72 / h-80
+  dataset,
 }) {
-  const years = ["2021", "2022", "2023", "2024"];
-  const values = [2.91, 2.98, 3.24, 3.59];
+  const years = dataset.labels;
+  const values = dataset.values;
 
   const option = {
     grid: {
-      left: "5%",
-      right: "5%",
-      bottom: "10%",
-      top: "15%",
-      containLabel: true,
+      top: 30, // distance from top
+      right: 0, // distance from right
+      bottom: 30, // distance from bottom
+      left: 35, // distance from left
+      containLabel: true, // make sure labels are inside the chart
     },
     xAxis: {
       type: "category",
+      gridIndex: 0,
       data: years,
       axisTick: { show: false },
       axisLine: { show: false },
-      axisLabel: { fontSize: 12 },
+      axisLabel: { fontSize: 12, show: false },
     },
     yAxis: {
       type: "value",
-      min: 0,
-      max: 4,
+      gridIndex: 0,
+      nameGap: 45, // increase spacing between axis name and labels
+      nameTextStyle: {
+        fontSize: 14,
+        fontFamily: "Funnel Display",
+      },
+      // min: 0,
+      // max: 100,
       splitLine: { show: false },
       axisLine: { show: false },
       axisTick: { show: false },
@@ -39,7 +47,7 @@ export default function BarChartIPA({
           values?.map((val, idx) => ({
             value: val,
             itemStyle: {
-              color: idx === values.length - 1 ? "#2979FF" : "#ccc", // biru utk terakhir
+              color: idx === values.length - 1 ? "#2979FF" : "#ccc",
               borderRadius: [10, 10, 0, 0],
             },
             label: {

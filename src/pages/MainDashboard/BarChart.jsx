@@ -34,25 +34,27 @@ export default function BarChart({
     series: [
       {
         type: "bar",
-        data: values.map((val, idx) => ({
-          value: val,
-          itemStyle: {
-            color: idx === values.length - 1 ? "#2979FF" : "#ccc", // biru utk terakhir
-            borderRadius: [10, 10, 0, 0],
-          },
-          label: {
-            show: true,
-            position: "top",
-            formatter: val.toFixed(2),
-            backgroundColor: "#fff",
-            padding: [4, 8],
-            borderRadius: 6,
-            color: idx === values.length - 1 ? "#2979FF" : "#333",
-            fontWeight: idx === values.length - 1 ? "bold" : "normal",
-            shadowColor: "rgba(0,0,0,0.1)",
-            shadowBlur: 4,
-          },
-        })),
+        data:
+          values.length > 0 &&
+          values?.map((val, idx) => ({
+            value: val,
+            itemStyle: {
+              color: idx === values.length - 1 ? "#2979FF" : "#ccc", // biru utk terakhir
+              borderRadius: [10, 10, 0, 0],
+            },
+            label: {
+              show: true,
+              position: "top",
+              formatter: val.toFixed(2),
+              backgroundColor: "#fff",
+              padding: [4, 8],
+              borderRadius: 6,
+              color: idx === values.length - 1 ? "#2979FF" : "#333",
+              fontWeight: idx === values.length - 1 ? "bold" : "normal",
+              shadowColor: "rgba(0,0,0,0.1)",
+              shadowBlur: 4,
+            },
+          })),
         barWidth: "40%",
       },
     ],
