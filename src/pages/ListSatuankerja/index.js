@@ -69,6 +69,7 @@ function ListSatuanKerjaPage() {
     type: "",
     type_id: "",
     dokumen: null,
+    dokumen_spm: null,
     uploaded_by: "",
     status: "",
     kelengkapan: [],
@@ -148,9 +149,11 @@ function ListSatuanKerjaPage() {
       const now = isPengajuanPath(location.pathname)
         ? new Date().getFullYear()
         : filter.tahun;
+      const status = isPengajuanPath(location.pathname) ? "arsip" : null;
       const query = buildQueryString({
         biro_code: currentMenu?.code,
         tahun: now,
+        status: status,
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -182,7 +185,10 @@ function ListSatuanKerjaPage() {
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
       payload.append("dokumen", formData.dokumen);
-      payload.append("uploaded_name", formData.dokumen);
+      if (!isPengajuanPath(location.pathname)) {
+        payload.append("status", "arsip");
+      }
+      payload.append("uploaded_name", formData.uploaded_by);
 
       const result = await apiRequest({
         url: "/api/archive/create",
@@ -209,6 +215,10 @@ function ListSatuanKerjaPage() {
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
       payload.append("dokumen", formData.dokumen || formData.document);
+      payload.append(
+        "dokumen_spm",
+        formData.dokumen_spm || formData.dokumen_spm
+      );
       payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
       // for (let [key, value] of payload.entries()) {
       //   console.log(`${key}:`, value);
@@ -253,12 +263,30 @@ function ListSatuanKerjaPage() {
     let isAnyFile = formData?.dokumen || formData?.document;
     formData.type = formData.type_id;
     try {
-      if (variantModal === "Add" && isAnyFile) {
+      if (
+        variantModal === "Add" &&
+        isAnyFile &&
+        isPengajuanPath(location.pathname)
+      ) {
         if (
           !formData?.["no_spp"] ||
           !formData.tahun ||
           !formData.type ||
           !formData.uploaded_by ||
+          !formData.dokumen
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else if (
+        variantModal === "Add" &&
+        isAnyFile &&
+        !isPengajuanPath(location.pathname)
+      ) {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
           !formData.dokumen
         ) {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
@@ -353,43 +381,43 @@ function ListSatuanKerjaPage() {
           {/* Kolom Kiri: Tombol */}
           <div style={{ flex: 1 }}>
             {userData &&
-              (!isPengajuanPath(location.pathname)
-                ? // Tombol "Tambah Arsip" - hanya admin dan pic
-                  (userData.role === "admin" || userData.role === "pic") && (
-                    <Button
-                      onClick={() => {
-                        setIsOpenModal(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          tahun: moment().year(),
-                        }));
-                        setVariantModal("Add");
-                      }}
-                      style={{ width: "fit-content" }}
-                      variant="danger"
-                      icon={<Plus size={20} />}
-                    >
-                      Tambah Arsip
-                    </Button>
-                  )
-                : // Tombol "Tambah Pengajuan" - hanya user
-                  userData.role === "user" && (
-                    <Button
-                      onClick={() => {
-                        setIsOpenModal(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          tahun: moment().year(),
-                        }));
-                        setVariantModal("Add");
-                      }}
-                      style={{ width: "fit-content" }}
-                      variant="danger"
-                      icon={<Plus size={20} />}
-                    >
-                      Tambah Pengajuan
-                    </Button>
-                  ))}
+              (!isPengajuanPath(location.pathname) ? (
+                // Tombol "Tambah Arsip" bisa semua role
+                <Button
+                  onClick={() => {
+                    setIsOpenModal(true);
+                    setFormData((prev) => ({
+                      ...prev,
+                      tahun: moment().year(),
+                    }));
+                    setVariantModal("Add");
+                  }}
+                  style={{ width: "fit-content" }}
+                  variant="danger"
+                  icon={<Plus size={20} />}
+                >
+                  Tambah Arsip
+                </Button>
+              ) : (
+                // Tombol "Tambah Pengajuan" - hanya user
+                userData.role === "user" && (
+                  <Button
+                    onClick={() => {
+                      setIsOpenModal(true);
+                      setFormData((prev) => ({
+                        ...prev,
+                        tahun: moment().year(),
+                      }));
+                      setVariantModal("Add");
+                    }}
+                    style={{ width: "fit-content" }}
+                    variant="danger"
+                    icon={<Plus size={20} />}
+                  >
+                    Tambah Pengajuan
+                  </Button>
+                )
+              ))}
           </div>
 
           {/* Kolom Kanan: Form Filter */}
@@ -553,6 +581,32 @@ function ListSatuanKerjaPage() {
                       );
                     }
 
+                    if (col.key === "document_spm") {
+                      return (
+                        <TableCell
+                          key={col.key}
+                          align="center"
+                          onClick={() => {
+                            if (typeof row.document_spm?.url === "string") {
+                              setIsOpenPDF(true);
+                              setPDFtoOpen(row.document_spm?.url);
+                            }
+                          }}
+                          style={{
+                            color: themeColors.primary.light,
+                            cursor:
+                              typeof row.document_spm?.url === "string"
+                                ? "pointer"
+                                : "default",
+                          }}
+                        >
+                          {typeof row.document_spm?.url === "string"
+                            ? `Klik untuk lihat SPM ` + row.no_spp || "-"
+                            : "-"}
+                        </TableCell>
+                      );
+                    }
+
                     if (col.key === "action") {
                       const isPengajuan = isPengajuanPath(location.pathname);
                       const role = userData?.role;
@@ -562,7 +616,7 @@ function ListSatuanKerjaPage() {
                           role === "user" &&
                           row.status !== "approved" &&
                           row.status !== "sp2d") ||
-                        (!isPengajuan && (role === "admin" || role === "pic"));
+                        !isPengajuan;
 
                       const showPengujianButton =
                         isPengajuan &&
@@ -575,7 +629,7 @@ function ListSatuanKerjaPage() {
                           row.status === "reject" ||
                           row.status === "sp2d");
 
-                      const showDash = !isPengajuan && role === "user";
+                      const showDash = false; //!isPengajuan && role === "user";
 
                       return (
                         <TableCell key={col.key} align="center">
@@ -718,10 +772,13 @@ function ListSatuanKerjaPage() {
         <form
           onSubmit={handleSubmit}
           style={{
+            padding: 10,
             width: "100%",
             display: "flex",
             flexDirection: "column",
             gap: 20,
+            height: "450px",
+            overflowY: "auto",
           }}
         >
           <Input
@@ -783,9 +840,22 @@ function ListSatuanKerjaPage() {
             required
             value={formData?.document}
           />
+          {userData &&
+            !isPengajuanPath(location.pathname) &&
+            variantModal == "Edit" &&
+            userData.role !== "user" && (
+              <FileInput
+                accept=".pdf"
+                label="Dokumen SPM"
+                name="dokumen_spm"
+                onChange={handleChange}
+                required
+                value={formData?.document_spm}
+              />
+            )}
 
           {/* Tampilkan Catatan hanya jika isPengajuanPath FALSE */}
-          {!isPengajuanPath(location.pathname) && (
+          {!isPengajuanPath(location.pathname) && userData.role === "pic" && (
             <Textarea
               label="Catatan"
               name="catatan"
@@ -809,7 +879,7 @@ function ListSatuanKerjaPage() {
           title="PDF Viewer"
         /> */}
         <iframe
-          src={pdfToOpen}
+          src={`${pdfToOpen}#zoom=70`}
           style={{ width: "100%", height: "500px" }}
           title="PDF Viewer"
         />
@@ -904,7 +974,9 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectOneOpen(open);
                 }}
-                disabled={formData.status === "approved" || formData.status === "sp2d"}
+                disabled={
+                  formData.status === "approved" || formData.status === "sp2d"
+                }
               />
               <Select
                 label="Status"
@@ -947,7 +1019,9 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectTwoOpen(open);
                 }}
-                disabled={formData.status === "approved" || formData.status === "sp2d"}
+                disabled={
+                  formData.status === "approved" || formData.status === "sp2d"
+                }
               />
               <Textarea
                 label="Catatan"

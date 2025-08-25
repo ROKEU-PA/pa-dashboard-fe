@@ -162,7 +162,7 @@ function Sidebar() {
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
-  console.log(role, userData);
+  // console.log(role, userData);
 
   const handleLogout = () => logout();
 
@@ -170,7 +170,18 @@ function Sidebar() {
   const getFilteredMenuItems = () => {
     if (role === "admin") return menuItems;
 
-    if (role === "user" || role === "pic") {
+    if (role === "user") {
+      return menuItems
+        .filter((item) => item.name === "Pelaksanaan Anggaran")
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
+          ),
+        }));
+    }
+
+    if (role === "pic") {
       return menuItems
         .filter((item) => item.name === "Pelaksanaan Anggaran")
         .map((item) => ({
