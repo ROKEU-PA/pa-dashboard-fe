@@ -120,6 +120,11 @@ const menuItems = [
     path: "/dashboard/tata-usaha",
     children: [
       {
+        name: "Dashboard",
+        path: "/tata-usaha",
+        icon: <Axis3D />,
+      },
+      {
         name: "Home",
         path: "/soon",
         icon: <Building />,
