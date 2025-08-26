@@ -33,7 +33,7 @@ function BudgetExecution() {
               </span>
             </div>
             <span className="font-bold text-sm text-center">
-              Kementrian Ketenagakerjaan
+              Kementerian Ketenagakerjaan
             </span>
           </div>
         </Card>

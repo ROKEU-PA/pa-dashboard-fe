@@ -34,7 +34,7 @@ const menuItems = [
   },
   {
     name: "PTUK",
-    path: "/dashboard/ptuk",
+    path: "/ptuk/tuntutan-ganti-rugi",
     adminOnly: true,
     children: [
       {
@@ -47,7 +47,7 @@ const menuItems = [
   },
   {
     name: "Pelaksanaan Anggaran",
-    path: "/dashboard/pelaksanaan-anggaran",
+    path: "/pelaksanaan-anggaran",
     children: [
       {
         name: "Dashboard",
@@ -86,17 +86,13 @@ const menuItems = [
   {
     name: "Barang Milik Negara",
     adminOnly: true,
-    path: "/dashboard/barang-milik-negara",
+    // path: "/dashboard/barang-milik-negara",
+    path: "/barang-milik-negara",
     children: [
       {
         name: "Dashboard",
         path: "/barang-milik-negara",
         icon: <Axis3D />,
-      },
-      {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
       },
     ],
     icon: <Package />,
@@ -107,9 +103,9 @@ const menuItems = [
     path: "/dashboard/akuntansi-pelaporan",
     children: [
       {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
+        name: "Dashboard",
+        path: "/dashboard/akuntansi-pelaporan",
+        icon: <Axis3D />,
       },
     ],
     icon: <FileChartColumn />,
@@ -117,17 +113,12 @@ const menuItems = [
   {
     name: "Tata Usaha",
     adminOnly: true,
-    path: "/dashboard/tata-usaha",
+    path: "/tata-usaha",
     children: [
       {
         name: "Dashboard",
         path: "/tata-usaha",
         icon: <Axis3D />,
-      },
-      {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
       },
     ],
     icon: <BookUser />,
@@ -260,6 +251,7 @@ function Sidebar() {
                       alignItems: "center",
                       padding: "10px",
                       cursor: "pointer",
+                      marginBottom: "5px",
                     }}
                   >
                     <div

@@ -529,18 +529,39 @@ function ListSatuanKerjaPage() {
                       );
                     }
                     if (col.key === "status") {
+                      const statusValue = row?.[col.key];
+
+                      // Label yang akan ditampilkan
+                      const statusLabel =
+                        statusValue === "approved"
+                          ? "Telah Diuji"
+                          : statusValue === "reject"
+                          ? "Ditolak"
+                          : statusValue === "sp2d"
+                          ? "SP2D"
+                          : "Baru";
+
+                      // Class warna berdasarkan status
+                      const statusColorClass =
+                        statusValue === "approved"
+                          ? "bg-green-500"
+                          : statusValue === "reject"
+                          ? "bg-red-500"
+                          : statusValue === "sp2d"
+                          ? "bg-yellow-500"
+                          : "bg-blue-500";
+
                       return (
                         <TableCell key={col.key} align="center">
-                          {row?.[col.key] === "approved"
-                            ? "Telah Diuji"
-                            : row?.[col.key] === "reject"
-                            ? "Ditolak"
-                            : row?.[col.key] === "sp2d"
-                            ? "SP2D"
-                            : "Baru"}
+                          <span
+                            className={`px-2 py-1 rounded text-white text-sm ${statusColorClass}`}
+                          >
+                            {statusLabel}
+                          </span>
                         </TableCell>
                       );
                     }
+
                     if (col.key === "catatan") {
                       return (
                         <TableCell key={col.key} align="center">
@@ -974,9 +995,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectOneOpen(open);
                 }}
-                disabled={
-                  formData.status === "approved" || formData.status === "sp2d"
-                }
+                disabled={formData.status === "sp2d"}
               />
               <Select
                 label="Status"
@@ -1019,9 +1038,7 @@ function ListSatuanKerjaPage() {
                   }
                   setMultiSelectTwoOpen(open);
                 }}
-                disabled={
-                  formData.status === "approved" || formData.status === "sp2d"
-                }
+                disabled={formData.status === "sp2d"}
               />
               <Textarea
                 label="Catatan"

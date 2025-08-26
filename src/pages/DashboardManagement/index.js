@@ -13,6 +13,7 @@ function DashboardManagementPage() {
     image_id: "",
     image: null,
   });
+  const [selectImage, setSelectImage] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -109,9 +110,13 @@ function DashboardManagementPage() {
                 { label: "Barang Milik Negara", value: "BMNP" },
                 { label: "Akuntansi Pelaporan", value: "ALP" },
                 { label: "Tata Usaha", value: "TUP" },
-                { label: "Struktur Organisasi", value: "SOP"},
-                { label: "Helpdesk", value: "HDP"}
+                { label: "Struktur Organisasi", value: "SOP" },
+                { label: "Helpdesk", value: "HDP" },
               ]}
+              isOpen={selectImage}
+              setIsOpen={(open) => {
+                setSelectImage(open);
+              }}
             />
             <FileInput
               accept=".png, .jpg, .jpeg"

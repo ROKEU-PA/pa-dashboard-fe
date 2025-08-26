@@ -148,19 +148,19 @@ function Administrator() {
               </span>
             </div>
             <div className="items-center flex gap-3">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_IPA} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target IPA</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>3.20</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi IPA</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>3.59</span>
               </div>
             </div>
           </div>
@@ -170,19 +170,19 @@ function Administrator() {
             </div>
 
             <div className="items-center flex gap-4">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_IKPA} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target IKPA</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>93.50</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi IKPA</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>94.99</span>
               </div>
             </div>
           </div>
@@ -200,12 +200,12 @@ function Administrator() {
                   <span className="text-sm">Target</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>70.55%</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>69.36%</span>
               </div>
             </div>
           </div>
@@ -217,19 +217,19 @@ function Administrator() {
             </div>
 
             <div className="items-center flex gap-4">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_SPIP} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>3.93</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>3.93</span>
               </div>
             </div>
           </div>

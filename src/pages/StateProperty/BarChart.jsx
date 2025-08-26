@@ -5,7 +5,7 @@ export default function BarChart({
   height = "h-72", // Tailwind height: h-64 / h-72 / h-80
 }) {
   const years = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
-  const values = [888.3, 686.91, 288.1, 1893, 482.44, 394.91, 122, 998];
+  const values = [620.9, 480.3, 278.5, 199, 1813, 1281, 228, 0];
 
   const option = {
     grid: {

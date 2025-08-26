@@ -48,7 +48,7 @@ export default function IKPAChart({ height }) {
 
         data: [
           {
-            value: 94.91,
+            value: 95.25,
           },
         ],
       },

@@ -28,5 +28,8 @@ export const datasetKehadiran = [
 ];
 
 export const datasetBarChart = {
-  IKK: { labels: ["Target IPA", "Realisasi IPA"], values: [3.9, 3.2] },
+  IKK_IPA: { labels: ["Target IPA", "Realisasi IPA"], values: [3.20,3.59] },
+  IKK: { labels: ["Target IPA", "Realisasi IPA"], values: [70.55,69.36] },
+  IKK_IKPA: { labels: ["Target IPA", "Realisasi IPA"], values: [93.50,94.99] },
+  IKK_SPIP: { labels: ["Target IPA", "Realisasi IPA"], values: [3.93,3.93] },
 };

@@ -33,7 +33,7 @@ const PrivateRoute = ({ children }) => {
           window.location.replace("/satuan-kerja/pengajuan");
           return;
         } else {
-          window.location.replace("/dashboard");
+          window.location.replace("/dashboard-utama");
           return;
         }
       }
