@@ -30,6 +30,7 @@ import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
 import { useLocation, useParams } from "react-router-dom";
 import moment from "moment";
+import User from "@/components/User";
 import {
   columns,
   getCurrentSatuanKerja,
@@ -359,12 +360,15 @@ function ListSatuanKerjaPage() {
 
   return (
     <div>
-      <Breadcrumbs
-        items={[
-          { name: "Satuan Kerja", path: "/satuan-kerja" },
-          { name: menuName.name },
-        ]}
-      />
+      <div className="flex justify-between">
+        <Breadcrumbs
+          items={[
+            { name: "Satuan Kerja", path: "/satuan-kerja" },
+            { name: menuName.name },
+          ]}
+        />
+        <User name={userData?.name} previlege={userData?.role.toUpperCase()} />
+      </div>
       <Title>{menuName.name || menuTitle}</Title>
       <Paper
         elevation={3}
@@ -808,7 +812,15 @@ function ListSatuanKerjaPage() {
             value={formData?.no_spp}
             onChange={handleChange}
             required
-            validate={validationSchema.onlyNumber}
+            validate={(val) => {
+              const onlyNumberError = validationSchema.onlyNumber(val);
+              if (onlyNumberError) return onlyNumberError;
+
+              const numbersppError = validationSchema.numberspp(val);
+              if (numbersppError) return numbersppError;
+
+              return "";
+            }}
             placeholder="Masukkan nomor SPP"
           />
 
@@ -890,7 +902,13 @@ function ListSatuanKerjaPage() {
           </Button>
         </form>
       </Modal>
-      <Modal open={isOpenPDF} onClose={() => setIsOpenPDF(false)} title="">
+      <Modal
+        open={isOpenPDF}
+        onClose={() => setIsOpenPDF(false)}
+        title=""
+        width="80vw"
+        maxWidth="95vw"
+      >
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
         {/* <CustomPDFViewer pdfSource={pdfToOpen} /> */}
         {/* <CustomPDFViewer pdfSource="https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
@@ -900,8 +918,8 @@ function ListSatuanKerjaPage() {
           title="PDF Viewer"
         /> */}
         <iframe
-          src={`${pdfToOpen}#zoom=70`}
-          style={{ width: "100%", height: "500px" }}
+          src={`${pdfToOpen}#zoom=150`}
+          style={{ width: "100%", height: "calc(100vh - 100px)" }}
           title="PDF Viewer"
         />
       </Modal>
@@ -912,10 +930,8 @@ function ListSatuanKerjaPage() {
           setVariantModal("");
         }}
         title="Form Pengujian"
-        style={{
-          maxWidth: "1200px",
-          width: "90vw",
-        }}
+        width="95vw"
+        maxWidth="95vw"
       >
         {/* Container utama */}
         <div
@@ -923,13 +939,13 @@ function ListSatuanKerjaPage() {
             display: "flex",
             flexDirection: "row",
             gap: 20,
-            width: "1100px",
-            maxWidth: "90vw",
+            width: "115vw",
+            maxWidth: "115vw",
             height: "500px",
           }}
         >
           <iframe
-            src={`${pdfToOpen}#zoom=70`}
+            src={`${pdfToOpen}#zoom=120`}
             style={{ width: "100%", height: "100%" }}
             title="PDF Viewer"
           />
@@ -944,7 +960,7 @@ function ListSatuanKerjaPage() {
               onSubmit={handleSubmit}
               style={{
                 padding: 20,
-                width: "95%",
+                width: "55%",
                 display: "flex",
                 flexDirection: "column",
                 gap: 20,

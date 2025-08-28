@@ -48,16 +48,19 @@ function MenuPage() {
               }
               style={{
                 textDecoration: "none",
-                pointerEvents: !isAdmin
-                  ? data.code !== userData?.biro_code && "none"
-                  : "auto",
+                pointerEvents:
+                  !isAdmin &&
+                  !userData?.access_code?.includes(Number(data.code))
+                    ? "none"
+                    : "auto",
               }}
               key={index}
               onClick={() => handleChangeMenu(data)}
             >
               <div
                 className={`card ${
-                  !isAdmin && data.code !== userData?.biro_code
+                  !isAdmin &&
+                  !userData?.access_code?.includes(Number(data.code))
                     ? "card-disabled"
                     : ""
                 }`}

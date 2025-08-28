@@ -5,6 +5,10 @@ export const requiredValidator =
 
 export const validationSchema = {
   name: (val) => (val.length >= 3 ? "" : "Minimal 3 karakter"),
+  numberspp: (val) => {
+    if (val.length !== 5) return "Harus terdiri dari 5 angka";
+    return "";
+  },
 
   onlyNumber: (val) => (/^\d+$/.test(val) ? "" : "Hanya boleh angka"),
 
@@ -102,32 +106,38 @@ export function filterDataByCode(dataArray, targetCode) {
 }
 
 export const isAuthorizedRoute = (pathname, userData, menus = []) => {
+  const isSuperAdmin = userData?.role === "super_admin";
   const isAdmin = userData?.role === "admin";
   const isUser = userData?.role === "user";
   const isPIC = userData?.role === "pic";
   const isGuest = userData?.role === "guest";
 
-  // 1. Admin bisa akses semua
+  // 1. Super Admin bisa akses semua
+  if (isSuperAdmin) return true;
   if (isAdmin) return true;
 
   // 2. User bisa akses Pelaksanaan Anggaran (aktualisasi)
-  if (isUser) {
+  if (isUser || isPIC) {
     if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
+    if (pathname.startsWith("/tanda-terima")) return true;
     if (pathname === "/pelaksanaan-anggaran") return true;
-    if (pathname.startsWith("/satuan-kerja")) return true;
+    if (pathname === "/satuan-kerja") return true;
+    if (pathname === "/satuan-kerja/pengajuan") return true;
 
     // Validasi berdasarkan listMenu dan biro_code
-    const matched = menus.find((menu) => menu.path === pathname);
+    const cleanedPath = (() => {
+      if (pathname.startsWith("/satuan-kerja/pengajuan")) {
+        const parts = pathname.split("/").filter(Boolean);
+        // Ambil bagian terakhir dan gabungkan dengan "/satuan-kerja"
+        return `/satuan-kerja/${parts[parts.length - 1]}`;
+      }
+      return pathname;
+    })();
+
+    const matched = menus.find((menu) => menu.path === cleanedPath);
     if (!matched) return false;
 
-    return matched.code === userData?.biro_code;
-  }
-
-  if (isPIC) {
-    if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
-    if (pathname === "/pelaksanaan-anggaran") return true;
-    if (pathname.startsWith("/satuan-kerja")) return true;
-    if (pathname.startsWith("/tanda-terima")) return true;
+    return userData?.access_code?.includes(Number(matched.code));
   }
 
   // 3. Guest bisa akses /satuan-kerja

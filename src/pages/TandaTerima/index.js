@@ -14,6 +14,7 @@ import TablePagination from "@/components/TablePagination";
 import { buildQueryString } from "@/services/GeneralHelper";
 import Input from "@/components/Input";
 import Select from "@/components/Select";
+import User from "@/components/User";
 
 const columns = [
   { key: "kode_satker", label: "Kode Satker" },
@@ -23,6 +24,7 @@ const columns = [
   { key: "approved", label: "Telah Diuji" },
   { key: "sp2d", label: "SP2D" },
   { key: "total", label: "Total" },
+  { key: "arsip", label: "Total Arsip" },
 ];
 
 const columnsTT = [
@@ -83,8 +85,9 @@ function TandaTerimaPage() {
 
   const fetchReceipt = async () => {
     try {
+      const isUser = userData?.role === "user";
       const query = buildQueryString({
-        biro_code: filter.kode_satker,
+        biro_code: isUser ? userData.biro_code : filter.kode_satker,
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -125,7 +128,10 @@ function TandaTerimaPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Status", path: "/status" }]} />
+      <div className="flex justify-between">
+        <Breadcrumbs items={[{ name: "Status", path: "/status" }]} />
+        <User name={userData?.name} previlege={userData?.role.toUpperCase()} />
+      </div>
       <Title>Tanda Terima SPP</Title>
       <Paper
         elevation={3}
@@ -157,14 +163,28 @@ function TandaTerimaPage() {
                 kode_satker: e.target.value,
               }))
             }
-            value={filter.kode_satker}
-            options={dataTable.map((q) => ({
-              label: q.unit_satker,
-              value: q.kode_satker,
-            }))}
+            value={
+              userData?.role === "user"
+                ? userData?.biro_code
+                : filter.kode_satker
+            }
+            options={
+              userData?.role === "user"
+                ? dataTable
+                    .filter((q) => q.kode_satker === userData.biro_code)
+                    .map((q) => ({
+                      label: q.unit_satker,
+                      value: q.kode_satker,
+                    }))
+                : dataTable.map((q) => ({
+                    label: q.unit_satker,
+                    value: q.kode_satker,
+                  }))
+            }
             style={{ width: "400px" }}
             isOpen={selectOpen}
             setIsOpen={setSelectOpen}
+            disabled={userData.role === "user"}
           />
         </div>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -222,7 +242,7 @@ function TandaTerimaPage() {
           }}
         />
       </Paper>
-        <br></br>
+      <br></br>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
@@ -246,10 +266,15 @@ function TandaTerimaPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {dataTable.map((row, index) => (
+            {(userData?.role === "user"
+              ? dataTable.filter(
+                  (row) => row.kode_satker === userData.biro_code
+                )
+              : dataTable
+            ).map((row, index) => (
               <TableRow key={index}>
                 {columns.map((col) => {
-                  if (col.key == "unit_satker") {
+                  if (col.key === "unit_satker") {
                     return (
                       <TableCell key={col.key} align="left">
                         {row?.["unit_satker"]}

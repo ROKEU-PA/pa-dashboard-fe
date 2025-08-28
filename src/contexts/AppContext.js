@@ -8,6 +8,7 @@ export const AppProvider = ({ children }) => {
   const [listMenu, setListMenu] = useState([]);
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(null);
+  const [isSAdmin, setIsSAdmin] = useState(null);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -30,8 +31,11 @@ export const AppProvider = ({ children }) => {
   };
   useEffect(() => {
     if (userData) {
-      if (userData?.role !== "user") {
+      if (userData?.role === "admin") {
         setIsAdmin(true);
+      }
+      if (userData?.role === "super_admin") {
+        setIsSAdmin(true);
       }
     }
   }, [userData]);
@@ -62,6 +66,7 @@ export const AppProvider = ({ children }) => {
         setUserData,
         LoadUser,
         isAdmin,
+        isSAdmin,
       }}
     >
       {children}

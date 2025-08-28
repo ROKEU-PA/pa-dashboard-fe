@@ -30,7 +30,13 @@ const PrivateRoute = ({ children }) => {
     if (!allowed) {
       if (userData !== null) {
         if (userData.role === "user" || userData.role === "pic") {
-          window.location.replace("/satuan-kerja/pengajuan");
+          const parts = location.pathname.split("/").filter(Boolean);
+
+          if (parts.length > 1) {
+            // Buat path baru dengan menghapus bagian terakhir
+            const newPath = "/" + parts.slice(0, -1).join("/");
+            window.location.replace(newPath);
+          }
           return;
         } else {
           window.location.replace("/dashboard-utama");

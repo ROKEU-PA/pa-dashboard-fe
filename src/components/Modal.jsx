@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
-function Modal({ open, onClose, title, children }) {
+function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  width = "auto",
+  maxWidth = "90%",
+}) {
   const [isHovered, setIsHovered] = useState(false);
   if (!open) return null;
 
@@ -41,7 +48,8 @@ function Modal({ open, onClose, title, children }) {
           borderRadius: "8px",
           padding: "24px",
           minWidth: "40vw",
-          maxWidth: "90%",
+          maxWidth: maxWidth,
+          width: width,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           position: "relative",
         }}

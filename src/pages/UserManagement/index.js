@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -20,10 +20,16 @@ import Chip from "@/components/Chip";
 import Dialog from "@/components/Dialog";
 import { apiRequest } from "@/services/APIHelper";
 import { fetchHelperGET } from "@/services/FetchHelper";
+import MultiSelect from "@/components/MultiSelect";
+import { AppContext } from "@/contexts/AppContext";
+import User from "@/components/User";
+import moment from "moment";
 
 const columns = [
-  { key: "biro-code", label: "Kode Biro" },
-  { key: "biro-name", label: "Nama Biro" },
+  { key: "username", label: "Username" },
+  { key: "access", label: "Nama Biro" },
+  { key: "name", label: "Nama" },
+  { key: "status", label: "Status" },
   { key: "privilege", label: "Tipe Akses" },
   { key: "action", label: "Action" },
 ];
@@ -34,8 +40,7 @@ const mapTableData = (data) => {
     arr.push({
       ...item,
       id: item.id,
-      "biro-code": item.biro_code,
-      "biro-name": item.name,
+      username: item.biro_code,
       privilege: item.role,
     });
   });
@@ -44,26 +49,30 @@ const mapTableData = (data) => {
 };
 
 function UserManagementPage() {
+  const { listMenu, userData } = useContext(AppContext);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [page, setPage] = useState(0);
   const [totalPage, setTotalPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [variantModal, setVariantModal] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [multiSelectTwoOpen, setMultiSelectTwoOpen] = useState(false);
 
   const [searchKey, setSearchKey] = useState("");
   const [tableData, setTableData] = useState();
 
   const [formData, setFormData] = useState({
-    "biro-code": "",
-    "biro-name": "",
+    username: "",
+    name: "",
     privilege: "",
+    access_code: [],
     password: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    console.log(e.target.value, name, value);
+    // console.log(e.target.value, name, value);
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -73,11 +82,13 @@ function UserManagementPage() {
   const submitData = async (formData) => {
     try {
       const payload = {
-        kode_biro: formData?.["biro-code"],
+        kode_biro: formData?.username,
         role: formData.privilege,
         password: cryptoEncrypter(formData.password),
-        nama: formData?.["biro-name"],
+        access: JSON.stringify(formData?.access_code),
+        nama: formData?.name,
       };
+      console.log(payload);
 
       const result = await apiRequest({
         url: "/api/user/register",
@@ -90,9 +101,10 @@ function UserManagementPage() {
         toast.success("Pengguna berhasil diperbaharui!");
         setIsOpenModal(false);
         setFormData({
-          "biro-code": "",
-          "biro-name": "",
+          username: "",
+          name: "",
           privilege: "",
+          access_code: [],
           password: "",
         });
       } else {
@@ -107,9 +119,10 @@ function UserManagementPage() {
   const editData = async (formData) => {
     try {
       const payload = {
-        kode_biro: formData?.["biro-code"],
+        kode_biro: formData?.username,
         role: formData.privilege,
-        nama: formData?.["biro-name"],
+        nama: formData?.name,
+        access: JSON.stringify(formData?.access_code),
       };
       if (formData.password) {
         Object.assign(payload, {
@@ -124,14 +137,14 @@ function UserManagementPage() {
           body: payload,
         },
       });
-      console.log(result);
       if (result.success) {
         toast.success("Pengguna berhasil ditambahkan!");
         setIsOpenModal(false);
         setFormData({
-          "biro-code": "",
-          "biro-name": "",
+          username: "",
+          name: "",
           privilege: "",
+          access_code: [],
           password: "",
         });
       } else {
@@ -147,9 +160,10 @@ function UserManagementPage() {
 
     try {
       if (
-        !formData["biro-code"] ||
-        !formData["biro-name"] ||
-        !formData.privilege
+        !formData.username ||
+        !formData.name ||
+        !formData.privilege ||
+        !formData.access_code
       ) {
         toast.error("Mohon lengkapi semua field yang diperlukan.");
         return;
@@ -161,7 +175,6 @@ function UserManagementPage() {
           : await editData(formData);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       getListUser();
-      console.log("res", result);
     } catch (err) {
       console.error(err);
     }
@@ -198,7 +211,6 @@ function UserManagementPage() {
         url: "/api/user/delete/" + id,
         method: "DELETE",
       });
-      console.log(result);
       getListUser();
     } catch (error) {
       console.error(error);
@@ -211,9 +223,12 @@ function UserManagementPage() {
 
   return (
     <div>
-      <Breadcrumbs
-        items={[{ name: "Manajemen Akun", path: "/user-management" }]}
-      />
+      <div className="flex justify-between">
+        <Breadcrumbs
+          items={[{ name: "Manajemen Akun", path: "/user-management" }]}
+        />
+        <User name={userData?.name} previlege={userData?.role.toUpperCase()} />
+      </div>
       <Title>Manajemen Akun</Title>
       <Paper
         elevation={3}
@@ -224,6 +239,13 @@ function UserManagementPage() {
             onClick={() => {
               setIsOpenModal(true);
               setVariantModal("Add");
+              setFormData({
+                username: "",
+                name: "",
+                privilege: "",
+                access_code: [],
+                password: "",
+              });
             }}
             style={{ width: "fit-content" }}
             variant="danger"
@@ -270,17 +292,67 @@ function UserManagementPage() {
                 }}
               >
                 <TableCell component="th" scope="row" align="center">
-                  {row?.["biro-code"]}
+                  {row?.username}
                 </TableCell>
-                <TableCell align="center">{row?.["biro-name"]}</TableCell>
+                <TableCell align="center">{row?.access}</TableCell>
+                <TableCell align="center">{row?.name}</TableCell>
+                <TableCell align="center">
+                  <Chip
+                    label={
+                      row.last_activity &&
+                      moment(row.last_activity).isAfter(
+                        moment().subtract(5, "minutes")
+                      )
+                        ? "Online"
+                        : "Offline"
+                    }
+                    style={{
+                      color:
+                        row.last_activity &&
+                        moment(row.last_activity).isAfter(
+                          moment().subtract(5, "minutes")
+                        )
+                          ? "green"
+                          : "white",
+                      fontWeight: "bold",
+                      backgroundColor:
+                        row.last_activity &&
+                        moment(row.last_activity).isAfter(
+                          moment().subtract(5, "minutes")
+                        )
+                          ? "#E7FEE7"
+                          : "#858585ff",
+                    }}
+                  />{" "}
+                </TableCell>
                 <TableCell align="center">
                   <Chip
                     label={row?.["privilege"]?.toUpperCase()}
                     style={{
                       backgroundColor:
-                        row?.["privilege"] === "admin" ? "#FEDCE1" : "#E7FEE7",
+                        row?.["privilege"] === "super_admin"
+                          ? "#858585ff"
+                          : row?.["privilege"] === "admin"
+                          ? "#fef5c3ff"
+                          : row?.["privilege"] === "user"
+                          ? "#cee3f9ff"
+                          : row?.["privilege"] === "pic"
+                          ? "#E7FEE7"
+                          : row?.["privilege"] === "guest"
+                          ? "#FEDCE1"
+                          : "#000000",
                       color:
-                        row?.["privilege"] === "admin" ? "#F9203E" : "#06BC09",
+                        row?.["privilege"] === "super_admin"
+                          ? "#000000"
+                          : row?.["privilege"] === "admin"
+                          ? "#FFD700"
+                          : row?.["privilege"] === "user"
+                          ? "#007BFF"
+                          : row?.["privilege"] === "pic"
+                          ? "#28A745"
+                          : row?.["privilege"] === "guest"
+                          ? "#FF4C4C"
+                          : "#FFFFFF",
                     }}
                   />{" "}
                 </TableCell>
@@ -338,70 +410,122 @@ function UserManagementPage() {
         open={isOpenModal}
         onClose={() => setIsOpenModal(false)}
         title={`Form ${variantModal} Akun`}
+        width="50vw"
+        maxWidth="95vw"
       >
-        {console.log(formData)}
-        <form
-          onSubmit={handleSubmit}
+        {/* {console.log(formData)} */}
+        <div
           style={{
             width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            gap: 20,
+            overflowY: "auto",
+            maxHeight: "480px",
           }}
         >
-          <Input
-            label="Kode Biro"
-            name="biro-code"
-            value={formData["biro-code"]}
-            onChange={handleChange}
-            validate={validationSchema.onlyNumber}
-            required
-            disabled={variantModal === "Detail"}
-            placeholder="Masukkan Kode Biro"
-          />
-          <Input
-            label="Name"
-            name="biro-name"
-            disabled={variantModal === "Detail"}
-            value={formData["biro-name"]}
-            onChange={handleChange}
-            required
-            placeholder="Masukkan Nama Biro"
-          />
-          {variantModal !== "Detail" && (
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              gap: 20,
+            }}
+          >
             <Input
-              label="Password"
-              name="password"
-              type="password"
-              value={formData["password"]}
+              label="Username"
+              name="username"
+              value={formData["username"]}
               onChange={handleChange}
-              // validate={validationSchema.password}
-              placeholder="Masukkan password"
+              validate={validationSchema.onlyNumber}
+              required
+              disabled={variantModal === "Detail"}
+              placeholder="Masukkan Kode Akun"
             />
-          )}
-          <Select
-            label="Role"
-            name="privilege"
-            disabled={variantModal === "Detail"}
-            value={formData["privilege"]}
-            onChange={handleChange}
-            required
-            options={[
-              { label: "Admin", value: "admin" },
-              { label: "User", value: "user" },
-            ]}
-          />
-          {variantModal === "Add" && (
-            <Button type="submit" style={{ float: "right" }}>
-              Tambahkan
-            </Button>
-          )}
-          {variantModal === "Edit" && (
-            <Button type="submit" style={{ float: "right" }}>
-              Edit
-            </Button>
-          )}
-        </form>
+            <Input
+              label="Nama Akun"
+              name="name"
+              disabled={variantModal === "Detail"}
+              value={formData["name"]}
+              onChange={handleChange}
+              required
+              placeholder="Masukkan Nama Akun"
+            />
+            {variantModal !== "Detail" && (
+              <Input
+                label="Password"
+                name="password"
+                type="password"
+                value={formData["password"] || ""}
+                onChange={handleChange}
+                // validate={validationSchema.password}
+                placeholder="Masukkan password"
+              />
+            )}
+            <MultiSelect
+              label="Akses Satker"
+              name="access"
+              value={
+                Array.isArray(formData.access_code)
+                  ? listMenu
+                      .filter((item) =>
+                        formData.access_code.includes(item.code)
+                      )
+                      .map((item) => ({
+                        label: item.name,
+                        value: item.code,
+                      }))
+                  : []
+              }
+              onChange={(selectedOptions) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  access_code: Array.isArray(selectedOptions)
+                    ? selectedOptions.map((opt) => opt.value)
+                    : [],
+                }))
+              }
+              options={listMenu.map((q) => ({
+                label: q.name,
+                value: q.code,
+              }))}
+              isOpen={multiSelectTwoOpen}
+              setIsOpen={(open) => {
+                if (open) {
+                  setSelectOpen(false);
+                }
+                setMultiSelectTwoOpen(open);
+              }}
+            />
+
+            <Select
+              label="Role"
+              name="privilege"
+              disabled={variantModal === "Detail"}
+              value={formData["privilege"]}
+              onChange={handleChange}
+              isOpen={selectOpen}
+              setIsOpen={(open) => {
+                setSelectOpen(open);
+              }}
+              required
+              options={[
+                { label: "Admin", value: "admin" },
+                { label: "User", value: "user" },
+                { label: "PIC", value: "pic" },
+                { label: "Guest", value: "guest" },
+              ]}
+            />
+            {variantModal === "Add" && (
+              <Button type="submit" style={{ float: "right" }}>
+                Tambahkan
+              </Button>
+            )}
+            {variantModal === "Edit" && (
+              <Button type="submit" style={{ float: "right" }}>
+                Edit
+              </Button>
+            )}
+          </form>
+        </div>
       </Modal>
       <Dialog
         open={openDialog}

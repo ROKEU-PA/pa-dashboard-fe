@@ -164,26 +164,26 @@ function Sidebar() {
 
   // 🔍 Filter menu berdasarkan role
   const getFilteredMenuItems = () => {
-    if (role === "admin") return menuItems;
+    if (role === "super_admin") return menuItems;
 
-    if (role === "user") {
-      return menuItems
-        .filter((item) => item.name === "Pelaksanaan Anggaran")
-        .map((item) => ({
-          ...item,
-          children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
-          ),
-        }));
-    }
-
-    if (role === "pic") {
+    if (role === "user" || role === "pic") {
       return menuItems
         .filter((item) => item.name === "Pelaksanaan Anggaran")
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
             ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(child.name)
+          ),
+        }));
+    }
+
+    if (role === "admin") {
+      return menuItems
+        .filter((item) => item.name === "Pelaksanaan Anggaran" || item.name === "Management")
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP", "User Manage"].includes(child.name)
           ),
         }));
     }

@@ -26,7 +26,7 @@ function MainDashboard() {
         <Breadcrumbs
           items={[{ name: "Dashboard Utama", path: "/dashboard" }]}
         />
-        <User name={"Mas Febri"} previlege={"Administrator"} />
+        <User name={"Test"} previlege={"Administrator"} />
       </div>
       <Title>Dashboard Utama</Title>
       <div className="grid grid-cols-2 gap-4">
