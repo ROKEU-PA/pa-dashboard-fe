@@ -19,7 +19,7 @@ function BudgetExecution() {
             { name: "Pelaksanaan Anggaran", path: "/pelaksanaan-anggaran" },
           ]}
         />
-        <User name={"Mas Febri"} previlege={"Administrator"} />
+        <User name={"Test"} previlege={"Administrator"} />
       </div>
       <Title>Dashboard Pelaksanaan Anggaran</Title>
       <div className="grid grid-cols-5 gap-4 mb-4">

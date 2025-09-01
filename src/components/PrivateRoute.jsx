@@ -32,10 +32,12 @@ const PrivateRoute = ({ children }) => {
         if (userData.role === "user" || userData.role === "pic") {
           const parts = location.pathname.split("/").filter(Boolean);
 
-          if (parts.length > 1) {
+          if (parts[0] === "satuan-kerja" && parts.length > 1) {
             // Buat path baru dengan menghapus bagian terakhir
             const newPath = "/" + parts.slice(0, -1).join("/");
             window.location.replace(newPath);
+          } else {
+            window.location.replace("/satuan-kerja/pengajuan");
           }
           return;
         } else {

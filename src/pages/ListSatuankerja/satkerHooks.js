@@ -5,6 +5,7 @@ export const columns = [
   { key: "tahun", label: "Tahun", sortable: true },
   { key: "document", label: "Dokumen SPP & Pendukung" },
   { key: "document_spm", label: "Dokumen SPM" },
+  { key: "document_sp2d", label: "Dokumen SP2D" },
   { key: "revisi", label: "Revisi", hiddenInArsip: true},
   { key: "status", label: "Status", hiddenInArsip: true },
   { key: "kelengkapan", label: "Kelengkapan", hiddenInArsip: true },
