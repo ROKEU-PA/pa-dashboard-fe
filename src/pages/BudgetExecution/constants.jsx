@@ -17,6 +17,7 @@ export const dataTable = {
     { label: "Belanja Kontraktual (10%)", key: "Belanja Kontraktual (10%)" },
     { label: "Penyelesaian Tagihan (10%)", key: "Penyelesaian Tagihan (10%)" },
     { label: "Pengelolaan UP & TUP (10%)", key: "Pengelolaan UP & TUP (10%)" },
+    { label: "Dispensasi SPM (Pengurang)", key: "Dispensasi SPM (Pengurang)" },
     { label: "Capaian Output (25%)", key: "Capaian Output (25%)" },
     {
       label: "Nilai IKPA",
@@ -26,7 +27,7 @@ export const dataTable = {
   ],
   data: [
     {
-      eselon: "Kementerian",
+      eselon: "Kementerian Ketenagakerjaan",
       revisiDipa: 100,
       deviasiHalIII: 70.41,
       realisasiAnggaran: 99.78,

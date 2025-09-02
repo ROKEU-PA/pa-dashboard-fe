@@ -43,7 +43,7 @@ function MainDashboard() {
             </span>
           </div>
           <div className="grid grid-cols-[40%_60%] gap-2">
-            <DonutChart data={dataset} height="h-56" />
+            <DonutChart data={dataset} height="h-72" />
             <div className="grid grid-cols-2 ">
               <div key="info" className="flex flex-col">
                 <div className="flex gap-2 items-center">
@@ -101,7 +101,9 @@ function MainDashboard() {
               <BarChart data={dataset} height="h-56" />
               <div className="flex flex-col">
                 <div className="w-3 h-3 bg-[#296CF8]"></div>
-                <span className="text-sm">Jul 2025</span>
+                <span className="text-sm">
+                  {moment().locale("id").subtract(1, "months").format("MMM") + ` ` + moment().locale("id").format("YYYY")}
+                </span>
                 <span className="text-xl font-bold">95.25</span>
               </div>
             </div>

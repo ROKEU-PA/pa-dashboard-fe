@@ -20,10 +20,10 @@ import {
   Network,
   Archive,
   Axis3D,
-  Table
+  Table,
 } from "lucide-react";
-import React, { useState, useContext } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "@/contexts/AppContext";
 
 const menuItems = [
@@ -158,6 +158,7 @@ function Sidebar() {
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
+  const location = useLocation();
   // console.log(role, userData);
 
   const handleLogout = () => logout();
@@ -172,24 +173,46 @@ function Sidebar() {
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(child.name)
+            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP"].includes(
+              child.name
+            )
           ),
         }));
     }
 
     if (role === "admin") {
       return menuItems
-        .filter((item) => item.name === "Pelaksanaan Anggaran" || item.name === "Management")
+        .filter(
+          (item) =>
+            item.name === "Pelaksanaan Anggaran" || item.name === "Management"
+        )
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP", "User Manage"].includes(child.name)
+            [
+              "Pengajuan SPP",
+              "Arsip SPM",
+              "Tanda Terima SPP",
+              "User Manage",
+            ].includes(child.name)
           ),
         }));
     }
 
     if (role === "guest") {
-      return menuItems.filter((item) => item.name !== "Management");
+      return menuItems
+        .filter((item) => item.name !== "Management")
+        .map((item) => {
+          if (item.name === "Pelaksanaan Anggaran") {
+            return {
+              ...item,
+              children: item.children?.filter((child) =>
+                ["Dashboard", "IKPA"].includes(child.name)
+              ),
+            };
+          }
+          return item;
+        });
     }
 
     return [];
@@ -197,11 +220,33 @@ function Sidebar() {
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
+
+    if (!item.children && item.path) {
+      setOpenDropdown(null);
+      navigate(item.path);
+      return;
+    }
+
     if (!isOpen && item.path) {
       navigate(item.path);
     }
+
     setOpenDropdown(isOpen ? null : item.name);
   };
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+
+    const matchedMenu = getFilteredMenuItems().find((item) =>
+      item.children?.some((child) => currentPath.startsWith(child.path))
+    );
+
+    if (matchedMenu) {
+      setOpenDropdown(matchedMenu.name);
+    } else {
+      setOpenDropdown(null);
+    }
+  }, [location.pathname]);
 
   return (
     <div
