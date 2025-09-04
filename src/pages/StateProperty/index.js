@@ -7,11 +7,13 @@ import { Database } from "lucide-react";
 import DonutChart from "./DonutChart";
 import BarChart from "./BarChart";
 import moment from "moment";
-import { formatCurrency } from "@/services/GeneralHelper";
+import { formatCurrency, formatNumber } from "@/services/GeneralHelper";
 import User from "@/components/User";
 import { AssetConditions, dataTable } from "./constants";
 import Select from "@/components/Select";
 import { TableStateProperty } from "./Table";
+import { apiRequest } from "@/services/APIHelper";
+import { AppContext } from "@/contexts/AppContext";
 
 function StateProperty() {
   const dataset = [
@@ -20,6 +22,77 @@ function StateProperty() {
     { name: "Blocked", value: 60 },
     { name: "Backlog", value: 140 },
   ];
+  const { userData } = useContext(AppContext);
+  const [assetEs1, setAssetEs1] = useState({ columns: [], data: [] });
+  const [condAsset, setCondAsset] = useState([]);
+  const [months, setMonth] = useState([]);
+  const [values, setValues] = useState([]);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [year, setYear] = useState("2025");
+
+  const assetData = async () => {
+    try {
+      const data = await apiRequest({
+        url: `/api/bmn/asset`,
+      });
+      const list = data?.data;
+
+      const mapped = list.map((item, index) => {
+        const constantItem = dataTable?.data?.[index];
+
+        return {
+          ...item,
+          name: constantItem?.name || item.name,
+        };
+      });
+
+      setAssetEs1({
+        columns: dataTable.columns,
+        data: mapped,
+      });
+
+      setCondAsset(data?.asset_condition);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const pnbpGraph = async () => {
+    try {
+      const data = await apiRequest({
+        url: `/api/bmn/pnbp?tahun=` + year,
+      });
+      setMonth(
+        data?.data?.years.length === 0
+          ? [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ]
+          : data?.data?.years
+      );
+      setValues(
+        data?.data?.values.length === 0
+          ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+          : data?.data?.values.map((v) => Number(v))
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  useEffect(() => {
+    assetData();
+    pnbpGraph();
+  }, [year]);
 
   return (
     <div>
@@ -39,10 +112,13 @@ function StateProperty() {
               PNBP yang Berkaitan dengan Aset
             </span>
             <Select
+              isOpen={selectOpen}
+              setIsOpen={setSelectOpen}
               placeholder=""
               innerHeight="3rem"
               name="year"
-              value="2025"
+              onChange={(e) => setYear(e.target.value)}
+              value={year}
               options={[
                 { label: "2025", value: "2025" },
                 { label: "2024", value: "2024" },
@@ -51,7 +127,12 @@ function StateProperty() {
             />
           </div>
           <div className="items-center">
-            <BarChart data={dataset} height="h-72" />
+            <BarChart
+              data={dataset}
+              height="h-72"
+              years={months}
+              values={values}
+            />
           </div>
         </Card>
         <Card className="">
@@ -61,17 +142,31 @@ function StateProperty() {
             </span>
           </div>
           <div className="grid grid-cols-[40%_60%] gap-2">
-            <DonutChart data={dataset} height="h-72" />
+            <DonutChart
+              data={dataset}
+              height="h-72"
+              good={condAsset[1]?.value ?? 0}
+              mid={condAsset[2]?.value ?? 0}
+              damage={condAsset[3]?.value ?? 0}
+            />
             <div className="grid grid-cols-2 ">
-              {AssetConditions.map((item) => (
+              {condAsset.map((item) => (
                 <div key="info" className={`${item.style} flex flex-col`}>
                   <div
                     className={`flex gap-2 items-center font-bold ${item.containerStyle}`}
                   >
                     <span className="text">{item.title}</span>
                   </div>
-                  <span className={`text-3xl font-semibold `}>
-                    {formatCurrency(item.value)}
+                  <span
+                    className={
+                      item.title === "Nilai Aset"
+                        ? `text-2xl font-semibold `
+                        : `text-3xl font-semibold `
+                    }
+                  >
+                    {item.title === "Nilai Aset"
+                      ? formatCurrency(item.value)
+                      : formatNumber(item.value)}
                   </span>
                 </div>
               ))}
@@ -82,7 +177,7 @@ function StateProperty() {
           <span className="text-xl font-bold color-[#B7B7B7] mb-4">
             Rincian Konsisi Aset per Eselon 1
           </span>
-          <TableStateProperty dataTable={dataTable} />
+          <TableStateProperty dataTable={assetEs1} />
         </Card>
       </div>
     </div>

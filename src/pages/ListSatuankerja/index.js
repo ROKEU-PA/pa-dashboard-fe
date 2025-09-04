@@ -86,6 +86,17 @@ function ListSatuanKerjaPage() {
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectOpenStatus, setSelectOpenStatus] = useState(false);
 
+  const getFileExtension = (url) => {
+    try {
+      const parsedUrl = new URL(url);
+      const pathname = parsedUrl.pathname; // /folder/filename.pdf
+      return pathname.split(".").pop().toLowerCase(); // => pdf
+    } catch {
+      return ""; // fallback
+    }
+  };
+  const fileExtension = getFileExtension(pdfToOpen);
+
   const handleSortChange = (key) => {
     if (sortBy === key) {
       setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -290,9 +301,7 @@ function ListSatuanKerjaPage() {
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
       payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
-      for (let [key, value] of payload.entries()) {
-        console.log(`${key}:`, value);
-      }
+
       const hasFileUpload =
         (formData.dokumen && formData.document instanceof File) ||
         formData.dokumen_spm instanceof File ||
@@ -312,6 +321,9 @@ function ListSatuanKerjaPage() {
       if (formData.dokumen_sp2d instanceof File) {
         payload.append("dokumen_sp2d", formData.dokumen_sp2d);
       }
+      // for (let [key, value] of payload.entries()) {
+      //   console.log(`${key}:`, value);
+      // }
 
       const defaultToken = localStorage.getItem("token");
 
@@ -375,9 +387,9 @@ function ListSatuanKerjaPage() {
           options: {
             body: payload,
           },
+          isMultiType: true,
         });
-
-        if (result.ok) {
+        if (result.success) {
           toast.success("Data berhasil diperbarui!");
         } else {
           toast.error("Gagal memperbarui data.");
@@ -526,6 +538,7 @@ function ListSatuanKerjaPage() {
     ],
     [listMenu]
   );
+  // console.log(fileExtension);
 
   return (
     <div>
@@ -1096,7 +1109,7 @@ function ListSatuanKerjaPage() {
         open={isOpenPDF}
         onClose={() => setIsOpenPDF(false)}
         title=""
-        width="80vw"
+        width={fileExtension === "pdf" ? "80vw" : "5vw"}
         maxWidth="95vw"
       >
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
@@ -1107,11 +1120,19 @@ function ListSatuanKerjaPage() {
           style={{ width: "100%", height: "500px" }}
           title="PDF Viewer"
         /> */}
-        <iframe
-          src={`${pdfToOpen}#zoom=150`}
-          style={{ width: "100%", height: "calc(100vh - 100px)" }}
-          title="PDF Viewer"
-        />
+        {fileExtension === "pdf" ? (
+          <iframe
+            src={`${pdfToOpen}#zoom=150`}
+            style={{ width: "100%", height: "calc(100vh - 100px)" }}
+            title="PDF Viewer"
+          />
+        ) : (
+          <a href={pdfToOpen} download>
+            <p>File SPP ber-format (.rar)</p>
+            <br></br>
+            <Button style={{ width: "100%" }}>Download File</Button>
+          </a>
+        )}
       </Modal>
       <Modal
         open={isCheckModal}
@@ -1131,15 +1152,23 @@ function ListSatuanKerjaPage() {
             gap: 20,
             width: "115vw",
             maxWidth: "115vw",
-            height: "45vw",
-            maxHeight: "80vw",
+            height: "35vw",
+            maxHeight: "60vw",
           }}
         >
-          <iframe
-            src={`${pdfToOpen}#zoom=120`}
-            style={{ width: "100%", height: "100%" }}
-            title="PDF Viewer"
-          />
+          {fileExtension === "pdf" ? (
+            <iframe
+              src={`${pdfToOpen}#zoom=120`}
+              style={{ width: "100%", height: "100%" }}
+              title="PDF Viewer"
+            />
+          ) : (
+            <a href={pdfToOpen} download>
+              <p>File SPP ber-format (.rar)</p>
+              <br></br>
+              <Button style={{ width: "100%" }}>Download File</Button>
+            </a>
+          )}
           <div
             style={{
               width: "80%",
