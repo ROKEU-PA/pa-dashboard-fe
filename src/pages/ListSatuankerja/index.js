@@ -294,7 +294,7 @@ function ListSatuanKerjaPage() {
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
-      payload.append("feedback", formData.catatan);
+      payload.append("feedback", formData.feedback);
       payload.append("status", formData.status);
       payload.append("questions", JSON.stringify(formData.kelengkapan));
       payload.append("verifications", JSON.stringify(formData.verifikasi));
@@ -303,13 +303,12 @@ function ListSatuanKerjaPage() {
       payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =
-        (formData.dokumen && formData.document instanceof File) ||
+        formData.dokumen instanceof File ||
         formData.dokumen_spm instanceof File ||
         formData.dokumen_sp2d instanceof File;
 
       if (
-        formData.dokumen instanceof File ||
-        formData.document instanceof File
+        formData.dokumen instanceof File
       ) {
         payload.append("dokumen", formData.dokumen || formData.document);
       }
