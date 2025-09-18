@@ -20,6 +20,7 @@ import FileInput from "@/components/FileInput";
 import Select from "@/components/Select";
 import { AppContext } from "@/contexts/AppContext";
 import User from "@/components/User";
+import { useBudgetExecution } from "../BudgetExecution/useBudgetExecution";
 
 const columns = [
   { key: "kode_satker", label: "Kode Satker" },
@@ -37,6 +38,7 @@ const columns = [
 ];
 
 function IkpaPage() {
+  const { state, getIKPAColor } = useBudgetExecution("Hello");
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
@@ -96,6 +98,8 @@ function IkpaPage() {
       });
       let result = data?.data.filter((q) => q.satker_code === null);
       if (data.success) {
+        result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
+        console.log(result);
         setEs1Data(result);
       }
     } catch (error) {
@@ -308,7 +312,13 @@ function IkpaPage() {
                       {group.parent.dispensasi_spm}
                     </TableCell>
                     <TableCell align="center">
-                      {group.parent.nilai_ikpa}
+                      <div
+                        className={`p-1 rounded font-semibold ${getIKPAColor(
+                          group.parent.nilai_ikpa
+                        )}`}
+                      >
+                        {group.parent.nilai_ikpa}
+                      </div>
                     </TableCell>
                     <TableCell align="center">
                       {moment(group.parent.tanggal_sumber_data).format(
@@ -341,7 +351,13 @@ function IkpaPage() {
                     </TableCell>
                     <TableCell align="center">{row.dispensasi_spm}</TableCell>
                     <TableCell align="center">{row.capaian_output}</TableCell>
-                    <TableCell align="center">{row.nilai_ikpa}</TableCell>
+                    <TableCell align="center"><div
+                        className={`p-1 rounded font-semibold ${getIKPAColor(
+                          row.nilai_ikpa
+                        )}`}
+                      >
+                        {row.nilai_ikpa}
+                      </div></TableCell>
                     <TableCell align="center">
                       {moment(row.tanggal_sumber_data).format("YYYY/MM/DD")}
                     </TableCell>

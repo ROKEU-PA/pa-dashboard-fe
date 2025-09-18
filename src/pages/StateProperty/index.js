@@ -175,7 +175,7 @@ function StateProperty() {
         </Card>
         <Card className="flex flex-col col-span-2">
           <span className="text-xl font-bold color-[#B7B7B7] mb-4">
-            Rincian Konsisi Aset per Eselon 1
+            Rincian Kondisi Aset per Eselon 1
           </span>
           <TableStateProperty dataTable={assetEs1} />
         </Card>

@@ -226,63 +226,63 @@ function ListSatuanKerjaPage() {
       payload.append("uploaded_name", formData.uploaded_by);
 
       const defaultToken = localStorage.getItem("token");
-      const xhr = new XMLHttpRequest();
+      return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
 
-      // Show initial toast
-      const toastId = toast.info("Uploading file...", {
-        progress: 0,
-        autoClose: false,
-        closeButton: false,
-        isLoading: true,
-      });
-
-      // Progress handler
-      xhr.upload.onprogress = function (event) {
-        if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
-          toast.update(toastId, {
-            render: `Uploading file... (${percent}%)`,
-            progress: percent / 100,
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
           });
-        }
-      };
 
-      // Success handler
-      xhr.onload = function () {
-        if (xhr.status === 200 || xhr.status === 201) {
-          toast.update(toastId, {
-            render: "File berhasil diupload!",
-            type: "success",
-            isLoading: false,
-            autoClose: 3000,
-          });
-        } else {
-          toast.update(toastId, {
-            render: "Upload gagal. Silakan coba lagi.",
-            type: "error",
-            isLoading: false,
-            autoClose: 3000,
-          });
-        }
-      };
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
 
-      // Error handler
-      xhr.onerror = function () {
-        toast.update(toastId, {
-          render: "Terjadi kesalahan jaringan.",
-          type: "error",
-          isLoading: false,
-          autoClose: 3000,
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+
+          xhr.onerror = function () {
+            toast.update(toastId, {
+              render: "Terjadi kesalahan jaringan.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            reject(new Error("Network error"));
+          };
+
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
         });
-      };
-
-      xhr.open(
-        "POST",
-        `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
-      );
-      xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
-
-      xhr.send(payload);
     } catch (error) {
       console.error(error);
       toast.error("Gagal mengupload data.");
@@ -307,9 +307,7 @@ function ListSatuanKerjaPage() {
         formData.dokumen_spm instanceof File ||
         formData.dokumen_sp2d instanceof File;
 
-      if (
-        formData.dokumen instanceof File
-      ) {
+      if (formData.dokumen instanceof File) {
         payload.append("dokumen", formData.dokumen || formData.document);
       }
 
@@ -327,58 +325,63 @@ function ListSatuanKerjaPage() {
       const defaultToken = localStorage.getItem("token");
 
       if (hasFileUpload) {
-        const xhr = new XMLHttpRequest();
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
 
-        const toastId = toast.info("Uploading file...", {
-          progress: 0,
-          autoClose: false,
-          closeButton: false,
-          isLoading: true,
-        });
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
+          });
 
-        xhr.upload.onprogress = function (event) {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            toast.update(toastId, {
-              render: `Uploading file... (${percent}%)`,
-              progress: percent / 100,
-            });
-          }
-        };
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
 
-        xhr.onload = function () {
-          if (xhr.status === 200 || xhr.status === 201) {
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+
+          xhr.onerror = function () {
             toast.update(toastId, {
-              render: "File berhasil diupload!",
-              type: "success",
-              isLoading: false,
-              autoClose: 3000,
-            });
-          } else {
-            toast.update(toastId, {
-              render: "Upload gagal. Silakan coba lagi.",
+              render: "Terjadi kesalahan jaringan.",
               type: "error",
               isLoading: false,
               autoClose: 3000,
             });
-          }
-        };
+            reject(new Error("Network error"));
+          };
 
-        xhr.onerror = function () {
-          toast.update(toastId, {
-            render: "Terjadi kesalahan jaringan.",
-            type: "error",
-            isLoading: false,
-            autoClose: 3000,
-          });
-        };
-
-        xhr.open(
-          "POST",
-          `${process.env.REACT_APP_API_BASE_URL}/api/archive/edit/${formData?.id}`
-        );
-        xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
-        xhr.send(payload);
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/api/archive/edit/${formData?.id}`
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
+        });
       } else {
         const result = await apiRequest({
           url: `/api/archive/edit/${formData?.id}`,
@@ -401,7 +404,7 @@ function ListSatuanKerjaPage() {
   };
 
   const checklistIsValid = () => {
-    if (formData.status === "approved") {
+    if (formData.status === "approved" && isPengajuanPath(location.pathname)) {
       const kelengkapanChecked = formData.kelengkapan.map((item) => item.value);
       const verifikasiChecked = formData.verifikasi.map((item) => item.value);
 
@@ -491,12 +494,12 @@ function ListSatuanKerjaPage() {
         return;
       }
       if (variantModal === "Add") {
-        submitData(formData);
+        await submitData(formData);
       } else {
-        editData(formData);
+        await editData(formData);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
@@ -757,7 +760,9 @@ function ListSatuanKerjaPage() {
                     if (col.key === "catatan") {
                       return (
                         <TableCell key={col.key} align="center">
-                          {row?.["feedback"]}
+                          {row?.["feedback"] == "null"
+                            ? "-"
+                            : row?.["feedback"]}
                         </TableCell>
                       );
                     }
@@ -1140,7 +1145,7 @@ function ListSatuanKerjaPage() {
           setVariantModal("");
         }}
         title="Form Pengujian"
-        width="95vw"
+        width={fileExtension === "pdf" ? "95vw" : "65vw"}
         maxWidth="95vw"
       >
         {/* Container utama */}
@@ -1172,7 +1177,7 @@ function ListSatuanKerjaPage() {
             style={{
               width: "80%",
               overflowY: "auto",
-              maxHeight: "480px",
+              maxHeight: "55vw",
             }}
           >
             <form
