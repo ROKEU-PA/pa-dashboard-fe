@@ -480,9 +480,11 @@ function ListSatuanKerjaPage() {
           );
           return;
         }
+        console.log(process.env.MAX_UPLOAD)
+        const maxSize = formData.type_id === "ptup" || formData.type_id === "gup" ? 800 : 100;
 
-        if (!isFileSizeValid(file)) {
-          toast.error("Ukuran file melebihi 100MB");
+        if (!isFileSizeValid(file, maxSize)) {
+          toast.error("Ukuran file melebihi " + maxSize + "MB");
           return;
         }
       }
