@@ -227,62 +227,62 @@ function ListSatuanKerjaPage() {
 
       const defaultToken = localStorage.getItem("token");
       return new Promise((resolve, reject) => {
-          const xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
 
-          const toastId = toast.info("Uploading file...", {
-            progress: 0,
-            autoClose: false,
-            closeButton: false,
-            isLoading: true,
-          });
+        const toastId = toast.info("Uploading file...", {
+          progress: 0,
+          autoClose: false,
+          closeButton: false,
+          isLoading: true,
+        });
 
-          xhr.upload.onprogress = function (event) {
-            if (event.lengthComputable) {
-              const percent = Math.round((event.loaded / event.total) * 100);
-              toast.update(toastId, {
-                render: `Uploading file... (${percent}%)`,
-                progress: percent / 100,
-              });
-            }
-          };
-
-          xhr.onload = function () {
-            if (xhr.status === 200 || xhr.status === 201) {
-              toast.update(toastId, {
-                render: "File berhasil diupload!",
-                type: "success",
-                isLoading: false,
-                autoClose: 3000,
-              });
-              resolve(xhr.response); // ✅ sukses → Promise resolve
-            } else {
-              toast.update(toastId, {
-                render: "Upload gagal. Silakan coba lagi.",
-                type: "error",
-                isLoading: false,
-                autoClose: 3000,
-              });
-              reject(new Error("Upload gagal"));
-            }
-          };
-
-          xhr.onerror = function () {
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
             toast.update(toastId, {
-              render: "Terjadi kesalahan jaringan.",
+              render: `Uploading file... (${percent}%)`,
+              progress: percent / 100,
+            });
+          }
+        };
+
+        xhr.onload = function () {
+          if (xhr.status === 200 || xhr.status === 201) {
+            toast.update(toastId, {
+              render: "File berhasil diupload!",
+              type: "success",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            resolve(xhr.response); // ✅ sukses → Promise resolve
+          } else {
+            toast.update(toastId, {
+              render: "Upload gagal. Silakan coba lagi.",
               type: "error",
               isLoading: false,
               autoClose: 3000,
             });
-            reject(new Error("Network error"));
-          };
+            reject(new Error("Upload gagal"));
+          }
+        };
 
-          xhr.open(
-            "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
-          );
-          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
-          xhr.send(payload);
-        });
+        xhr.onerror = function () {
+          toast.update(toastId, {
+            render: "Terjadi kesalahan jaringan.",
+            type: "error",
+            isLoading: false,
+            autoClose: 3000,
+          });
+          reject(new Error("Network error"));
+        };
+
+        xhr.open(
+          "POST",
+          `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
+        );
+        xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+        xhr.send(payload);
+      });
     } catch (error) {
       console.error(error);
       toast.error("Gagal mengupload data.");
@@ -294,7 +294,7 @@ function ListSatuanKerjaPage() {
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
-      payload.append("feedback", formData.feedback);
+      payload.append("feedback", formData.feedback ?? formData.catatan);
       payload.append("status", formData.status);
       payload.append("questions", JSON.stringify(formData.kelengkapan));
       payload.append("verifications", JSON.stringify(formData.verifikasi));
@@ -480,8 +480,9 @@ function ListSatuanKerjaPage() {
           );
           return;
         }
-        console.log(process.env.MAX_UPLOAD)
-        const maxSize = formData.type_id === "ptup" || formData.type_id === "gup" ? 800 : 100;
+
+        const maxSize =
+          formData.type_id === "ptup" || formData.type_id === "gup" ? 800 : 100;
 
         if (!isFileSizeValid(file, maxSize)) {
           toast.error("Ukuran file melebihi " + maxSize + "MB");
@@ -874,7 +875,7 @@ function ListSatuanKerjaPage() {
                               onClick={() => {
                                 const kelengkapanWithLabel = questions
                                   .filter((q) =>
-                                    row.question_checklist.includes(
+                                    row.question_checklist?.includes(
                                       q.id_question
                                     )
                                   )
@@ -885,7 +886,7 @@ function ListSatuanKerjaPage() {
 
                                 const verifikasiWithLabel = verifications
                                   .filter((v) =>
-                                    row.verification_checklist.includes(
+                                    row.verification_checklist?.includes(
                                       v.id_question
                                     )
                                   )
@@ -1101,7 +1102,7 @@ function ListSatuanKerjaPage() {
             <Textarea
               label="Catatan"
               name="catatan"
-              value={formData?.catatan}
+              value={formData?.catatan ?? ""}
               onChange={handleChange}
             />
           )}
@@ -1169,11 +1170,21 @@ function ListSatuanKerjaPage() {
               title="PDF Viewer"
             />
           ) : (
-            <a href={pdfToOpen} download>
+            <div>
               <p>File SPP ber-format (.rar)</p>
-              <br></br>
-              <Button style={{ width: "100%" }}>Download File</Button>
-            </a>
+              <br />
+              <Button
+                style={{ width: "100%" }}
+                onClick={() => {
+                  const link = document.createElement("a");
+                  link.href = pdfToOpen;
+                  link.download = "";
+                  link.click();
+                }}
+              >
+                Download File
+              </Button>
+            </div>
           )}
           <div
             style={{
@@ -1285,7 +1296,7 @@ function ListSatuanKerjaPage() {
               <Textarea
                 label="Catatan"
                 name="catatan"
-                value={formData?.catatan}
+                value={formData?.catatan ?? ""}
                 onChange={handleChange}
               />
               <Button type="submit" style={{ width: "100%" }}>
