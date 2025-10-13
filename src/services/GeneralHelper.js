@@ -43,6 +43,16 @@ export const validationSchema = {
     const ext = file.name.split(".").pop().toLowerCase();
     return allowed.includes(ext) ? "" : "File harus format Word (doc/docx)";
   },
+  link: (val) => {
+    if (!val) return "Link tidak boleh kosong";
+
+    const pattern = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+.*$/i;
+    if (!pattern.test(val)) {
+      return "Format link tidak valid, harus diawali https://";
+    }
+
+    return null;
+  },
 };
 
 export function formatUrlPathToTitle(url) {
@@ -146,6 +156,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     if (pathname.startsWith("/ptuk")) return true;
     if (pathname.startsWith("/pelaksanaan-anggaran")) return true;
     if (pathname === "/ikpa") return true;
+    if (pathname === "/realisasi") return true;
     if (pathname.startsWith("/tata-usaha")) return true;
     if (pathname.startsWith("/barang-milik-negara")) return true;
   }

@@ -22,6 +22,7 @@ import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
 import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
+import RealisasiPage from "./pages/Realisasi";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -193,6 +194,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <IkpaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/realisasi"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <RealisasiPage />
               </AppLayout>
             </PrivateRoute>
           }

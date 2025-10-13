@@ -21,6 +21,7 @@ import {
   Archive,
   Axis3D,
   Table,
+  CircleDollarSign,
 } from "lucide-react";
 import React, { useState, useContext, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
@@ -49,11 +50,11 @@ const menuItems = [
     name: "Pelaksanaan Anggaran",
     path: "/pelaksanaan-anggaran",
     children: [
-      {
-        name: "Dashboard",
-        path: "/pelaksanaan-anggaran",
-        icon: <Axis3D />,
-      },
+      // {
+      //   name: "Dashboard",
+      //   path: "/pelaksanaan-anggaran",
+      //   icon: <Axis3D />,
+      // },
       {
         name: "Tanda Terima SPP",
         path: "/tanda-terima",
@@ -68,6 +69,11 @@ const menuItems = [
         name: "IKPA",
         path: "/ikpa",
         icon: <AlignEndHorizontal />,
+      },
+      {
+        name: "Realisasi",
+        path: "/realisasi",
+        icon: <CircleDollarSign />,
       },
       {
         name: "Arsip SPM",
@@ -89,11 +95,11 @@ const menuItems = [
     // path: "/dashboard/barang-milik-negara",
     path: "/barang-milik-negara",
     children: [
-      {
-        name: "Dashboard",
-        path: "/barang-milik-negara",
-        icon: <Axis3D />,
-      },
+      // {
+      //   name: "Dashboard",
+      //   path: "/barang-milik-negara",
+      //   icon: <Axis3D />,
+      // },
     ],
     icon: <Package />,
   },
@@ -207,7 +213,7 @@ function Sidebar() {
             return {
               ...item,
               children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA"].includes(child.name)
+                ["Dashboard", "IKPA", "Realisasi"].includes(child.name)
               ),
             };
           }

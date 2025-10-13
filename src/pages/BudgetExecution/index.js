@@ -119,11 +119,11 @@ function BudgetExecution() {
           </Card>
         ))}
         <div className="flex flex-col justify-between">
-          <span className="font-bold">Indikator Warna</span>
+          <span className="font-bold">Ketentuan Penilaian</span>
           <div className="flex gap-2 items-center">
             <div className="w-3 h-3 bg-[#6FCE00]"></div>
             <span className="text-sm">
-              {"Nilai IKPA ≥ 90"}
+              {"Nilai IKPA ≥ 95"}
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </span>
             <span className="text-sm">:</span>
@@ -152,7 +152,108 @@ function BudgetExecution() {
           </div>
         </div>
       </div>
-      <TableBudgetExecution dataTable={es1Data} />
+      <br></br>
+      <div className="grid grid-cols-5 gap-4 mb-4">
+        <Card className="row-span-2 p-4">
+          <div className="flex flex-col items-center mb-3">
+            <span className="font-bold text-2xl text-center">REALISASI</span>
+          </div>
+          {/* Total Pagu */}
+          <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+            <span className="font-bold text-sm flex items-center">
+              <span className="w-1 h-4 bg-white mr-2"></span> TOTAL PAGU
+            </span>
+            <span className="font-bold text-lg">Rp. 2.123</span>
+          </div>
+
+          {/* Blokir */}
+          <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+            <span className="font-bold text-sm flex items-center">
+              <span className="w-1 h-4 bg-white mr-2"></span> BLOKIR
+            </span>
+            <span className="font-bold text-lg">Rp. 2.123 (20%)</span>
+          </div>
+
+          {/* Realisasi */}
+          <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+            <span className="font-bold text-sm flex items-center">
+              <span className="w-1 h-4 bg-white mr-2"></span> REALISASI
+            </span>
+            <span className="font-bold text-lg">Rp. 2.123</span>
+          </div>
+
+          {/* Target */}
+          <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-lg px-3 py-2 text-black flex flex-col m-1">
+            <span className="font-bold text-sm flex items-center">
+              <span className="w-1 h-4 bg-black mr-2"></span> TARGET
+            </span>
+            <span className="font-bold text-lg">22% | Rp. 88.239</span>
+          </div>
+          <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-lg text-center m-1">
+            <span className="font-bold text-sm text-white">
+              Bulan {moment().locale("id").subtract(1, "months").format("MMMM")}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-center mb-3">
+            <span className="font-bold text-sm text-center mt-1">
+              Kementerian Ketenagakerjaan
+            </span>
+          </div>
+        </Card>
+
+        {/* Kartu detail per unit */}
+        {cardsData.map((item, index) => (
+          <Card className="p-3" key={index}>
+            <div className="flex flex-col">
+              <div className="flex justify-between items-center h-10">
+                <span className="font-bold text-base w-[200px]">
+                  {item.title}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col gap-1 text-sm text-white">
+              <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-md px-2 py-1 font-bold">
+                <div className="flex justify-between">
+                  <span>Pagu :</span>
+                  <span>Rp 1111</span>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-md px-2 py-1 font-bold">
+                <div className="flex justify-between">
+                  <span>Blokir :</span>
+                  <span>Rp 222 (22%)</span>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-md px-2 py-1 font-bold">
+                <div className="flex justify-between">
+                  <span>Realisasi Anggaran :</span>
+                  <span className="text-green-400">
+                    {item.realisasi}%{" "}
+                    <span>
+                      {item.realisasiDelta > 0 ? "▲" : "▼"}{" "}
+                      {item.realisasiDelta}%
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-md px-2 py-1 font-bold">
+                <div className="flex justify-between">
+                  <span className="text-black">Target Anggaran :</span>
+                  <span className="text-red-500">
+                    {item.target}%{" "}
+                    <span>
+                      {item.targetDelta > 0 ? "▲" : "▼"} {item.targetDelta}%
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      {/* <TableBudgetExecution dataTable={es1Data} /> */}
     </div>
   );
 }
