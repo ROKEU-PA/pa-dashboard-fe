@@ -79,7 +79,7 @@ function ListSatuanKerjaPage() {
     verifikasi: [],
     is_edit: null,
     link: "",
-    jml_hal: 0
+    jml_hal: 0,
   });
   const [dataTable, setDataTable] = useState([]);
   const [pdfToOpen, setPDFtoOpen] = useState("");
@@ -218,13 +218,19 @@ function ListSatuanKerjaPage() {
 
   const submitData = async (formData) => {
     try {
+      var CryptoJS = require("crypto-js");
+      var encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+      ).toString();
+
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
       payload.append("dokumen", formData.dokumen);
-      payload.append("link", formData.link);
+      payload.append("link", encryptedLink);
       payload.append("jml_hal", formData.jml_hal);
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
@@ -313,6 +319,11 @@ function ListSatuanKerjaPage() {
   const editData = async (formData) => {
     try {
       const payload = new FormData();
+      var CryptoJS = require("crypto-js");
+      var encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+      ).toString();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
       payload.append("feedback", formData.catatan ?? formData.feedback);
@@ -321,7 +332,7 @@ function ListSatuanKerjaPage() {
       payload.append("verifications", JSON.stringify(formData.verifikasi));
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
-      payload.append("link", formData.link);
+      payload.append("link", encryptedLink);
       payload.append("jml_hal", formData.jml_hal);
       payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
 
