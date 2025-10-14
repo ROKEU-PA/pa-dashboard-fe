@@ -93,12 +93,28 @@ function ListSatuanKerjaPage() {
   const getFileExtension = (url) => {
     try {
       const parsedUrl = new URL(url);
-      const pathname = parsedUrl.pathname; // /folder/filename.pdf
-      return pathname.split(".").pop().toLowerCase(); // => pdf
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const pathname = parsedUrl.pathname;
+
+      if (
+        hostname.includes("drive.google.com") ||
+        hostname.includes("docs.google.com") ||
+        hostname.includes("drive.googleusercontent.com")
+      ) {
+        return "gdrive";
+      }
+
+      const parts = pathname.split(".");
+      if (parts.length > 1) {
+        return parts.pop().toLowerCase();
+      }
+
+      return "";
     } catch {
-      return ""; // fallback
+      return "";
     }
   };
+
   const fileExtension = getFileExtension(pdfToOpen);
 
   const handleSortChange = (key) => {
@@ -232,6 +248,7 @@ function ListSatuanKerjaPage() {
       payload.append("dokumen", formData.dokumen);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", formData.jml_hal);
+      payload.append("feedback", formData.catatan ?? formData.feedback);
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
       }
@@ -303,12 +320,6 @@ function ListSatuanKerjaPage() {
           },
           isMultiType: true,
         });
-        console.log(result);
-        if (result.success) {
-          toast.success("Data berhasil diperbarui!");
-        } else {
-          toast.error("Gagal memperbarui data.");
-        }
       }
     } catch (error) {
       console.error(error);
@@ -425,11 +436,6 @@ function ListSatuanKerjaPage() {
           },
           isMultiType: true,
         });
-        if (result.success) {
-          toast.success("Data berhasil diperbarui!");
-        } else {
-          toast.error("Gagal memperbarui data.");
-        }
       }
     } catch (error) {
       console.error(error);
@@ -634,7 +640,7 @@ function ListSatuanKerjaPage() {
                 </Button>
               ) : (
                 // Tombol "Tambah Pengajuan" - hanya user
-                userData.role === "user" && (
+                userData?.role === "user" && (
                   <Button
                     onClick={() => {
                       setIsOpenModal(true);
@@ -928,10 +934,16 @@ function ListSatuanKerjaPage() {
                           {showEditButton && (
                             <Button
                               onClick={() => {
+                                if (
+                                  row.document.filename.includes("file_drive")
+                                ) {
+                                  setJenisFile("link");
+                                }
                                 setVariantModal("Edit");
                                 setFormData({
                                   ...row,
                                   type: row.jenis_spp,
+                                  link: row.document.path,
                                 });
                                 setIsOpenModal(true);
                               }}
@@ -1197,7 +1209,7 @@ function ListSatuanKerjaPage() {
           {userData &&
             !isPengajuanPath(location.pathname) &&
             variantModal == "Edit" &&
-            userData.role !== "user" && (
+            userData?.role !== "user" && (
               <FileInput
                 accept=".pdf"
                 label="Dokumen SPM"
@@ -1211,7 +1223,7 @@ function ListSatuanKerjaPage() {
           {userData &&
             !isPengajuanPath(location.pathname) &&
             variantModal == "Edit" &&
-            userData.role !== "user" && (
+            userData?.role !== "user" && (
               <FileInput
                 accept=".pdf"
                 label="Dokumen SP2D"
@@ -1223,7 +1235,7 @@ function ListSatuanKerjaPage() {
             )}
 
           {/* Tampilkan Catatan hanya jika isPengajuanPath FALSE */}
-          {!isPengajuanPath(location.pathname) && userData.role === "pic" && (
+          {!isPengajuanPath(location.pathname) && userData?.role === "pic" && (
             <Textarea
               label="Catatan"
               name="catatan"
@@ -1258,10 +1270,16 @@ function ListSatuanKerjaPage() {
             style={{ width: "100%", height: "calc(100vh - 100px)" }}
             title="PDF Viewer"
           />
+        ) : fileExtension === "gdrive" ? (
+          <a href={pdfToOpen} target="_blank" rel="noopener noreferrer">
+            <p>File berupa link Google Drive</p>
+            <br />
+            <Button style={{ width: "100%" }}>Buka</Button>
+          </a>
         ) : (
           <a href={pdfToOpen} download>
             <p>File SPP ber-format (.rar)</p>
-            <br></br>
+            <br />
             <Button style={{ width: "100%" }}>Download File</Button>
           </a>
         )}

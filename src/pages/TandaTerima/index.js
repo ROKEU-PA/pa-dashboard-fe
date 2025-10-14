@@ -87,7 +87,7 @@ function TandaTerimaPage() {
     try {
       const isUser = userData?.role === "user";
       const query = buildQueryString({
-        biro_code: isUser ? userData.biro_code : filter.kode_satker,
+        biro_code: isUser ? userData?.biro_code : filter.kode_satker,
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -171,7 +171,7 @@ function TandaTerimaPage() {
             options={
               userData?.role === "user"
                 ? dataTable
-                    .filter((q) => q.kode_satker === userData.biro_code)
+                    .filter((q) => q.kode_satker === userData?.biro_code)
                     .map((q) => ({
                       label: q.unit_satker,
                       value: q.kode_satker,
@@ -184,7 +184,7 @@ function TandaTerimaPage() {
             style={{ width: "400px" }}
             isOpen={selectOpen}
             setIsOpen={setSelectOpen}
-            disabled={userData.role === "user"}
+            disabled={userData?.role === "user"}
           />
         </div>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -268,7 +268,7 @@ function TandaTerimaPage() {
           <TableBody>
             {(userData?.role === "user"
               ? dataTable.filter(
-                  (row) => row.kode_satker === userData.biro_code
+                  (row) => row.kode_satker === userData?.biro_code
                 )
               : dataTable
             ).map((row, index) => (

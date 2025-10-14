@@ -6,6 +6,7 @@ export const columns = [
   { key: "document", label: "Dokumen SPP & Pendukung" },
   { key: "document_spm", label: "Dokumen SPM" },
   { key: "document_sp2d", label: "Dokumen SP2D" },
+  { key: "jml_hal", label: "Jumlah Lembar" },
   { key: "revisi", label: "Revisi", hiddenInArsip: true},
   { key: "status", label: "Status", hiddenInArsip: true },
   { key: "kelengkapan", label: "Kelengkapan", hiddenInArsip: true },
