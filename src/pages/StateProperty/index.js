@@ -106,7 +106,7 @@ function StateProperty() {
       </div>
       <Title>Dashboard Barang Milik Negara</Title>
       <div className="grid grid-cols-[55%_45%] gap-4 mr-4">
-        <Card className="">
+        {/* <Card className="">
           <div className="grid grid-cols-[90%_10%] items-center mb-4">
             <span className="font-bold text-xl">
               PNBP yang Berkaitan dengan Aset
@@ -134,7 +134,7 @@ function StateProperty() {
               values={values}
             />
           </div>
-        </Card>
+        </Card> */}
         <Card className="">
           <div className="flex justify-between items-center mb-4">
             <span className="text-xl font-bold color-[#B7B7B7]">

@@ -133,6 +133,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     if (pathname === "/pelaksanaan-anggaran") return true;
     if (pathname === "/satuan-kerja") return true;
     if (pathname === "/satuan-kerja/pengajuan") return true;
+    if (pathname === "/llat") return true;
 
     // Validasi berdasarkan listMenu dan biro_code
     const cleanedPath = (() => {
@@ -159,6 +160,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     if (pathname === "/realisasi") return true;
     if (pathname.startsWith("/tata-usaha")) return true;
     if (pathname.startsWith("/barang-milik-negara")) return true;
+    if (pathname === "/llat") return true;
   }
 
   if (pathname === "/") return true;

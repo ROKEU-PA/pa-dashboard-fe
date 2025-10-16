@@ -184,7 +184,7 @@ function IkpaPage() {
   return (
     <div>
       <div className="flex justify-between">
-        <Breadcrumbs items={[{ name: "Soon", path: "/soon" }]} />
+        <Breadcrumbs items={[{ name: "Pelaksanaan Anggaran / IKPA", path: "/ikpa" }]} />
         <User
           name={userData?.name}
           previlege={userData?.role?.toUpperCase()}

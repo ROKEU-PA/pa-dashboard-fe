@@ -21,6 +21,8 @@ import Select from "@/components/Select";
 import { AppContext } from "@/contexts/AppContext";
 import User from "@/components/User";
 import { useBudgetExecution } from "../BudgetExecution/useBudgetExecution";
+import Card from "@/components/Card";
+import { dataTable } from "../BudgetExecution/constants";
 
 const columns = [
   {
@@ -67,7 +69,7 @@ function RealisasiPage() {
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
-  const [dataTable, setDataTable] = useState([]);
+  const [dataTables, setDataTable] = useState([]);
   const [es1Data, setEs1Data] = useState([]);
   const [filter, setFilter] = useState({
     searchKey: "",
@@ -76,6 +78,7 @@ function RealisasiPage() {
   const [formData, setFormData] = useState({
     dokumen: null,
   });
+  const [cardsData, setCardsData] = useState([]);
 
   const fetchTemplateDownload = async () => {
     try {
@@ -122,11 +125,36 @@ function RealisasiPage() {
         url: `/api/pa/ikpa/all`,
       });
       let result = data?.data.filter((q) => q.satker_code === null);
+      let mapped = data?.data
+        .filter((q) => q.satker_code === null)
+        .map((item, index) => {
+          const constantItem = dataTable.data[index];
+
+          return {
+            eselon: constantItem?.eselon || item.name,
+            revisiDipa: item.revisi_dipa,
+            deviasiHalIII: item.deviasi_hal3_dipa,
+            realisasiAnggaran: item.realisasi_anggaran,
+            belanjaKontraktual: item.belanja_kontraktual,
+            penyelesaianTagihan: item.penyelesaian_tagihan,
+            pengelolaanUPTUP: item.pengelolaan_up_tup,
+            capaianOutput: item.capaian_output,
+            dispensasiSPM: item.dispensasi_spm,
+            nilaiIKPA: item.nilai_ikpa,
+          };
+        });
       if (data.success) {
         result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
         console.log(result);
         setEs1Data(result);
       }
+      let mappedCards = mapped
+        .filter((q) => q.eselon !== "Kementerian Ketenagakerjaan")
+        .map((item) => ({
+          title: item.eselon,
+          value: item.nilaiIKPA.toFixed(2),
+        }));
+      setCardsData(mappedCards);
     } catch (error) {
       console.error(error);
     }
@@ -188,7 +216,7 @@ function RealisasiPage() {
     }
   };
 
-  const groupedData = dataTable.reduce((acc, row) => {
+  const groupedData = dataTables.reduce((acc, row) => {
     const group = row.eselon_code;
     if (!acc[group]) acc[group] = { parent: null, children: [] };
 
@@ -209,7 +237,11 @@ function RealisasiPage() {
   return (
     <div>
       <div className="flex justify-between">
-        <Breadcrumbs items={[{ name: "Soon", path: "/soon" }]} />
+        <Breadcrumbs
+          items={[
+            { name: "Pelaksanaan Anggaran / Realisasi", path: "/realisasi" },
+          ]}
+        />
         <User
           name={userData?.name}
           previlege={userData?.role?.toUpperCase()}
@@ -219,7 +251,109 @@ function RealisasiPage() {
           id={userData?.id}
         />
       </div>
-      <Title>Indikator Pelaksanaan Anggaran Tingkat Satuan Kerja</Title>
+      <Title>Realisasi</Title>
+      <Paper style={{marginBottom: "1vw"}}>
+        <div className="grid grid-cols-3 gap-4 mb-4 mt-4">
+          <Card className="row-span-2 p-4">
+            <div className="flex flex-col items-center mb-3">
+              <span className="font-bold text-2xl text-center">REALISASI</span>
+            </div>
+            {/* Total Pagu */}
+            <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+              <span className="font-bold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2"></span> TOTAL PAGU
+              </span>
+              <span className="font-bold text-lg">Rp. 2.123</span>
+            </div>
+
+            {/* Blokir */}
+            <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+              <span className="font-bold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2"></span> BLOKIR
+              </span>
+              <span className="font-bold text-lg">Rp. 2.123 (20%)</span>
+            </div>
+
+            {/* Realisasi */}
+            <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-lg px-3 py-2 text-white flex flex-col m-1">
+              <span className="font-bold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2"></span> REALISASI
+              </span>
+              <span className="font-bold text-lg">Rp. 2.123</span>
+            </div>
+
+            {/* Target */}
+            <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-lg px-3 py-2 text-black flex flex-col m-1">
+              <span className="font-bold text-sm flex items-center">
+                <span className="w-1 h-4 bg-black mr-2"></span> TARGET
+              </span>
+              <span className="font-bold text-lg">22% | Rp. 88.239</span>
+            </div>
+            <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-lg text-center m-1">
+              <span className="font-bold text-sm text-white">
+                Bulan{" "}
+                {moment().locale("id").subtract(1, "months").format("MMMM")}
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center mb-3">
+              <span className="font-bold text-sm text-center mt-1">
+                Kementerian Ketenagakerjaan
+              </span>
+            </div>
+          </Card>
+
+          {/* Kartu detail per unit */}
+          {cardsData.map((item, index) => (
+            <Card className="p-3" key={index}>
+              <div className="flex flex-col">
+                <div className="flex justify-between items-center h-10">
+                  <span className="font-bold text-base w-[300px]">
+                    {item.title}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1 text-sm text-white">
+                <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-md px-2 py-1 font-bold">
+                  <div className="flex justify-between">
+                    <span>Pagu :</span>
+                    <span>Rp 1111</span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-md px-2 py-1 font-bold">
+                  <div className="flex justify-between">
+                    <span>Blokir :</span>
+                    <span>Rp 222 (22%)</span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-md px-2 py-1 font-bold">
+                  <div className="flex justify-between">
+                    <span>Realisasi Anggaran :</span>
+                    <span className="text-green-400">
+                      {item.realisasi}%{" "}
+                      <span>
+                        {item.realisasiDelta > 0 ? "▲" : "▼"}{" "}
+                        {item.realisasiDelta}%
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-md px-2 py-1 font-bold">
+                  <div className="flex justify-between">
+                    <span className="text-black">Target Anggaran :</span>
+                    <span className="text-red-500">
+                      {item.target}%{" "}
+                      <span>
+                        {item.targetDelta > 0 ? "▲" : "▼"} {item.targetDelta}%
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </Paper>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}

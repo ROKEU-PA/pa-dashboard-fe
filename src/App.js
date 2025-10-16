@@ -23,6 +23,8 @@ import StateProperty from "./pages/StateProperty";
 import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
+import ReportingAccounting from "./pages/ReportingAccounting";
+import LLATPage from "./pages/LLAT";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -209,11 +211,31 @@ function App() {
           }
         />
         <Route
+          path="/llat"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <LLATPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/tanda-terima"
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <TandaTerimaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/akuntansi-pelaporan"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <ReportingAccounting />
               </AppLayout>
             </PrivateRoute>
           }

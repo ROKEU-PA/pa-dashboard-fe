@@ -11,6 +11,8 @@ import { NotepadText } from "lucide-react";
 import { TableBudgetExecution } from "./TableBudgetExecution";
 import { apiRequest } from "@/services/APIHelper";
 import { AppContext } from "@/contexts/AppContext";
+import Select from "@/components/Select";
+import BarChart from "./BarChart";
 
 function BudgetExecution() {
   const { userData } = useContext(AppContext);
@@ -23,6 +25,16 @@ function BudgetExecution() {
     return "bg-[#FF4155]"; // Kurang
   };
 
+  const dataset = [
+    { name: "Completed", value: 320 },
+    { name: "In Progress", value: 180 },
+    { name: "Blocked", value: 60 },
+    { name: "Backlog", value: 140 },
+  ];
+  const [values, setValues] = useState([70.70, 33.39, 50.48, 9.41, 83.77, 33.10, 31.96, 29.94]);
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [year, setYear] = useState("2025");
+
   const es1Options = async () => {
     try {
       const data = await apiRequest({
@@ -34,7 +46,7 @@ function BudgetExecution() {
           const constantItem = dataTable.data[index];
 
           return {
-            eselon: constantItem?.eselon || item.name, // fallback ke item.name kalau tidak ketemu
+            eselon: constantItem?.eselon || item.name,
             revisiDipa: item.revisi_dipa,
             deviasiHalIII: item.deviasi_hal3_dipa,
             realisasiAnggaran: item.realisasi_anggaran,
@@ -64,9 +76,43 @@ function BudgetExecution() {
       console.error(error);
     }
   };
+  // const realGraph = async () => {
+  //   try {
+  //     const data = await apiRequest({
+  //       url: `/api/bmn/pnbp?tahun=` + year,
+  //     });
+  //     setMonth(
+  //       data?.data?.years.length === 0
+  //         ? [
+  //             "Jan",
+  //             "Feb",
+  //             "Mar",
+  //             "Apr",
+  //             "May",
+  //             "Jun",
+  //             "Jul",
+  //             "Aug",
+  //             "Sep",
+  //             "Oct",
+  //             "Nov",
+  //             "Dec",
+  //           ]
+  //         : data?.data?.years
+  //     );
+  //     setValues(
+  //       data?.data?.values.length === 0
+  //         ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  //         : data?.data?.values.map((v) => Number(v))
+  //     );
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
+  const eselons = es1Data.data.map((item) => item.eselon);
   useEffect(() => {
     es1Options();
-  }, []);
+    // realGraph();
+  }, [year]);
   return (
     <div>
       <div className="flex justify-between">
@@ -152,105 +198,47 @@ function BudgetExecution() {
           </div>
         </div>
       </div>
-      <br></br>
-      <div className="grid grid-cols-5 gap-4 mb-4">
-        <Card className="row-span-2 p-4">
-          <div className="flex flex-col items-center mb-3">
-            <span className="font-bold text-2xl text-center">REALISASI</span>
-          </div>
-          {/* Total Pagu */}
-          <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-            <span className="font-bold text-sm flex items-center">
-              <span className="w-1 h-4 bg-white mr-2"></span> TOTAL PAGU
-            </span>
-            <span className="font-bold text-lg">Rp. 2.123</span>
-          </div>
-
-          {/* Blokir */}
-          <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-            <span className="font-bold text-sm flex items-center">
-              <span className="w-1 h-4 bg-white mr-2"></span> BLOKIR
-            </span>
-            <span className="font-bold text-lg">Rp. 2.123 (20%)</span>
-          </div>
-
-          {/* Realisasi */}
-          <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-            <span className="font-bold text-sm flex items-center">
-              <span className="w-1 h-4 bg-white mr-2"></span> REALISASI
-            </span>
-            <span className="font-bold text-lg">Rp. 2.123</span>
-          </div>
-
-          {/* Target */}
-          <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-lg px-3 py-2 text-black flex flex-col m-1">
-            <span className="font-bold text-sm flex items-center">
-              <span className="w-1 h-4 bg-black mr-2"></span> TARGET
-            </span>
-            <span className="font-bold text-lg">22% | Rp. 88.239</span>
-          </div>
-          <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-lg text-center m-1">
-            <span className="font-bold text-sm text-white">
-              Bulan {moment().locale("id").subtract(1, "months").format("MMMM")}
+      <div className="grid grid-cols-[50%_50%] gap-4 mr-4">
+        <Card className="">
+          <div className="grid grid-cols-[90%_10%] items-center mb-4">
+            <span className="font-bold text-xl">
+              Persentase Realisasi Anggaran per Eselon 1
             </span>
           </div>
-
-          <div className="flex flex-col items-center mb-3">
-            <span className="font-bold text-sm text-center mt-1">
-              Kementerian Ketenagakerjaan
-            </span>
+          <div className="items-center">
+            <BarChart
+              data={dataset}
+              height="h-72"
+              labels={eselons}
+              values={values}
+            />
           </div>
         </Card>
+        <Card className="p-6">
+          <div className="grid grid-cols-2 gap-6 justify-items-center">
+            {/* Peringkat Realisasi Kemnaker */}
+            <div className="flex flex-col items-center">
+              <span className="font-semibold text-center mb-2 text-xl">
+                Peringkat Realisasi <br /> Kemnaker
+              </span>
+              <br></br>
+              <div className="w-52 h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
+                <span className="text-white text-8xl font-bold">9</span>
+              </div>
+            </div>
 
-        {/* Kartu detail per unit */}
-        {cardsData.map((item, index) => (
-          <Card className="p-3" key={index}>
-            <div className="flex flex-col">
-              <div className="flex justify-between items-center h-10">
-                <span className="font-bold text-base w-[200px]">
-                  {item.title}
-                </span>
+            {/* Peringkat Alokasi */}
+            <div className="flex flex-col items-center">
+              <span className="font-semibold text-center mb-2 text-xl">
+                Peringkat Alokasi <br /> Seluruh Kementerian
+              </span>
+              <br></br>
+              <div className="w-52 h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
+                <span className="text-white text-8xl font-bold">16</span>
               </div>
             </div>
-            <div className="flex flex-col gap-1 text-sm text-white">
-              <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-md px-2 py-1 font-bold">
-                <div className="flex justify-between">
-                  <span>Pagu :</span>
-                  <span>Rp 1111</span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-md px-2 py-1 font-bold">
-                <div className="flex justify-between">
-                  <span>Blokir :</span>
-                  <span>Rp 222 (22%)</span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-md px-2 py-1 font-bold">
-                <div className="flex justify-between">
-                  <span>Realisasi Anggaran :</span>
-                  <span className="text-green-400">
-                    {item.realisasi}%{" "}
-                    <span>
-                      {item.realisasiDelta > 0 ? "▲" : "▼"}{" "}
-                      {item.realisasiDelta}%
-                    </span>
-                  </span>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-md px-2 py-1 font-bold">
-                <div className="flex justify-between">
-                  <span className="text-black">Target Anggaran :</span>
-                  <span className="text-red-500">
-                    {item.target}%{" "}
-                    <span>
-                      {item.targetDelta > 0 ? "▲" : "▼"} {item.targetDelta}%
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+          </div>
+        </Card>
       </div>
 
       {/* <TableBudgetExecution dataTable={es1Data} /> */}

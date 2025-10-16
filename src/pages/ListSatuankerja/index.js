@@ -14,7 +14,7 @@ import MultiSelect from "@/components/MultiSelect";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Plus } from "lucide-react";
+import { Book, Plus } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import {
   buildQueryString,
@@ -306,7 +306,7 @@ function ListSatuanKerjaPage() {
           };
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/api/archive/append`
+            `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
@@ -669,6 +669,16 @@ function ListSatuanKerjaPage() {
               flexWrap: "wrap",
             }}
           >
+            <a href={"https://drive.google.com/file/d/1t2_URZ7ij2rciW-tmNDIDyRFhdwiZ10f/view"} target="_blank" rel="noopener noreferrer">
+              <Button
+                onClick={() => {}}
+                style={{ width: "fit-content"}}
+                variant="secondary"
+                icon={<Book size={20} />}
+              >
+                PMK 039 2024
+              </Button>
+            </a>
             <Input
               label="Search"
               style={{ width: "200px" }}
@@ -938,6 +948,8 @@ function ListSatuanKerjaPage() {
                                   row.document.filename.includes("file_drive")
                                 ) {
                                   setJenisFile("link");
+                                } else {
+                                  setJenisFile("file");
                                 }
                                 setVariantModal("Edit");
                                 setFormData({
@@ -1170,7 +1182,6 @@ function ListSatuanKerjaPage() {
               }}
             />
           )}
-          {/* tampilkan sesuai jenisFile */}
           {jenisFile === "link" && (
             <Input
               label="Link"
