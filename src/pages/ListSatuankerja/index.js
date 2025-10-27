@@ -522,7 +522,16 @@ function ListSatuanKerjaPage() {
         }
 
         const maxSize =
-          formData.type_id === "ptup" || formData.type_id === "gup" ? 800 : 100;
+          formData.type_id === "ptup" ||
+          formData.type_id === "gup" ||
+          formData.type_id === "uptup" ||
+          formData.type_id === "gup_kkp" ||
+          formData.type_id === "gup_pnbp" ||
+          formData.type_id === "gup_rm" ||
+          formData.type_id === "ptup_rm" ||
+          formData.type_id === "ptup_pnbp"
+            ? 1536
+            : 200;
 
         if (!isFileSizeValid(file, maxSize)) {
           toast.error("Ukuran file melebihi " + maxSize + "MB");
@@ -669,10 +678,16 @@ function ListSatuanKerjaPage() {
               flexWrap: "wrap",
             }}
           >
-            <a href={"https://drive.google.com/file/d/1t2_URZ7ij2rciW-tmNDIDyRFhdwiZ10f/view"} target="_blank" rel="noopener noreferrer">
+            <a
+              href={
+                "https://drive.google.com/file/d/1t2_URZ7ij2rciW-tmNDIDyRFhdwiZ10f/view"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               <Button
                 onClick={() => {}}
-                style={{ width: "fit-content"}}
+                style={{ width: "fit-content" }}
                 variant="secondary"
                 icon={<Book size={20} />}
               >
@@ -911,6 +926,14 @@ function ListSatuanKerjaPage() {
                           {typeof row.document_sp2d?.url === "string"
                             ? `Klik untuk lihat SP2D ` + row.no_spp || "-"
                             : "-"}
+                        </TableCell>
+                      );
+                    }
+
+                    if (col.key === "jml_hal") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          {row.jml_hal === 0 ? "-" : row.jml_hal}
                         </TableCell>
                       );
                     }
