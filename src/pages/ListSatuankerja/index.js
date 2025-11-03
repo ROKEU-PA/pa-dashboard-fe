@@ -143,9 +143,7 @@ function ListSatuanKerjaPage() {
     });
   };
 
-  const getAcceptedFileType = () => {
-    return ".pdf, .rar, .zip";
-  };
+  const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
 
   const isFileSizeValid = (file, maxSizeMB = 100) => {
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
@@ -500,12 +498,18 @@ function ListSatuanKerjaPage() {
 
       if (isAnyFile && formData.dokumen) {
         const file = formData.dokumen;
-        const acceptedExtension = getAcceptedFileType();
-        const fileName = file.name?.toLowerCase();
+        const acceptedExtension = getAcceptedFileType()
+          .replace(/\s+/g, "")
+          .split(",");
 
-        if (!fileName.endsWith(acceptedExtension)) {
+        const fileName = file.name?.toLowerCase();
+        const isAccepted = acceptedExtension.some((ext) =>
+          fileName.endsWith(ext)
+        );
+
+        if (!isAccepted) {
           toast.error(
-            `File yang diizinkan untuk tipe ini hanya ${acceptedExtension}`
+            `File yang diizinkan hanya: ${acceptedExtension.join(", ")}`
           );
           return;
         }
