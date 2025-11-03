@@ -206,6 +206,7 @@ function Sidebar() {
               "Arsip SPM",
               "Tanda Terima SPP",
               "User Manage",
+              "LLAT"
             ].includes(child.name)
           ),
         }));

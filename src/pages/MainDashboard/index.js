@@ -96,20 +96,13 @@ function MainDashboard() {
               Nilai IKPA dan Target Tahun {moment().format("YYYY")}
             </span>
           </div>
-          <div className="grid grid-cols-[65%_35%] gap-2 items-center">
-            <div className="grid grid-cols-[80%_20%] items-center">
-              <BarChart data={dataset} height="h-56" />
-              <div className="flex flex-col">
-                <div className="w-3 h-3 bg-[#296CF8]"></div>
-                <span className="text-sm">
-                  {moment().locale("id").subtract(1, "months").format("MMM") + ` ` + moment().locale("id").format("YYYY")}
-                </span>
-                <span className="text-xl font-bold">95.25</span>
-              </div>
+          <div className="grid grid-cols-[65%_35%] items-center">
+            <div className="grid grid-cols-[90%_10%] items-center">
+              <BarChart data={dataset} height="h-72" />
             </div>
             <div className="flex gap-2 flex-col">
-              <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center">
-                <span className="text-[85px]  font-black text-white">94</span>
+              <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center mr-10">
+                <span className="text-[85px] font-black text-white">94</span>
               </div>
               <span className="font-bold text-sm ">
                 Target Nilai IKPA Kemnaker 2025

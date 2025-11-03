@@ -69,7 +69,256 @@ function RealisasiPage() {
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
-  const [dataTables, setDataTable] = useState([]);
+  const [dataTables, setDataTable] = useState([
+    {
+      eselon_code: "026",
+      name: "KEMENTERIAN KETENAGAKERJAAN",
+      per_jenis: {
+        51: {
+          pagu: 96400154000,
+          realisasi: 77706174313,
+          persentase_real: 80.61,
+          sisa: 18693979687,
+        },
+        52: {
+          pagu: 419166503000,
+          realisasi: 128313046987,
+          persentase_real: 30.61,
+          sisa: 290853456013,
+        },
+        53: {
+          pagu: 13469240000,
+          realisasi: 6747777064,
+          persentase_real: 50.1,
+          sisa: 6721462936,
+        },
+      },
+      pagu: 529035897000,
+      realisasi: 212766998364,
+      sisa: 316268898636,
+      persen_realisasi: 40.22,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02601",
+      name: "SEKRETARIAT JENDERAL",
+      per_jenis: {
+        51: {
+          pagu: 96400154000,
+          realisasi: 77706174313,
+          persentase_real: 80.61,
+          sisa: 18693979687,
+        },
+        52: {
+          pagu: 419166503000,
+          realisasi: 128313046987,
+          persentase_real: 30.61,
+          sisa: 290853456013,
+        },
+        53: {
+          pagu: 13469240000,
+          realisasi: 6747777064,
+          persentase_real: 50.1,
+          sisa: 6721462936,
+        },
+      },
+      pagu: 529035897000,
+      realisasi: 212766998364,
+      sisa: 316268898636,
+      persen_realisasi: 40.22,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02602",
+      name: "INSPEKTORAT JENDERAL",
+      per_jenis: {
+        51: {
+          pagu: 24802040000,
+          realisasi: 19387652052,
+          persentase_real: 78.17,
+          sisa: 5414387948,
+        },
+        52: {
+          pagu: 33080460000,
+          realisasi: 12279610799,
+          persentase_real: 37.12,
+          sisa: 20800849201,
+        },
+        53: {
+          pagu: 200000000,
+          realisasi: 196092600,
+          persentase_real: 98.05,
+          sisa: 3907400,
+        },
+      },
+      pagu: 58082500000,
+      realisasi: 31863355451,
+      sisa: 26219144549,
+      persen_realisasi: 54.86,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02604",
+      name: "DITJEN PEMBINAAN PENEMPATAN TENAGA KERJA DAN PERLUASAN KESEMPATAN KERJA",
+      per_jenis: {
+        51: {
+          pagu: 60230900000,
+          realisasi: 53107121066,
+          persentase_real: 88.17,
+          sisa: 7123778934,
+        },
+        52: {
+          pagu: 742889574000,
+          realisasi: 43079726203,
+          persentase_real: 5.8,
+          sisa: 699809847797,
+        },
+        53: {
+          pagu: 1000000000,
+          realisasi: 994921362,
+          persentase_real: 99.49,
+          sisa: 5078638,
+        },
+      },
+      pagu: 804120474000,
+      realisasi: 97181768631,
+      sisa: 706938705369,
+      persen_realisasi: 12.09,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02605",
+      name: "DITJEN PEMBINAAN HUBUNGAN INDUSTRIAL DAN JAMINAN SOSIAL TENAGA KERJA",
+      per_jenis: {
+        51: {
+          pagu: 35837912000,
+          realisasi: 31738116022,
+          persentase_real: 88.56,
+          sisa: 4099795978,
+        },
+        52: {
+          pagu: 11737435764000,
+          realisasi: 9384006887918,
+          persentase_real: 79.95,
+          sisa: 2353428876082,
+        },
+        53: {
+          pagu: 7212500000,
+          realisasi: 6999000,
+          persentase_real: 0.1,
+          sisa: 7205501000,
+        },
+      },
+      pagu: 11780486176000,
+      realisasi: 9415752002940,
+      sisa: 2364734173060,
+      persen_realisasi: 79.93,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02608",
+      name: "DITJEN PEMBINAAN PENGAWASAN KETENAGAKERJAAN DAN KESELAMATAN DAN KESEHATAN KERJA",
+      per_jenis: {
+        51: {
+          pagu: 92824800000,
+          realisasi: 74654464053,
+          persentase_real: 80.43,
+          sisa: 18170335947,
+        },
+        52: {
+          pagu: 190287708000,
+          realisasi: 45925875840,
+          persentase_real: 24.13,
+          sisa: 144361832160,
+        },
+        53: {
+          pagu: 7455653000,
+          realisasi: 819232700,
+          persentase_real: 10.99,
+          sisa: 6636420300,
+        },
+      },
+      pagu: 290568161000,
+      realisasi: 121399572593,
+      sisa: 169168588407,
+      persen_realisasi: 41.78,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02611",
+      name: "BADAN PERENCANAAN DAN PENGEMBANGAN KETENAGAKERJAAN",
+      per_jenis: {
+        51: {
+          pagu: 26877940000,
+          realisasi: 21586633652,
+          persentase_real: 80.31,
+          sisa: 5291306348,
+        },
+        52: {
+          pagu: 166526226000,
+          realisasi: 56890278699,
+          persentase_real: 34.16,
+          sisa: 109635947301,
+        },
+        53: {
+          pagu: 25420000000,
+          realisasi: 19625000,
+          persentase_real: 0.08,
+          sisa: 25400375000,
+        },
+      },
+      pagu: 218824166000,
+      realisasi: 78496537351,
+      sisa: 140327628649,
+      persen_realisasi: 35.87,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+    {
+      eselon_code: "02613",
+      name: "DIREKTORAT JENDERAL PEMBINAAN PELATIHAN VOKASI DAN PRODUKTIVITAS",
+      per_jenis: {
+        51: {
+          pagu: 296279510000,
+          realisasi: 270348230220,
+          persentase_real: 91.25,
+          sisa: 25931279780,
+        },
+        52: {
+          pagu: 1215695350000,
+          realisasi: 286004822265,
+          persentase_real: 23.53,
+          sisa: 929690527735,
+        },
+        53: {
+          pagu: 68179899000,
+          realisasi: 19883006417,
+          persentase_real: 29.16,
+          sisa: 48296892583,
+        },
+      },
+      pagu: 1580154759000,
+      realisasi: 576236058902,
+      sisa: 1003918700098,
+      persen_realisasi: 36.47,
+      bulan: 10,
+      tahun: 2025,
+      tanggal_sumber_data: "2025-10-30 07:17:57",
+    },
+  ]);
   const [es1Data, setEs1Data] = useState([]);
   const [filter, setFilter] = useState({
     searchKey: "",
@@ -79,84 +328,64 @@ function RealisasiPage() {
     dokumen: null,
   });
   const [cardsData, setCardsData] = useState([]);
-
-  const fetchTemplateDownload = async () => {
-    try {
-      const response = await fetchHelperGET(
-        process.env.REACT_APP_API_BASE_URL + `/api/pa/ikpa/format/download`,
-        "GET",
-        localStorage.getItem("token"),
-        "blob"
-      );
-      const url = window.URL.createObjectURL(response);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "format_template_import_ikpa.xlsx";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Gagal fetch template:", error);
-    }
+  const formatMiliar = (num) => {
+    if (!num && num !== 0) return "-";
+    return (num / 1_000_000_000).toFixed(2) + " M";
   };
-
-  const fetchTable = async () => {
-    try {
-      const query = buildQueryString({
-        eselon_code: filter.eselonKey,
-        search_key: filter.searchKey,
-      });
-      const data = await apiRequest({
-        url: `/api/pa/ikpa/all?${query}`,
-      });
-      let result = data?.data;
-      if (data.success) {
-        setDataTable(result);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const fetchTable = async () => {
+  //   try {
+  //     const query = buildQueryString({
+  //       eselon_code: filter.eselonKey,
+  //       search_key: filter.searchKey,
+  //     });
+  //     const data = await apiRequest({
+  //       url: `/api/pa/ikpa/all?${query}`,
+  //     });
+  //     let result = data?.data;
+  //     if (data.success) {
+  //       setDataTable(result);
+  //     }
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   const es1Options = async () => {
     try {
-      const data = await apiRequest({
-        url: `/api/pa/ikpa/all`,
-      });
-      let result = data?.data.filter((q) => q.satker_code === null);
-      let mapped = data?.data
-        .filter((q) => q.satker_code === null)
+      const data = { success: true, data: dataTables };
+
+      if (!data?.success || !data?.data) return;
+      let mapped = data.data
+        // .filter((q) => q.satker_code === null)
         .map((item, index) => {
           const constantItem = dataTable.data[index];
+          const perJenis = item.per_jenis || {};
+
+          const totalPagu = item.pagu || 0;
+          const totalRealisasi = item.realisasi || 0;
+          const totalPersen = item.persen_realisasi || 0;
+          const totalSisa = item.sisa || 0;
+
+          const pegawai = perJenis["51"] || {};
+          const barang = perJenis["52"] || {};
+          const modal = perJenis["53"] || {};
 
           return {
-            eselon: constantItem?.eselon || item.name,
-            revisiDipa: item.revisi_dipa,
-            deviasiHalIII: item.deviasi_hal3_dipa,
-            realisasiAnggaran: item.realisasi_anggaran,
-            belanjaKontraktual: item.belanja_kontraktual,
-            penyelesaianTagihan: item.penyelesaian_tagihan,
-            pengelolaanUPTUP: item.pengelolaan_up_tup,
-            capaianOutput: item.capaian_output,
-            dispensasiSPM: item.dispensasi_spm,
-            nilaiIKPA: item.nilai_ikpa,
+            title: constantItem?.eselon || item.name,
+            pagu: totalPagu,
+            realisasiNominal: totalRealisasi,
+            realisasiPersen: totalPersen,
+            blokir: totalSisa,
+            blokirPersen: ((totalSisa / totalPagu) * 100).toFixed(2),
+            targetNominal: totalPagu * 0.95,
+            targetPersen: 95,
           };
         });
-      if (data.success) {
-        result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
-        console.log(result);
-        setEs1Data(result);
-      }
-      let mappedCards = mapped
-        .filter((q) => q.eselon !== "Kementerian Ketenagakerjaan")
-        .map((item) => ({
-          title: item.eselon,
-          value: item.nilaiIKPA.toFixed(2),
-        }));
-      setCardsData(mappedCards);
+
+      console.log("cardsData mapped:", mapped);
+      setCardsData(mapped);
     } catch (error) {
-      console.error(error);
+      console.error("Error mapping data:", error);
     }
   };
 
@@ -174,7 +403,7 @@ function RealisasiPage() {
       payload.append("excel", formData.dokumen);
 
       const result = await apiRequest({
-        url: "/api/pa/ikpa/import",
+        url: "/api/pa/realization/import",
         method: "POST",
         options: {
           body: payload,
@@ -209,7 +438,7 @@ function RealisasiPage() {
       setFormData({
         dokumen: null,
       });
-      fetchTable();
+      // fetchTable();
     } catch (err) {
       console.error(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
@@ -230,7 +459,7 @@ function RealisasiPage() {
   }, {});
 
   useEffect(() => {
-    fetchTable();
+    // fetchTable();
     es1Options();
   }, [filter.searchKey, filter.eselonKey]);
 
@@ -252,106 +481,132 @@ function RealisasiPage() {
         />
       </div>
       <Title>Realisasi</Title>
-      <Paper style={{marginBottom: "1vw"}}>
+      <Paper style={{ marginBottom: "1vw" }}>
         <div className="grid grid-cols-3 gap-4 mb-4 mt-4">
-          <Card className="row-span-2 p-4">
+          {/* CARD INDEX 0 (TOTAL) */}
+          <Card className="row-span-2 p-4 bg-white shadow-md rounded-2xl border border-gray-100">
             <div className="flex flex-col items-center mb-3">
-              <span className="font-bold text-2xl text-center">REALISASI</span>
-            </div>
-            {/* Total Pagu */}
-            <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-              <span className="font-bold text-sm flex items-center">
-                <span className="w-1 h-4 bg-white mr-2"></span> TOTAL PAGU
+              <span className="font-bold text-2xl text-center text-gray-800">
+                REALISASI
               </span>
-              <span className="font-bold text-lg">Rp. 2.123</span>
+            </div>
+
+            {/* Total Pagu */}
+            <div className="bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] rounded-lg px-3 py-2 text-white flex flex-col m-1 shadow-sm">
+              <span className="font-semibold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2 rounded"></span> TOTAL
+                PAGU
+              </span>
+              <span className="font-bold text-lg">
+                Rp {(2123 / 1_000).toFixed(2)} M
+              </span>
             </div>
 
             {/* Blokir */}
-            <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-              <span className="font-bold text-sm flex items-center">
-                <span className="w-1 h-4 bg-white mr-2"></span> BLOKIR
+            <div className="bg-gradient-to-r from-[#EF4444] to-[#F87171] rounded-lg px-3 py-2 text-white flex flex-col m-1 shadow-sm">
+              <span className="font-semibold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2 rounded"></span> BLOKIR
               </span>
-              <span className="font-bold text-lg">Rp. 2.123 (20%)</span>
+              <span className="font-bold text-lg flex justify-between">
+                <span>Rp {(2123 / 1_000).toFixed(2)} M</span>
+                <span>(20%)</span>
+              </span>
             </div>
 
             {/* Realisasi */}
-            <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-lg px-3 py-2 text-white flex flex-col m-1">
-              <span className="font-bold text-sm flex items-center">
-                <span className="w-1 h-4 bg-white mr-2"></span> REALISASI
+            <div className="bg-gradient-to-r from-[#15803D] to-[#4ADE80] rounded-lg px-3 py-2 text-white flex flex-col m-1 shadow-sm">
+              <span className="font-semibold text-sm flex items-center">
+                <span className="w-1 h-4 bg-white mr-2 rounded"></span>{" "}
+                REALISASI
               </span>
-              <span className="font-bold text-lg">Rp. 2.123</span>
+              <span className="font-bold text-lg flex justify-between">
+                <span>Rp {(2123 / 1_000).toFixed(2)} M</span>
+                <span>▲ 58%</span>
+              </span>
             </div>
 
             {/* Target */}
-            <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-lg px-3 py-2 text-black flex flex-col m-1">
-              <span className="font-bold text-sm flex items-center">
-                <span className="w-1 h-4 bg-black mr-2"></span> TARGET
+            <div className="bg-gradient-to-r from-[#FACC15] to-[#FDE68A] rounded-lg px-3 py-2 text-gray-900 flex flex-col m-1 shadow-sm">
+              <span className="font-semibold text-sm flex items-center">
+                <span className="w-1 h-4 bg-black mr-2 rounded"></span> TARGET
               </span>
-              <span className="font-bold text-lg">22% | Rp. 88.239</span>
+              <span className="font-bold text-lg flex justify-between">
+                <span>Rp {(88239 / 1_000).toFixed(2)} M</span>
+                <span>▼ 22%</span>
+              </span>
             </div>
-            <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-lg text-center m-1">
-              <span className="font-bold text-sm text-white">
+
+            {/* Bulan */}
+            <div className="bg-gradient-to-b from-[#3B82F6] to-[#1E40AF] rounded-lg text-center m-1 py-1.5 shadow-sm">
+              <span className="font-semibold text-sm text-white">
                 Bulan{" "}
                 {moment().locale("id").subtract(1, "months").format("MMMM")}
               </span>
             </div>
 
+            {/* Footer */}
             <div className="flex flex-col items-center mb-3">
-              <span className="font-bold text-sm text-center mt-1">
+              <span className="font-semibold text-sm text-center mt-1 text-gray-700">
                 Kementerian Ketenagakerjaan
               </span>
             </div>
           </Card>
 
-          {/* Kartu detail per unit */}
-          {cardsData.map((item, index) => (
-            <Card className="p-3" key={index}>
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center h-10">
-                  <span className="font-bold text-base w-[300px]">
-                    {item.title}
-                  </span>
-                </div>
-              </div>
-              <div className="flex flex-col gap-1 text-sm text-white">
-                <div className="bg-gradient-to-r from-[#1B3B70] to-[#2D71FE] rounded-md px-2 py-1 font-bold">
-                  <div className="flex justify-between">
-                    <span>Pagu :</span>
-                    <span>Rp 1111</span>
+          {/* CARD PER UNIT (INDEX > 0) */}
+          {cardsData
+            ?.filter((_, index) => index !== 0)
+            .map((item, index) => {
+              const realisasiNaik = item.realisasiPersen >= 50; // contoh logika
+              const targetNaik = item.targetPersen >= 50;
+
+              return (
+                <Card
+                  key={index}
+                  className="p-4 bg-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl border border-gray-100"
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-semibold text-gray-800 text-[15px] tracking-tight">
+                      {item.title}
+                    </h3>
                   </div>
-                </div>
-                <div className="bg-gradient-to-r from-[#fc0303] to-[#f59a9a] rounded-md px-2 py-1 font-bold">
-                  <div className="flex justify-between">
-                    <span>Blokir :</span>
-                    <span>Rp 222 (22%)</span>
-                  </div>
-                </div>
-                <div className="bg-gradient-to-r from-[#00a86b] to-[#7fffd4] rounded-md px-2 py-1 font-bold">
-                  <div className="flex justify-between">
-                    <span>Realisasi Anggaran :</span>
-                    <span className="text-green-400">
-                      {item.realisasi}%{" "}
+
+                  <div className="flex flex-col gap-2 text-sm font-medium">
+                    {/* Pagu */}
+                    <div className="bg-gradient-to-r from-[#1E3A8A] to-[#3B82F6] text-white rounded-lg px-3 py-2 flex justify-between">
+                      <span>Pagu:</span>
+                      <span>Rp {(item.pagu / 1_000_000_000).toFixed(2)} M</span>
+                    </div>
+
+                    {/* Blokir */}
+                    <div className="bg-gradient-to-r from-[#EF4444] to-[#F87171] text-white rounded-lg px-3 py-2 flex justify-between">
+                      <span>Blokir:</span>
                       <span>
-                        {item.realisasiDelta > 0 ? "▲" : "▼"}{" "}
-                        {item.realisasiDelta}%
+                        Rp {(item.blokir / 1_000_000_000).toFixed(2)} M (
+                        {item.blokirPersen}%)
                       </span>
-                    </span>
-                  </div>
-                </div>
-                <div className="bg-gradient-to-r from-[#ffd724] to-[#f5e6a6] rounded-md px-2 py-1 font-bold">
-                  <div className="flex justify-between">
-                    <span className="text-black">Target Anggaran :</span>
-                    <span className="text-red-500">
-                      {item.target}%{" "}
+                    </div>
+
+                    {/* Realisasi */}
+                    <div className="bg-gradient-to-r from-[#15803D] to-[#4ADE80] text-white rounded-lg px-3 py-2 flex justify-between">
+                      <span>Realisasi:</span>
                       <span>
-                        {item.targetDelta > 0 ? "▲" : "▼"} {item.targetDelta}%
+                        Rp {(item.realisasiNominal / 1_000_000_000).toFixed(2)}{" "}
+                        M {realisasiNaik ? "▲" : "▼"} {item.realisasiPersen}%
                       </span>
-                    </span>
+                    </div>
+
+                    {/* Target */}
+                    <div className="bg-gradient-to-r from-[#FACC15] to-[#FDE68A] text-gray-900 rounded-lg px-3 py-2 flex justify-between">
+                      <span>Target:</span>
+                      <span>
+                        Rp {(item.targetNominal / 1_000_000_000).toFixed(2)} M{" "}
+                        {targetNaik ? "▲" : "▼"} {item.targetPersen}%
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </Card>
-          ))}
+                </Card>
+              );
+            })}
         </div>
       </Paper>
       <Paper
@@ -419,139 +674,136 @@ function RealisasiPage() {
             </Button> */}
           </div>
         </div>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHeader>
-            {/* Baris pertama */}
-            <TableRow>
-              {columns.map((col, index) =>
-                col.children ? (
-                  <TableCell
-                    key={index}
-                    align="center"
-                    colSpan={col.children.length}
-                  >
-                    {col.label}
-                  </TableCell>
-                ) : (
-                  <TableCell
-                    key={index}
-                    align="center"
-                    rowSpan={col.rowSpan || 1}
-                  >
-                    {col.label}
-                  </TableCell>
-                )
-              )}
-            </TableRow>
-
-            {/* Baris kedua */}
-            <TableRow>
-              {columns.map((col) =>
-                col.children
-                  ? col.children.map((child, idx) => (
-                      <TableCell key={child.key || idx} align="center">
-                        {child.label}
-                      </TableCell>
-                    ))
-                  : null
-              )}
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {Object.entries(groupedData).map(([eselonCode, group], index) => (
-              <React.Fragment key={eselonCode}>
-                {/* Row utama (group) */}
-                {group.parent && (
-                  <TableRow
-                    sx={{ backgroundColor: "#f0f0f0", fontWeight: "bold" }}
-                  >
-                    {/* <TableCell align="center">
-                      {group.parent.eselon_code}
-                    </TableCell> */}
-                    <TableCell align="center">{group.parent.name}</TableCell>
-                    <TableCell align="center">
-                      {group.parent.revisi_dipa}
+        <div className="overflow-x-auto max-w-full md:max-w-[90vw] lg:max-w-[83vw]">
+          <Table className="min-w-max w-full border-collapse" sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHeader>
+              {/* Baris pertama */}
+              <TableRow>
+                {columns.map((col, index) =>
+                  col.children ? (
+                    <TableCell
+                      key={index}
+                      align="center"
+                      colSpan={col.children.length}
+                    >
+                      {col.label}
                     </TableCell>
-                    <TableCell align="center">
-                      {group.parent.deviasi_hal3_dipa}
+                  ) : (
+                    <TableCell
+                      key={index}
+                      align="center"
+                      rowSpan={col.rowSpan || 1}
+                    >
+                      {col.label}
                     </TableCell>
-                    <TableCell align="center">
-                      {group.parent.realisasi_anggaran}
-                    </TableCell>
-                    <TableCell align="center">
-                      {group.parent.belanja_kontraktual}
-                    </TableCell>
-                    <TableCell align="center">
-                      {group.parent.penyelesaian_tagihan}
-                    </TableCell>
-                    <TableCell align="center">
-                      {group.parent.pengelolaan_up_tup}
-                    </TableCell>
-                    <TableCell align="center">
-                      {group.parent.capaian_output}
-                    </TableCell>
-                    <TableCell align="center">
-                      {group.parent.dispensasi_spm}
-                    </TableCell>
-                    <TableCell align="center">
-                      <div
-                        className={`p-1 rounded font-semibold ${getIKPAColor(
-                          group.parent.nilai_ikpa
-                        )}`}
-                      >
-                        {group.parent.nilai_ikpa}
-                      </div>
-                    </TableCell>
-                    <TableCell align="center">
-                      {moment(group.parent.tanggal_sumber_data).format(
-                        "YYYY/MM/DD"
-                      )}
-                    </TableCell>
-                  </TableRow>
+                  )
                 )}
+              </TableRow>
 
-                {/* Row anak (satker) */}
-                {group.children.map((row, idx) => (
-                  <TableRow key={row.id}>
-                    {/* <TableCell align="center">{row.satker_code}</TableCell> */}
-                    <TableCell align="center">{row.name}</TableCell>
-                    <TableCell align="center">{row.revisi_dipa}</TableCell>
-                    <TableCell align="center">
-                      {row.deviasi_hal3_dipa}
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.realisasi_anggaran}
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.belanja_kontraktual}
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.penyelesaian_tagihan}
-                    </TableCell>
-                    <TableCell align="center">
-                      {row.pengelolaan_up_tup}
-                    </TableCell>
-                    <TableCell align="center">{row.dispensasi_spm}</TableCell>
-                    <TableCell align="center">{row.capaian_output}</TableCell>
-                    <TableCell align="center">
-                      <div
-                        className={`p-1 rounded font-semibold ${getIKPAColor(
-                          row.nilai_ikpa
-                        )}`}
-                      >
-                        {row.nilai_ikpa}
-                      </div>
-                    </TableCell>
-                    <TableCell align="center">
-                      {moment(row.tanggal_sumber_data).format("YYYY/MM/DD")}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
+              {/* Baris kedua */}
+              <TableRow>
+                {columns.map((col) =>
+                  col.children
+                    ? col.children.map((child, idx) => (
+                        <TableCell key={child.key || idx} align="center">
+                          {child.label}
+                        </TableCell>
+                      ))
+                    : null
+                )}
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {dataTables.map((item, index) => (
+                <TableRow key={item.eselon_code}>
+                  {/* Kolom Eselon */}
+                  <TableCell align="left" sx={{ fontWeight: "bold" }}>
+                    {item.name}
+                  </TableCell>
+
+                  {/* --- Kolom Total --- */}
+                  <TableCell align="right">
+                    {item.pagu.toLocaleString("id-ID")}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.realisasi.toLocaleString("id-ID")}
+                    <br />
+                    <span style={{ color: "#888", fontSize: "1em" }}>
+                      ({item.persen_realisasi.toFixed(2)}%)
+                    </span>
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.sisa.toLocaleString("id-ID")}
+                  </TableCell>
+
+                  {/* --- Kolom Pegawai (jenis_belanja = 51) --- */}
+                  <TableCell align="right">
+                    {item.per_jenis["51"]?.pagu?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["51"] ? (
+                      <>
+                        {item.per_jenis["51"].realisasi.toLocaleString("id-ID")}
+                        <br />
+                        <span style={{ color: "#888", fontSize: "1em" }}>
+                          ({item.per_jenis["51"].persentase_real}%)
+                        </span>
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["51"]?.sisa?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+
+                  {/* --- Kolom Barang (jenis_belanja = 52) --- */}
+                  <TableCell align="right">
+                    {item.per_jenis["52"]?.pagu?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["52"] ? (
+                      <>
+                        {item.per_jenis["52"].realisasi.toLocaleString("id-ID")}
+                        <br />
+                        <span style={{ color: "#888", fontSize: "1em" }}>
+                          ({item.per_jenis["52"].persentase_real}%)
+                        </span>
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["52"]?.sisa?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+
+                  {/* --- Kolom Modal (jenis_belanja = 53) --- */}
+                  <TableCell align="right">
+                    {item.per_jenis["53"]?.pagu?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["53"] ? (
+                      <>
+                        {item.per_jenis["53"].realisasi.toLocaleString("id-ID")}
+                        <br />
+                        <span style={{ color: "#888", fontSize: "1em" }}>
+                          ({item.per_jenis["53"].persentase_real}%)
+                        </span>
+                      </>
+                    ) : (
+                      "-"
+                    )}
+                  </TableCell>
+                  <TableCell align="right">
+                    {item.per_jenis["53"]?.sisa?.toLocaleString("id-ID") ?? "-"}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Paper>
       <Modal
         open={isOpenModal}

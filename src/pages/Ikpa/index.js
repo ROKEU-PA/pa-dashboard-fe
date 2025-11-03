@@ -23,18 +23,35 @@ import User from "@/components/User";
 import { useBudgetExecution } from "../BudgetExecution/useBudgetExecution";
 
 const columns = [
-  { key: "kode_satker", label: "Kode Satker" },
-  { key: "eselon", label: "Eselon 1/Satker" },
-  { key: "revisi_dipa", label: "Revisi DIPA" },
-  { key: "deviasi_hal3_dipa", label: "Deviasi Hal III Dipa" },
-  { key: "realisasi_anggaran", label: "Realisasi Anggaran" },
-  { key: "belanja_kontraktual", label: "Belanja Kontraktual" },
-  { key: "penyelesaian_tagihan", label: "Penyelesaian Tagihan" },
-  { key: "pengelolaan_up_tup", label: "Pengelolaan UP TUP" },
-  { key: "dispensasi_spm", label: "Dispensasi SPM" },
-  { key: "capaian_output", label: "Capaian Output" },
-  { key: "nilai_ikpa", label: "Nilai IKPA" },
-  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data" },
+  { key: "kode_satker", label: "Kode Satker", rowSpan: 3 },
+  {
+    label: "Eselon",
+    key: "eselon",
+    rowSpan: 2,
+  },
+  {
+    label: "Kualitas Perencanaan Anggaran",
+    children: [
+      { key: "revisi_dipa", label: "Revisi DIPA" },
+      { key: "deviasi_hal3_dipa", label: "Deviasi Hal III Dipa" },
+    ],
+  },
+  {
+    label: "Kualitas Pelaksanaan Anggaran",
+    children: [
+      { key: "realisasi_anggaran", label: "Realisasi Anggaran" },
+      { key: "belanja_kontraktual", label: "Belanja Kontraktual" },
+      { key: "penyelesaian_tagihan", label: "Penyelesaian Tagihan" },
+      { key: "pengelolaan_up_tup", label: "Pengelolaan UP TUP" },
+    ],
+  },
+  {
+    label: "Kualitas Hasil Pelaksanaan Anggaran",
+    children: [{ key: "capaian_output", label: "Capaian Output" }],
+  },
+  { key: "nilai_ikpa", label: "Nilai IKPA", rowSpan: 10},
+  { key: "dispensasi_spm", label: "Dispensasi SPM", rowSpan: 11 },
+  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data", rowSpan: 12 },
 ];
 
 function IkpaPage() {
@@ -184,7 +201,9 @@ function IkpaPage() {
   return (
     <div>
       <div className="flex justify-between">
-        <Breadcrumbs items={[{ name: "Pelaksanaan Anggaran / IKPA", path: "/ikpa" }]} />
+        <Breadcrumbs
+          items={[{ name: "Pelaksanaan Anggaran / IKPA", path: "/ikpa" }]}
+        />
         <User
           name={userData?.name}
           previlege={userData?.role?.toUpperCase()}
@@ -263,16 +282,38 @@ function IkpaPage() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHeader>
             <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  component="th"
-                  scope="col"
-                  align="center"
-                >
-                  {col.label}
-                </TableCell>
-              ))}
+              {columns.map((col, index) =>
+                col.children ? (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    colSpan={col.children.length}
+                  >
+                    {col.label}
+                  </TableCell>
+                ) : (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    rowSpan={col.rowSpan || 1}
+                  >
+                    {col.label}
+                  </TableCell>
+                )
+              )}
+            </TableRow>
+
+            {/* Baris kedua */}
+            <TableRow>
+              {columns.map((col) =>
+                col.children
+                  ? col.children.map((child, idx) => (
+                      <TableCell key={child.key || idx} align="center">
+                        {child.label}
+                      </TableCell>
+                    ))
+                  : null
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -309,9 +350,6 @@ function IkpaPage() {
                       {group.parent.capaian_output}
                     </TableCell>
                     <TableCell align="center">
-                      {group.parent.dispensasi_spm}
-                    </TableCell>
-                    <TableCell align="center">
                       <div
                         className={`p-1 rounded font-semibold ${getIKPAColor(
                           group.parent.nilai_ikpa
@@ -321,9 +359,33 @@ function IkpaPage() {
                       </div>
                     </TableCell>
                     <TableCell align="center">
+                      {group.parent.dispensasi_spm}
+                    </TableCell>
+                    <TableCell align="center">
                       {moment(group.parent.tanggal_sumber_data).format(
                         "YYYY/MM/DD"
                       )}
+                    </TableCell>
+                  </TableRow>
+                )}
+                {group.parent && (
+                  <TableRow
+                    sx={{ backgroundColor: "#feffebff", fontWeight: "bold" }}
+                  >
+                    <TableCell align="center" colSpan="2">
+                    {"Nilai Aspek"}
+                    </TableCell>
+                    <TableCell align="center" colSpan="2" >
+                      {Math.round(((group.parent.revisi_dipa + group.parent.deviasi_hal3_dipa)/2) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="4" >
+                      {Math.round(((group.parent.realisasi_anggaran + group.parent.belanja_kontraktual + group.parent.penyelesaian_tagihan + group.parent.pengelolaan_up_tup)/4) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="1" >
+                      {Math.round((group.parent.capaian_output) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="3" >
+                      {""}
                     </TableCell>
                   </TableRow>
                 )}
@@ -351,13 +413,15 @@ function IkpaPage() {
                     </TableCell>
                     <TableCell align="center">{row.dispensasi_spm}</TableCell>
                     <TableCell align="center">{row.capaian_output}</TableCell>
-                    <TableCell align="center"><div
+                    <TableCell align="center">
+                      <div
                         className={`p-1 rounded font-semibold ${getIKPAColor(
                           row.nilai_ikpa
                         )}`}
                       >
                         {row.nilai_ikpa}
-                      </div></TableCell>
+                      </div>
+                    </TableCell>
                     <TableCell align="center">
                       {moment(row.tanggal_sumber_data).format("YYYY/MM/DD")}
                     </TableCell>

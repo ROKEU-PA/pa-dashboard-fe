@@ -36,6 +36,7 @@ import {
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
+import PendingDocumentsModal from "./pendingDocumentsModal";
 
 function ListSatuanKerjaPage() {
   const { menuName, listMenu, userData } = useContext(AppContext);
@@ -89,6 +90,7 @@ function ListSatuanKerjaPage() {
   const [selectOpenStatus, setSelectOpenStatus] = useState(false);
   const [selectOpenJenis, setSelectOpenJenis] = useState(false);
   const [jenisFile, setJenisFile] = useState("file");
+  const [showModal, setShowModal] = useState(false);
 
   const getFileExtension = (url) => {
     try {
@@ -141,21 +143,8 @@ function ListSatuanKerjaPage() {
     });
   };
 
-  const getAcceptedFileType = (typeId) => {
-    const lower = typeId?.toLowerCase();
-    const rarTypes = [
-      "gup",
-      "ptup",
-      "gup_kkp",
-      "gup_pnbp",
-      "gup_rm",
-      "ptup_pnbp",
-      "ptup_rm",
-    ];
-    if (rarTypes.includes(lower)) {
-      return ".rar";
-    }
-    return ".pdf";
+  const getAcceptedFileType = () => {
+    return ".pdf, .rar, .zip";
   };
 
   const isFileSizeValid = (file, maxSizeMB = 100) => {
@@ -511,7 +500,7 @@ function ListSatuanKerjaPage() {
 
       if (isAnyFile && formData.dokumen) {
         const file = formData.dokumen;
-        const acceptedExtension = getAcceptedFileType(formData.type);
+        const acceptedExtension = getAcceptedFileType();
         const fileName = file.name?.toLowerCase();
 
         if (!fileName.endsWith(acceptedExtension)) {
@@ -575,12 +564,12 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  // console.log(formData);
   useEffect(
     () => {
       fetchTable();
       fetchType();
       setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+      setShowModal(true);
     },
     [
       filter.tahun,
@@ -933,7 +922,11 @@ function ListSatuanKerjaPage() {
                     if (col.key === "jml_hal") {
                       return (
                         <TableCell key={col.key} align="center">
-                          {row.jml_hal === 0 ? "-" : row.jml_hal}
+                          {typeof row.jml_hal !== "undefined" ||
+                          row.jml_hal !== null ||
+                          row.jml_hal === 0
+                            ? "-"
+                            : row.jml_hal}
                         </TableCell>
                       );
                     }
@@ -1231,7 +1224,7 @@ function ListSatuanKerjaPage() {
 
           {jenisFile === "file" && (
             <FileInput
-              accept={getAcceptedFileType(formData?.type_id)}
+              accept={getAcceptedFileType()}
               label="Dokumen"
               name="dokumen"
               onChange={handleChange}
@@ -1599,6 +1592,11 @@ function ListSatuanKerjaPage() {
           </form>
         </div>
       </Modal>
+      <PendingDocumentsModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        code={currentMenu?.code}
+      />
     </div>
   );
 }

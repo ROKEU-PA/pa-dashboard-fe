@@ -1,4 +1,4 @@
-import React, { useContext, useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -6,34 +6,16 @@ import { AppContext } from "@/contexts/AppContext";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import Card from "@/components/Card";
-import { color } from "echarts";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Title from "@/components/Title";
 import { User } from "lucide-react";
+import { apiRequest } from "@/services/APIHelper";
 
 export default function LLATPage() {
   const { userData } = useContext(AppContext);
   const calendarRef = useRef(null);
 
-  const [events, setEvents] = useState([
-    {
-      id: "e1",
-      date: "2025-10-07",
-      title: "Pendaftaran Kontrak/Addendum s.d. 30 Sep 25",
-    },
-    { id: "e2", date: "2025-10-07", title: "SPM-LS BAST/BAPP s.d. 30 Sep 25" },
-    {
-      id: "e3",
-      date: "2025-10-15",
-      title:
-        "Transaksi keuangan dan BMN, serta Rekonsiliasi UAKPA/UAKPA BUN s.d. 30 Sep 25",
-    },
-    {
-      id: "e4",
-      date: "2025-10-22",
-      title: "SPM-LS BAST/BAPP 1 s.d. 15 Okt 25",
-    },
-  ]);
+  const [events, setEvents] = useState([]);
 
   const [selectedDate, setSelectedDate] = useState(null);
   const [newNote, setNewNote] = useState("");
@@ -45,8 +27,8 @@ export default function LLATPage() {
       "0"
     )}`;
   });
+  const colors = ["#E3F2FD", "#E8F5E9", "#FFF9C4", "#FCE4EC", "#D1C4E9"];
 
-  // handler ketika user klik tanggal
   const handleDateClick = (info) => {
     setSelectedDate(info.dateStr);
   };
@@ -62,60 +44,126 @@ export default function LLATPage() {
     setSelectedDate(null);
   };
 
-  const handleAddNote = () => {
+  const handleAddNote = async () => {
     if (!selectedDate || !newNote.trim()) return;
 
-    const id = `e${Date.now()}`;
+    const existingEvent = events.find((e) => e.date === selectedDate);
+    const existingColor = existingEvent?.color;
 
-    setEvents((prev) => {
-      const next = [...prev, { id, date: selectedDate, title: newNote.trim() }];
-      return next;
-    });
+    const usedColors = [...new Set(events.map((e) => e.color))];
+    const availableColors = colors.filter((c) => !usedColors.includes(c));
+    const nextColor =
+      availableColors[0] || colors[events.length % colors.length];
 
-    setNewNote("");
+    const colorToUse = existingColor || nextColor;
+
+    // --- optimistic update ---
+    const optimisticId = `temp-${Date.now()}`;
+    const optimisticEvent = {
+      id: optimisticId,
+      date: selectedDate,
+      title: newNote.trim(),
+      color: colorToUse,
+    };
+    setEvents((prev) => [...prev, optimisticEvent]);
+    try {
+      const payload = {
+        date: selectedDate,
+        note: newNote.trim(),
+        user_id: userData?.id || null,
+        color: colorToUse,
+      };
+
+      const result = await apiRequest({
+        url: "/api/calendar/create",
+        method: "POST",
+        options: { body: payload },
+      });
+
+      if (result?.success) {
+        const saved = result.data;
+        setEvents((prev) =>
+          prev.map((ev) =>
+            ev.id === optimisticId
+              ? {
+                  id: saved.id?.toString() || saved.id,
+                  date: saved.date,
+                  title: saved.note ?? saved.title ?? newNote.trim(),
+                  color: saved.color ?? colorToUse,
+                  ...saved,
+                }
+              : ev
+          )
+        );
+      } else {
+        setEvents((prev) => prev.filter((ev) => ev.id !== optimisticId));
+        console.error("gagal simpan note:", result);
+        alert("Gagal menyimpan catatan.");
+      }
+    } catch (err) {
+      setEvents((prev) => prev.filter((ev) => ev.id !== optimisticId));
+      console.error(err);
+      alert("Terjadi kesalahan saat menyimpan.");
+    } finally {
+      setNewNote("");
+    }
   };
 
-  const colors = ["#E3F2FD", "#E8F5E9", "#FFF9C4", "#FCE4EC"];
-
-  // semua event di bulan currentMonth
   const monthlyEvents = events.filter((e) => e.date.startsWith(currentMonth));
 
-  // kelompokkan events by date
   const groupedEvents = monthlyEvents.reduce((acc, e) => {
     if (!acc[e.date]) acc[e.date] = [];
-    acc[e.date].push(e.title);
+    acc[e.date].push(e.note);
     return acc;
   }, {});
 
-  // buat daftar tanggal unik terurut
   const groupedEntriesSorted = Object.keys(groupedEvents)
     .sort((a, b) => new Date(a) - new Date(b))
     .map((date) => ({ date, notes: groupedEvents[date] }));
 
-  // buat peta warna berdasarkan urutan tanggal
   const colorMap = {};
-  groupedEntriesSorted.forEach((entry, idx) => {
-    colorMap[entry.date] = colors[idx % colors.length];
+  events.forEach((e) => {
+    if (!colorMap[e.date]) {
+      colorMap[e.date] = e.color || "#E3F2FD"; // fallback kalau kosong
+    }
   });
 
-  // mapping events ke calendar (warna sesuai tanggal)
   const calendarEvents = events.map((e) => ({
     id: e.id,
-    title: e.title,
+    title: e.note,
     start: e.date,
     allDay: true,
-    backgroundColor: colorMap[e.date] || "#BBDEFB",
+    backgroundColor: e.color,
     borderColor: colorMap[e.date] || "#BBDEFB",
     textColor: "#000000",
   }));
+
+  const fetchNotes = async (month) => {
+    try {
+      const response = await apiRequest({
+        url: `/api/calendar?month=${month}`,
+      });
+      if (response.success) {
+        setEvents(response.data);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (currentMonth) {
+      fetchNotes(currentMonth);
+    }
+  }, [currentMonth]);
 
   return (
     <div>
       <div className="flex justify-between">
         <Breadcrumbs
-          items={[{ name: "Pelaksanaan Anggara / LLAT", path: "/llat" }]}
+          items={[{ name: "Pelaksanaan Anggaran / LLAT", path: "/llat" }]}
         />
-        <User name={"Test"} previlege={"Administrator"} />
+        <User name={userData?.name} previlege={userData?.role?.toUpperCase()} />
       </div>
       <Title>Langkah - Langkah Akhir Tahun</Title>
       <div className="flex gap-6">
@@ -152,7 +200,7 @@ export default function LLATPage() {
               <div
                 key={date}
                 className="p-3 rounded-xl shadow-sm border"
-                style={{ backgroundColor: colors[idx % colors.length] }}
+                style={{ backgroundColor: colorMap[date] || "#E3F2FD" }}
               >
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-gray-700">
@@ -178,7 +226,6 @@ export default function LLATPage() {
             <p className="text-gray-400">Belum ada catatan bulan ini.</p>
           )}
 
-          {/* Tambah catatan: hanya admin atau pic, dan pilih tanggal terlebih dahulu */}
           {(userData?.role === "admin" || userData?.role === "pic") && (
             <div className="mt-4">
               <h3 className="text-sm text-gray-600 mb-2">
