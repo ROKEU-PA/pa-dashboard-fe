@@ -139,17 +139,18 @@ function TandaTerimaPage() {
       >
         <h3>Tanda Terima</h3>
         <br></br>
-        <div
+        <div 
+        className="flex flex-col md:flex-row gap-2 mb-4 overflow-x-auto text-sm md:text-base"
           style={{
             display: "flex",
-            gap: 10,
+            gap: 20,
             marginBottom: "1rem",
             justifyContent: "left",
           }}
         >
           <Input
             label="Search"
-            style={{ width: "200px" }}
+            className="w-full md:w-[200px]"
             name="Search"
             value={filter.searchKey}
             onChange={(e) => handleDateChange("searchKey", e.target.value)}
@@ -181,56 +182,57 @@ function TandaTerimaPage() {
                     value: q.kode_satker,
                   }))
             }
-            style={{ width: "400px" }}
+            className="w-full md:w-[400px]"
             isOpen={selectOpen}
             setIsOpen={setSelectOpen}
             disabled={userData?.role === "user"}
           />
         </div>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHeader>
-            <TableRow>
-              {columnsTT.map((col) => (
-                <TableCell
-                  key={col.key}
-                  component="th"
-                  scope="col"
-                  align="center"
-                  style={{ cursor: col.sortable ? "pointer" : "default" }}
-                >
-                  {col.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dataReceiptTable.map((row, index) => (
-              <TableRow key={index}>
-                {columnsTT.map((col) => {
-                  if (col.key === "status") {
+        <div className="overflow-x-auto w-full text-xs md:text-sm">
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHeader>
+              <TableRow>
+                {columnsTT.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    component="th"
+                    scope="col"
+                    align="center"
+                    style={{ cursor: col.sortable ? "pointer" : "default" }}
+                  >
+                    {col.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dataReceiptTable.map((row, index) => (
+                <TableRow key={index}>
+                  {columnsTT.map((col) => {
+                    if (col.key === "status") {
+                      return (
+                        <TableCell key={col.key} align="center">
+                          {row?.[col.key] === "approved"
+                            ? "Telah Diuji"
+                            : row?.[col.key] === "reject"
+                            ? "Ditolak"
+                            : row?.[col.key] === "sp2d"
+                            ? "SP2D"
+                            : "Baru"}
+                        </TableCell>
+                      );
+                    }
                     return (
                       <TableCell key={col.key} align="center">
-                        {row?.[col.key] === "approved"
-                          ? "Telah Diuji"
-                          : row?.[col.key] === "reject"
-                          ? "Ditolak"
-                          : row?.[col.key] === "sp2d"
-                          ? "SP2D"
-                          : "Baru"}
+                        {row[col.key] ?? "-"}
                       </TableCell>
                     );
-                  }
-                  return (
-                    <TableCell key={col.key} align="center">
-                      {row[col.key] ?? "-"}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
         <TablePagination
           page={page}
           totalPages={totalPages}
@@ -249,48 +251,50 @@ function TandaTerimaPage() {
       >
         <h3>Status SPP Unit Kerja</h3>
         <br></br>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHeader>
-            <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  component="th"
-                  scope="col"
-                  align="center"
-                  style={{ cursor: col.sortable ? "pointer" : "default" }}
-                >
-                  {col.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {(userData?.role === "user"
-              ? dataTable.filter(
-                  (row) => row.kode_satker === userData?.biro_code
-                )
-              : dataTable
-            ).map((row, index) => (
-              <TableRow key={index}>
-                {columns.map((col) => {
-                  if (col.key === "unit_satker") {
+        <div className="overflow-x-auto w-full text-xs md:text-sm">
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHeader>
+              <TableRow>
+                {columns.map((col) => (
+                  <TableCell
+                    key={col.key}
+                    component="th"
+                    scope="col"
+                    align="center"
+                    style={{ cursor: col.sortable ? "pointer" : "default" }}
+                  >
+                    {col.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {(userData?.role === "user"
+                ? dataTable.filter(
+                    (row) => row.kode_satker === userData?.biro_code
+                  )
+                : dataTable
+              ).map((row, index) => (
+                <TableRow key={index}>
+                  {columns.map((col) => {
+                    if (col.key === "unit_satker") {
+                      return (
+                        <TableCell key={col.key} align="left">
+                          {row?.["unit_satker"]}
+                        </TableCell>
+                      );
+                    }
                     return (
-                      <TableCell key={col.key} align="left">
-                        {row?.["unit_satker"]}
+                      <TableCell key={col.key} align="center">
+                        {row[col.key] ?? "-"}
                       </TableCell>
                     );
-                  }
-                  return (
-                    <TableCell key={col.key} align="center">
-                      {row[col.key] ?? "-"}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </Paper>
     </div>
   );

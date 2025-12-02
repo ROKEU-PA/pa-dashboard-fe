@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
-import AppLayout from "./Layouts/AppLayout";
+import AppLayout from "./layouts/AppLayout";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
 import CompilationPage from "./pages/Compilation";

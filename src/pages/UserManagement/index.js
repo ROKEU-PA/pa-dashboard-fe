@@ -234,7 +234,7 @@ function UserManagementPage() {
         elevation={3}
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }} className="text-sm md:text-base gap-2">
           <Button
             onClick={() => {
               setIsOpenModal(true);
@@ -255,7 +255,7 @@ function UserManagementPage() {
           </Button>
           <div
             style={{
-              display: "flex",
+              display: "flex ",
               float: "right",
             }}
           >
@@ -267,137 +267,139 @@ function UserManagementPage() {
               onChange={(e) => setSearchKey(e.target.value)}
             />
           </div>
-        </div>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHeader>
-            <TableRow>
-              {columns.map((data) => (
-                <TableCell
-                  component="th"
-                  scope="col"
-                  align="center"
-                  key={data.key}
-                >
-                  {data.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tableData?.map((row) => (
-              <TableRow
-                key={row.no}
-                sx={{
-                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
-                }}
-              >
-                <TableCell component="th" scope="row" align="center">
-                  {row?.username}
-                </TableCell>
-                <TableCell align="center">{row?.access}</TableCell>
-                <TableCell align="center">{row?.name}</TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={
-                      row.last_activity &&
-                      moment(row.last_activity).isAfter(
-                        moment().subtract(5, "minutes")
-                      )
-                        ? "Online"
-                        : "Offline"
-                    }
-                    style={{
-                      color:
-                        row.last_activity &&
-                        moment(row.last_activity).isAfter(
-                          moment().subtract(5, "minutes")
-                        )
-                          ? "green"
-                          : "white",
-                      fontWeight: "bold",
-                      backgroundColor:
-                        row.last_activity &&
-                        moment(row.last_activity).isAfter(
-                          moment().subtract(5, "minutes")
-                        )
-                          ? "#E7FEE7"
-                          : "#858585ff",
-                    }}
-                  />{" "}
-                </TableCell>
-                <TableCell align="center">
-                  <Chip
-                    label={row?.["privilege"]?.toUpperCase()}
-                    style={{
-                      backgroundColor:
-                        row?.["privilege"] === "super_admin"
-                          ? "#858585ff"
-                          : row?.["privilege"] === "admin"
-                          ? "#fef5c3ff"
-                          : row?.["privilege"] === "user"
-                          ? "#cee3f9ff"
-                          : row?.["privilege"] === "pic"
-                          ? "#E7FEE7"
-                          : row?.["privilege"] === "guest"
-                          ? "#FEDCE1"
-                          : "#000000",
-                      color:
-                        row?.["privilege"] === "super_admin"
-                          ? "#000000"
-                          : row?.["privilege"] === "admin"
-                          ? "#FFD700"
-                          : row?.["privilege"] === "user"
-                          ? "#007BFF"
-                          : row?.["privilege"] === "pic"
-                          ? "#28A745"
-                          : row?.["privilege"] === "guest"
-                          ? "#FF4C4C"
-                          : "#FFFFFF",
-                    }}
-                  />{" "}
-                </TableCell>
-                <TableCell
-                  align="center"
-                  style={{
-                    display: "flex",
-                    gap: "10px",
-                    justifyContent: "center",
+        </div >
+        <div className="overflow-x-auto text-sm md:text-base">
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHeader>
+              <TableRow>
+                {columns.map((data) => (
+                  <TableCell
+                    component="th"
+                    scope="col"
+                    align="center"
+                    key={data.key}
+                  >
+                    {data.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {tableData?.map((row) => (
+                <TableRow
+                  key={row.no}
+                  sx={{
+                    "&:lastChild td, &:lastChild th": { borderBottom: "none" },
                   }}
                 >
-                  <Button
-                    onClick={() => {
-                      setVariantModal("Detail");
-                      setFormData(row);
-                      setIsOpenModal(true);
+                  <TableCell component="th" scope="row" align="center">
+                    {row?.username}
+                  </TableCell>
+                  <TableCell align="center">{row?.access}</TableCell>
+                  <TableCell align="center">{row?.name}</TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={
+                        row.last_activity &&
+                        moment(row.last_activity).isAfter(
+                          moment().subtract(5, "minutes")
+                        )
+                          ? "Online"
+                          : "Offline"
+                      }
+                      style={{
+                        color:
+                          row.last_activity &&
+                          moment(row.last_activity).isAfter(
+                            moment().subtract(5, "minutes")
+                          )
+                            ? "green"
+                            : "white",
+                        fontWeight: "bold",
+                        backgroundColor:
+                          row.last_activity &&
+                          moment(row.last_activity).isAfter(
+                            moment().subtract(5, "minutes")
+                          )
+                            ? "#E7FEE7"
+                            : "#858585ff",
+                      }}
+                    />{" "}
+                  </TableCell>
+                  <TableCell align="center">
+                    <Chip
+                      label={row?.["privilege"]?.toUpperCase()}
+                      style={{
+                        backgroundColor:
+                          row?.["privilege"] === "super_admin"
+                            ? "#858585ff"
+                            : row?.["privilege"] === "admin"
+                            ? "#fef5c3ff"
+                            : row?.["privilege"] === "user"
+                            ? "#cee3f9ff"
+                            : row?.["privilege"] === "pic"
+                            ? "#E7FEE7"
+                            : row?.["privilege"] === "guest"
+                            ? "#FEDCE1"
+                            : "#000000",
+                        color:
+                          row?.["privilege"] === "super_admin"
+                            ? "#000000"
+                            : row?.["privilege"] === "admin"
+                            ? "#FFD700"
+                            : row?.["privilege"] === "user"
+                            ? "#007BFF"
+                            : row?.["privilege"] === "pic"
+                            ? "#28A745"
+                            : row?.["privilege"] === "guest"
+                            ? "#FF4C4C"
+                            : "#FFFFFF",
+                      }}
+                    />{" "}
+                  </TableCell>
+                  <TableCell
+                    align="center"
+                    style={{
+                      display: "flex",
+                      gap: "10px",
+                      justifyContent: "center",
                     }}
-                    style={{ width: "fit-content" }}
-                    variant="primary"
-                    icon={<UserRoundSearch size={18} />}
-                  ></Button>
-                  <Button
-                    onClick={() => {
-                      setVariantModal("Edit");
-                      setFormData(row);
-                      setIsOpenModal(true);
-                    }}
-                    style={{ width: "fit-content" }}
-                    variant="secondary"
-                    icon={<Settings size={18} />}
-                  ></Button>
-                  <Button
-                    onClick={() => {
-                      setOpenDialog(true);
-                      setFormData(row);
-                    }}
-                    style={{ width: "fit-content" }}
-                    variant="danger"
-                    icon={<Trash2 size={18} />}
-                  ></Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                  >
+                    <Button
+                      onClick={() => {
+                        setVariantModal("Detail");
+                        setFormData(row);
+                        setIsOpenModal(true);
+                      }}
+                      style={{ width: "fit-content" }}
+                      variant="primary"
+                      icon={<UserRoundSearch size={18} />}
+                    ></Button>
+                    <Button
+                      onClick={() => {
+                        setVariantModal("Edit");
+                        setFormData(row);
+                        setIsOpenModal(true);
+                      }}
+                      style={{ width: "fit-content" }}
+                      variant="secondary"
+                      icon={<Settings size={18} />}
+                    ></Button>
+                    <Button
+                      onClick={() => {
+                        setOpenDialog(true);
+                        setFormData(row);
+                      }}
+                      style={{ width: "fit-content" }}
+                      variant="danger"
+                      icon={<Trash2 size={18} />}
+                    ></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
         <TablePagination
           page={page}
           totalPages={totalPage}
@@ -410,8 +412,9 @@ function UserManagementPage() {
         open={isOpenModal}
         onClose={() => setIsOpenModal(false)}
         title={`Form ${variantModal} Akun`}
-        width="50vw"
+        width="80%"
         maxWidth="95vw"
+        className="md:text-base text-sm"
       >
         {/* {console.log(formData)} */}
         <div
