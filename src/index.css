@@ -70,7 +70,7 @@ code {
     monospace;
 }
 
-.sidebar {
+/* .sidebar {
   width: 200px;
   font-size: 14px !important;
   height: 100vh;
@@ -80,7 +80,7 @@ code {
   top: 0;
   left: 0;
   overflow-y: auto;
-}
+} */
 
 .sidebar-link {
   display: block;

@@ -18,8 +18,8 @@ import moment from "moment";
 
 function Administrator() {
   return (
-    <div>
-      <div className="flex justify-between">
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <Breadcrumbs
           items={[
             { name: "Barang Milik Negara", path: "/barang-milik-negara" },
@@ -28,12 +28,12 @@ function Administrator() {
         <User name={"Mas Febri"} previlege={"Administrator"} />
       </div>
       <Title>Dashboard Barang Milik Negara</Title>
-      <div className="grid grid-cols-2 gap-4 mr-4">
-        <Card className="">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
           <div className="items-center mb-4">
             <span className="font-bold text-xl">Jumlah Pegawai</span>
           </div>
-          <div className="grid grid-cols-2">
+          <div className="grid grid-cols-1 grid-cols-2">
             <div className="items-center">
               <DonutChart dataset={datasetPegawai} height="h-40" />
             </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchHelper } from "../services/FetchHelper";
 // import { useAuth } from "../auth/AuthContext";
@@ -18,6 +18,16 @@ function LoginPage() {
     satker: "",
     password: "",
   });
+
+  // State untuk mendeteksi desktop
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+
+  // Update isDesktop saat resize
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth > 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [])
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -68,7 +78,7 @@ function LoginPage() {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "45vw 55vw",
+          gridTemplateColumns: isDesktop ? "45vw 55vw" : "1fr",
           height: "100vh",
         }}
       >
@@ -129,7 +139,8 @@ function LoginPage() {
               Login
             </Button>
           </form>
-        </div>
+        </div >
+         {isDesktop && (
         <div
           style={{
             backgroundImage: 'url("/login-background-2.jpg")',
@@ -139,6 +150,7 @@ function LoginPage() {
             width: "100%",
           }}
         ></div>
+         )}
       </div>
     </div>
   );

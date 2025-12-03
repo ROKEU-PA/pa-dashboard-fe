@@ -24,7 +24,7 @@ function DatePickerInput({
   const inputRef = useRef(null);
 
   const runValidation = (val) => {
-    if (required && !val) return `${label} wajib diisi`;
+    if (required && !val) return '${label} wajib diisi';
     return "";
   };
 
@@ -50,24 +50,26 @@ function DatePickerInput({
 
   const labelStyle = {
     position: "absolute",
-    zIndex: 30,
+    
+    // UBAH INI:
+    zIndex: 1, 
     top: showFloatingLabel ? "-0.6rem" : "0.7rem",
     left: "0.75rem",
     fontSize: showFloatingLabel ? "0.75rem" : "1rem",
     color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
-    backgroundColor: "white",
+    backgroundColor: "#ffffff", // Sesuai settingan terakhir (putih)
     padding: "0 4px",
     transition: "all 0.2s ease",
     pointerEvents: "none",
-  };
+};
 
   const inputStyle = {
     // width: "100%",
     padding: "0.75rem",
     fontSize: "1rem",
-    border: `1px solid ${error || localError ? "#d32f2f" : "#ccc"}`,
+    border: '1px solid ${error || localError ? "#d32f2f" : "#ccc"}',
     borderRadius: "4px",
-    backgroundColor: "#fff",
+    backgroundColor: "transparent", 
     color: "#333",
   };
 
@@ -103,7 +105,6 @@ function DatePickerInput({
       )}
     </div>
   );
-}
 
 DatePickerInput.propTypes = {
   label: PropTypes.string.isRequired,
@@ -121,5 +122,5 @@ DatePickerInput.propTypes = {
   startDate: PropTypes.instanceOf(Date),
   endDate: PropTypes.instanceOf(Date),
 };
-
+}
 export default DatePickerInput;

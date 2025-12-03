@@ -90,7 +90,7 @@ export default function BarChart({ height = "h-72" }) {
           borderRadius: [8, 8, 0, 0],
         },
         barWidth: "25%",
-        barGap: "50%", // <— tambahkan ini
+        barGap: "50%",
       },
     ],
     animationDuration: 800,

@@ -115,7 +115,7 @@ function BudgetExecution() {
   }, [year]);
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex sm:flex-row justify-between">
         <Breadcrumbs
           items={[
             { name: "Pelaksanaan Anggaran", path: "/pelaksanaan-anggaran" },
@@ -131,12 +131,12 @@ function BudgetExecution() {
         />
       </div>
       <Title>Dashboard Pelaksanaan Anggaran</Title>
-      <div className="grid grid-cols-5 gap-4 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
         <Card className="row-span-2">
           <div className="flex flex-col items-center ">
             <span className="font-bold text-2xl text-center">NILAI IKPA</span>
             <IKPAChart height={"h-48"} val={es1Data?.data?.[0]?.nilaiIKPA} />
-            <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center px-6 pb-1 absolute top-[22rem]">
+            <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center px-4 py-1 mt-2">
               <span className="font-bold text-sm text-center text-white ">
                 Bulan{" "}
                 {moment().locale("id").subtract(1, "months").format("MMMM")}
@@ -151,7 +151,7 @@ function BudgetExecution() {
           <Card className="p-3" key={index}>
             <div className="flex flex-col">
               <div className="flex justify-between items-center h-10">
-                <span className="font-bold text-base w-[200px]">
+                <span className="font-bold text-sm sm:text-base">
                   {item.title}
                 </span>
                 <div className={`${item.color} rounded-lg p-1`}>
@@ -198,32 +198,32 @@ function BudgetExecution() {
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-[50%_50%] gap-4 mr-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-4">
         <Card className="">
           <div className="grid grid-cols-[90%_10%] items-center mb-4">
-            <span className="font-bold text-xl">
+            <span className="font-bold text-lg block mb-4">
               Persentase Realisasi Anggaran per Eselon 1
             </span>
           </div>
           <div className="items-center">
             <BarChart
               data={dataset}
-              height="h-72"
+              height="h-72 "
               labels={eselons}
               values={values}
             />
           </div>
         </Card>
-        <Card className="p-6">
-          <div className="grid grid-cols-2 gap-6 justify-items-center">
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Peringkat Realisasi Kemnaker */}
             <div className="flex flex-col items-center">
               <span className="font-semibold text-center mb-2 text-xl">
                 Peringkat Realisasi <br /> Kemnaker
               </span>
               <br></br>
-              <div className="w-52 h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
-                <span className="text-white text-8xl font-bold">9</span>
+              <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow">
+                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">9</span>
               </div>
             </div>
 
@@ -233,8 +233,8 @@ function BudgetExecution() {
                 Peringkat Alokasi <br /> Seluruh Kementerian
               </span>
               <br></br>
-              <div className="w-52 h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
-                <span className="text-white text-8xl font-bold">16</span>
+              <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
+                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">16</span>
               </div>
             </div>
           </div>

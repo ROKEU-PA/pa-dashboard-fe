@@ -70,7 +70,7 @@ export default function DashboardPage() {
       <Breadcrumbs items={[{ name: "Dashboard Utama", path: "/dashboard" }]} />
       <Title>{title}</Title>
 
-      <Paper elevation={3} className="bg-[#F5F6F7]">
+      <Paper elevation={3} className="bg-[#F5F6F7] p-4 sm:p-6 md:p-8">
         <div className="flex justify-center items-center min-h-[400px]">
           {loading ? (
             <p className="text-gray-600">Memuat gambar dashboard...</p>
@@ -78,7 +78,7 @@ export default function DashboardPage() {
             <img
               src={imageUrl}
               alt={`Dashboard ${title}`}
-              className="w-full object-contain"
+              className="w-full max-w-5xl h-auto object-contain mx-auto"
             />
           ) : (
             <p className="text-gray-400">Gambar tidak tersedia</p>

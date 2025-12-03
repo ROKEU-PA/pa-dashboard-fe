@@ -126,7 +126,7 @@ function CompilationPage() {
         <div
           style={{
             float: "left",
-            display: "flex",
+            flexWrap: "wrap",
             gap: 10,
             marginBottom: "1rem",
           }}

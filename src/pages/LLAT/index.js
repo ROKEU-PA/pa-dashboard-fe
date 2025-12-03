@@ -166,9 +166,9 @@ export default function LLATPage() {
         <User name={userData?.name} previlege={userData?.role?.toUpperCase()} />
       </div>
       <Title>Langkah - Langkah Akhir Tahun</Title>
-      <div className="flex gap-6">
+      <div className="flex gap-6 flex-col md:flex-row">
         {/* Kalender */}
-        <Card className="w-3/5 p-4">
+        <Card className="w-full md:w-3/5 p-2 md:p-4 text-xs md:text-base">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, interactionPlugin]}
@@ -186,7 +186,7 @@ export default function LLATPage() {
         </Card>
 
         {/* Panel Catatan Bulanan */}
-        <Card className="w-2/5 p-6 flex flex-col gap-4 overflow-y-auto max-h-[100vh]">
+        <Card className="w-full md:w-2/5 p-6 flex flex-col gap-4 overflow-y-auto max-h-[80vh] md:max-h-[100vh] text-sm md:text-base">
           <h2 className="text-xl font-semibold text-gray-700">
             Catatan Bulan{" "}
             {new Date(`${currentMonth}-01`).toLocaleString("id-ID", {
@@ -228,7 +228,7 @@ export default function LLATPage() {
 
           {(userData?.role === "admin" || userData?.role === "pic") && (
             <div className="mt-4">
-              <h3 className="text-sm text-gray-600 mb-2">
+              <h3 className="text-sm md:text-base text-gray-600 mb-2">
                 {selectedDate
                   ? `Tambah catatan untuk ${new Date(
                       selectedDate
@@ -236,16 +236,18 @@ export default function LLATPage() {
                   : "Klik tanggal di kalender untuk memilih tanggal"}
               </h3>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col md:flex-row gap-2 w-full gap-2">
                 <Input
                   placeholder="Isi catatan..."
                   value={newNote}
                   onChange={(e) => setNewNote(e.target.value)}
                   disabled={!selectedDate}
+                  className="w-full"
                 />
                 <Button
                   onClick={handleAddNote}
                   disabled={!selectedDate || !newNote.trim()}
+                   className="w-full md:w-auto"
                 >
                   Tambah
                 </Button>

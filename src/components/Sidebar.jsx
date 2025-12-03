@@ -16,6 +16,7 @@ import {
   Settings,
   GaugeCircle,
   LayoutDashboard,
+  Info,
   MessageSquare,
   Network,
   Archive,
@@ -32,7 +33,7 @@ const menuItems = [
   {
     name: "Dashboard Utama",
     path: "/dashboard-utama",
-    icon: <LayoutDashboard />,
+    icon: <LayoutDashboard/>,
   },
   {
     name: "PTUK",
@@ -51,11 +52,6 @@ const menuItems = [
     name: "Pelaksanaan Anggaran",
     path: "/pelaksanaan-anggaran",
     children: [
-      // {
-      //   name: "Dashboard",
-      //   path: "/pelaksanaan-anggaran",
-      //   icon: <Axis3D />,
-      // },
       {
         name: "Tanda Terima SPP",
         path: "/tanda-terima",
@@ -94,6 +90,7 @@ const menuItems = [
       },
     ],
     icon: <HandCoins />,
+  
   },
   {
     name: "Barang Milik Negara",
@@ -212,24 +209,30 @@ function Sidebar() {
         }));
     }
 
-    if (role === "guest") {
-      return menuItems
-        .filter((item) => item.name !== "Management")
-        .map((item) => {
-          if (item.name === "Pelaksanaan Anggaran") {
-            return {
-              ...item,
-              children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA", "Realisasi", "LLAT"].includes(child.name)
-              ),
-            };
-          }
-          return item;
-        });
-    }
+ if (role !== "guest") {
+  return menuItems.map(item => ({
+    ...item,
+    children: item.children?.filter(child => child.name !== "About")
+  }));
+}
 
-    return [];
-  };
+if (role === "guest") {
+  return menuItems
+    .filter(item => item.name !== "Management")
+    .map(item => {
+      if (item.name === "Pelaksanaan Anggaran") {
+        return {
+          ...item,
+          children: item.children?.filter(child =>
+            [ "Dashboard","IKPA", "Realisasi", "LLAT", "About"].includes(child.name)
+          ),
+        };
+      }
+      return item;
+    });
+}
+
+return [];};
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;

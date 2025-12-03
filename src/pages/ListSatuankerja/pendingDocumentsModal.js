@@ -66,9 +66,10 @@ export default function PendingDocumentsModal({ open, onClose, code }) {
             overflowY: "auto",
             border: "1px solid #ddd",
             borderRadius: 6,
+            overflowX: "auto",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse",minWidth: 600, }}>
             <thead
               style={{ backgroundColor: "#f9fafb", position: "sticky", top: 0 }}
             >
