@@ -40,6 +40,7 @@ export const TableBudgetExecution = ({ dataTable }) => {
               <TableCell align="center">{item.belanjaKontraktual}</TableCell>
               <TableCell align="center">{item.penyelesaianTagihan}</TableCell>
               <TableCell align="center">{item.pengelolaanUPTUP}</TableCell>
+              <TableCell align="center">{item.dispensasiSPM}</TableCell>
               <TableCell align="center">{item.capaianOutput}</TableCell>
               <TableCell align="center">
                 <div

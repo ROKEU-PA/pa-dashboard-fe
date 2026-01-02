@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
-import TablePagination from "@/components/TablePagination";
 import TableHeader from "@/components/TableHeader";
 import TableCell from "@/components/TableCell";
 import { TableBody } from "@/components/TableBody";
@@ -9,73 +8,66 @@ import Title from "@/components/Title";
 import Paper from "@/components/Paper";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Modal from "@/components/Modal";
-import themeColors from "@/constants/color";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import TableSortLabel from "@/components/TableSortLabel";
 import { buildQueryString } from "@/services/GeneralHelper";
 import moment from "moment";
 import { apiRequest } from "@/services/APIHelper";
-import { AppContext } from "@/contexts/AppContext";
 import { Download, Upload } from "lucide-react";
 import { fetchHelperGET } from "@/services/FetchHelper";
 import { toast } from "react-toastify";
 import FileInput from "@/components/FileInput";
+import Select from "@/components/Select";
+import { AppContext } from "@/contexts/AppContext";
+import User from "@/components/User";
+import { useBudgetExecution } from "../BudgetExecution/useBudgetExecution";
 
 const columns = [
-  { key: "kode_satker", label: "Kode Satker" },
-  { key: "eselon", label: "Eselon 1/Satker" },
-  { key: "revisi_dipa", label: "Revisi DIPA" },
-  { key: "deviasi_hal3_dipa", label: "Deviasi Hal III Dipa" },
-  { key: "realisasi_anggaran", label: "Realisasi Anggaran" },
-  { key: "belanja_kontraktual", label: "Belanja Kontraktual" },
-  { key: "penyelesaian_tagihan", label: "Penyelesaian Tagihan" },
-  { key: "pengelolaan_up_tup", label: "Pengelolaan UP TUP" },
-  { key: "capaian_output", label: "Capaian Output" },
-  { key: "nilai_ikpa", label: "Nilai IKPA" },
-  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data" },
+  { key: "kode_satker", label: "Kode Satker", rowSpan: 3 },
+  {
+    label: "Eselon",
+    key: "eselon",
+    rowSpan: 2,
+  },
+  {
+    label: "Kualitas Perencanaan Anggaran",
+    children: [
+      { key: "revisi_dipa", label: "Revisi DIPA" },
+      { key: "deviasi_hal3_dipa", label: "Deviasi Hal III Dipa" },
+    ],
+  },
+  {
+    label: "Kualitas Pelaksanaan Anggaran",
+    children: [
+      { key: "realisasi_anggaran", label: "Realisasi Anggaran" },
+      { key: "belanja_kontraktual", label: "Belanja Kontraktual" },
+      { key: "penyelesaian_tagihan", label: "Penyelesaian Tagihan" },
+      { key: "pengelolaan_up_tup", label: "Pengelolaan UP TUP" },
+    ],
+  },
+  {
+    label: "Kualitas Hasil Pelaksanaan Anggaran",
+    children: [{ key: "capaian_output", label: "Capaian Output" }],
+  },
+  { key: "nilai_ikpa", label: "Nilai IKPA", rowSpan: 10},
+  { key: "dispensasi_spm", label: "Dispensasi SPM", rowSpan: 11 },
+  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data", rowSpan: 12 },
 ];
 
 function IkpaPage() {
+  const { state, getIKPAColor } = useBudgetExecution("Hello");
   const { userData } = useContext(AppContext);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [page, setPage] = useState(0);
-  const [sortBy, setSortBy] = useState(null);
-  const [sortDir, setSortDir] = useState("asc");
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [totalPages, setTotalPages] = useState(1);
+  const [selectOpen, setSelectOpen] = useState(false);
   const [dataTable, setDataTable] = useState([]);
+  const [es1Data, setEs1Data] = useState([]);
   const [filter, setFilter] = useState({
     searchKey: "",
+    eselonKey: "",
   });
   const [formData, setFormData] = useState({
     dokumen: null,
   });
-
-  const handleSortChange = (key) => {
-    if (sortBy === key) {
-      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
-    }
-  };
-
-  const handleDateChange = (key, value) => {
-    setFilter((prev) => {
-      const newFilter = { ...prev, [key]: value };
-
-      if (
-        key === "startDate" &&
-        newFilter.endDate &&
-        value > newFilter.endDate
-      ) {
-        newFilter.endDate = null;
-      }
-
-      return newFilter;
-    });
-  };
 
   const fetchTemplateDownload = async () => {
     try {
@@ -101,28 +93,31 @@ function IkpaPage() {
   const fetchTable = async () => {
     try {
       const query = buildQueryString({
-        biro_code: userData?.biro_code,
-        year: filter.year,
+        eselon_code: filter.eselonKey,
         search_key: filter.searchKey,
-        page: page + 1,
-        per_page: rowsPerPage,
-        sort_by: sortBy,
-        sort_dir: sortDir,
-        start_date: filter.startDate
-          ? moment(filter.startDate).format("YYYY-MM-DD").toString()
-          : "",
-        end_date: filter.endDate
-          ? moment(filter.endDate).format("YYYY-MM-DD").toString()
-          : "",
       });
       const data = await apiRequest({
-        url: `/api/pa/ikpa/all?`,
+        url: `/api/pa/ikpa/all?${query}`,
       });
       let result = data?.data;
-      console.log(result);
       if (data.success) {
-        setTotalPages(result?.last_page);
-        setDataTable(result?.data);
+        setDataTable(result);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const es1Options = async () => {
+    try {
+      const data = await apiRequest({
+        url: `/api/pa/ikpa/all`,
+      });
+      let result = data?.data.filter((q) => q.satker_code === null);
+      if (data.success) {
+        result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
+        console.log(result);
+        setEs1Data(result);
       }
     } catch (error) {
       console.error(error);
@@ -200,21 +195,25 @@ function IkpaPage() {
 
   useEffect(() => {
     fetchTable();
-  }, [
-    filter.year,
-    filter.searchKey,
-    page + 1,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    filter.startDate,
-    filter.endDate,
-  ]);
+    es1Options();
+  }, [filter.searchKey, filter.eselonKey]);
 
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Soon", path: "/soon" }]} />
-      <Title>Fitur Sedang Di Kembangkan </Title>
+      <div className="flex justify-between">
+        <Breadcrumbs
+          items={[{ name: "Pelaksanaan Anggaran / IKPA", path: "/ikpa" }]}
+        />
+        <User
+          name={userData?.name}
+          previlege={userData?.role?.toUpperCase()}
+          username={userData?.biro_code}
+          role={userData?.role}
+          access_code={userData?.access_code}
+          id={userData?.id}
+        />
+      </div>
+      <Title>Indikator Pelaksanaan Anggaran Tingkat Satuan Kerja</Title>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
@@ -232,112 +231,91 @@ function IkpaPage() {
             style={{ width: "200px" }}
             name="Search"
             value={filter.searchKey}
-            onChange={(e) => handleDateChange("searchKey", e.target.value)}
+            onChange={(e) =>
+              setFilter((prev) => ({
+                ...prev,
+                searchKey: e.target.value,
+              }))
+            }
+          />
+          <Select
+            label="Eselon 1"
+            name="eselon_code"
+            onChange={(e) =>
+              setFilter((prev) => ({
+                ...prev,
+                eselonKey: e.target.value ?? "",
+              }))
+            }
+            value={filter.eselonKey}
+            options={es1Data.map((q) => ({
+              label: q.name,
+              value: q.eselon_code,
+            }))}
+            style={{ width: "120vh" }}
+            isOpen={selectOpen}
+            setIsOpen={setSelectOpen}
           />
           <div style={{ display: "flex", gap: 10 }}>
-            <Button
-              onClick={() => setIsOpenModal(true)}
-              style={{ width: "fit-content" }}
-              variant="secondary"
-              icon={<Upload size={20} />}
-            >
-              Import Data IKPA
-            </Button>
-            <Button
+            {userData &&
+              (userData.role === "admin" ||
+                userData.role === "super_admin") && (
+                <Button
+                  onClick={() => setIsOpenModal(true)}
+                  style={{ width: "fit-content" }}
+                  variant="secondary"
+                  icon={<Upload size={20} />}
+                >
+                  Import Data IKPA
+                </Button>
+              )}
+            {/* <Button
               onClick={fetchTemplateDownload}
               style={{ width: "fit-content" }}
               variant="primary"
               icon={<Download size={20} />}
             >
               Download Template
-            </Button>
+            </Button> */}
           </div>
-          {/* <Input
-            label="Tahun"
-            style={{ width: "200px" }}
-            name="Tahun"
-            value={filter.year}
-            validate={validationSchema.tahun}
-            onChange={(e) => handleDateChange("year", e.target.value)}
-          /> 
-          <DatePickerInput
-            label="Start Date"
-            selected={filter.startDate}
-            onChange={(date) => handleDateChange("startDate", date)}
-            selectsStart
-            startDate={filter.startDate}
-            endDate={filter.endDate}
-          />
-          <DatePickerInput
-            label="End Date"
-            selected={filter.endDate}
-            onChange={(date) => handleDateChange("endDate", date)}
-            selectsEnd
-            startDate={filter.startDate}
-            endDate={filter.endDate}
-            minDate={filter.startDate}
-          /> */}
         </div>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHeader>
             <TableRow>
-              {columns.map((col) => (
-                <TableCell
-                  key={col.key}
-                  component="th"
-                  scope="col"
-                  align="center"
-                  onClick={() => col.sortable && handleSortChange(col.key)}
-                  style={{ cursor: col.sortable ? "pointer" : "default" }}
-                >
-                  {col.sortable ? (
-                    <TableSortLabel
-                      active={sortBy === col.key}
-                      direction={sortDir}
-                    >
-                      {col.label}
-                    </TableSortLabel>
-                  ) : (
-                    col.label
-                  )}
-                </TableCell>
-              ))}
+              {columns.map((col, index) =>
+                col.children ? (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    colSpan={col.children.length}
+                  >
+                    {col.label}
+                  </TableCell>
+                ) : (
+                  <TableCell
+                    key={index}
+                    align="center"
+                    rowSpan={col.rowSpan || 1}
+                  >
+                    {col.label}
+                  </TableCell>
+                )
+              )}
+            </TableRow>
+
+            {/* Baris kedua */}
+            <TableRow>
+              {columns.map((col) =>
+                col.children
+                  ? col.children.map((child, idx) => (
+                      <TableCell key={child.key || idx} align="center">
+                        {child.label}
+                      </TableCell>
+                    ))
+                  : null
+              )}
             </TableRow>
           </TableHeader>
-          {/* <TableBody>
-            {dataTable.map((row) => (
-              <TableRow
-                key={row.no}
-                sx={{
-                  "&:lastChild td, &:lastChild th": { borderBottom: "none" },
-                }}
-              >
-                <TableCell align="center">1</TableCell>
-                <TableCell align="center">Sekretariat Jenderal</TableCell>
-                <TableCell align="center">{row?.["revisi_dipa"]}</TableCell>
-                <TableCell align="center">
-                  {row?.["deviasi_hal3_dipa"]}
-                </TableCell>
-                <TableCell align="center">
-                  {row?.["realisasi_anggaran"]}
-                </TableCell>
-                <TableCell align="center">
-                  {row?.["belanja_kontraktual"]}
-                </TableCell>
-                <TableCell align="center">
-                  {row?.["penyelesaian_tagihan"]}
-                </TableCell>
-                <TableCell align="center">
-                  {row?.["pengelolaan_up_tup"]}
-                </TableCell>
-                <TableCell align="center">{row?.["capaian_output"]}</TableCell>
-                <TableCell align="center">{row?.["nilai_ikpa"]}</TableCell>
-                <TableCell align="center">
-                  {moment(row?.["updated_at"]).format("YYYY/MM/DD")}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody> */}
           <TableBody>
             {Object.entries(groupedData).map(([eselonCode, group], index) => (
               <React.Fragment key={eselonCode}>
@@ -346,10 +324,10 @@ function IkpaPage() {
                   <TableRow
                     sx={{ backgroundColor: "#f0f0f0", fontWeight: "bold" }}
                   >
-                    <TableCell align="center">{group.parent.eselon_code}</TableCell>
                     <TableCell align="center">
-                      {group.parent.name}
+                      {group.parent.eselon_code}
                     </TableCell>
+                    <TableCell align="center">{group.parent.name}</TableCell>
                     <TableCell align="center">
                       {group.parent.revisi_dipa}
                     </TableCell>
@@ -372,10 +350,42 @@ function IkpaPage() {
                       {group.parent.capaian_output}
                     </TableCell>
                     <TableCell align="center">
-                      {group.parent.nilai_ikpa}
+                      <div
+                        className={`p-1 rounded font-semibold ${getIKPAColor(
+                          group.parent.nilai_ikpa
+                        )}`}
+                      >
+                        {group.parent.nilai_ikpa}
+                      </div>
                     </TableCell>
                     <TableCell align="center">
-                      {moment(group.parent.updated_at).format("YYYY/MM/DD")}
+                      {group.parent.dispensasi_spm}
+                    </TableCell>
+                    <TableCell align="center">
+                      {moment(group.parent.tanggal_sumber_data).format(
+                        "YYYY/MM/DD"
+                      )}
+                    </TableCell>
+                  </TableRow>
+                )}
+                {group.parent && (
+                  <TableRow
+                    sx={{ backgroundColor: "#feffebff", fontWeight: "bold" }}
+                  >
+                    <TableCell align="center" colSpan="2">
+                    {"Nilai Aspek"}
+                    </TableCell>
+                    <TableCell align="center" colSpan="2" >
+                      {Math.round(((group.parent.revisi_dipa + group.parent.deviasi_hal3_dipa)/2) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="4" >
+                      {Math.round(((group.parent.realisasi_anggaran + group.parent.belanja_kontraktual + group.parent.penyelesaian_tagihan + group.parent.pengelolaan_up_tup)/4) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="1" >
+                      {Math.round((group.parent.capaian_output) * 100) / 100}
+                    </TableCell>
+                    <TableCell align="center" colSpan="3" >
+                      {""}
                     </TableCell>
                   </TableRow>
                 )}
@@ -401,10 +411,19 @@ function IkpaPage() {
                     <TableCell align="center">
                       {row.pengelolaan_up_tup}
                     </TableCell>
+                    <TableCell align="center">{row.dispensasi_spm}</TableCell>
                     <TableCell align="center">{row.capaian_output}</TableCell>
-                    <TableCell align="center">{row.nilai_ikpa}</TableCell>
                     <TableCell align="center">
-                      {moment(row.updated_at).format("YYYY/MM/DD")}
+                      <div
+                        className={`p-1 rounded font-semibold ${getIKPAColor(
+                          row.nilai_ikpa
+                        )}`}
+                      >
+                        {row.nilai_ikpa}
+                      </div>
+                    </TableCell>
+                    <TableCell align="center">
+                      {moment(row.tanggal_sumber_data).format("YYYY/MM/DD")}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -412,16 +431,6 @@ function IkpaPage() {
             ))}
           </TableBody>
         </Table>
-        <TablePagination
-          page={page}
-          totalPages={totalPages}
-          onPageChange={setPage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={(value) => {
-            setRowsPerPage(value);
-            setPage(0); // reset to first page when rows per page changes
-          }}
-        />
       </Paper>
       <Modal
         open={isOpenModal}

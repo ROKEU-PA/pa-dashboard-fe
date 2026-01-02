@@ -22,14 +22,14 @@ function MainDashboard() {
 
   return (
     <div>
-      <div className="flex justify-between">
+      <div className="flex justify-between flex-wrap">
         <Breadcrumbs
           items={[{ name: "Dashboard Utama", path: "/dashboard" }]}
         />
-        <User name={"Mas Febri"} previlege={"Administrator"} />
+        <User name={"Test"} previlege={"Administrator"} />
       </div>
       <Title>Dashboard Utama</Title>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="">
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-4 items-center">
@@ -42,8 +42,8 @@ function MainDashboard() {
               Pengelolaan Keuangan
             </span>
           </div>
-          <div className="grid grid-cols-[40%_60%] gap-2">
-            <DonutChart data={dataset} height="h-56" />
+          <div className="grid grid-cols-1 lg:grid-cols-[40%_60%] gap-2">
+            <DonutChart data={dataset} height="h-72" />
             <div className="grid grid-cols-2 ">
               <div key="info" className="flex flex-col">
                 <div className="flex gap-2 items-center">
@@ -96,18 +96,13 @@ function MainDashboard() {
               Nilai IKPA dan Target Tahun {moment().format("YYYY")}
             </span>
           </div>
-          <div className="grid grid-cols-[65%_35%] gap-2 items-center">
-            <div className="grid grid-cols-[80%_20%] items-center">
-              <BarChart data={dataset} height="h-56" />
-              <div className="flex flex-col">
-                <div className="w-3 h-3 bg-[#296CF8]"></div>
-                <span className="text-sm">Jul 2025</span>
-                <span className="text-xl font-bold">94.91</span>
-              </div>
+          <div className="grid grid-cols-1 grid-cols-[65%_35%] items-center">
+            <div className="grid grid-cols-[90%_10%] items-center">
+              <BarChart data={dataset} height="h-72" />
             </div>
-            <div className="flex gap-2 flex-col">
-              <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center">
-                <span className="text-[85px]  font-black text-white">93.5</span>
+            <div className="flex gap-2 flex-col ">
+              <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center mr-10">
+                <span className="text-[85px] font-black text-white">94</span>
               </div>
               <span className="font-bold text-sm ">
                 Target Nilai IKPA Kemnaker 2025
@@ -158,7 +153,7 @@ function MainDashboard() {
               Realisasi Anggaran
             </span>
           </div>
-          <div className="grid grid-cols-[30%_40%_25%] gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 grid-cols-[30%_40%_25%] gap-2">
             <DonutChartAkuntansi data={dataset} height="h-64" />
             <div className="flex flex-col my-10 justify-evenly">
               <div key="info" className="flex  items-center">
@@ -175,7 +170,7 @@ function MainDashboard() {
                 <div className="flex gap-2 flex-col ml-2">
                   <span className="text-xl font-bold">Realisasi</span>
                   <span className=" text-xl font-semibold leading-none">
-                    {formatCurrency("10504149944398")}
+                    {formatCurrency("10681709121207")}
                   </span>
                 </div>
               </div>

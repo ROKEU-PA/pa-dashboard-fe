@@ -1,13 +1,13 @@
 export const AssetConditions = [
   {
     title: "Total Aset",
-    value: 530156,
+    value: 530130,
     containerStyle:
       "bg-blue-400 rounded px-2 w-[60%] text-white text-center items-center",
   },
-  { title: "Kondisi Baik", value: 480685 },
+  { title: "Kondisi Baik", value: 480692 },
   { title: "Rusak Ringan", value: 1295 },
-  { title: "Rusak Berat", value: 48146 },
+  { title: "Rusak Berat", value: 48143 },
   { title: "Nilai Aset", value: 16184055648805, style: "col-span-2" },
 ];
 
@@ -34,7 +34,7 @@ export const dataTable = {
       baik: 23378,
       rusakRingan: 9,
       rusakBerat: 4941,
-      total: 28328,
+      total: 28329,
     },
     {
       name: "Inspektorat Jenderal",
@@ -66,17 +66,17 @@ export const dataTable = {
     },
     {
       name: "Barenbang",
-      baik: 2723,
+      baik: 2725,
       rusakRingan: 0,
       rusakBerat: 41,
-      total: 2764,
+      total: 2766,
     },
     {
       name: "Binalavotas",
-      baik: 394131,
+      baik: 394135,
       rusakRingan: 1192,
-      rusakBerat: 24714,
-      total: 420037,
+      rusakBerat: 24711,
+      total: 420038,
     },
   ],
 };

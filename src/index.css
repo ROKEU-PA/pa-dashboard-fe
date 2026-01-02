@@ -4,40 +4,39 @@
 
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-Light.ttf") format("ttf");
-  font-weight: 300; /* Atur ketebalan font yang sesuai */
+  src: url("/public/fonts/FunnelDisplay-Light.ttf") format("truetype");
+  font-weight: 300;
   font-style: normal;
-  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+  font-display: swap;
 }
 
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-Regular.ttf") format("ttf");
-  font-weight: 400; /* Atur ketebalan font yang sesuai */
+  src: url("/public/fonts/FunnelDisplay-Regular.ttf") format("truetype");
+  font-weight: 400;
   font-style: normal;
-  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+  font-display: swap;
 }
 
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-Medium.ttf") format("ttf");
-  font-weight: 500; /* Atur ketebalan font yang sesuai */
+  src: url("/public/fonts/FunnelDisplay-Medium.ttf") format("truetype");
+  font-weight: 500;
   font-style: normal;
-  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+  font-display: swap;
 }
 
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-SemiBold.ttf") format("ttf");
-  font-weight: 600; /* Atur ketebalan font yang sesuai */
+  src: url("/public/fonts/FunnelDisplay-SemiBold.ttf") format("truetype");
+  font-weight: 600;
   font-style: normal;
-  font-display: swap; /* Opsional: untuk mengontrol bagaimana font dirender saat belum diunduh */
+  font-display: swap;
 }
 
-/* Tambahkan varian font lain jika ada (misalnya, bold, italic) */
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-Bold.ttf") format("ttf");
+  src: url("/public/fonts/FunnelDisplay-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -45,7 +44,7 @@
 
 @font-face {
   font-family: "Funnel Display";
-  src: url("/public/fonts/FunnelDisplay-ExtraBold.ttf") format("ttf");
+  src: url("/public/fonts/FunnelDisplay-ExtraBold.ttf") format("truetype");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
@@ -70,7 +69,7 @@ code {
     monospace;
 }
 
-.sidebar {
+/* .sidebar {
   width: 200px;
   font-size: 14px !important;
   height: 100vh;
@@ -80,7 +79,7 @@ code {
   top: 0;
   left: 0;
   overflow-y: auto;
-}
+} */
 
 .sidebar-link {
   display: block;
@@ -196,3 +195,20 @@ th:hover .sort-icon,
   gap: 8px;
   padding: 4px 0;
 }
+.react-datepicker-wrapper {
+  display: inline-block !important;
+  width: auto !important;
+}
+
+.react-datepicker__input-container input {
+  width: 200px !important;
+  background-color: transparent !important; 
+  border: 1px solid #ccc !important;        
+  padding: 0.75rem !important;              
+  border-radius: 4px !important;
+}
+iframe {
+  display: block !important;
+}
+
+/* tambah */

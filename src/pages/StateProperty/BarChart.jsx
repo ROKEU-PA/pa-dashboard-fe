@@ -2,11 +2,10 @@ import React from "react";
 import ReactECharts from "echarts-for-react";
 
 export default function BarChart({
-  height = "h-72", // Tailwind height: h-64 / h-72 / h-80
+  height = "h-72",
+  years = [],
+  values = [], // Tailwind height: h-64 / h-72 / h-80
 }) {
-  const years = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug"];
-  const values = [888.3, 686.91, 288.1, 1893, 482.44, 394.91, 122, 998];
-
   const option = {
     grid: {
       top: 30, // distance from top
@@ -70,7 +69,28 @@ export default function BarChart({
           })),
         barWidth: "40%",
       },
+      {
+        name: "Trend",
+        type: "line", // ✅ Tambahkan ini
+        data: values, // 🚨 Harus array angka (pastikan sudah diubah ke number)
+        smooth: true, // 🔁 Biar garisnya halus
+        lineStyle: {
+          color: "#FF7043",
+          width: 2,
+        },
+        itemStyle: {
+          color: "#FF7043",
+        },
+        symbol: "circle", // titik-titik
+        symbolSize: 6,
+      },
     ],
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
+      },
+    },
   };
 
   return (

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-export default function IKPAChart({ height }) {
+export default function IKPAChart({ height, val }) {
   const option = {
     series: [
       {
@@ -48,7 +48,7 @@ export default function IKPAChart({ height }) {
 
         data: [
           {
-            value: 94.91,
+            value: val,
           },
         ],
       },

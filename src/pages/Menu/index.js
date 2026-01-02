@@ -26,12 +26,13 @@ function MenuPage() {
     <div style={{ padding: "10px 1rem" }}>
       <Breadcrumbs items={[{ name: "Satuan Kerja", path: "/satuan-kerja" }]} />
       <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: "space-between",
-          gap: 20,
-        }}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full"
+        // style={{
+        //   display: "flex",
+        //   flexWrap: "wrap",
+        //   justifyContent: "space-between",
+        //   gap: 20,
+        // }}
       >
         {listMenu &&
           listMenu.map((data, index) => (
@@ -48,16 +49,19 @@ function MenuPage() {
               }
               style={{
                 textDecoration: "none",
-                pointerEvents: !isAdmin
-                  ? data.code !== userData?.biro_code && "none"
-                  : "auto",
+                pointerEvents:
+                  !isAdmin &&
+                  !userData?.access_code?.includes(Number(data.code))
+                    ? "none"
+                    : "auto",
               }}
               key={index}
               onClick={() => handleChangeMenu(data)}
             >
               <div
                 className={`card ${
-                  !isAdmin && data.code !== userData?.biro_code
+                  !isAdmin &&
+                  !userData?.access_code?.includes(Number(data.code))
                     ? "card-disabled"
                     : ""
                 }`}
@@ -72,7 +76,7 @@ function MenuPage() {
       <style>
         {`
           .card {
-            width: calc(95vw / 5);
+            width: 100%;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             border-radius: 6px;

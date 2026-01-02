@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 // import LoginPage from "./pages/LoginPage";
 import AppLayout from "./Layouts/AppLayout";
+import LoginPage from "./pages/LoginPage";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
 import CompilationPage from "./pages/Compilation";
@@ -22,7 +23,9 @@ import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
 import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
-import LoginPage from "./pages/LoginPage";
+import RealisasiPage from "./pages/Realisasi";
+import ReportingAccounting from "./pages/ReportingAccounting";
+import LLATPage from "./pages/LLAT";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -199,11 +202,41 @@ function App() {
           }
         />
         <Route
+          path="/realisasi"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <RealisasiPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/llat"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <LLATPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/tanda-terima"
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <TandaTerimaPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/akuntansi-pelaporan"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin}>
+                <ReportingAccounting />
               </AppLayout>
             </PrivateRoute>
           }

@@ -14,7 +14,7 @@ import MultiSelect from "@/components/MultiSelect";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
 import Breadcrumbs from "@/components/Breadcrumbs";
-import { Plus } from "lucide-react";
+import { Book, Plus } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import {
   buildQueryString,
@@ -23,20 +23,26 @@ import {
 } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import DatePickerInput from "@/components/DatePickerInput";
-// import CustomPDFViewer from "@/components/PDFViewer";
+import CustomPDFViewer from "@/components/PDFViewer";
 import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
 import { useLocation, useParams } from "react-router-dom";
 import moment from "moment";
+import User from "@/components/User";
 import {
   columns,
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
+import PendingDocumentsModal from "./pendingDocumentsModal";
+
+
 
 function ListSatuanKerjaPage() {
+  const isMobile = window.innerWidth < 768; //responsif
+
   const { menuName, listMenu, userData } = useContext(AppContext);
   const location = useLocation();
 
@@ -69,12 +75,16 @@ function ListSatuanKerjaPage() {
     type: "",
     type_id: "",
     dokumen: null,
+    dokumen_spm: null,
+    dokumen_sp2d: null,
     uploaded_by: "",
     status: "",
     kelengkapan: [],
     catatan: "",
     verifikasi: [],
     is_edit: null,
+    link: "",
+    jml_hal: 0,
   });
   const [dataTable, setDataTable] = useState([]);
   const [pdfToOpen, setPDFtoOpen] = useState("");
@@ -82,6 +92,36 @@ function ListSatuanKerjaPage() {
   const [multiSelectTwoOpen, setMultiSelectTwoOpen] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectOpenStatus, setSelectOpenStatus] = useState(false);
+  const [selectOpenJenis, setSelectOpenJenis] = useState(false);
+  const [jenisFile, setJenisFile] = useState("file");
+  const [showModal, setShowModal] = useState(false);
+
+  const getFileExtension = (url) => {
+    try {
+      const parsedUrl = new URL(url);
+      const hostname = parsedUrl.hostname.toLowerCase();
+      const pathname = parsedUrl.pathname;
+
+      if (
+        hostname.includes("drive.google.com") ||
+        hostname.includes("docs.google.com") ||
+        hostname.includes("drive.googleusercontent.com")
+      ) {
+        return "gdrive";
+      }
+
+      const parts = pathname.split(".");
+      if (parts.length > 1) {
+        return parts.pop().toLowerCase();
+      }
+
+      return "";
+    } catch {
+      return "";
+    }
+  };
+
+  const fileExtension = getFileExtension(pdfToOpen);
 
   const handleSortChange = (key) => {
     if (sortBy === key) {
@@ -105,6 +145,13 @@ function ListSatuanKerjaPage() {
 
       return newFilter;
     });
+  };
+
+  const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
+
+  const isFileSizeValid = (file, maxSizeMB = 100) => {
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    return file.size <= maxSizeBytes;
   };
 
   const handleChange = (e) => {
@@ -148,9 +195,11 @@ function ListSatuanKerjaPage() {
       const now = isPengajuanPath(location.pathname)
         ? new Date().getFullYear()
         : filter.tahun;
+      const status = isPengajuanPath(location.pathname) ? "arsip" : null;
       const query = buildQueryString({
         biro_code: currentMenu?.code,
         tahun: now,
+        status: status,
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -176,60 +225,217 @@ function ListSatuanKerjaPage() {
 
   const submitData = async (formData) => {
     try {
+      var CryptoJS = require("crypto-js");
+      var encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+      ).toString();
+
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
       payload.append("dokumen", formData.dokumen);
-      payload.append("uploaded_name", formData.dokumen);
+      payload.append("link", encryptedLink);
+      payload.append("jml_hal", formData.jml_hal);
+      payload.append("feedback", formData.catatan ?? formData.feedback);
+      if (!isPengajuanPath(location.pathname)) {
+        payload.append("status", "arsip");
+      }
+      payload.append("uploaded_name", formData.uploaded_by);
+      // for (let [key, value] of payload.entries()) {
+      //   console.log(`${key}:`, value);
+      // }
 
-      const result = await apiRequest({
-        url: "/api/archive/create",
-        method: "POST",
-        options: {
-          body: payload,
-        },
-        isMultiType: true,
-      });
+      if (formData.dokumen !== null) {
+        const defaultToken = localStorage.getItem("token");
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
+          });
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+          xhr.onerror = function () {
+            toast.update(toastId, {
+              render: "Terjadi kesalahan jaringan.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            reject(new Error("Network error"));
+          };
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
+        });
+      } else {
+        const result = await apiRequest({
+          url: "/api/archive/create",
+          method: "POST",
+          options: {
+            body: payload,
+          },
+          isMultiType: true,
+        });
+      }
     } catch (error) {
       console.error(error);
+      toast.error("Gagal mengupload data.");
     }
   };
 
   const editData = async (formData) => {
     try {
       const payload = new FormData();
+      var CryptoJS = require("crypto-js");
+      var encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+      ).toString();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
-      payload.append("feedback", formData.catatan);
+      payload.append("feedback", formData.catatan ?? formData.feedback);
       payload.append("status", formData.status);
       payload.append("questions", JSON.stringify(formData.kelengkapan));
       payload.append("verifications", JSON.stringify(formData.verifikasi));
       payload.append("jenis_spp", formData.type);
       payload.append("tahun", formData.tahun);
-      payload.append("dokumen", formData.dokumen || formData.document);
+      payload.append("link", encryptedLink);
+      payload.append("jml_hal", formData.jml_hal);
       payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
+
+      const hasFileUpload =
+        formData.dokumen instanceof File ||
+        formData.dokumen_spm instanceof File ||
+        formData.dokumen_sp2d instanceof File;
+
+      if (formData.dokumen instanceof File) {
+        payload.append("dokumen", formData.dokumen || formData.document);
+      }
+
+      if (formData.dokumen_spm instanceof File) {
+        payload.append("dokumen_spm", formData.dokumen_spm);
+      }
+
+      if (formData.dokumen_sp2d instanceof File) {
+        payload.append("dokumen_sp2d", formData.dokumen_sp2d);
+      }
       // for (let [key, value] of payload.entries()) {
       //   console.log(`${key}:`, value);
       // }
 
-      const result = await apiRequest({
-        url: `/api/archive/edit/${formData?.id}`,
-        method: "POST",
-        options: {
-          body: payload,
-        },
-        isMultiType: true,
-      });
-      // console.log("editData", formData.id, result);
+      const defaultToken = localStorage.getItem("token");
+
+      if (hasFileUpload) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
+          });
+
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
+
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+
+          xhr.onerror = function () {
+            toast.update(toastId, {
+              render: "Terjadi kesalahan jaringan.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            reject(new Error("Network error"));
+          };
+
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/api/archive/edit/${formData?.id}`
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
+        });
+      } else {
+        const result = await apiRequest({
+          url: `/api/archive/edit/${formData?.id}`,
+          method: "POST",
+          options: {
+            body: payload,
+          },
+          isMultiType: true,
+        });
+      }
     } catch (error) {
       console.error(error);
+      toast.error("Gagal mengupload data.");
     }
   };
 
   const checklistIsValid = () => {
-    if (formData.status === "approved") {
+    if (formData.status === "approved" && isPengajuanPath(location.pathname)) {
       const kelengkapanChecked = formData.kelengkapan.map((item) => item.value);
       const verifikasiChecked = formData.verifikasi.map((item) => item.value);
 
@@ -253,12 +459,30 @@ function ListSatuanKerjaPage() {
     let isAnyFile = formData?.dokumen || formData?.document;
     formData.type = formData.type_id;
     try {
-      if (variantModal === "Add" && isAnyFile) {
+      if (
+        variantModal === "Add" &&
+        isAnyFile &&
+        isPengajuanPath(location.pathname)
+      ) {
         if (
           !formData?.["no_spp"] ||
           !formData.tahun ||
           !formData.type ||
           !formData.uploaded_by ||
+          !formData.dokumen
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else if (
+        variantModal === "Add" &&
+        isAnyFile &&
+        !isPengajuanPath(location.pathname)
+      ) {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
           !formData.dokumen
         ) {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
@@ -275,6 +499,43 @@ function ListSatuanKerjaPage() {
           return;
         }
       }
+
+      if (isAnyFile && formData.dokumen) {
+        const file = formData.dokumen;
+        const acceptedExtension = getAcceptedFileType()
+          .replace(/\s+/g, "")
+          .split(",");
+
+        const fileName = file.name?.toLowerCase();
+        const isAccepted = acceptedExtension.some((ext) =>
+          fileName.endsWith(ext)
+        );
+
+        if (!isAccepted) {
+          toast.error(
+            `File yang diizinkan hanya: ${acceptedExtension.join(", ")}`
+          );
+          return;
+        }
+
+        const maxSize =
+          formData.type_id === "ptup" ||
+          formData.type_id === "gup" ||
+          formData.type_id === "uptup" ||
+          formData.type_id === "gup_kkp" ||
+          formData.type_id === "gup_pnbp" ||
+          formData.type_id === "gup_rm" ||
+          formData.type_id === "ptup_rm" ||
+          formData.type_id === "ptup_pnbp"
+            ? 1536
+            : 200;
+
+        if (!isFileSizeValid(file, maxSize)) {
+          toast.error("Ukuran file melebihi " + maxSize + "MB");
+          return;
+        }
+      }
+
       if (!checklistIsValid()) {
         toast.error(
           "Semua Kelengkapan dan Verifikasi harus dicentang sebelum status dirubah Telah Diuji."
@@ -282,12 +543,12 @@ function ListSatuanKerjaPage() {
         return;
       }
       if (variantModal === "Add") {
-        submitData(formData);
+        await submitData(formData);
       } else {
-        editData(formData);
+        await editData(formData);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
 
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
@@ -302,6 +563,8 @@ function ListSatuanKerjaPage() {
         kelengkapan: [],
         catatan: "",
         verifikasi: [],
+        link: "",
+        jml_hal: "",
       });
       fetchTable();
     } catch (err) {
@@ -309,12 +572,12 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  // console.log(formData);
   useEffect(
     () => {
       fetchTable();
       fetchType();
       setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+      setShowModal(true);
     },
     [
       filter.tahun,
@@ -328,15 +591,26 @@ function ListSatuanKerjaPage() {
     ],
     [listMenu]
   );
+  // console.log(fileExtension);
 
   return (
     <div>
-      <Breadcrumbs
-        items={[
-          { name: "Satuan Kerja", path: "/satuan-kerja" },
-          { name: menuName.name },
-        ]}
-      />
+      <div className="flex justify-between">
+        <Breadcrumbs
+          items={[
+            { name: "Satuan Kerja", path: "/satuan-kerja" },
+            { name: menuName.name },
+          ]}
+        />
+        <User
+          name={userData?.name}
+          previlege={userData?.role?.toUpperCase()}
+          username={userData?.biro_code}
+          role={userData?.role}
+          access_code={userData?.access_code}
+          id={userData?.id}
+        />
+      </div>
       <Title>{menuName.name || menuTitle}</Title>
       <Paper
         elevation={3}
@@ -353,54 +627,71 @@ function ListSatuanKerjaPage() {
           {/* Kolom Kiri: Tombol */}
           <div style={{ flex: 1 }}>
             {userData &&
-              (!isPengajuanPath(location.pathname)
-                ? // Tombol "Tambah Arsip" - hanya admin dan pic
-                  (userData.role === "admin" || userData.role === "pic") && (
-                    <Button
-                      onClick={() => {
-                        setIsOpenModal(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          tahun: moment().year(),
-                        }));
-                        setVariantModal("Add");
-                      }}
-                      style={{ width: "fit-content" }}
-                      variant="danger"
-                      icon={<Plus size={20} />}
-                    >
-                      Tambah Arsip
-                    </Button>
-                  )
-                : // Tombol "Tambah Pengajuan" - hanya user
-                  userData.role === "user" && (
-                    <Button
-                      onClick={() => {
-                        setIsOpenModal(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          tahun: moment().year(),
-                        }));
-                        setVariantModal("Add");
-                      }}
-                      style={{ width: "fit-content" }}
-                      variant="danger"
-                      icon={<Plus size={20} />}
-                    >
-                      Tambah Pengajuan
-                    </Button>
-                  ))}
+              (!isPengajuanPath(location.pathname) ? (
+                // Tombol "Tambah Arsip" bisa semua role
+                <Button
+                  onClick={() => {
+                    setIsOpenModal(true);
+                    setFormData((prev) => ({
+                      ...prev,
+                      tahun: moment().year(),
+                    }));
+                    setVariantModal("Add");
+                  }}
+                  style={{ width: "fit-content" }}
+                  variant="danger"
+                  icon={<Plus size={20} />}
+                >
+                  Tambah Arsip
+                </Button>
+              ) : (
+                // Tombol "Tambah Pengajuan" - hanya user
+                userData?.role === "user" && (
+                  <Button
+                    onClick={() => {
+                      setIsOpenModal(true);
+                      setFormData((prev) => ({
+                        ...prev,
+                        tahun: moment().year(),
+                      }));
+                      setVariantModal("Add");
+                    }}
+                    style={{ width: "fit-content" }}
+                    variant="danger"
+                    icon={<Plus size={20} />}
+                  >
+                    Tambah Pengajuan
+                  </Button>
+                )
+              ))}
           </div>
 
           {/* Kolom Kanan: Form Filter */}
           <div
             style={{
               display: "flex",
-              gap: 15,
-              justifyContent: "flex-end",
               flexWrap: "wrap",
+              gap: "1rem",
+              justifyContent: "flex-end",
+              width: "100%",
             }}
           >
+            <a
+              href={
+                "https://drive.google.com/file/d/1t2_URZ7ij2rciW-tmNDIDyRFhdwiZ10f/view"
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button
+                onClick={() => {}}
+                style={{ width: "fit-content" }}
+                variant="secondary"
+                icon={<Book size={20} />}
+              >
+                PMK 039 2024
+              </Button>
+            </a>
             <Input
               label="Search"
               style={{ width: "200px" }}
@@ -437,250 +728,357 @@ function ListSatuanKerjaPage() {
             />
           </div>
         </div>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
-          <TableHeader>
-            <TableRow>
-              {columns
-                .filter(
-                  (col) =>
-                    !(col.hiddenInArsip && !isPengajuanPath(location.pathname))
-                )
-                .map((col) => (
-                  <TableCell
-                    key={col.key}
-                    component="th"
-                    scope="col"
-                    align="center"
-                    onClick={() => col.sortable && handleSortChange(col.key)}
-                    style={{ cursor: col.sortable ? "pointer" : "default" }}
-                  >
-                    {col.sortable ? (
-                      <TableSortLabel
-                        active={sortBy === col.key}
-                        direction={sortDir}
-                      >
-                        {col.label}
-                      </TableSortLabel>
-                    ) : (
-                      col.label
-                    )}
-                  </TableCell>
-                ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dataTable.map((row, index) => (
-              <TableRow key={index}>
+        {/* c */}
+        <div style={{ overflowX: "auto", width: "100%" }}>
+          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+            <TableHeader>
+              <TableRow>
                 {columns
                   .filter(
                     (col) =>
-                      !(
-                        col.hiddenInArsip && !isPengajuanPath(location.pathname)
-                      )
+                      !(col.hiddenInArsip && !isPengajuanPath(location.pathname))
                   )
-                  .map((col) => {
-                    if (col.key == "spp_number") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          {row?.["no_spp"]}
-                        </TableCell>
-                      );
-                    }
-                    if (col.key === "created_at") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          {moment(row?.[col.key]).format("YYYY/MM/DD")}
-                        </TableCell>
-                      );
-                    }
-                    if (col.key === "revisi") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          Revisi ke-{row?.[col.key]}
-                        </TableCell>
-                      );
-                    }
-                    if (col.key === "status") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          {row?.[col.key] === "approved"
-                            ? "Telah Diuji"
-                            : row?.[col.key] === "reject"
-                            ? "Ditolak"
-                            : row?.[col.key] === "sp2d"
-                            ? "SP2D"
-                            : "Baru"}
-                        </TableCell>
-                      );
-                    }
-                    if (col.key === "catatan") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          {row?.["feedback"]}
-                        </TableCell>
-                      );
-                    }
-
-                    if (col.key == "kelengkapan") {
-                      return (
-                        <TableCell key={col.key} align="center">
-                          {row?.["total_kelengkapan"]}
-                        </TableCell>
-                      );
-                    }
-
-                    if (col.key === "document") {
-                      return (
-                        <TableCell
-                          key={col.key}
-                          align="center"
-                          onClick={() => {
-                            if (typeof row.document?.url === "string") {
-                              setIsOpenPDF(true);
-                              setPDFtoOpen(row.document?.url);
-                            }
-                          }}
-                          style={{
-                            color: themeColors.primary.light,
-                            cursor:
-                              typeof row.document?.url === "string"
-                                ? "pointer"
-                                : "default",
-                          }}
+                  .map((col) => (
+                    <TableCell
+                      key={col.key}
+                      component="th"
+                      scope="col"
+                      align="center"
+                      onClick={() => col.sortable && handleSortChange(col.key)}
+                      style={{ cursor: col.sortable ? "pointer" : "default" }}
+                    >
+                      {col.sortable ? (
+                        <TableSortLabel
+                          active={sortBy === col.key}
+                          direction={sortDir}
                         >
-                          {`Klik untuk lihat SPP ` + row.no_spp || "-"}
-                        </TableCell>
-                      );
-                    }
+                          {col.label}
+                        </TableSortLabel>
+                      ) : (
+                        col.label
+                      )}
+                    </TableCell>
+                  ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {dataTable.map((row, index) => (
+                <TableRow key={index}>
+                  {columns
+                    .filter(
+                      (col) =>
+                        !(
+                          col.hiddenInArsip && !isPengajuanPath(location.pathname)
+                        )
+                    )
+                    .map((col) => {
+                      if (col.key == "spp_number") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {row?.["no_spp"]}
+                          </TableCell>
+                        );
+                      }
+                      if (col.key === "created_at") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {moment(row?.[col.key]).format("YYYY/MM/DD")}
+                          </TableCell>
+                        );
+                      }
+                      if (col.key === "revisi") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            Revisi ke-{row?.[col.key]}
+                          </TableCell>
+                        );
+                      }
+                      if (col.key === "status") {
+                        const statusValue = row?.[col.key];
 
-                    if (col.key === "action") {
-                      const isPengajuan = isPengajuanPath(location.pathname);
-                      const role = userData?.role;
+                        // Label yang akan ditampilkan
+                        const statusLabel =
+                          statusValue === "approved"
+                            ? "Telah Diuji"
+                            : statusValue === "reject"
+                            ? "Ditolak"
+                            : statusValue === "sp2d"
+                            ? "SP2D"
+                            : "Baru";
 
-                      const showEditButton =
-                        (isPengajuan &&
-                          role === "user" &&
-                          row.status !== "approved" &&
-                          row.status !== "sp2d") ||
-                        (!isPengajuan && (role === "admin" || role === "pic"));
+                        // Class warna berdasarkan status
+                        const statusColorClass =
+                          statusValue === "approved"
+                            ? "bg-green-500"
+                            : statusValue === "reject"
+                            ? "bg-red-500"
+                            : statusValue === "sp2d"
+                            ? "bg-yellow-500"
+                            : "bg-blue-500";
 
-                      const showPengujianButton =
-                        isPengajuan &&
-                        (role === "admin" || role === "pic") &&
-                        row.status !== "sp2d";
+                        return (
+                          <TableCell key={col.key} align="center">
+                            <span
+                              className={`px-2 py-1 rounded text-white text-sm ${statusColorClass}`}
+                            >
+                              {statusLabel}
+                            </span>
+                          </TableCell>
+                        );
+                      }
 
-                      const showDetailButton =
-                        isPengajuan &&
-                        (row.status === "approved" ||
-                          row.status === "reject" ||
-                          row.status === "sp2d");
+                      if (col.key === "catatan") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {row?.["feedback"] == "null" ||
+                            row?.["feedback"] == null ? (
+                              "-"
+                            ) : row?.["feedback"].length > 25 ? (
+                              <span
+                                className={`px-2 py-1 rounded text-white text-sm bg-yellow-500`}
+                              >
+                                {"...Catatan lengkap di Detail"}
+                              </span>
+                            ) : (
+                              row?.["feedback"]
+                            )}
+                          </TableCell>
+                        );
+                      }
 
-                      const showDash = !isPengajuan && role === "user";
+                      if (col.key == "kelengkapan") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {row?.["total_kelengkapan"]}
+                          </TableCell>
+                        );
+                      }
 
+                      if (col.key === "document") {
+                        return (
+                          <TableCell
+                            key={col.key}
+                            align="center"
+                            onClick={() => {
+                              if (typeof row.document?.url === "string") {
+                                setIsOpenPDF(true);
+                                setPDFtoOpen(row.document?.url);
+                              }
+                            }}
+                            style={{
+                              color: themeColors.primary.light,
+                              cursor:
+                                typeof row.document?.url === "string"
+                                  ? "pointer"
+                                  : "default",
+                            }}
+                          >
+                            {`Klik untuk lihat SPP ` + row.no_spp || "-"}
+                          </TableCell>
+                        );
+                      }
+
+                      if (col.key === "document_spm") {
+                        return (
+                          <TableCell
+                            key={col.key}
+                            align="center"
+                            onClick={() => {
+                              if (typeof row.document_spm?.url === "string") {
+                                setIsOpenPDF(true);
+                                setPDFtoOpen(row.document_spm?.url);
+                              }
+                            }}
+                            style={{
+                              color: themeColors.primary.light,
+                              cursor:
+                                typeof row.document_spm?.url === "string"
+                                  ? "pointer"
+                                  : "default",
+                            }}
+                          >
+                            {typeof row.document_spm?.url === "string"
+                              ? `Klik untuk lihat SPM ` + row.no_spp || "-"
+                              : "-"}
+                          </TableCell>
+                        );
+                      }
+
+                      if (col.key === "document_sp2d") {
+                        return (
+                          <TableCell
+                            key={col.key}
+                            align="center"
+                            onClick={() => {
+                              if (typeof row.document_sp2d?.url === "string") {
+                                setIsOpenPDF(true);
+                                setPDFtoOpen(row.document_sp2d?.url);
+                              }
+                            }}
+                            style={{
+                              color: themeColors.primary.light,
+                              cursor:
+                                typeof row.document_sp2d?.url === "string"
+                                  ? "pointer"
+                                  : "default",
+                            }}
+                          >
+                            {typeof row.document_sp2d?.url === "string"
+                              ? `Klik untuk lihat SP2D ` + row.no_spp || "-"
+                              : "-"}
+                          </TableCell>
+                        );
+                      }
+
+                      if (col.key === "jml_hal") {
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {typeof row.jml_hal !== "undefined" ||
+                            row.jml_hal !== null ||
+                            row.jml_hal === 0
+                              ? "-"
+                              : row.jml_hal}
+                          </TableCell>
+                        );
+                      }
+
+                      if (col.key === "action") {
+                        const isPengajuan = isPengajuanPath(location.pathname);
+                        const role = userData?.role;
+
+                        const showEditButton =
+                          (isPengajuan &&
+                            role === "user" &&
+                            row.status !== "approved" &&
+                            row.status !== "sp2d") ||
+                          !isPengajuan;
+
+                        const showPengujianButton =
+                          isPengajuan &&
+                          (role === "admin" || role === "pic") &&
+                          row.status !== "sp2d";
+
+                        const showDetailButton =
+                          isPengajuan &&
+                          (row.status === "approved" ||
+                            row.status === "reject" ||
+                            row.status === "sp2d");
+
+                        const showDash = false; //!isPengajuan && role === "user";
+
+                        return (
+                          <TableCell key={col.key} align="center">
+                            {showEditButton && (
+                              <Button
+                                onClick={() => {
+                                  if (
+                                    row.document.filename.includes("file_drive")
+                                  ) {
+                                    setJenisFile("link");
+                                  } else {
+                                    setJenisFile("file");
+                                  }
+                                  setVariantModal("Edit");
+                                  setFormData({
+                                    ...row,
+                                    type: row.jenis_spp,
+                                    link: row.document.path,
+                                  });
+                                  setIsOpenModal(true);
+                                }}
+                                style={{ width: "fit-content", margin: "5px" }}
+                              >
+                                Edit
+                              </Button>
+                            )}
+
+                            {showPengujianButton && (
+                              <Button
+                                onClick={() => {
+                                  const kelengkapanWithLabel = questions
+                                    .filter((q) =>
+                                      row.question_checklist?.includes(
+                                        q.id_question
+                                      )
+                                    )
+                                    .map((q) => ({
+                                      label: q.text,
+                                      value: q.id_question,
+                                    }));
+
+                                  const verifikasiWithLabel = verifications
+                                    .filter((v) =>
+                                      row.verification_checklist?.includes(
+                                        v.id_question
+                                      )
+                                    )
+                                    .map((v) => ({
+                                      label: v.text,
+                                      value: v.id_question,
+                                    }));
+                                  setVariantModal("Pengujian");
+                                  setFormData({
+                                    ...row,
+                                    type: row.jenis_spp,
+                                    kelengkapan: kelengkapanWithLabel,
+                                    verifikasi: verifikasiWithLabel,
+                                    catatan: row.feedback,
+                                  });
+                                  fetchType(row.type_id);
+                                  setPDFtoOpen(row.document?.url);
+                                  setIsCheckModal(true);
+                                }}
+                                style={{
+                                  minWidth: "100px",
+                                  padding: "6px 12px",
+                                  margin: "5px",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                                variant="danger"
+                              >
+                                {row.status === "approved"
+                                  ? "Ubah Status"
+                                  : "Pengujian"}
+                              </Button>
+                            )}
+
+                            {showDetailButton && (
+                              <Button
+                                onClick={() => {
+                                  fetchType(row.type_id);
+                                  setFormData({
+                                    ...row,
+                                    type: row.jenis_spp,
+                                    kelengkapan: row.question_checklist,
+                                    verifikasi: row.verification_checklist,
+                                  });
+                                  setIsDetailModal(true);
+                                }}
+                                style={{ width: "fit-content" }}
+                              >
+                                Detail
+                              </Button>
+                            )}
+
+                            {showDash && <>-</>}
+                          </TableCell>
+                        );
+                      }
+
+                      // Default rendering
                       return (
                         <TableCell key={col.key} align="center">
-                          {showEditButton && (
-                            <Button
-                              onClick={() => {
-                                setVariantModal("Edit");
-                                setFormData({
-                                  ...row,
-                                  type: row.jenis_spp,
-                                });
-                                setIsOpenModal(true);
-                              }}
-                              style={{ width: "fit-content", margin: "5px" }}
-                            >
-                              Edit
-                            </Button>
-                          )}
-
-                          {showPengujianButton && (
-                            <Button
-                              onClick={() => {
-                                const kelengkapanWithLabel = questions
-                                  .filter((q) =>
-                                    row.question_checklist.includes(
-                                      q.id_question
-                                    )
-                                  )
-                                  .map((q) => ({
-                                    label: q.text,
-                                    value: q.id_question,
-                                  }));
-
-                                const verifikasiWithLabel = verifications
-                                  .filter((v) =>
-                                    row.verification_checklist.includes(
-                                      v.id_question
-                                    )
-                                  )
-                                  .map((v) => ({
-                                    label: v.text,
-                                    value: v.id_question,
-                                  }));
-                                setVariantModal("Pengujian");
-                                setFormData({
-                                  ...row,
-                                  type: row.jenis_spp,
-                                  kelengkapan: kelengkapanWithLabel,
-                                  verifikasi: verifikasiWithLabel,
-                                  catatan: row.feedback,
-                                });
-                                fetchType(row.type_id);
-                                setPDFtoOpen(row.document?.url);
-                                setIsCheckModal(true);
-                              }}
-                              style={{
-                                minWidth: "100px",
-                                padding: "6px 12px",
-                                margin: "5px",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                              }}
-                              variant="danger"
-                            >
-                              {row.status === "approved"
-                                ? "Ubah Status"
-                                : "Pengujian"}
-                            </Button>
-                          )}
-
-                          {showDetailButton && (
-                            <Button
-                              onClick={() => {
-                                fetchType(row.type_id);
-                                setFormData({
-                                  ...row,
-                                  type: row.jenis_spp,
-                                  kelengkapan: row.question_checklist,
-                                  verifikasi: row.verification_checklist,
-                                });
-                                setIsDetailModal(true);
-                              }}
-                              style={{ width: "fit-content" }}
-                            >
-                              Detail
-                            </Button>
-                          )}
-
-                          {showDash && <>-</>}
+                          {row[col.key] ?? "-"}
                         </TableCell>
                       );
-                    }
-
-                    // Default rendering
-                    return (
-                      <TableCell key={col.key} align="center">
-                        {row[col.key] ?? "-"}
-                      </TableCell>
-                    );
-                  })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    })}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
         <TablePagination
           page={page}
           totalPages={totalPages}
@@ -718,10 +1116,13 @@ function ListSatuanKerjaPage() {
         <form
           onSubmit={handleSubmit}
           style={{
+            padding: 10,
             width: "100%",
             display: "flex",
             flexDirection: "column",
             gap: 20,
+            height: "450px",
+            overflowY: "auto",
           }}
         >
           <Input
@@ -730,7 +1131,15 @@ function ListSatuanKerjaPage() {
             value={formData?.no_spp}
             onChange={handleChange}
             required
-            validate={validationSchema.onlyNumber}
+            validate={(val) => {
+              const onlyNumberError = validationSchema.onlyNumber(val);
+              if (onlyNumberError) return onlyNumberError;
+
+              const numbersppError = validationSchema.numberspp(val);
+              if (numbersppError) return numbersppError;
+
+              return "";
+            }}
             placeholder="Masukkan nomor SPP"
           />
 
@@ -759,7 +1168,12 @@ function ListSatuanKerjaPage() {
               value: q.type_id,
             }))}
             isOpen={selectOpen}
-            setIsOpen={setSelectOpen}
+            setIsOpen={(open) => {
+              if (open) {
+                setSelectOpenJenis(false);
+              }
+              setSelectOpen(open);
+            }}
           />
 
           {/* Tampilkan Nama Pengirim hanya jika isPengajuanPath TRUE */}
@@ -775,21 +1189,96 @@ function ListSatuanKerjaPage() {
             />
           )}
 
-          <FileInput
-            accept=".pdf"
-            label="Dokumen"
-            name="dokumen"
-            onChange={handleChange}
-            required
-            value={formData?.document}
-          />
+          {!isPengajuanPath(location.pathname) && variantModal === "Add" && (
+            <Select
+              label="Jenis File"
+              name="jenis_file"
+              value={jenisFile}
+              onChange={(selected) => {
+                setJenisFile(selected.target.value);
+              }}
+              options={[
+                { label: "File Upload", value: "file" },
+                { label: "Link Drive", value: "link" },
+              ]}
+              isOpen={selectOpenJenis}
+              setIsOpen={(open) => {
+                if (open) {
+                  setSelectOpen(false);
+                }
+                setSelectOpenJenis(open);
+              }}
+            />
+          )}
+          {jenisFile === "link" && (
+            <Input
+              label="Link"
+              name="link"
+              value={formData.link}
+              onChange={handleChange}
+              validate={validationSchema.link}
+              required
+              placeholder="Masukkan Link"
+            />
+          )}
+
+          {jenisFile === "link" && (
+            <Input
+              label="Jumlah halaman file"
+              name="jml_hal"
+              value={formData.jml_hal}
+              onChange={handleChange}
+              validate={validationSchema.onlyNumber}
+              required
+              placeholder="Masukkan Jumlah halaman file"
+            />
+          )}
+
+          {jenisFile === "file" && (
+            <FileInput
+              accept={getAcceptedFileType()}
+              label="Dokumen"
+              name="dokumen"
+              onChange={handleChange}
+              required
+              value={formData?.document}
+            />
+          )}
+
+          {userData &&
+            !isPengajuanPath(location.pathname) &&
+            variantModal == "Edit" &&
+            userData?.role !== "user" && (
+              <FileInput
+                accept=".pdf"
+                label="Dokumen SPM"
+                name="dokumen_spm"
+                onChange={handleChange}
+                required
+                value={formData?.document_spm}
+              />
+            )}
+
+          {userData &&
+            !isPengajuanPath(location.pathname) &&
+            variantModal == "Edit" &&
+            userData?.role !== "user" && (
+              <FileInput
+                accept=".pdf"
+                label="Dokumen SP2D"
+                name="dokumen_sp2d"
+                onChange={handleChange}
+                required
+                value={formData?.document_sp2d}
+              />
+            )}
 
           {/* Tampilkan Catatan hanya jika isPengajuanPath FALSE */}
-          {!isPengajuanPath(location.pathname) && (
+          {!isPengajuanPath(location.pathname) && userData?.role === "pic" && (
             <Textarea
               label="Catatan"
               name="catatan"
-              value={formData?.catatan}
+              value={formData?.catatan ?? formData?.feedback ?? ""}
               onChange={handleChange}
             />
           )}
@@ -799,7 +1288,13 @@ function ListSatuanKerjaPage() {
           </Button>
         </form>
       </Modal>
-      <Modal open={isOpenPDF} onClose={() => setIsOpenPDF(false)} title="">
+      <Modal
+        open={isOpenPDF}
+        onClose={() => setIsOpenPDF(false)}
+        title=""
+        width={fileExtension === "pdf" ? "80vw" : "5vw"}
+        maxWidth="95vw"
+      >
         {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
         {/* <CustomPDFViewer pdfSource={pdfToOpen} /> */}
         {/* <CustomPDFViewer pdfSource="https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
@@ -808,11 +1303,27 @@ function ListSatuanKerjaPage() {
           style={{ width: "100%", height: "500px" }}
           title="PDF Viewer"
         /> */}
-        <iframe
-          src={pdfToOpen}
-          style={{ width: "100%", height: "500px" }}
-          title="PDF Viewer"
-        />
+        {fileExtension === "pdf" ? (
+          <div style={{
+                        maxHeight: "calc(100vh - 120px)",
+                        overflowY: "auto",
+                        padding: 0,
+                      }}>
+          <CustomPDFViewer pdfSource={pdfToOpen} />
+          </div>
+        ) : fileExtension === "gdrive" ? (
+          <a href={pdfToOpen} target="_blank" rel="noopener noreferrer">
+            <p>File berupa link Google Drive</p>
+            <br />
+            <Button style={{ width: "100%" }}>Buka</Button>
+          </a>
+        ) : (
+          <a href={pdfToOpen} download>
+            <p>File SPP ber-format (.rar)</p>
+            <br />
+            <Button style={{ width: "100%" }}>Download File</Button>
+          </a>
+        )}
       </Modal>
       <Modal
         open={isCheckModal}
@@ -821,144 +1332,190 @@ function ListSatuanKerjaPage() {
           setVariantModal("");
         }}
         title="Form Pengujian"
-        style={{
-          maxWidth: "1200px",
-          width: "90vw",
+        width={fileExtension === "pdf" ? "95vw" : "80vw"}
+        maxWidth="95vw"
+        bodyStyle={{
+          maxHeight: "80vh",
+          overflowY: "auto",
         }}
       >
-        {/* Container utama */}
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
-            gap: 20,
-            width: "1100px",
-            maxWidth: "90vw",
-            height: "500px",
+            maxHeight: "75vh",
+            overflowY: "auto",
+            padding: window.innerWidth <= 768 ? "2px" : "20px",
           }}
         >
-          <iframe
-            src={`${pdfToOpen}#zoom=70`}
-            style={{ width: "100%", height: "100%" }}
-            title="PDF Viewer"
-          />
+          {/* Container utama */}
           <div
             style={{
-              width: "80%",
-              overflowY: "auto",
-              maxHeight: "480px",
+                display: "flex",
+                flexDirection: window.innerWidth <= 768 ? "column" : "row", // FIX
+                gap: 20,
+                width: "100%",
+                padding: window.innerWidth <= 768 ? "0 2px" : 0,
+                height: "auto",
+                overflow: "auto",
             }}
           >
-            <form
-              onSubmit={handleSubmit}
+            {fileExtension === "pdf" ? (
+              // <iframe
+              //   src={`${pdfToOpen}#zoom=120`}
+              //   style={{ width: "100%", height: "100%" }}
+              //   title="PDF Viewer"
+              // />
+              <div style={{
+                            width: window.innerWidth <= 768 ? "100%" : "50%",
+                            maxHeight:
+                              window.innerWidth <= 768 ? "45vh" : "calc(100vh - 200px)",
+                            overflowY: "auto",
+                            padding: 0,
+                        }}>
+              <CustomPDFViewer pdfSource={pdfToOpen} />
+              </div>
+            ) : (
+              <div style={{ width: window.innerWidth <= 768 ? "100%" : "50%" }}>
+                <p>File SPP ber-format (.rar)</p>
+                <br />
+                <Button
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    const linkSPP = document.createElement("a");
+                    linkSPP.href = pdfToOpen;
+                    linkSPP.download = "";
+                    linkSPP.click();
+                  }}
+                >
+                  Download File
+                </Button>
+              </div>
+            )}
+            <div
               style={{
-                padding: 20,
-                width: "95%",
-                display: "flex",
-                flexDirection: "column",
-                gap: 20,
+                width: window.innerWidth <= 768 ? "100%" : "50%",
+                overflowY: "auto",
+                maxHeight: window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
+                paddingRight: 10,
               }}
             >
-              <Input
-                label="No. SPP"
-                name="no_spp"
-                value={formData?.["no_spp"]}
-                disabled
-              />
-              <Select
-                label="Jenis SPP"
-                name="type"
-                value={formData?.type_id}
-                disabled
-                options={types.map((q) => ({
-                  label: q.type,
-                  value: q.type_id,
-                }))}
-                isOpen={selectOpen}
-                setIsOpen={(open) => {
-                  if (open) {
-                    setSelectOpenStatus(false);
-                  }
-                  setSelectOpen(open);
+              <form
+                onSubmit={handleSubmit}
+                style={{
+                  padding: 20,
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 20,
+                  fontSize: window.innerWidth <= 768 ? "14px" : "16px",
                 }}
-              />
-              <MultiSelect
-                label="Kelengkapan"
-                name="kelengkapan"
-                value={formData.kelengkapan}
-                onChange={(selectedOptions) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    kelengkapan: selectedOptions,
-                  }))
-                }
-                options={questions.map((q) => ({
-                  label: q.text,
-                  value: q.id_question,
-                }))}
-                isOpen={multiSelectOneOpen}
-                setIsOpen={(open) => {
-                  if (open) {
-                    setSelectOpenStatus(false);
-                    setMultiSelectTwoOpen(false);
+              >
+                <Input
+                  label="No. SPP"
+                  name="no_spp"
+                  value={formData?.["no_spp"]}
+                  disabled
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                />
+                <Select
+                  label="Jenis SPP"
+                  name="type"
+                  value={formData?.type_id}
+                  disabled
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  options={types.map((q) => ({
+                    label: q.type,
+                    value: q.type_id,
+                  }))}
+                  isOpen={selectOpen}
+                  setIsOpen={(open) => {
+                    if (open) {
+                      setSelectOpenStatus(false);
+                    }
+                    setSelectOpen(open);
+                  }}
+                />
+                <MultiSelect
+                  label="Kelengkapan"
+                  name="kelengkapan"
+                  value={formData.kelengkapan}
+                  onChange={(selectedOptions) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      kelengkapan: selectedOptions,
+                    }))
                   }
-                  setMultiSelectOneOpen(open);
-                }}
-                disabled={formData.status === "approved"}
-              />
-              <Select
-                label="Status"
-                name="status"
-                value={formData?.status}
-                onChange={handleChange}
-                options={[
-                  { label: "Ditolak", value: "reject" },
-                  { label: "Telah Diuji", value: "approved" },
-                  { label: "SP2D", value: "sp2d" },
-                ]}
-                isOpen={selectOpenStatus}
-                setIsOpen={(open) => {
-                  if (open) {
-                    setMultiSelectOneOpen(false);
-                    setMultiSelectTwoOpen(false);
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  options={questions.map((q) => ({
+                    label: q.text,
+                    value: q.id_question,
+                  }))}
+                  isOpen={multiSelectOneOpen}
+                  setIsOpen={(open) => {
+                    if (open) {
+                      setSelectOpenStatus(false);
+                      setMultiSelectTwoOpen(false);
+                    }
+                    setMultiSelectOneOpen(open);
+                  }}
+                  disabled={formData.status === "sp2d"}
+                />
+                <Select
+                  label="Status"
+                  name="status"
+                  value={formData?.status}
+                  onChange={handleChange}
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  options={[
+                    { label: "Ditolak", value: "reject" },
+                    { label: "Telah Diuji", value: "approved" },
+                    { label: "SP2D", value: "sp2d" },
+                  ]}
+                  isOpen={selectOpenStatus}
+                  setIsOpen={(open) => {
+                    if (open) {
+                      setMultiSelectOneOpen(false);
+                      setMultiSelectTwoOpen(false);
+                    }
+                    setSelectOpenStatus(open);
+                  }}
+                />
+                <MultiSelect
+                  label="Verifikasi"
+                  name="verifikasi"
+                  value={formData?.verifikasi}
+                  onChange={(selectedOptions) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      verifikasi: selectedOptions,
+                    }))
                   }
-                  setSelectOpenStatus(open);
-                }}
-              />
-              <MultiSelect
-                label="Verifikasi"
-                name="verifikasi"
-                value={formData?.verifikasi}
-                onChange={(selectedOptions) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    verifikasi: selectedOptions,
-                  }))
-                }
-                options={verifications.map((q) => ({
-                  label: q.text,
-                  value: q.id_question,
-                }))}
-                isOpen={multiSelectTwoOpen}
-                setIsOpen={(open) => {
-                  if (open) {
-                    setSelectOpenStatus(false);
-                    setMultiSelectOneOpen(false);
-                  }
-                  setMultiSelectTwoOpen(open);
-                }}
-                disabled={formData.status === "approved"}
-              />
-              <Textarea
-                label="Catatan"
-                name="catatan"
-                value={formData?.catatan}
-                onChange={handleChange}
-              />
-              <Button type="submit" style={{ width: "100%" }}>
-                Submit
-              </Button>
-            </form>
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  options={verifications.map((q) => ({
+                    label: q.text,
+                    value: q.id_question,
+                  }))}
+                  isOpen={multiSelectTwoOpen}
+                  setIsOpen={(open) => {
+                    if (open) {
+                      setSelectOpenStatus(false);
+                      setMultiSelectOneOpen(false);
+                    }
+                    setMultiSelectTwoOpen(open);
+                  }}
+                  disabled={formData.status === "sp2d"}
+                />
+                <Textarea
+                  label="Catatan"
+                  name="catatan"
+                  value={formData?.catatan ?? formData?.feedback ?? ""}
+                  onChange={handleChange}
+                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                />
+                <Button type="submit" style={{ width: "100%" }}>
+                  Submit
+                </Button>
+              </form>
+            </div>
           </div>
         </div>
       </Modal>
@@ -1078,6 +1635,11 @@ function ListSatuanKerjaPage() {
           </form>
         </div>
       </Modal>
+      <PendingDocumentsModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        code={currentMenu?.code}
+      />
     </div>
   );
 }

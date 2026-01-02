@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchHelper } from "@/services/FetchHelper";
 import { useAuth } from "@/contexts/AuthContexts";
@@ -17,6 +17,16 @@ function LoginPage() {
     satker: "",
     password: "",
   });
+
+  // State untuk mendeteksi desktop
+  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
+
+  // Update isDesktop saat resize
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth > 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;

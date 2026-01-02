@@ -18,8 +18,8 @@ import moment from "moment";
 
 function Administrator() {
   return (
-    <div>
-      <div className="flex justify-between">
+    <div className="p-4 space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <Breadcrumbs
           items={[
             { name: "Barang Milik Negara", path: "/barang-milik-negara" },
@@ -28,12 +28,12 @@ function Administrator() {
         <User name={"Mas Febri"} previlege={"Administrator"} />
       </div>
       <Title>Dashboard Barang Milik Negara</Title>
-      <div className="grid grid-cols-2 gap-4 mr-4">
-        <Card className="">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card>
           <div className="items-center mb-4">
             <span className="font-bold text-xl">Jumlah Pegawai</span>
           </div>
-          <div className="grid grid-cols-2">
+          <div className="grid grid-cols-1 grid-cols-2">
             <div className="items-center">
               <DonutChart dataset={datasetPegawai} height="h-40" />
             </div>
@@ -148,19 +148,19 @@ function Administrator() {
               </span>
             </div>
             <div className="items-center flex gap-3">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_IPA} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target IPA</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>3.20</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi IPA</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>3.59</span>
               </div>
             </div>
           </div>
@@ -170,19 +170,19 @@ function Administrator() {
             </div>
 
             <div className="items-center flex gap-4">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_IKPA} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target IKPA</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>93.50</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi IKPA</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>94.99</span>
               </div>
             </div>
           </div>
@@ -200,12 +200,12 @@ function Administrator() {
                   <span className="text-sm">Target</span>
                 </div>
 
-                <span className={`text-4xl font-semibold`}>70.55</span>
+                <span className={`text-4xl font-semibold`}>70.55%</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>69.36%</span>
               </div>
             </div>
           </div>
@@ -217,18 +217,20 @@ function Administrator() {
             </div>
 
             <div className="items-center flex gap-4">
-              <BarChart dataset={datasetBarChart?.IKK} height="h-64" />
+              <BarChart dataset={datasetBarChart?.IKK_SPIP} height="h-64" />
               <div key="info" className={`flex flex-col`}>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target</span>
                 </div>
                 <span className={`text-4xl font-semibold`}>70.55</span>
+
+                <span className={`text-4xl font-semibold`}>3.93</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>
                   <span className="text-sm">Realisasi</span>
                 </div>
-                <span className={`text-4xl font-semibold`}>69.36</span>
+                <span className={`text-4xl font-semibold`}>3.93</span>
               </div>
             </div>
           </div>

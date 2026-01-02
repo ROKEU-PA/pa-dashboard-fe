@@ -46,14 +46,14 @@ function FileInput({
 
     try {
       setLoading(true);
-      toast.info("Uploading file...");
+      toast.info("Menambahkan file...");
 
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      toast.success("File uploaded successfully!");
+      toast.success("File ditambahkan!");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to upload file.");
+      toast.error("Failed gagal ditambahkan.");
     } finally {
       setIsFilled(false);
       setLoading(false);

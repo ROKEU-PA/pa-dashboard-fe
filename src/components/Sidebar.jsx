@@ -16,24 +16,28 @@ import {
   Settings,
   GaugeCircle,
   LayoutDashboard,
+  Info,
   MessageSquare,
   Network,
   Archive,
   Axis3D,
+  Table,
+  CircleDollarSign,
+  Calendar,
 } from "lucide-react";
-import React, { useState, useContext } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useState, useContext, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "@/contexts/AppContext";
 
 const menuItems = [
   {
     name: "Dashboard Utama",
     path: "/dashboard-utama",
-    icon: <LayoutDashboard />,
+    icon: <LayoutDashboard/>,
   },
   {
     name: "PTUK",
-    path: "/dashboard/ptuk",
+    path: "/ptuk/tuntutan-ganti-rugi",
     adminOnly: true,
     children: [
       {
@@ -46,12 +50,12 @@ const menuItems = [
   },
   {
     name: "Pelaksanaan Anggaran",
-    path: "/dashboard/pelaksanaan-anggaran",
+    path: "/pelaksanaan-anggaran",
     children: [
       {
-        name: "Dashboard",
-        path: "/pelaksanaan-anggaran",
-        icon: <Axis3D />,
+        name: "Tanda Terima SPP",
+        path: "/tanda-terima",
+        icon: <Table />,
       },
       {
         name: "Pengajuan SPP",
@@ -64,6 +68,11 @@ const menuItems = [
         icon: <AlignEndHorizontal />,
       },
       {
+        name: "Realisasi",
+        path: "/realisasi",
+        icon: <CircleDollarSign />,
+      },
+      {
         name: "Arsip SPM",
         path: "/satuan-kerja",
         icon: <Archive />,
@@ -74,54 +83,51 @@ const menuItems = [
         icon: <TrendingUpDown />,
         adminOnly: true,
       },
+      {
+        name: "LLAT",
+        path: "/llat",
+        icon: <Calendar />,
+      },
     ],
     icon: <HandCoins />,
+  
   },
   {
     name: "Barang Milik Negara",
     adminOnly: true,
-    path: "/dashboard/barang-milik-negara",
+    // path: "/dashboard/barang-milik-negara",
+    path: "/barang-milik-negara",
     children: [
-      {
-        name: "Dashboard",
-        path: "/barang-milik-negara",
-        icon: <Axis3D />,
-      },
-      {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
-      },
+      // {
+      //   name: "Dashboard",
+      //   path: "/barang-milik-negara",
+      //   icon: <Axis3D />,
+      // },
     ],
     icon: <Package />,
   },
   {
     name: "Akuntansi Pelaporan",
     adminOnly: true,
-    path: "/dashboard/akuntansi-pelaporan",
+    path: "/akuntansi-pelaporan",
     children: [
-      {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
-      },
+      // {
+      //   name: "Dashboard",
+      //   path: "/dashboard/akuntansi-pelaporan",
+      //   icon: <Axis3D />,
+      // },
     ],
     icon: <FileChartColumn />,
   },
   {
     name: "Tata Usaha",
     adminOnly: true,
-    path: "/dashboard/tata-usaha",
+    path: "/tata-usaha",
     children: [
       {
         name: "Dashboard",
         path: "/tata-usaha",
         icon: <Axis3D />,
-      },
-      {
-        name: "Home",
-        path: "/soon",
-        icon: <Building />,
       },
     ],
     icon: <BookUser />,
@@ -161,13 +167,14 @@ function Sidebar() {
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
-  console.log(role, userData);
+  const location = useLocation();
+  // console.log(role, userData);
 
   const handleLogout = () => logout();
 
   // 🔍 Filter menu berdasarkan role
   const getFilteredMenuItems = () => {
-    if (role === "admin") return menuItems;
+    if (role === "super_admin") return menuItems;
 
     if (role === "user" || role === "pic") {
       return menuItems
@@ -175,25 +182,87 @@ function Sidebar() {
         .map((item) => ({
           ...item,
           children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM"].includes(child.name)
+            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP", "LLAT"].includes(
+              child.name
+            )
           ),
         }));
     }
 
-    if (role === "guest") {
-      return menuItems.filter((item) => item.name !== "Management");
+    if (role === "admin") {
+      return menuItems
+        .filter(
+          (item) =>
+            item.name === "Pelaksanaan Anggaran" || item.name === "Management"
+        )
+        .map((item) => ({
+          ...item,
+          children: item.children?.filter((child) =>
+            [
+              "Pengajuan SPP",
+              "Arsip SPM",
+              "Tanda Terima SPP",
+              "User Manage",
+              "LLAT"
+            ].includes(child.name)
+          ),
+        }));
     }
 
-    return [];
-  };
+ if (role !== "guest") {
+  return menuItems.map(item => ({
+    ...item,
+    children: item.children?.filter(child => child.name !== "About")
+  }));
+}
+
+if (role === "guest") {
+  return menuItems
+    .filter(item => item.name !== "Management")
+    .map(item => {
+      if (item.name === "Pelaksanaan Anggaran") {
+        return {
+          ...item,
+          children: item.children?.filter(child =>
+            [ "Dashboard","IKPA", "Realisasi", "LLAT", "About"].includes(child.name)
+          ),
+        };
+      }
+      return item;
+    });
+}
+
+return [];};
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
+
+    if (!item.children && item.path) {
+      setOpenDropdown(null);
+      navigate(item.path);
+      return;
+    }
+
     if (!isOpen && item.path) {
       navigate(item.path);
     }
+
     setOpenDropdown(isOpen ? null : item.name);
   };
+
+  useEffect(() => {
+    const currentPath = location.pathname;
+
+    const matchedMenu = getFilteredMenuItems().find((item) =>
+      item.children?.some((child) => currentPath.startsWith(child.path))
+    );
+
+    if (matchedMenu) {
+      setOpenDropdown(matchedMenu.name);
+    } else {
+      setOpenDropdown(null);
+    }
+  }, [location.pathname]);
 
   return (
     <div
@@ -243,6 +312,7 @@ function Sidebar() {
                       alignItems: "center",
                       padding: "10px",
                       cursor: "pointer",
+                      marginBottom: "5px",
                     }}
                   >
                     <div
