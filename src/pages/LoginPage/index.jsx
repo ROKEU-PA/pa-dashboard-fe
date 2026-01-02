@@ -1,166 +1,144 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { fetchHelper } from "@/services/FetchHelper";
-import { useAuth } from "@/contexts/AuthContexts";
-import { useAppProvider } from "@/contexts/AppContext";
+// src/pages/LoginPage/index.jsx
+import React from "react";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
+import { useLogin } from "./hooks/useLogin";
+import { useMediaQuery } from "./hooks/useMediaQuery";
+import { useFormValidation } from "./hooks/useFormValidation";
+import { ASSETS, TEXT, FORM_FIELDS, BREAKPOINTS } from "./constants";
+import { styles } from "./styles";
+import "index.css";
 import { validationSchema } from "@/services/GeneralHelper";
-import { toast } from "react-toastify";
 
-function LoginPage() {
-  const navigate = useNavigate();
-  const { LoadUser } = useAppProvider();
-  const { login } = useAuth();
-  const [errorMessage, setErrorMessage] = useState(null);
-  const [formData, setFormData] = useState({
-    satker: "",
-    password: "",
+const LoginPage = () => {
+  // Custom hooks
+  const { isLoading, errorMessage, handleLogin, clearError } = useLogin();
+  const isDesktop = useMediaQuery(BREAKPOINTS.MOBILE);
+  const { formData, handleChange } = useFormValidation({
+    [FORM_FIELDS.SATKER]: "",
+    [FORM_FIELDS.PASSWORD]: "",
   });
 
-  // State untuk mendeteksi desktop
-  const [isDesktop, setIsDesktop] = useState(window.innerWidth > 768);
-
-  // Update isDesktop saat resize
-  useEffect(() => {
-    const handleResize = () => setIsDesktop(window.innerWidth > 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await handleLogin(formData);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    var CryptoJS = require("crypto-js");
-    var encryptedPass = CryptoJS.AES.encrypt(
-      formData.password,
-      "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
-    ).toString();
-
-    try {
-      const response = await fetchHelper(
-        "https://rokeubmn.kemnaker.go.id/api/auth/login",
-        "POST",
-        { kode_biro: parseInt(formData.satker), password: encryptedPass }
-      );
-      if (response?.success) {
-        login(response?.data?.access_token);
-        sessionStorage.setItem("justLoggedIn", "true");
-        LoadUser();
-        navigate("/dashboard-utama");
-        setErrorMessage(null);
-      } else {
-        toast.error(response?.message);
-      }
-    } catch (err) {
-      setErrorMessage(
-        err.toString().includes("Unauthorized")
-          ? "Kode Satuan Kerja atau Password salah!"
-          : err.toString()
-      );
-      console.log(err, err.toString());
-      toast.error(err);
-    } finally {
+  const handleInputChange = (event) => {
+    handleChange(event);
+    if (errorMessage) {
+      clearError();
     }
   };
 
   return (
-    <div className="h-[100vh]">
-      <div className="w-full h-[25vh] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] align-middle content-center">
-        <img
-          src="/logo-kemnaker.webp"
-          alt="logo"
-          width="250"
-          className="ml-[12%]"
-        ></img>
-        <img
-          src="/logo-kemnaker-decoration.webp"
-          alt="logo"
-          width=""
-          height=""
-          className="ml-[12%]"
-        ></img>
-      </div>
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "45vw 55vw",
-          height: "75vh",
-        }}
+    <div className={styles.container}>
+      {/* Header Section */}
+      <header
+        className={`${styles.header.base} ${styles.header.padding}`}
+        role="banner"
       >
-        <div
-          style={{
-            margin: "5rem auto",
-            display: "flex",
-            gap: "2rem",
-            flexDirection: "column",
-          }}
+        <img
+          src={ASSETS.LOGO}
+          alt={TEXT.LOGO_ALT}
+          className={`${styles.logo.base} ${styles.logo.size}`}
+          loading="eager"
+        />
+      </header>
+
+      {/* Main Content */}
+      <main className={`${styles.mainGrid.base} ${styles.mainGrid.columns}`}>
+        {/* Form Section */}
+        <section
+          className={`${styles.formSection.base} ${styles.formSection.padding}`}
+          aria-label="Login form section"
         >
-          <div
-            style={{
-              width: "90%",
-            }}
-          >
-            <span style={{ fontWeight: 700, fontSize: 28 }}>
-              Selamat Datang di SiAKBAR
-            </span>
-            <br></br>
-            <span style={{ fontWeight: 600, fontSize: 16, color: "#898A8D" }}>
-              Anggaran, Keuangan, dan Barang
-            </span>
+          <div className={styles.formContainer}>
+            {/* Page Title */}
+            <div className={styles.title.container}>
+              <h1 className={styles.title.heading}>{TEXT.PAGE_TITLE}</h1>
+              <p className={styles.title.subtitle}>{TEXT.PAGE_SUBTITLE}</p>
+            </div>
+
+            {/* Login Form */}
+            <form
+              onSubmit={handleSubmit}
+              className={styles.form.base}
+              noValidate
+              aria-label="Login form"
+            >
+              {/* Satuan Kerja Input */}
+              <div className={styles.form.inputWrapper}>
+                <Input
+                  label={TEXT.SATKER_LABEL}
+                  name={FORM_FIELDS.SATKER}
+                  type="text"
+                  required
+                  value={formData[FORM_FIELDS.SATKER]}
+                  validate={validationSchema.onlyNumber}
+                  onChange={handleInputChange}
+                  placeholder={TEXT.SATKER_PLACEHOLDER}
+                  autoComplete="username"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Password Input */}
+              <div className={styles.form.inputWrapper}>
+                <Input
+                  label={TEXT.PASSWORD_LABEL}
+                  type="password"
+                  name={FORM_FIELDS.PASSWORD}
+                  required
+                  value={formData[FORM_FIELDS.PASSWORD]}
+                  onChange={handleInputChange}
+                  placeholder={TEXT.PASSWORD_PLACEHOLDER}
+                  autoComplete="current-password"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Error Message */}
+              {errorMessage && (
+                <div
+                  role="alert"
+                  aria-live="polite"
+                  className={`${styles.error.base} ${styles.error.color}`}
+                >
+                  {errorMessage}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                className={`${styles.button.base} ${styles.button.colors} ${styles.button.focus} ${styles.button.disabled} !w-full`}
+                disabled={isLoading}
+              >
+                {isLoading ? "Memproses..." : TEXT.LOGIN_BUTTON}
+              </Button>
+            </form>
           </div>
-          <form
-            onSubmit={handleSubmit}
-            style={{ display: "flex", gap: 20, flexDirection: "column" }}
+        </section>
+
+        {isDesktop && (
+          <section
+            className={`${styles.imageSection.base} ${styles.imageSection.padding} ${styles.imageSection.background}`}
+            aria-hidden="true"
           >
-            <Input
-              label="Satuan Kerja"
-              name="satker"
-              required
-              value={formData.satker}
-              validate={validationSchema.onlyNumber}
-              onChange={handleChange}
-            />
-
-            <Input
-              label="Password"
-              type="password"
-              name="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-            />
-            {errorMessage && (
-              <span style={{ fontSize: 16, textAlign: "center", color: "red" }}>
-                {errorMessage}
-              </span>
-            )}
-
-            <Button type="submit" style={{ width: "100%" }}>
-              Login
-            </Button>
-          </form>
-        </div>
-        {/* <div
-          style={{
-            backgroundImage: 'url("/login-background-2.jpg")',
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            // height: "100vh",
-            width: "100%",
-          }}
-        ></div> */}
-      </div>
+            <div className={styles.image.container}>
+              <img
+                src={ASSETS.BUILDING_IMAGE}
+                alt="Modern office buildings"
+                className={styles.image.img}
+                loading="lazy"
+                width="600"
+              />
+            </div>
+          </section>
+        )}
+      </main>
     </div>
   );
-}
+};
 
 export default LoginPage;

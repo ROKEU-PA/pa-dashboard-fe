@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 function Button({
   type = "button",
   variant = "primary",
+  className,
   size = "medium",
   disabled = false,
   onClick,
@@ -84,7 +85,7 @@ function Button({
 
   return (
     <button
-      className="pointer"
+      className={`pointer ${className}`}
       type={type}
       style={styleFinal}
       disabled={disabled}
