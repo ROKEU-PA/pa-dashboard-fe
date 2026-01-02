@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchHelper } from "../services/FetchHelper";
-// import { useAuth } from "../auth/AuthContext";
-import { useAuth } from "../contexts/AuthContexts";
-import { useAppProvider } from "../contexts/AppContext";
-import Button from "../components/Button";
-import Input from "../components/Input";
-import { validationSchema } from "../services/GeneralHelper";
+import { fetchHelper } from "@/services/FetchHelper";
+import { useAuth } from "@/contexts/AuthContexts";
+import { useAppProvider } from "@/contexts/AppContext";
+import Button from "@/components/Button";
+import Input from "@/components/Input";
+import { validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 
 function LoginPage() {
@@ -64,37 +63,47 @@ function LoginPage() {
   };
 
   return (
-    <div>
+    <div className="h-[100vh]">
+      <div className="w-full h-[25vh] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] align-middle content-center">
+        <img
+          src="/logo-kemnaker.webp"
+          alt="logo"
+          width="250"
+          className="ml-[12%]"
+        ></img>
+        <img
+          src="/logo-kemnaker-decoration.webp"
+          alt="logo"
+          width=""
+          height=""
+          className="ml-[12%]"
+        ></img>
+      </div>
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "45vw 55vw",
-          height: "100vh",
+          height: "75vh",
         }}
       >
-        <div style={{ margin: "25% 30%" }}>
+        <div
+          style={{
+            margin: "5rem auto",
+            display: "flex",
+            gap: "2rem",
+            flexDirection: "column",
+          }}
+        >
           <div
             style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "2rem",
+              width: "90%",
             }}
           >
-            <img src="/logo-kemnaker-ori.png" alt="logo" width="200"></img>
-          </div>
-          <div
-            style={{
-              width: "100%",
-              marginBottom: "2rem",
-              textAlign: "center",
-            }}
-          >
-            <span style={{ fontWeight: 600, fontSize: 28 }}>
+            <span style={{ fontWeight: 700, fontSize: 28 }}>
               Selamat Datang di SiAKBAR
             </span>
             <br></br>
-            <span style={{ fontWeight: 600, fontSize: 16 }}>
+            <span style={{ fontWeight: 600, fontSize: 16, color: "#898A8D" }}>
               Anggaran, Keuangan, dan Barang
             </span>
           </div>
@@ -130,15 +139,15 @@ function LoginPage() {
             </Button>
           </form>
         </div>
-        <div
+        {/* <div
           style={{
             backgroundImage: 'url("/login-background-2.jpg")',
             backgroundSize: "cover",
             backgroundPosition: "center",
-            height: "100vh",
+            // height: "100vh",
             width: "100%",
           }}
-        ></div>
+        ></div> */}
       </div>
     </div>
   );

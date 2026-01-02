@@ -221,7 +221,7 @@ function Sidebar() {
         className="sidebar-scroll"
       >
         <img
-          src="/logo-kemnaker.png"
+          src="/logo-kemnaker.webp"
           alt="logo"
           width="160"
           style={{ marginBottom: "2rem" }}

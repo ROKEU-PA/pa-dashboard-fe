@@ -223,7 +223,6 @@ function Administrator() {
                   <div className="w-3 h-3 bg-blue-500 "></div>
                   <span className="text-sm">Target</span>
                 </div>
-
                 <span className={`text-4xl font-semibold`}>70.55</span>
                 <div className={`flex gap-2 items-center font-bold `}>
                   <div className="w-3 h-3 bg-gray-400 "></div>

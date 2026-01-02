@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "./pages/LoginPage";
+// import LoginPage from "./pages/LoginPage";
 import AppLayout from "./Layouts/AppLayout";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
@@ -22,6 +22,7 @@ import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
 import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
+import LoginPage from "./pages/LoginPage";
 // import "@/PDFWorkerSetup";
 
 function App() {

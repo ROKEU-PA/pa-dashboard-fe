@@ -27,12 +27,12 @@ function Button({
 
   const variantStyles = {
     primary: {
-      backgroundColor: isActive ? "#0f2e4c" : isHovered ? "#1d4e85" : "#15406A",
+      backgroundColor: isActive ? "#0f2e4c" : isHovered ? "#2F8AFD" : "#59C7FF",
       color: "white",
     },
     secondary: {
       backgroundColor: isActive ? "#3bb999" : isHovered ? "#43e6bd" : "#4cd4b0",
-      color: "#15406A",
+      color: "#59C7FF",
     },
     outline: {
       backgroundColor: isActive
@@ -40,8 +40,8 @@ function Button({
         : isHovered
         ? "#f3faff"
         : "transparent",
-      border: "2px solid #15406A",
-      color: "#15406A",
+      border: "2px solid #59C7FF",
+      color: "#59C7FF",
     },
     danger: {
       backgroundColor: isActive ? "#b2241c" : isHovered ? "#e2544a" : "#d93025",
@@ -84,6 +84,7 @@ function Button({
 
   return (
     <button
+      className="pointer"
       type={type}
       style={styleFinal}
       disabled={disabled}
@@ -98,9 +99,7 @@ function Button({
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
     >
-      <div
-        style={{ display: "inline-flex", alignItems: "center", gap: "0.5em" }}
-      >
+      <div style={{ display: "inline-flex", gap: "0.5em" }}>
         {icon && icon}
         {children && (
           <span style={{ lineHeight: icon ? "25px" : 0 }}>{children}</span>
