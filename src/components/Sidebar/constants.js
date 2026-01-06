@@ -25,7 +25,7 @@ export const menuItems = [
   {
     name: "Dashboard Utama",
     path: "/dashboard-utama",
-    icon: <LayoutDashboard />,
+    icon: <LayoutDashboard strokeWidth={3} />,
   },
   {
     name: "PTUK",
@@ -35,10 +35,10 @@ export const menuItems = [
       {
         name: "Tuntutan Ganti Rugi",
         path: "/ptuk/tuntutan-ganti-rugi",
-        icon: <Building />,
+        icon: <Building strokeWidth={3} />,
       },
     ],
-    icon: <Layers />,
+    icon: <Layers strokeWidth={3} />,
   },
   {
     name: "Pelaksanaan Anggaran",
@@ -47,41 +47,41 @@ export const menuItems = [
       {
         name: "Tanda Terima SPP",
         path: "/tanda-terima",
-        icon: <Table />,
+        icon: <Table strokeWidth={3} />,
       },
       {
         name: "Pengajuan SPP",
         path: "/satuan-kerja/pengajuan",
-        icon: <FolderCheck />,
+        icon: <FolderCheck strokeWidth={3} />,
       },
       {
         name: "IKPA",
         path: "/ikpa",
-        icon: <AlignEndHorizontal />,
+        icon: <AlignEndHorizontal strokeWidth={3} />,
       },
       {
         name: "Realisasi",
         path: "/realisasi",
-        icon: <CircleDollarSign />,
+        icon: <CircleDollarSign strokeWidth={3} />,
       },
       {
         name: "Arsip SPM",
         path: "/satuan-kerja",
-        icon: <Archive />,
+        icon: <Archive strokeWidth={3} />,
       },
       {
         name: "Kompilasi",
         path: "/compilation",
-        icon: <TrendingUpDown />,
+        icon: <TrendingUpDown strokeWidth={3} />,
         adminOnly: true,
       },
       {
         name: "LLAT",
         path: "/llat",
-        icon: <Calendar />,
+        icon: <Calendar strokeWidth={3} />,
       },
     ],
-    icon: <HandCoins />,
+    icon: <HandCoins strokeWidth={3} />,
   },
   {
     name: "Barang Milik Negara",
@@ -92,10 +92,10 @@ export const menuItems = [
       // {
       //   name: "Dashboard",
       //   path: "/barang-milik-negara",
-      //   icon: <Axis3D />,
+      //   icon: <Axis3D strokeWidth={3} />,
       // },
     ],
-    icon: <Package />,
+    icon: <Package strokeWidth={3} />,
   },
   {
     name: "Akuntansi Pelaporan",
@@ -105,10 +105,10 @@ export const menuItems = [
       // {
       //   name: "Dashboard",
       //   path: "/dashboard/akuntansi-pelaporan",
-      //   icon: <Axis3D />,
+      //   icon: <Axis3D strokeWidth={3} />,
       // },
     ],
-    icon: <FileChartColumn />,
+    icon: <FileChartColumn strokeWidth={3} />,
   },
   {
     name: "Tata Usaha",
@@ -118,34 +118,34 @@ export const menuItems = [
       {
         name: "Dashboard",
         path: "/tata-usaha",
-        icon: <Axis3D />,
+        icon: <Axis3D strokeWidth={3} />,
       },
     ],
-    icon: <BookUser />,
+    icon: <BookUser strokeWidth={3} />,
   },
   {
     name: "Struktur Organisasi",
     path: "/dashboard/struktur-organisasi",
-    icon: <Network />,
+    icon: <Network strokeWidth={3} />,
   },
   {
     name: "Helpdesk",
     path: "/dashboard/helpdesk",
-    icon: <MessageSquare />,
+    icon: <MessageSquare strokeWidth={3} />,
   },
   {
     name: "Management",
-    icon: <Settings />,
+    icon: <Settings strokeWidth={3} />,
     children: [
       {
         name: "User Manage",
         path: "/user-management",
-        icon: <UserRoundCog />,
+        icon: <UserRoundCog strokeWidth={3} />,
       },
       {
         name: "Dashboard Manage",
         path: "/dashboard-management",
-        icon: <GaugeCircle />,
+        icon: <GaugeCircle strokeWidth={3} />,
       },
     ],
     adminOnly: true,
