@@ -20,7 +20,7 @@ export const styles = {
 
   formSection: {
     base: "flex items-center justify-center",
-    padding: "px-8 lg:px-16 py-12 lg:py-0",
+    padding: "px-8 lg:px-16 py-12 lg:py-0 mb-20",
   },
 
   formContainer: "w-[50%] max-w-md space-y-8",
@@ -55,6 +55,6 @@ export const styles = {
 
   image: {
     container: "w-full max-w-lg",
-    img: "absolute top-[17%] right-[10%]",
+    img: "absolute top-[20%] right-[10%]",
   },
 };

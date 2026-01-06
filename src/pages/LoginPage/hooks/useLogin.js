@@ -27,7 +27,7 @@ export const useLogin = () => {
 
         const encryptedPassword = encryptPassword(formData.password);
         const payload = {
-          kode_biro: parseInt(formData.satker, 10),
+          kode_biro: parseInt(formData?.satker, 10),
           password: encryptedPassword,
         };
 

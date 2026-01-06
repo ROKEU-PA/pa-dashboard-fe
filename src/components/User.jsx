@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { toast } from "react-toastify";
 import { apiRequest } from "@/services/APIHelper";
 import { cryptoEncrypter } from "@/services/GeneralHelper";
+import { ChevronDown } from "lucide-react";
 
 const User = ({
   className = "",
@@ -62,16 +63,16 @@ const User = ({
   };
 
   return (
-    <div className={`${className} py-2 relative`} ref={dropdownRef}>
+    <div className={`${className} pb-2 relative`} ref={dropdownRef}>
       <div
-        className="flex gap-2 items-center cursor-pointer"
+        className="flex gap-2 items-center cursor-pointer pb-2"
         onClick={() => setOpen(!open)}
       >
+        <div className="w-8 h-8 rounded-full bg-red-500"></div>
         <div className="flex flex-col text-right">
           <span className="text-[14px] font-bold">{name}</span>
-          <span className="text-[12px] font-normal">{previlege}</span>
         </div>
-        <div className="w-8 h-8 rounded-full bg-red-500"></div>
+        <ChevronDown size={20} />
       </div>
 
       {open && (

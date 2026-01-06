@@ -1,6 +1,5 @@
-import React, { useContext, useEffect, useState } from "react";
+import React from "react";
 import Title from "@/components/Title";
-import Paper from "@/components/Paper";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Card from "@/components/Card";
 import { Database } from "lucide-react";
@@ -22,13 +21,6 @@ function MainDashboard() {
 
   return (
     <div>
-      <div className="flex justify-between flex-wrap">
-        <Breadcrumbs
-          items={[{ name: "Dashboard Utama", path: "/dashboard" }]}
-        />
-        <User name={"Test"} previlege={"Administrator"} />
-      </div>
-      <Title>Dashboard Utama</Title>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="">
           <div className="flex justify-between items-center mb-4">
@@ -153,10 +145,10 @@ function MainDashboard() {
               Realisasi Anggaran
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 grid-cols-[30%_40%_25%] gap-2">
+          <div className="grid md:grid-cols-2 grid-cols-[30%_40%_25%] gap-2">
             <DonutChartAkuntansi data={dataset} height="h-64" />
             <div className="flex flex-col my-10 justify-evenly">
-              <div key="info" className="flex  items-center">
+              <div key="info_card_1" className="flex  items-center">
                 <div className="w-1 h-12 bg-[#616484]"></div>
                 <div className="flex gap-2 flex-col ml-2">
                   <span className="text-xl font-bold">Total Pagu</span>
@@ -165,7 +157,7 @@ function MainDashboard() {
                   </span>
                 </div>
               </div>
-              <div key="info" className="flex  items-center">
+              <div key="info_crd_2" className="flex  items-center">
                 <div className="w-1 h-12 bg-[#43AAF0]"></div>
                 <div className="flex gap-2 flex-col ml-2">
                   <span className="text-xl font-bold">Realisasi</span>

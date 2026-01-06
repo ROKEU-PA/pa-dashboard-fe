@@ -33,7 +33,6 @@ const LoginPage = () => {
 
   return (
     <div className={styles.container}>
-      {/* Header Section */}
       <header
         className={`${styles.header.base} ${styles.header.padding}`}
         role="banner"
@@ -44,30 +43,45 @@ const LoginPage = () => {
           className={`${styles.logo.base} ${styles.logo.size}`}
           loading="eager"
         />
+        <img
+          src={"/logo-kemnaker-decoration.webp"}
+          alt={TEXT.LOGO_ALT}
+          className={`absolute right-[-1rem] rotate-[168.75deg]`}
+          loading="eager"
+          width={250}
+        />
+        <img
+          src={"/logo-kemnaker-decoration.webp"}
+          alt={TEXT.LOGO_ALT}
+          className={`absolute right-[12.5rem] top-[-7rem] rotate-[168.75deg]`}
+          loading="eager"
+          width={250}
+        />
+        <img
+          src={"/logo-kemnaker-decoration.webp"}
+          alt={TEXT.LOGO_ALT}
+          className={`absolute right-[21rem] top-[5.5rem] rotate-[168.75deg]`}
+          loading="eager"
+          width={250}
+        />
       </header>
 
-      {/* Main Content */}
       <main className={`${styles.mainGrid.base} ${styles.mainGrid.columns}`}>
-        {/* Form Section */}
         <section
           className={`${styles.formSection.base} ${styles.formSection.padding}`}
           aria-label="Login form section"
         >
           <div className={styles.formContainer}>
-            {/* Page Title */}
             <div className={styles.title.container}>
               <h1 className={styles.title.heading}>{TEXT.PAGE_TITLE}</h1>
               <p className={styles.title.subtitle}>{TEXT.PAGE_SUBTITLE}</p>
             </div>
-
-            {/* Login Form */}
             <form
               onSubmit={handleSubmit}
               className={styles.form.base}
               noValidate
               aria-label="Login form"
             >
-              {/* Satuan Kerja Input */}
               <div className={styles.form.inputWrapper}>
                 <Input
                   label={TEXT.SATKER_LABEL}
@@ -82,8 +96,6 @@ const LoginPage = () => {
                   disabled={isLoading}
                 />
               </div>
-
-              {/* Password Input */}
               <div className={styles.form.inputWrapper}>
                 <Input
                   label={TEXT.PASSWORD_LABEL}
@@ -97,8 +109,6 @@ const LoginPage = () => {
                   disabled={isLoading}
                 />
               </div>
-
-              {/* Error Message */}
               {errorMessage && (
                 <div
                   role="alert"
@@ -131,7 +141,7 @@ const LoginPage = () => {
                 alt="Modern office buildings"
                 className={styles.image.img}
                 loading="lazy"
-                width="600"
+                width="550"
               />
             </div>
           </section>

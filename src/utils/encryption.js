@@ -1,7 +1,7 @@
 // src/utils/encryption.js
 import CryptoJS from "crypto-js";
 
-let ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+let ENCRYPTION_KEY = process.env.REACT_APP_ENCRYPTION_KEY;
 
 export const encryptPassword = (password) => {
   try {
