@@ -38,8 +38,6 @@ import {
 } from "@/pages/ListSatuankerja/satkerHooks";
 import PendingDocumentsModal from "./pendingDocumentsModal";
 
-
-
 function ListSatuanKerjaPage() {
   const isMobile = window.innerWidth < 768; //responsif
 
@@ -57,7 +55,7 @@ function ListSatuanKerjaPage() {
     endDate: null,
   });
   const [isOpenPDF, setIsOpenPDF] = useState(false);
-  const [variantModal, setVariantModal] = useState("");
+  const [letiantModal, setVariantModal] = useState("");
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(0);
@@ -225,8 +223,8 @@ function ListSatuanKerjaPage() {
 
   const submitData = async (formData) => {
     try {
-      var CryptoJS = require("crypto-js");
-      var encryptedLink = CryptoJS.AES.encrypt(
+      let CryptoJS = require("crypto-js");
+      let encryptedLink = CryptoJS.AES.encrypt(
         formData.link,
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
       ).toString();
@@ -321,8 +319,8 @@ function ListSatuanKerjaPage() {
   const editData = async (formData) => {
     try {
       const payload = new FormData();
-      var CryptoJS = require("crypto-js");
-      var encryptedLink = CryptoJS.AES.encrypt(
+      let CryptoJS = require("crypto-js");
+      let encryptedLink = CryptoJS.AES.encrypt(
         formData.link,
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
       ).toString();
@@ -336,7 +334,7 @@ function ListSatuanKerjaPage() {
       payload.append("tahun", formData.tahun);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", formData.jml_hal);
-      payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
+      payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =
         formData.dokumen instanceof File ||
@@ -460,7 +458,7 @@ function ListSatuanKerjaPage() {
     formData.type = formData.type_id;
     try {
       if (
-        variantModal === "Add" &&
+        letiantModal === "Add" &&
         isAnyFile &&
         isPengajuanPath(location.pathname)
       ) {
@@ -475,7 +473,7 @@ function ListSatuanKerjaPage() {
           return;
         }
       } else if (
-        variantModal === "Add" &&
+        letiantModal === "Add" &&
         isAnyFile &&
         !isPengajuanPath(location.pathname)
       ) {
@@ -488,12 +486,12 @@ function ListSatuanKerjaPage() {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
         }
-      } else if (variantModal === "Edit") {
+      } else if (letiantModal === "Edit") {
         if (!formData?.["no_spp"] || !formData.tahun || !formData.type) {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
         }
-      } else if (variantModal === "Pengujian") {
+      } else if (letiantModal === "Pengujian") {
         if (!formData.kelengkapan || !formData.status || !formData.verifikasi) {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
@@ -542,7 +540,7 @@ function ListSatuanKerjaPage() {
         );
         return;
       }
-      if (variantModal === "Add") {
+      if (letiantModal === "Add") {
         await submitData(formData);
       } else {
         await editData(formData);
@@ -639,7 +637,7 @@ function ListSatuanKerjaPage() {
                     setVariantModal("Add");
                   }}
                   style={{ width: "fit-content" }}
-                  variant="danger"
+                  letiant="danger"
                   icon={<Plus size={20} />}
                 >
                   Tambah Arsip
@@ -657,7 +655,7 @@ function ListSatuanKerjaPage() {
                       setVariantModal("Add");
                     }}
                     style={{ width: "fit-content" }}
-                    variant="danger"
+                    letiant="danger"
                     icon={<Plus size={20} />}
                   >
                     Tambah Pengajuan
@@ -686,7 +684,7 @@ function ListSatuanKerjaPage() {
               <Button
                 onClick={() => {}}
                 style={{ width: "fit-content" }}
-                variant="secondary"
+                letiant="secondary"
                 icon={<Book size={20} />}
               >
                 PMK 039 2024
@@ -736,7 +734,9 @@ function ListSatuanKerjaPage() {
                 {columns
                   .filter(
                     (col) =>
-                      !(col.hiddenInArsip && !isPengajuanPath(location.pathname))
+                      !(
+                        col.hiddenInArsip && !isPengajuanPath(location.pathname)
+                      )
                   )
                   .map((col) => (
                     <TableCell
@@ -768,7 +768,8 @@ function ListSatuanKerjaPage() {
                     .filter(
                       (col) =>
                         !(
-                          col.hiddenInArsip && !isPengajuanPath(location.pathname)
+                          col.hiddenInArsip &&
+                          !isPengajuanPath(location.pathname)
                         )
                     )
                     .map((col) => {
@@ -1036,7 +1037,7 @@ function ListSatuanKerjaPage() {
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                 }}
-                                variant="danger"
+                                letiant="danger"
                               >
                                 {row.status === "approved"
                                   ? "Ubah Status"
@@ -1107,7 +1108,7 @@ function ListSatuanKerjaPage() {
         }}
         title={
           isPengajuanPath(location.pathname)
-            ? variantModal == "Add"
+            ? letiantModal == "Add"
               ? "Form Pengajuan"
               : "Form Edit"
             : "Form Pengarsipan"
@@ -1177,7 +1178,7 @@ function ListSatuanKerjaPage() {
           />
 
           {/* Tampilkan Nama Pengirim hanya jika isPengajuanPath TRUE */}
-          {isPengajuanPath(location.pathname) && variantModal == "Add" && (
+          {isPengajuanPath(location.pathname) && letiantModal == "Add" && (
             <Input
               label="Nama Pengirim"
               name="uploaded_by"
@@ -1189,7 +1190,7 @@ function ListSatuanKerjaPage() {
             />
           )}
 
-          {!isPengajuanPath(location.pathname) && variantModal === "Add" && (
+          {!isPengajuanPath(location.pathname) && letiantModal === "Add" && (
             <Select
               label="Jenis File"
               name="jenis_file"
@@ -1247,7 +1248,7 @@ function ListSatuanKerjaPage() {
 
           {userData &&
             !isPengajuanPath(location.pathname) &&
-            variantModal == "Edit" &&
+            letiantModal == "Edit" &&
             userData?.role !== "user" && (
               <FileInput
                 accept=".pdf"
@@ -1261,7 +1262,7 @@ function ListSatuanKerjaPage() {
 
           {userData &&
             !isPengajuanPath(location.pathname) &&
-            variantModal == "Edit" &&
+            letiantModal == "Edit" &&
             userData?.role !== "user" && (
               <FileInput
                 accept=".pdf"
@@ -1304,12 +1305,14 @@ function ListSatuanKerjaPage() {
           title="PDF Viewer"
         /> */}
         {fileExtension === "pdf" ? (
-          <div style={{
-                        maxHeight: "calc(100vh - 120px)",
-                        overflowY: "auto",
-                        padding: 0,
-                      }}>
-          <CustomPDFViewer pdfSource={pdfToOpen} />
+          <div
+            style={{
+              maxHeight: "calc(100vh - 120px)",
+              overflowY: "auto",
+              padding: 0,
+            }}
+          >
+            <CustomPDFViewer pdfSource={pdfToOpen} />
           </div>
         ) : fileExtension === "gdrive" ? (
           <a href={pdfToOpen} target="_blank" rel="noopener noreferrer">
@@ -1349,13 +1352,13 @@ function ListSatuanKerjaPage() {
           {/* Container utama */}
           <div
             style={{
-                display: "flex",
-                flexDirection: window.innerWidth <= 768 ? "column" : "row", // FIX
-                gap: 20,
-                width: "100%",
-                padding: window.innerWidth <= 768 ? "0 2px" : 0,
-                height: "auto",
-                overflow: "auto",
+              display: "flex",
+              flexDirection: window.innerWidth <= 768 ? "column" : "row", // FIX
+              gap: 20,
+              width: "100%",
+              padding: window.innerWidth <= 768 ? "0 2px" : 0,
+              height: "auto",
+              overflow: "auto",
             }}
           >
             {fileExtension === "pdf" ? (
@@ -1364,14 +1367,16 @@ function ListSatuanKerjaPage() {
               //   style={{ width: "100%", height: "100%" }}
               //   title="PDF Viewer"
               // />
-              <div style={{
-                            width: window.innerWidth <= 768 ? "100%" : "50%",
-                            maxHeight:
-                              window.innerWidth <= 768 ? "45vh" : "calc(100vh - 200px)",
-                            overflowY: "auto",
-                            padding: 0,
-                        }}>
-              <CustomPDFViewer pdfSource={pdfToOpen} />
+              <div
+                style={{
+                  width: window.innerWidth <= 768 ? "100%" : "50%",
+                  maxHeight:
+                    window.innerWidth <= 768 ? "45vh" : "calc(100vh - 200px)",
+                  overflowY: "auto",
+                  padding: 0,
+                }}
+              >
+                <CustomPDFViewer pdfSource={pdfToOpen} />
               </div>
             ) : (
               <div style={{ width: window.innerWidth <= 768 ? "100%" : "50%" }}>
@@ -1394,7 +1399,8 @@ function ListSatuanKerjaPage() {
               style={{
                 width: window.innerWidth <= 768 ? "100%" : "50%",
                 overflowY: "auto",
-                maxHeight: window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
+                maxHeight:
+                  window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
                 paddingRight: 10,
               }}
             >
@@ -1414,14 +1420,18 @@ function ListSatuanKerjaPage() {
                   name="no_spp"
                   value={formData?.["no_spp"]}
                   disabled
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                 />
                 <Select
                   label="Jenis SPP"
                   name="type"
                   value={formData?.type_id}
                   disabled
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                   options={types.map((q) => ({
                     label: q.type,
                     value: q.type_id,
@@ -1444,7 +1454,9 @@ function ListSatuanKerjaPage() {
                       kelengkapan: selectedOptions,
                     }))
                   }
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                   options={questions.map((q) => ({
                     label: q.text,
                     value: q.id_question,
@@ -1464,7 +1476,9 @@ function ListSatuanKerjaPage() {
                   name="status"
                   value={formData?.status}
                   onChange={handleChange}
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                   options={[
                     { label: "Ditolak", value: "reject" },
                     { label: "Telah Diuji", value: "approved" },
@@ -1489,7 +1503,9 @@ function ListSatuanKerjaPage() {
                       verifikasi: selectedOptions,
                     }))
                   }
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                   options={verifications.map((q) => ({
                     label: q.text,
                     value: q.id_question,
@@ -1509,7 +1525,9 @@ function ListSatuanKerjaPage() {
                   name="catatan"
                   value={formData?.catatan ?? formData?.feedback ?? ""}
                   onChange={handleChange}
-                  style={{ fontSize: window.innerWidth <= 768 ? "14px" : "16px" }}
+                  style={{
+                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
+                  }}
                 />
                 <Button type="submit" style={{ width: "100%" }}>
                   Submit

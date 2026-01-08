@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../components/Sidebar/Sidebar";
+import Navbar from "@/components/Navbar";
 
 function AppLayout({ children, isAdmin }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,22 +23,24 @@ function AppLayout({ children, isAdmin }) {
           md:translate-x-0 md:static md:flex
         `}
       >
-         <Sidebar isAdmin={isAdmin} onNavigate={() => setSidebarOpen(false)} />
+        <Sidebar isAdmin={isAdmin} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
       {/* Konten utama */}
-      <main className="flex-1 p-4 overflow-auto transition-all duration-300">
-        {/* Hamburger button */}
-        <div className="md:hidden sticky top-0">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-800 bg-gray-200 p-2 rounded-md"
-          >
-            ☰
-          </button>
-        </div>
+      <main className="flex-1 overflow-auto transition-all duration-300">
+        <Navbar menuName={"Dashboard"} user={"development"} />
+        <div className="p-4">
+          <div className="md:hidden sticky top-0">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-gray-800 bg-gray-200 p-2 rounded-md"
+            >
+              ☰
+            </button>
+          </div>
 
-        {children}
+          {children}
+        </div>
       </main>
     </div>
   );

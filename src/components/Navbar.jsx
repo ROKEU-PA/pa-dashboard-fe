@@ -1,20 +1,13 @@
 import React from "react";
-import { useAuth } from "../contexts/AuthContexts";
+import User from "./User";
 
-function Navbar() {
-  const { logout } = useAuth();
-
+function Navbar({ menuName, user }) {
   return (
-    <div
-      style={{
-        background: "#ddd",
-        padding: "1rem",
-        display: "flex",
-        justifyContent: "space-between",
-      }}
-    >
-      <div>Welcome, "Guest"</div>
-      <button onClick={logout}>Logout</button>
+    <div className="bg-white w-full px-4 py-2">
+      <div className="flex justify-between flex-wrap mt-2">
+        <span className="px-3 font-bold text-2xl">{menuName}</span>
+        <User name={user} previlege={"Administrator"} />
+      </div>
     </div>
   );
 }

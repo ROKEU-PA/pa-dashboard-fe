@@ -172,8 +172,8 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
 
 export const cryptoEncrypter = (string) => {
   if (!string || string === "" || string === undefined) return null;
-  var CryptoJS = require("crypto-js");
-  var encryptedString = CryptoJS.AES.encrypt(
+  let CryptoJS = require("crypto-js");
+  let encryptedString = CryptoJS.AES.encrypt(
     string,
     "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
   ).toString();

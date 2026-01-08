@@ -1,165 +1,9 @@
 import { useAuth } from "@/contexts/AuthContexts";
-import {
-  Building,
-  Layers,
-  LogOut,
-  UserRoundCog,
-  ChevronDown,
-  ChevronUp,
-  AlignEndHorizontal,
-  TrendingUpDown,
-  FolderCheck,
-  HandCoins,
-  FileChartColumn,
-  Package,
-  BookUser,
-  Settings,
-  GaugeCircle,
-  LayoutDashboard,
-  Info,
-  MessageSquare,
-  Network,
-  Archive,
-  Axis3D,
-  Table,
-  CircleDollarSign,
-  Calendar,
-} from "lucide-react";
+import { LogOut, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState, useContext, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "@/contexts/AppContext";
-
-const menuItems = [
-  {
-    name: "Dashboard Utama",
-    path: "/dashboard-utama",
-    icon: <LayoutDashboard/>,
-  },
-  {
-    name: "PTUK",
-    path: "/ptuk/tuntutan-ganti-rugi",
-    adminOnly: true,
-    children: [
-      {
-        name: "Tuntutan Ganti Rugi",
-        path: "/ptuk/tuntutan-ganti-rugi",
-        icon: <Building />,
-      },
-    ],
-    icon: <Layers />,
-  },
-  {
-    name: "Pelaksanaan Anggaran",
-    path: "/pelaksanaan-anggaran",
-    children: [
-      {
-        name: "Tanda Terima SPP",
-        path: "/tanda-terima",
-        icon: <Table />,
-      },
-      {
-        name: "Pengajuan SPP",
-        path: "/satuan-kerja/pengajuan",
-        icon: <FolderCheck />,
-      },
-      {
-        name: "IKPA",
-        path: "/ikpa",
-        icon: <AlignEndHorizontal />,
-      },
-      {
-        name: "Realisasi",
-        path: "/realisasi",
-        icon: <CircleDollarSign />,
-      },
-      {
-        name: "Arsip SPM",
-        path: "/satuan-kerja",
-        icon: <Archive />,
-      },
-      {
-        name: "Kompilasi",
-        path: "/compilation",
-        icon: <TrendingUpDown />,
-        adminOnly: true,
-      },
-      {
-        name: "LLAT",
-        path: "/llat",
-        icon: <Calendar />,
-      },
-    ],
-    icon: <HandCoins />,
-  
-  },
-  {
-    name: "Barang Milik Negara",
-    adminOnly: true,
-    // path: "/dashboard/barang-milik-negara",
-    path: "/barang-milik-negara",
-    children: [
-      // {
-      //   name: "Dashboard",
-      //   path: "/barang-milik-negara",
-      //   icon: <Axis3D />,
-      // },
-    ],
-    icon: <Package />,
-  },
-  {
-    name: "Akuntansi Pelaporan",
-    adminOnly: true,
-    path: "/akuntansi-pelaporan",
-    children: [
-      // {
-      //   name: "Dashboard",
-      //   path: "/dashboard/akuntansi-pelaporan",
-      //   icon: <Axis3D />,
-      // },
-    ],
-    icon: <FileChartColumn />,
-  },
-  {
-    name: "Tata Usaha",
-    adminOnly: true,
-    path: "/tata-usaha",
-    children: [
-      {
-        name: "Dashboard",
-        path: "/tata-usaha",
-        icon: <Axis3D />,
-      },
-    ],
-    icon: <BookUser />,
-  },
-  {
-    name: "Struktur Organisasi",
-    path: "/dashboard/struktur-organisasi",
-    icon: <Network />,
-  },
-  {
-    name: "Helpdesk",
-    path: "/dashboard/helpdesk",
-    icon: <MessageSquare />,
-  },
-  {
-    name: "Management",
-    icon: <Settings />,
-    children: [
-      {
-        name: "User Manage",
-        path: "/user-management",
-        icon: <UserRoundCog />,
-      },
-      {
-        name: "Dashboard Manage",
-        path: "/dashboard-management",
-        icon: <GaugeCircle />,
-      },
-    ],
-    adminOnly: true,
-  },
-];
+import { menuItems } from "./constants";
 
 function Sidebar() {
   const { userData } = useContext(AppContext);
@@ -168,11 +12,9 @@ function Sidebar() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
   const location = useLocation();
-  // console.log(role, userData);
 
   const handleLogout = () => logout();
 
-  // 🔍 Filter menu berdasarkan role
   const getFilteredMenuItems = () => {
     if (role === "super_admin") return menuItems;
 
@@ -203,36 +45,39 @@ function Sidebar() {
               "Arsip SPM",
               "Tanda Terima SPP",
               "User Manage",
-              "LLAT"
+              "LLAT",
             ].includes(child.name)
           ),
         }));
     }
 
- if (role !== "guest") {
-  return menuItems.map(item => ({
-    ...item,
-    children: item.children?.filter(child => child.name !== "About")
-  }));
-}
+    if (role !== "guest") {
+      return menuItems.map((item) => ({
+        ...item,
+        children: item.children?.filter((child) => child.name !== "About"),
+      }));
+    }
 
-if (role === "guest") {
-  return menuItems
-    .filter(item => item.name !== "Management")
-    .map(item => {
-      if (item.name === "Pelaksanaan Anggaran") {
-        return {
-          ...item,
-          children: item.children?.filter(child =>
-            [ "Dashboard","IKPA", "Realisasi", "LLAT", "About"].includes(child.name)
-          ),
-        };
-      }
-      return item;
-    });
-}
+    if (role === "guest") {
+      return menuItems
+        .filter((item) => item.name !== "Management")
+        .map((item) => {
+          if (item.name === "Pelaksanaan Anggaran") {
+            return {
+              ...item,
+              children: item.children?.filter((child) =>
+                ["Dashboard", "IKPA", "Realisasi", "LLAT", "About"].includes(
+                  child.name
+                )
+              ),
+            };
+          }
+          return item;
+        });
+    }
 
-return [];};
+    return [];
+  };
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
@@ -269,16 +114,16 @@ return [];};
       style={{
         width: "260px",
         height: "100vh",
-        background: "#15406A",
         display: "flex",
         flexDirection: "column",
         position: "fixed",
         top: 0,
         left: 0,
         color: "#fff",
+        overflow: "hidden",
       }}
+      className="bg-gradient-to-b from-[#59C7FF] to-[#2F8AFD]"
     >
-      {/* Logo dan isi menu */}
       <div
         style={{
           padding: "1rem",
@@ -286,14 +131,15 @@ return [];};
           overflowY: "auto",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
+          justifyItems: "center",
         }}
         className="sidebar-scroll"
       >
         <img
-          src="/logo-kemnaker.webp"
+          src="/rokeu_logo_white.webp"
           alt="logo"
-          width="160"
-          style={{ marginBottom: "2rem" }}
+          width="150"
+          className="mt-5 mb-10"
         />
         <nav>
           {getFilteredMenuItems().map((item, index) => {
@@ -349,7 +195,6 @@ return [];};
                             display: "flex",
                             alignItems: "center",
                             gap: "8px",
-                            color: "#fff",
                             padding: "6px 6px",
                             textDecoration: "none",
                             fontSize: "0.9rem",
@@ -377,7 +222,6 @@ return [];};
                     alignItems: "center",
                     gap: "8px",
                     padding: "10px",
-                    color: "#fff",
                     textDecoration: "none",
                     borderRadius: "5px",
                   }}
@@ -390,28 +234,33 @@ return [];};
           })}
         </nav>
       </div>
-
-      {/* Logout */}
       <div
         style={{
           padding: "1rem",
-          borderTop: "1px solid #1F5B8A",
+          marginBottom: "0.7rem",
+          textAlign: "center",
         }}
       >
         <span
           onClick={handleLogout}
           style={{
-            display: "flex",
-            alignItems: "center",
+            position: "relative",
             gap: "8px",
-            cursor: "pointer",
+            zIndex: 10,
             color: "#fff",
+            fontSize: "12px",
           }}
         >
-          <LogOut />
-          Logout
+          © Rokeu BMN 2026, Version 2.0
         </span>
       </div>
+      <img
+        src={"/logo-kemnaker-decoration.webp"}
+        alt={"logo-decoration"}
+        className={`absolute z-0 right-[-3rem] rotate-[168.75deg] bottom-[-4.5rem]`}
+        loading="eager"
+        width={200}
+      />
     </div>
   );
 }

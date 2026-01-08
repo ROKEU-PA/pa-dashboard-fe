@@ -95,12 +95,13 @@ code {
 }
 
 .sidebar-link:hover {
-  background: #1d5c9c;
+  background: #59c7ff;
 }
 
 .sidebar-link.active {
-  font-weight: bold;
-  background: #1d5c9c;
+  font-weight: 900;
+  color: #59c7ff;
+  background: #fff;
 }
 
 .pdf-viewer {
@@ -177,10 +178,10 @@ th:hover .sort-icon,
   transition: backgroud 0.2 ease;
 }
 .dropdown-parent:hover {
-  background-color: #1f5b8a;
+  background-color: #59c7ff;
 }
 .dropdown-parent.open {
-  background-color: #1f5b8a;
+  background-color: #59c7ff;
 }
 
 .readonly-list {
@@ -202,9 +203,9 @@ th:hover .sort-icon,
 
 .react-datepicker__input-container input {
   width: 200px !important;
-  background-color: transparent !important; 
-  border: 1px solid #ccc !important;        
-  padding: 0.75rem !important;              
+  background-color: transparent !important;
+  border: 1px solid #ccc !important;
+  padding: 0.75rem !important;
   border-radius: 4px !important;
 }
 iframe {
