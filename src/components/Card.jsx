@@ -12,7 +12,7 @@ const Card = ({
   return (
     <div className={``}>
       <div
-        className={`bg-[${color}] rounded-full content-center p-2 w-fit mx-[20px] relative mb-[-2rem]`}
+        className={`${color} rounded-full content-center p-2 w-fit mx-[20px] relative mb-[-2rem]`}
       >
         {icon}
       </div>

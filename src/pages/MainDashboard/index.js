@@ -1,12 +1,6 @@
 import React from "react";
 import Card from "@/components/Card";
-import {
-  Building2,
-  Database,
-  Landmark,
-  Leaf,
-  SquareKanban,
-} from "lucide-react";
+import { Building2, Landmark, Leaf, SquareKanban } from "lucide-react";
 import DonutChart from "./DonutChart";
 import BarChart from "./BarChart";
 import moment from "moment";
@@ -24,11 +18,11 @@ function MainDashboard() {
 
   return (
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-7">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card
           className="h-[41vh]"
-          icon={<Leaf size={20} color="#6FCE00" strokeWidth={3} />}
-          color={"#D4F0B2"}
+          icon={<Leaf size={26} color="#6FCE00" strokeWidth={3} />}
+          color={"bg-[#D4F0B2]"}
           title={"PTUK"}
           subCaption="Pengelola Keuangan"
         >
@@ -76,8 +70,8 @@ function MainDashboard() {
         </Card>
         <Card
           className="h-[41vh]"
-          icon={<Landmark size={20} color="#FC0166" strokeWidth={3} />}
-          color={"#FFCFE2"}
+          icon={<Landmark size={26} color="#FC0166" strokeWidth={3} />}
+          color={"bg-[#FFCFE2]"}
           title={"Pelaksanaan Anggaran"}
           subCaption={`Nilai IKPA dan Target Tahun  ${moment().format("YYYY")}`}
         >
@@ -97,8 +91,8 @@ function MainDashboard() {
         </Card>
         <Card
           className="h-[41vh]"
-          icon={<Building2 size={20} color="#FFBC00" strokeWidth={3} />}
-          color={"#FFF3D0"}
+          icon={<Building2 size={26} color="#FFBC00" strokeWidth={3} />}
+          color={"bg-[#FFF3D0]"}
           title={"Barang Milik Negara"}
           subCaption={`Nilai IPA dan Target Tahun ${moment().format("YYYY")}`}
         >
@@ -123,8 +117,8 @@ function MainDashboard() {
         </Card>
         <Card
           className="h-[41vh]"
-          icon={<SquareKanban size={20} color="#59C7FF" strokeWidth={3} />}
-          color={"#D5F1FF"}
+          icon={<SquareKanban size={26} color="#59C7FF" strokeWidth={3} />}
+          color={"bg-[#D5F1FF]"}
           title={"Akuntansi dan Pelaporan"}
           subCaption={`Realisasi Anggaran`}
         >
