@@ -62,7 +62,7 @@ function MainDashboard() {
                   <span className="text-sm">TL Status Sesuai</span>
                 </div>
                 <span className="text-[40px] ml-4 font-extrabold  leading-none">
-                  12222
+                  1222
                 </span>
               </div>
             </div>
