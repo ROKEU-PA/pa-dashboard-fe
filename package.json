@@ -31,7 +31,8 @@
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "craco test"
+    "test": "craco test",
+    "prepare": "husky"
   },
   "eslintConfig": {
     "extends": [
@@ -52,6 +53,9 @@
     ]
   },
   "devDependencies": {
-    "@craco/craco": "^7.1.0"
+    "@commitlint/cli": "^20.3.1",
+    "@commitlint/config-conventional": "^20.3.1",
+    "@craco/craco": "^7.1.0",
+    "husky": "^9.1.7"
   }
 }
