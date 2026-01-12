@@ -1,10 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar";
 
-function AppLayout({ children, isAdmin }) {
+function AppLayout({ children, isAdmin, title, userName}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const location = useLocation();
+  // OTOMATIS: Tutup sidebar setiap kali path/URL berubah
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [location.pathname]);
   return (
     <div className="flex h-screen  overflow-hidden">
       {/* Overlay mobile */}
@@ -26,18 +31,23 @@ function AppLayout({ children, isAdmin }) {
         <Sidebar isAdmin={isAdmin} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
+     
+           {!sidebarOpen && (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="fixed top-3 left-4 z-[60] md:hidden p-2.5 bg-white rounded-xl shadow-md border border-gray-100 text-gray-800 animate-in fade-in duration-300"
+        >
+          ☰
+        </button>
+      )}
+          
+
       {/* Konten utama */}
       <main className="flex-1 overflow-auto transition-all duration-300">
-        <Navbar menuName={"Dashboard"} user={"development"} />
-        <div className="p-4">
-          <div className="md:hidden sticky top-0">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="text-gray-800 bg-gray-200 p-2 rounded-md"
-            >
-              ☰
-            </button>
-          </div>
+        
+          <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} />
+      
+        <div className="p-2 md:p-4">
 
           {children}
         </div>

@@ -26,6 +26,9 @@ import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
+import StatusPSP from "./pages/StateProperty/statusSpp"; 
+import KondisiAset from "./pages/StateProperty/kondisiAset"; 
+import JumlahJenisBMN from "./pages/StateProperty/jenisBMN";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -38,7 +41,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={token ? <Navigate to="/dashboard" /> : <LoginPage />}
+          element={token ? <Navigate to="/dashboard-utama" /> : <LoginPage />}
         />
         <Route
           path="/satuan-kerja"
@@ -54,7 +57,7 @@ function App() {
           path="/dashboard-utama"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Dashboard" userName="Administrator">
                 <MainDashboard />
               </AppLayout>
             </PrivateRoute>
@@ -64,7 +67,7 @@ function App() {
           path="/pelaksanaan-anggaran"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran" userName="Administrator">
                 <BudgetExecution />
               </AppLayout>
             </PrivateRoute>
@@ -74,8 +77,38 @@ function App() {
           path="/barang-milik-negara"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
                 <StateProperty />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/barang-milik-negara/status-psp"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+                <StatusPSP />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/barang-milik-negara/kondisi-aset"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+                <KondisiAset />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/barang-milik-negara/jumlah-jenis"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+                <JumlahJenisBMN />
               </AppLayout>
             </PrivateRoute>
           }
@@ -84,7 +117,7 @@ function App() {
           path="/tata-usaha"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Tata Usaha" userName="Administrator">
                 <Administrator />
               </AppLayout>
             </PrivateRoute>
@@ -235,7 +268,7 @@ function App() {
           path="/akuntansi-pelaporan"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Akutansi dan Pelaporan" userName="Administrator">
                 <ReportingAccounting />
               </AppLayout>
             </PrivateRoute>

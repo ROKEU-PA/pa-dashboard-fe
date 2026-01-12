@@ -1,56 +1,46 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-/**
- * props:
- * - title?: string
- * - subtitle?: string
- * - data: Array<{ name: string; value: number }>
- * - height?: string (Tailwind or inline height)
- */
 export default function DonutChart({
-  height = "h-72",
-  good = 0,
-  mid = 0,
-  damage = 0, // Tailwind height: h-64 / h-72 / h-80
+  height = "h-52",
+  data = [], 
+   
 }) {
   const option = {
-    color: ["#616484", "#47B5FF", "#FF0000"], // blue, dark purple, yellow (example)
+    tooltip: {
+      trigger: "item",
+      formatter: "{b}: {c} ({d}%)",
+    },
     legend: {
-      orient: "horizontal",
-      bottom: "-2%",
+      show: false, 
     },
-    title: {
-      show: false, // pastikan tidak ada title
-    },
-
     series: [
       {
+        name: "Access From",
         type: "pie",
-        radius: ["35%", "75%"], // inner and outer radius → bigger hole
+        center :["50%", "40%"],
+        radius : ["30%", "80%"],
         avoidLabelOverlap: false,
-        center: ["50%", "40%"],
-        minAngle: 5, // ✅ tambahkan ini
-        avoidLabelOverlap: false,
-        label: {
-          show: true,
-          position: "outside",
-          formatter: "{d}%", // nama dan persentase
-        },
-        labelLine: {
-          show: true,
-        },
-
         itemStyle: {
-          borderRadius: 1, // ❌ remove rounded corners
+          borderRadius: 0,
           borderColor: "#fff",
           borderWidth: 2,
         },
-        data: [
-          { value: `${good}`, name: "Baik" },
-          { value: `${mid}`, name: "Rusak Berat" },
-          { value: `${damage}`, name: "Rusak Ringan" },
-        ],
+        label: {
+          show: false, 
+          position: "center",
+        },
+        emphasis: {
+          label: {
+            show: false,
+            fontSize: 20,
+            fontWeight: "bold",
+          },
+        },
+        labelLine: {
+          show: false,
+        },
+        data: data,
       },
     ],
   };
@@ -60,8 +50,7 @@ export default function DonutChart({
       <ReactECharts
         option={option}
         style={{ height: "100%", width: "100%" }}
-        notMerge
-        lazyUpdate
+        // notMerge={true}
       />
     </div>
   );

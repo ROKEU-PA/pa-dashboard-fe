@@ -8,11 +8,11 @@ export default function BarChart({
 }) {
   const option = {
     grid: {
-      top: 30, // distance from top
-      right: 0, // distance from right
-      bottom: 30, // distance from bottom
-      left: 35, // distance from left
-      containLabel: true, // make sure labels are inside the chart
+      top: 30, 
+      right: 0, 
+      bottom: 30,
+      left: 35, 
+      containLabel: true, 
     },
     xAxis: {
       type: "category",
@@ -51,8 +51,8 @@ export default function BarChart({
           values?.map((val, idx) => ({
             value: val,
             itemStyle: {
-              color: "#2979FF", // biru utk terakhir
-              borderRadius: [10, 10, 0, 0],
+              color: "#59c7ff", 
+              borderRadius: [0, 0, 0, 0],
             },
             label: {
               show: true,
@@ -71,9 +71,9 @@ export default function BarChart({
       },
       {
         name: "Trend",
-        type: "line", // ✅ Tambahkan ini
-        data: values, // 🚨 Harus array angka (pastikan sudah diubah ke number)
-        smooth: true, // 🔁 Biar garisnya halus
+        type: "line", 
+        data: values, 
+        smooth: true, 
         lineStyle: {
           color: "#FF7043",
           width: 2,
