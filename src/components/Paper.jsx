@@ -21,7 +21,7 @@ function Paper({ children, elevation = 1, style, ...props }) {
 
   return (
     <div style={paperStyle} {...props}>
-      {children}
+      <div className="bg-black">{children}</div>
     </div>
   );
 }

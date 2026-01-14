@@ -1,24 +1,15 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
-
-/**
- * props:
- * - title?: string
- * - subtitle?: string
- * - data: Array<{ name: string; value: number }>
- * - height?: string (Tailwind or inline height)
- */
 export default function DonutChart({
   height = "h-72", // Tailwind height: h-64 / h-72 / h-80
 }) {
   const option = {
     color: ["#616484", "#47B5FF", "#EDFF00"], // blue, dark purple, yellow (example)
     legend: {
-      orient: "horizontal",
-      bottom: "-2%",
+      show: false,
     },
     title: {
-      show: false, // pastikan tidak ada title
+      show: false,
     },
 
     series: [
@@ -49,7 +40,7 @@ export default function DonutChart({
   };
 
   return (
-    <div className={`w-full ${height}`}>
+    <div className={`w-full ${height} mb-[-2rem]`}>
       <ReactECharts
         option={option}
         style={{ height: "100%", width: "100%" }}
