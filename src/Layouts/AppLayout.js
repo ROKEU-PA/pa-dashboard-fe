@@ -47,7 +47,7 @@ function AppLayout({ children, isAdmin, title, userName}) {
         
           <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} />
       
-        <div className="p-2 md:p-4">
+        <div className="">
 
           {children}
         </div>
