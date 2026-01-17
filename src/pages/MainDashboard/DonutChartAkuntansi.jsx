@@ -9,13 +9,17 @@ import ReactECharts from "echarts-for-react";
  * - height?: string (Tailwind or inline height)
  */
 export default function DonutChartAkuntansi({
-  height = "h-72", // Tailwind height: h-64 / h-72 / h-80
+  height, // Tailwind height: h-64 / h-72 / h-80
 }) {
   const option = {
+    grid: {
+      left: "0",
+      right: "0",
+      bottom: "0",
+    },
     color: ["#616484", "#47B5FF", "#EDFF00"], // blue, dark purple, yellow (example)
     legend: {
-      orient: "horizontal",
-      bottom: "-2%",
+      show: false,
     },
     title: {
       show: false, // pastikan tidak ada title
@@ -51,7 +55,7 @@ export default function DonutChartAkuntansi({
     <div className={`w-full ${height}`}>
       <ReactECharts
         option={option}
-        style={{ height: "100%", width: "100%" }}
+        style={{ height: "190px", width: "100%" }}
         notMerge
         lazyUpdate
       />

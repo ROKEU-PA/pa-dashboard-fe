@@ -1,3 +1,4 @@
+import { encryptPassword } from "@/utils/encryption";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
@@ -18,8 +19,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (newToken) => {
-    localStorage.setItem("token", newToken);
-    setToken(newToken);
+    let encryptedToken = encryptPassword(newToken);
+    localStorage.setItem("token", encryptedToken);
+    setToken(encryptedToken);
   };
 
   const logout = () => {
