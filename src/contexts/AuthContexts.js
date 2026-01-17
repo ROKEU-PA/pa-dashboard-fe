@@ -1,36 +1,42 @@
-import { encryptPassword } from "@/utils/encryption";
-import React, { createContext, useContext, useState, useEffect } from "react";
+// contexts/AuthContexts.jsx
+import { Axios } from "axios";
+import { createContext, useContext, useState, useEffect } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [auth, setAuth] = useState({
+    accessToken: null,
+    user: null,
+  });
+
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      setToken(localStorage.getItem("token"));
+    const restoreSession = async () => {
+      try {
+        const res = await Axios.post(
+          "/auth/refresh",
+          {},
+          { withCredentials: true }
+        );
+
+        setAuth((prev) => ({
+          ...prev,
+          accessToken: res.data.accessToken,
+        }));
+      } catch {
+        setAuth({ accessToken: null, user: null });
+      } finally {
+        setIsInitializing(false);
+      }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
+    restoreSession();
   }, []);
 
-  const login = (newToken) => {
-    let encryptedToken = encryptPassword(newToken);
-    localStorage.setItem("token", encryptedToken);
-    setToken(encryptedToken);
-  };
-
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-  };
-
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ auth, setAuth, isInitializing }}>
       {children}
     </AuthContext.Provider>
   );

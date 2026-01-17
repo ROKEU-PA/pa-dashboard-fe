@@ -1,23 +1,52 @@
 import { useContext, useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContexts";
 import { AppContext } from "@/contexts/AppContext";
-import { isAuthorizedRoute } from "@/services/GeneralHelper";
+import {
+  isAuthorizedRoute,
+  getRedirectPathOnDenied,
+  getDefaultRedirectPath,
+} from "@/services/authorizationHelper";
+
+const LoadingScreen = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+  </div>
+);
 
 const PrivateRoute = ({ children }) => {
-  const { token } = useAuth();
+  const { auth, isInitializing } = useAuth();
   const { userData, listMenu } = useContext(AppContext);
   const location = useLocation();
-  const [isAllowed, setIsAllowed] = useState(null);
+
+  const [authState, setAuthState] = useState({
+    isChecking: true,
+    isAllowed: false,
+    redirectTo: null,
+  });
 
   useEffect(() => {
-    if (!token) {
-      window.location.replace("/");
+    if (isInitializing) {
+      setAuthState({ isChecking: true, isAllowed: false, redirectTo: null });
       return;
     }
 
-    const menus = [
-      ...listMenu,
+    if (!auth?.accessToken) {
+      setAuthState({
+        isChecking: false,
+        isAllowed: false,
+        redirectTo: "/",
+      });
+      return;
+    }
+
+    if (!userData) {
+      setAuthState({ isChecking: true, isAllowed: false, redirectTo: null });
+      return;
+    }
+
+    const menusWithStaticRoutes = [
+      ...(listMenu || []),
       { path: "/satuan-kerja" },
       { path: "/" },
       { path: "/compilation" },
@@ -25,35 +54,61 @@ const PrivateRoute = ({ children }) => {
       { path: "/soon" },
     ];
 
-    const allowed = isAuthorizedRoute(location.pathname, userData, menus);
+    const isAllowed = isAuthorizedRoute(
+      location.pathname,
+      userData,
+      menusWithStaticRoutes
+    );
 
-    if (!allowed) {
-      if (userData !== null) {
-        if (userData.role === "user" || userData.role === "pic") {
-          const parts = location.pathname.split("/").filter(Boolean);
-
-          if (parts[0] === "satuan-kerja" && parts.length > 1) {
-            // Buat path baru dengan menghapus bagian terakhir
-            const newPath = "/" + parts.slice(0, -1).join("/");
-            window.location.replace(newPath);
-          } else {
-            window.location.replace("/satuan-kerja/pengajuan");
-          }
-          return;
-        } else {
-          window.location.replace("/dashboard-utama");
-          return;
-        }
-      }
+    if (isAllowed) {
+      setAuthState({
+        isChecking: false,
+        isAllowed: true,
+        redirectTo: null,
+      });
+      return;
     }
 
-    setIsAllowed(true);
-  }, [token, userData, listMenu, location.pathname]);
+    const redirectPath = getRedirectPathOnDenied(
+      location.pathname,
+      userData.role
+    );
 
-  // Jangan render apa pun sampai izin dicek
-  if (isAllowed === null) return null;
+    console.log("Access denied, redirecting to:", redirectPath);
 
-  return children;
+    setAuthState({
+      isChecking: false,
+      isAllowed: false,
+      redirectTo: redirectPath,
+    });
+  }, [
+    isInitializing,
+    auth?.accessToken,
+    userData,
+    listMenu,
+    location.pathname,
+    auth,
+  ]);
+
+  if (authState.isChecking) {
+    return <LoadingScreen />;
+  }
+
+  if (authState.redirectTo) {
+    return (
+      <Navigate
+        to={authState.redirectTo}
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
+  }
+
+  if (authState.isAllowed) {
+    return children;
+  }
+
+  return <LoadingScreen />;
 };
 
 export default PrivateRoute;

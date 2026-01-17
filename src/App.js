@@ -26,11 +26,13 @@ import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
+import { useAuth } from "./contexts/AuthContexts";
 // import "@/PDFWorkerSetup";
 
 function App() {
   const { isAdmin, listMenu, userData } = useContext(AppContext);
-  const token = localStorage.getItem("token");
+  const { auth, isInitializing } = useAuth();
+  const isAuthenticated = !!auth?.accessToken;
 
   return (
     <>
@@ -38,7 +40,13 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={token ? <Navigate to="/dashboard" /> : <LoginPage />}
+          element={
+            isInitializing ? null : isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage />
+            )
+          }
         />
         <Route
           path="/satuan-kerja"
