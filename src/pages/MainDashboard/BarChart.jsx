@@ -1,22 +1,23 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-export default function BarChart({ height = "h-72" }) {
+export default function BarChart({ height }) {
   const months = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul"];
   const data2024 = [71.13, 81.83, 83, 70.13, 86.91, 90.13, 93.24];
   const data2025 = [75.13, 83, 88.83, 87.13, 88.1, 93.24, 94.91];
 
   const option = {
     grid: {
-      left: "5%",
-      right: "5%",
-      bottom: "10%",
-      top: "10%",
+      left: "0",
+      right: "0",
+      bottom: "5%",
+      top: "15%",
       containLabel: true,
     },
     legend: {
       data: ["Tahun 2024", "Tahun 2025"],
-      bottom: 0,
+      top: 0,
+      right: 10,
       icon: "circle",
       textStyle: {
         color: "#555",
@@ -46,51 +47,21 @@ export default function BarChart({ height = "h-72" }) {
         data: data2024,
         itemStyle: {
           color: "#D1D5DB",
-          borderRadius: [8, 8, 0, 0],
         },
         barWidth: "25%",
         barGap: "30%", // jarak antar seri
-        label: {
-          show: true,
-          position: "mid",
-          color: "#999",
-          fontSize: 11,
-          formatter: (p) => p.value.toFixed(2),
-        },
       },
       {
         name: "Tahun 2025",
         type: "bar",
         data: data2025.map((val, idx) => ({
           value: val,
-          label: {
-            show: true,
-            position: "top",
-            formatter: (params) =>
-              idx === data2025.length - 1
-                ? `{bubble|${params.value.toFixed(2)}}`
-                : params.value.toFixed(2),
-            rich: {
-              bubble: {
-                backgroundColor: "#2979FF",
-                color: "#fff",
-                padding: [4, 8],
-                borderRadius: 6,
-                fontWeight: "bold",
-                shadowColor: "rgba(0,0,0,0.15)",
-                shadowBlur: 6,
-              },
-            },
-            color: idx === data2025.length - 1 ? "#fff" : "#2979FF",
-            fontWeight: idx === data2025.length - 1 ? "bold" : "normal",
-          },
         })),
         itemStyle: {
-          color: "#2979FF",
-          borderRadius: [8, 8, 0, 0],
+          color: "#59C7FF",
         },
         barWidth: "25%",
-        barGap: "50%",
+        barGap: "30%",
       },
     ],
     animationDuration: 800,
@@ -98,7 +69,10 @@ export default function BarChart({ height = "h-72" }) {
 
   return (
     <div className={`w-full ${height}`}>
-      <ReactECharts option={option} style={{ width: "100%", height: "100%" }} />
+      <ReactECharts
+        option={option}
+        style={{ width: "100%", height: "200px" }}
+      />
     </div>
   );
 }

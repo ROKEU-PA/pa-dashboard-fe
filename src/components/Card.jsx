@@ -10,25 +10,32 @@ const Card = ({
   subCaption = "",
 }) => {
   return (
-    <div className={``}>
+    <div className="relative">
+      {/* Icon Badge */}
       <div
-        className={`${color} rounded-full content-center p-2 w-fit mx-[20px] relative mb-[-2rem]`}
+        className={`${color} rounded-full p-2 w-fit mx-5 relative z-10 -mb-4`}
       >
         {icon}
       </div>
+
+      {/* Card Content */}
       <div
-        className={`bg-white rounded-xl mt-4 px-[1.5rem] py-[2rem] border border-gray-200 ${className}`}
+        className={`bg-white rounded-xl pt-8 px-6 pb-6 border border-gray-200 ${className}`}
       >
-        <div className="flex justify-between items-center mb-4">
-          <div className="flex gap-4 items-center">
-            <span className="font-bold text-lg">{title}</span>
-          </div>
-          <span className="text-sm font-bold text-[#898A8D]">{subCaption}</span>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+          <h3 className="font-bold text-lg">{title}</h3>
+          {subCaption && (
+            <span className="text-sm font-bold text-gray-400">
+              {subCaption}
+            </span>
+          )}
         </div>
-        {children}
+
+        {/* Children Container with overflow control */}
+        <div className="overflow-hidden">{children}</div>
       </div>
     </div>
   );
 };
-
 export default Card;

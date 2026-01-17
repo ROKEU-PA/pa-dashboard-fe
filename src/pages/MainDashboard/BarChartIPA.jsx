@@ -39,8 +39,7 @@ export default function BarChartIPA({
           values?.map((val, idx) => ({
             value: val,
             itemStyle: {
-              color: idx === values.length - 1 ? "#2979FF" : "#ccc", // biru utk terakhir
-              borderRadius: [10, 10, 0, 0],
+              color: idx === values.length - 1 ? "#59C7FF" : "#ccc",
             },
             label: {
               show: true,
@@ -49,7 +48,7 @@ export default function BarChartIPA({
               backgroundColor: "#fff",
               padding: [4, 8],
               borderRadius: 6,
-              color: idx === values.length - 1 ? "#2979FF" : "#333",
+              color: idx === values.length - 1 ? "#59C7FF" : "#333",
               fontWeight: idx === values.length - 1 ? "bold" : "normal",
               shadowColor: "rgba(0,0,0,0.1)",
               shadowBlur: 4,
@@ -62,7 +61,10 @@ export default function BarChartIPA({
 
   return (
     <div className={`w-full ${height}`}>
-      <ReactECharts option={option} style={{ width: "100%", height: "100%" }} />
+      <ReactECharts
+        option={option}
+        style={{ width: "100%", height: "240px" }}
+      />
     </div>
   );
 }
