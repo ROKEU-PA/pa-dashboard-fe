@@ -31,7 +31,9 @@ function BudgetExecution() {
     { name: "Blocked", value: 60 },
     { name: "Backlog", value: 140 },
   ];
-  const [values, setValues] = useState([70.70, 33.39, 50.48, 9.41, 83.77, 33.10, 31.96, 29.94]);
+  const [values, setValues] = useState([
+    70.7, 33.39, 50.48, 9.41, 83.77, 33.1, 31.96, 29.94,
+  ]);
   const [selectOpen, setSelectOpen] = useState(false);
   const [year, setYear] = useState("2025");
 
@@ -108,7 +110,7 @@ function BudgetExecution() {
   //     console.error(error);
   //   }
   // };
-  const eselons = es1Data.data.map((item) => item.eselon);
+  const eselons = es1Data?.data?.map((item) => item.eselon);
   useEffect(() => {
     es1Options();
     // realGraph();
@@ -147,23 +149,24 @@ function BudgetExecution() {
             </span>
           </div>
         </Card>
-        {cardsData.map((item, index) => (
-          <Card className="p-3" key={index}>
-            <div className="flex flex-col">
-              <div className="flex justify-between items-center h-10">
-                <span className="font-bold text-sm sm:text-base">
-                  {item.title}
-                </span>
-                <div className={`${item.color} rounded-lg p-1`}>
-                  <NotepadText color="white" />
+        {cardsData &&
+          cardsData.map((item, index) => (
+            <Card className="p-3" key={index}>
+              <div className="flex flex-col">
+                <div className="flex justify-between items-center h-10">
+                  <span className="font-bold text-sm sm:text-base">
+                    {item.title}
+                  </span>
+                  <div className={`${item.color} rounded-lg p-1`}>
+                    <NotepadText color="white" />
+                  </div>
                 </div>
               </div>
-            </div>
-            <span className="text-[50px] font-black text-blue-500">
-              {item.value}
-            </span>
-          </Card>
-        ))}
+              <span className="text-[50px] font-black text-blue-500">
+                {item.value}
+              </span>
+            </Card>
+          ))}
         <div className="flex flex-col justify-between">
           <span className="font-bold">Ketentuan Penilaian</span>
           <div className="flex gap-2 items-center">
@@ -223,7 +226,9 @@ function BudgetExecution() {
               </span>
               <br></br>
               <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow">
-                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">9</span>
+                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">
+                  9
+                </span>
               </div>
             </div>
 
@@ -234,7 +239,9 @@ function BudgetExecution() {
               </span>
               <br></br>
               <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
-                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">16</span>
+                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">
+                  16
+                </span>
               </div>
             </div>
           </div>

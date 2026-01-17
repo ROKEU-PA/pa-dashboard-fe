@@ -26,14 +26,19 @@ import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
+<<<<<<< HEAD
 import StatusPSP from "./pages/StateProperty/statusSpp"; 
 import KondisiAset from "./pages/StateProperty/kondisiAset"; 
 import JumlahJenisBMN from "./pages/StateProperty/jenisBMN";
+=======
+import { useAuth } from "./contexts/AuthContexts";
+>>>>>>> 219ce58 (refactoring login logic and moving session into web memory)
 // import "@/PDFWorkerSetup";
 
 function App() {
   const { isAdmin, listMenu, userData } = useContext(AppContext);
-  const token = localStorage.getItem("token");
+  const { auth, isInitializing } = useAuth();
+  const isAuthenticated = !!auth?.accessToken;
 
   return (
     <>
@@ -41,7 +46,13 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={token ? <Navigate to="/dashboard-utama" /> : <LoginPage />}
+          element={
+            isInitializing ? null : isAuthenticated ? (
+              <Navigate to="/dashboard" replace />
+            ) : (
+              <LoginPage />
+            )
+          }
         />
         <Route
           path="/satuan-kerja"
