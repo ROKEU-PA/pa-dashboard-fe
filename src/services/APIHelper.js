@@ -5,11 +5,11 @@ export async function apiRequest({
   method = "GET",
   options = {},
   isMultiType = false,
+  token,
 }) {
+  if (!token) return;
   const path = process.env.REACT_APP_API_BASE_URL + url;
-  const defaultToken = localStorage.getItem("token");
   const { body } = options;
-  const token = options.token || defaultToken;
 
   if (!path || typeof path !== "string") {
     toast.error("Invalid API URL");
@@ -52,7 +52,6 @@ export async function apiRequest({
           window.location.href = path;
         };
         navigate("/");
-        localStorage.removeItem("token");
       }
       throw new Error(errorMessage);
     }

@@ -5,7 +5,12 @@ module.exports = {
   ],
   theme: {
     extend: {
-      colors: { "kemnaker-blue": "#2F8AFD", "kemnaker-light": "#59C7FF" },
+      colors: {
+        "kemnaker-blue": "#59C7FF",
+        "kemnaker-light": "#59C7FF",
+        neon: "#BCDD51",
+        "neon-bg": "#EDF6D0",
+      },
     },
   },
   plugins: [],

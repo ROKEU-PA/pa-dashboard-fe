@@ -25,7 +25,6 @@ function DashboardManagementPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     let isAnyFile = formData?.image;
 
