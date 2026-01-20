@@ -3,14 +3,10 @@ import User from "./User";
 
 function Navbar({ menuName, user }) {
   return (
-    <div className="bg-white w-full px-4 py-2 ">
-      <div className="flex justify-between items-center mt-2">
-        <span className="pl-10 md:pl-3 font-bold text-lg md:text-2xl transition-all">
-          {menuName}
-        </span>
-        <div className="flex-shrink-0">
-          <User name={user} previlege={"Administrator"} />
-        </div>
+    <div className="bg-white w-full px-4">
+      <div className="flex justify-between flex-wrap mt-2">
+        <span className="px-3 font-bold text-2xl">{menuName}</span>
+        <User name={user} previlege={"Administrator"} />
       </div>
     </div>
   );
