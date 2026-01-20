@@ -19,6 +19,9 @@ import {
   Table,
   CircleDollarSign,
   Calendar,
+  FileText, 
+  Box,      
+  Activity,
 } from "lucide-react";
 
 export const menuItems = [
@@ -89,11 +92,21 @@ export const menuItems = [
     // path: "/dashboard/barang-milik-negara",
     path: "/barang-milik-negara",
     children: [
-      // {
-      //   name: "Dashboard",
-      //   path: "/barang-milik-negara",
-      //   icon: <Axis3D strokeWidth={3} />,
-      // },
+     {
+        name: "Status PSP",
+        path: "/barang-milik-negara/status-psp",
+        icon: <FileText size={18} />,
+      },
+      {
+        name: "Kondisi Aset",
+        path: "/barang-milik-negara/kondisi-aset",
+        icon: <Activity size={18} />,
+      },
+      {
+        name: "Jumlah Jenis BMN",
+        path: "/barang-milik-negara/jumlah-jenis",
+        icon: <Box size={18} />,
+      },
     ],
     icon: <Package strokeWidth={3} />,
   },

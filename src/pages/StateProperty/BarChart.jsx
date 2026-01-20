@@ -4,15 +4,15 @@ import ReactECharts from "echarts-for-react";
 export default function BarChart({
   height = "h-72",
   years = [],
-  values = [], // Tailwind height: h-64 / h-72 / h-80
+  values = [], 
 }) {
   const option = {
     grid: {
-      top: 30, // distance from top
-      right: 0, // distance from right
-      bottom: 30, // distance from bottom
-      left: 35, // distance from left
-      containLabel: true, // make sure labels are inside the chart
+      top: 30, 
+      right: 0, 
+      bottom: 30,
+      left: 35, 
+      containLabel: true, 
     },
     xAxis: {
       type: "category",
@@ -27,17 +27,16 @@ export default function BarChart({
       gridIndex: 0,
       name: "Juta",
       nameLocation: "middle",
-      nameGap: 45, // increase spacing between axis name and labels
+      nameGap: 45, 
       nameTextStyle: {
         fontSize: 14,
         fontFamily: "Funnel Display",
       },
       axisLabel: {
         fontSize: 12,
-        margin: 10, // spacing between labels and axis line
+        margin: 10, 
       },
-      // min: 0,
-      // max: 100,
+    
       splitLine: { show: false },
       axisLine: { show: false },
       axisTick: { show: false },
@@ -51,8 +50,8 @@ export default function BarChart({
           values?.map((val, idx) => ({
             value: val,
             itemStyle: {
-              color: "#2979FF", // biru utk terakhir
-              borderRadius: [10, 10, 0, 0],
+              color: "#59c7ff", 
+              borderRadius: [0, 0, 0, 0],
             },
             label: {
               show: true,
@@ -71,9 +70,9 @@ export default function BarChart({
       },
       {
         name: "Trend",
-        type: "line", // ✅ Tambahkan ini
-        data: values, // 🚨 Harus array angka (pastikan sudah diubah ke number)
-        smooth: true, // 🔁 Biar garisnya halus
+        type: "line", 
+        data: values, 
+        smooth: true, 
         lineStyle: {
           color: "#FF7043",
           width: 2,
@@ -81,7 +80,7 @@ export default function BarChart({
         itemStyle: {
           color: "#FF7043",
         },
-        symbol: "circle", // titik-titik
+        symbol: "circle", 
         symbolSize: 6,
       },
     ],
