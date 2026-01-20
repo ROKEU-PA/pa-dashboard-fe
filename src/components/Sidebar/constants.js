@@ -19,8 +19,8 @@ import {
   Table,
   CircleDollarSign,
   Calendar,
-  FileText, // Icon Baru
-  Box,      // Icon Baru
+  FileText, 
+  Box,      
   Activity,
 } from "lucide-react";
 

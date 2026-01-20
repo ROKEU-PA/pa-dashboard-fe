@@ -4,7 +4,7 @@ import ReactECharts from "echarts-for-react";
 export default function BarChart({
   height = "h-72",
   years = [],
-  values = [], // Tailwind height: h-64 / h-72 / h-80
+  values = [], 
 }) {
   const option = {
     grid: {
@@ -27,17 +27,16 @@ export default function BarChart({
       gridIndex: 0,
       name: "Juta",
       nameLocation: "middle",
-      nameGap: 45, // increase spacing between axis name and labels
+      nameGap: 45, 
       nameTextStyle: {
         fontSize: 14,
         fontFamily: "Funnel Display",
       },
       axisLabel: {
         fontSize: 12,
-        margin: 10, // spacing between labels and axis line
+        margin: 10, 
       },
-      // min: 0,
-      // max: 100,
+    
       splitLine: { show: false },
       axisLine: { show: false },
       axisTick: { show: false },
@@ -81,7 +80,7 @@ export default function BarChart({
         itemStyle: {
           color: "#FF7043",
         },
-        symbol: "circle", // titik-titik
+        symbol: "circle", 
         symbolSize: 6,
       },
     ],

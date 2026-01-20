@@ -13,7 +13,7 @@ function StateProperty() {
     rb: 193826,
     nilai: 16920388457705,
   };
-  const dataHibah = { sk: 1.98, belum:18, batal: 511 };
+  const dataHibah = { sk: 1.98, belum: 18, batal: 511 };
 
   const chartStatusData = [
     {
@@ -70,12 +70,12 @@ function StateProperty() {
       </div>
       <span className="text-xl font-bold text-gray-800 ml-4.5">
         {isTriliun
-        ? `Rp ${value} Triliun`
-        : isJuta
-        ? `Rp ${value} Juta`
-        : isCurrency
-        ? formatCurrency(value)
-        : formatNumber(value)}
+          ? `Rp ${value} Triliun`
+          : isJuta
+          ? `Rp ${value} Juta`
+          : isCurrency
+          ? formatCurrency(value)
+          : formatNumber(value)}
       </span>
     </div>
   );
@@ -83,7 +83,6 @@ function StateProperty() {
   return (
     <div className="bg-[#F8F9FA] h-[830] w-full flex flex-col">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4  items-stretch">
-        {/* CARD STATUS PENETAPAN */}
         <Card className="rounded-3xl bg-white h-[440px] shadow-sm relative border-none flex flex-col">
           <CardIcon
             icon={Leaf}
@@ -118,7 +117,6 @@ function StateProperty() {
           </div>
         </Card>
 
-        {/* CARD KONDISI ASET */}
         <Card className="rounded-3xl bg-white shadow-sm h-[440px] relative border-none flex flex-col">
           <CardIcon
             icon={Database}
@@ -163,8 +161,6 @@ function StateProperty() {
             </div>
           </div>
         </Card>
-
-        {/* CARD TOTAL NILAI HIBAH (BAR CHART) */}
         <Card className="rounded-3xl bg-white shadow-sm h-[400px] relative border-none flex flex-col p-6">
           <CardIcon
             icon={BarChart3}
@@ -182,25 +178,21 @@ function StateProperty() {
               </p>
             </div>
           </div>
-
-          {/* Container Chart  */}
           <div className="flex-1 flex items-end justify-between gap-[2%] w-full h-full min-h-[200px] px-1">
             {[40, 60, 95, 70, 55, 80, 90, 100].map((h, i) => (
-              <div key={i} className="flex flex-col items-center flex-1 h-full justify-end group">
-                {/* Tooltip Hover */}
+              <div
+                key={i}
+                className="flex flex-col items-center flex-1 h-full justify-end group"
+              >
                 <div className="opacity-0 group-hover:opacity-100 transition-all bg-gray-800 text-white text-[9px] px-1.5 py-0.5 rounded mb-1 whitespace-nowrap">
                   {h}T
                 </div>
-
-                {/* Batang: w-full memastikan dia ikut lebar kontainer yang mengecil */}
                 <div
                   style={{ height: `${h}%` }}
                   className="bg-[#4FC3F7] w-full max-w-[40px] rounded-t-md md:rounded-t-lg transition-all duration-300 ease-in-out group-hover:bg-[#03A9F4] shadow-sm relative"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent"></div>
                 </div>
-
-                {/* Label Tahun */}
                 <span className="text-[10px] md:text-[11px] text-gray-400 mt-3 font-bold">
                   {2018 + i}
                 </span>
@@ -208,7 +200,6 @@ function StateProperty() {
             ))}
           </div>
         </Card>
-        {/* CARD PROGRESS HIBAH */}
         <Card className="rounded-3xl bg-white shadow-sm h-[400px] relative border-none flex flex-col">
           <CardIcon
             icon={PieChart}

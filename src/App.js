@@ -30,6 +30,10 @@ import StatusPSP from "./pages/StateProperty/statusSpp";
 import KondisiAset from "./pages/StateProperty/kondisiAset"; 
 import JumlahJenisBMN from "./pages/StateProperty/jenisBMN";
 import { useAuth } from "./contexts/AuthContexts";
+import { useAuth } from "./contexts/AuthContexts";
+import StatusPSP from "./pages/StateProperty/PspStatus"; 
+import KondisiAset from "./pages/StateProperty/assetCondition"; 
+import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 // import "@/PDFWorkerSetup";
 
 function App() {

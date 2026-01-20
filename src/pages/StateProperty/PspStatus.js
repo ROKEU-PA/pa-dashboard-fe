@@ -78,7 +78,6 @@ function StatusPSP() {
     },
   ];
 
-  // --- HELPER COMPONENTS ---
   const CardIcon = ({ icon: Icon, colorClass, bgClass }) => (
     <div
       className={`absolute -top-5 left-6 w-10 h-10 rounded-full flex items-center justify-center ${bgClass} shadow-sm border border-white`}
