@@ -10,6 +10,17 @@ module.exports = {
         "kemnaker-light": "#59C7FF",
         neon: "#BCDD51",
         "neon-bg": "#EDF6D0",
+        "green-bg": "#EDF6D0",
+        "green-text": "#8EBA01",
+
+        "blue-bg": "#D5F1FF",
+        "blue-text": "#2F8AFD",
+
+        "orange-bg": "#FFF3D0",
+        "orange-text": "#FFBE02",
+
+        "red-bg": "#FFCFE2",
+        "red-text": "#FC0166",
       },
     },
   },

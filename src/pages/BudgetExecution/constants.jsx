@@ -1,11 +1,21 @@
 export const dashboardCards = [
-  { title: "Sekretariat Jenderal", value: "95.26", color: "bg-[#6FCE00]" },
-  { title: "Inspektorat Jenderal", value: "97.21", color: "bg-[#6FCE00]" },
-  { title: "Ditjen Banapenta dan PKK", value: "93.63", color: "bg-[#2E70FD]" },//F1E528
-  { title: "PHI dan Jamsostek", value: "95.18", color: "bg-[#6FCE00]" },
-  { title: "Binwasnaker dan K3", value: "93.06", color: "bg-[#2E70FD]" },
-  { title: "Barenbang Ketenagakerjaan", value: "91.65", color: "bg-[#2E70FD]" },
-  { title: "Binalavotas", value: "92.32", color: "bg-[#2E70FD]" },
+  { label: "Sekretariat Jenderal", value: "95.26", color: "bg-[#6FCE00]" },
+  { label: "Inspektorat Jenderal", value: "97.21", color: "bg-[#6FCE00]" },
+  { label: "Ditjen Banapenta dan PKK", value: "93.63", color: "bg-[#2E70FD]" }, //F1E528
+  { label: "PHI dan Jamsostek", value: "95.18", color: "bg-[#6FCE00]" },
+  { label: "Binwasnaker dan K3", value: "93.06", color: "bg-[#2E70FD]" },
+  { label: "Barenbang Ketenagakerjaan", value: "91.65", color: "bg-[#2E70FD]" },
+  { label: "Binalavotas", value: "92.32", color: "bg-[#2E70FD]" },
+];
+
+export const labelsDummy = [
+  { value: "Sekretariat Jenderal" },
+  { value: "Inspektorat Jenderal" },
+  { value: "Ditjen Banapenta dan PKK" }, //F1E528
+  { value: "PHI dan Jamsostek" },
+  { value: "Binwasnaker dan K3" },
+  { value: "Barenbang Ketenagakerjaan" },
+  { value: "Binalavotas" },
 ];
 
 export const dataTable = {
@@ -41,7 +51,7 @@ export const dataTable = {
       eselon: "Sekretariat Jenderal",
       revisiDipa: 100,
       deviasiHalIII: 94,
-      realisasiAnggaran: 81.70,
+      realisasiAnggaran: 81.7,
       belanjaKontraktual: 100,
       penyelesaianTagihan: 100,
       pengelolaanUPTUP: 98.21,
@@ -96,7 +106,7 @@ export const dataTable = {
       eselon: "Barenbang Ketenagakerjaan",
       revisiDipa: 100,
       deviasiHalIII: 74.25,
-      realisasiAnggaran: 79.40,
+      realisasiAnggaran: 79.4,
       belanjaKontraktual: 100,
       penyelesaianTagihan: 100,
       pengelolaanUPTUP: 96.29,
@@ -113,6 +123,6 @@ export const dataTable = {
       pengelolaanUPTUP: 95.56,
       capaianOutput: 100,
       nilaiIKPA: 92.32,
-    }
+    },
   ],
 };
