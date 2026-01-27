@@ -19,8 +19,8 @@ import {
   Table,
   CircleDollarSign,
   Calendar,
-  FileText, 
-  Box,      
+  FileText,
+  Box,
   Activity,
 } from "lucide-react";
 
@@ -92,7 +92,7 @@ export const menuItems = [
     // path: "/dashboard/barang-milik-negara",
     path: "/barang-milik-negara",
     children: [
-     {
+      {
         name: "Status PSP",
         path: "/barang-milik-negara/status-psp",
         icon: <FileText size={18} />,

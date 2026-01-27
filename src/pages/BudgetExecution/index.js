@@ -1,29 +1,38 @@
-import React, { useContext, useEffect, useState } from "react";
-import Title from "@/components/Title";
-import Breadcrumbs from "@/components/Breadcrumbs";
+import React, { useEffect, useState } from "react";
 import Card from "@/components/Card";
-import User from "@/components/User";
-import IKPAChart from "./GaugeChart";
 import moment from "moment";
 import "moment/locale/id";
-import { dashboardCards, dataTable } from "./constants";
-import { NotepadText } from "lucide-react";
-import { TableBudgetExecution } from "./TableBudgetExecution";
+import { labelsDummy, dataTable } from "./constants";
 import { apiRequest } from "@/services/APIHelper";
-import { AppContext } from "@/contexts/AppContext";
-import Select from "@/components/Select";
 import BarChart from "./BarChart";
+import { SquareKanban, Star } from "lucide-react";
 
 function BudgetExecution() {
-  const { userData } = useContext(AppContext);
   const [cardsData, setCardsData] = useState([]);
   const [es1Data, setEs1Data] = useState({ columns: [], data: [] });
   const mapColorByIKPA = (ikpa) => {
-    if (ikpa >= 95) return "bg-[#6FCE00]"; // Sangat Baik
-    if (ikpa >= 89) return "bg-[#2E70FD]"; // Baik
-    if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup
-    return "bg-[#FF4155]"; // Kurang
+    if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
+    if (ikpa >= 89) return "bg-blue-bg"; // Baik
+    if (ikpa >= 79) return "bg-orange-bg"; // Cukup
+    return "bg-red-bg"; // Kurang
   };
+
+  const mapColorTextByIKPA = (ikpa) => {
+    if (ikpa >= 95) return "text-green-text"; // Sangat Baik
+    if (ikpa >= 89) return "text-blue-text"; // Baik
+    if (ikpa >= 79) return "text-orange-text"; // Cukup
+    return "text-red-text"; // Kurang
+  };
+
+  const dummyCard = [
+    { title: "Sekertariat Jenderal", value: 88.23 },
+    { title: "Inspektorat Jenderal", value: 95.29 },
+    { title: "Ditjen Binapenta dan PKK", value: 94.2 },
+    { title: "PHI & Jamsostek", value: 72.88 },
+    { title: "Binwasnaker & K3", value: 95.29 },
+    { title: "Barenbang Ketenagakerjaan", value: 95.29 },
+    { title: "Binalavotas", value: 97.08 },
+  ];
 
   const dataset = [
     { name: "Completed", value: 320 },
@@ -34,7 +43,6 @@ function BudgetExecution() {
   const [values, setValues] = useState([
     70.7, 33.39, 50.48, 9.41, 83.77, 33.1, 31.96, 29.94,
   ]);
-  const [selectOpen, setSelectOpen] = useState(false);
   const [year, setYear] = useState("2025");
 
   const es1Options = async () => {
@@ -78,7 +86,6 @@ function BudgetExecution() {
       console.error(error);
     }
   };
-  // const realGraph = async () => {
   //   try {
   //     const data = await apiRequest({
   //       url: `/api/bmn/pnbp?tahun=` + year,
@@ -113,136 +120,155 @@ function BudgetExecution() {
   const eselons = es1Data?.data?.map((item) => item.eselon);
   useEffect(() => {
     es1Options();
-    // realGraph();
   }, [year]);
+
   return (
     <div>
-      <div className="flex sm:flex-row justify-between">
-        <Breadcrumbs
-          items={[
-            { name: "Pelaksanaan Anggaran", path: "/pelaksanaan-anggaran" },
-          ]}
-        />
-        <User
-          name={userData?.name}
-          previlege={userData?.role?.toUpperCase()}
-          username={userData?.biro_code}
-          role={userData?.role}
-          access_code={userData?.access_code}
-          id={userData?.id}
-        />
-      </div>
-      <Title>Dashboard Pelaksanaan Anggaran</Title>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-        <Card className="row-span-2">
-          <div className="flex flex-col items-center ">
-            <span className="font-bold text-2xl text-center">NILAI IKPA</span>
-            <IKPAChart height={"h-48"} val={es1Data?.data?.[0]?.nilaiIKPA} />
-            <div className="bg-gradient-to-b from-[#5C90FD] to-[#2D71FE] rounded-2xl text-center px-4 py-1 mt-2">
-              <span className="font-bold text-sm text-center text-white ">
-                Bulan{" "}
-                {moment().locale("id").subtract(1, "months").format("MMMM")}
-              </span>
-            </div>
-            <span className="font-bold text-sm text-center">
-              Kementerian Ketenagakerjaan
+      <div className="grid grid-cols-5 gap-4 mb-4 bg-[#F1FAFF] rounded-lg">
+        <div className="lg:row-span-2 relative bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] text-white rounded-xl px-7 py-10 flex flex-col gap-12 overflow-hidden">
+          <div className="flex flex-col gap-1 z-10">
+            <span className="font-bold text-2xl">Nilai IKPA</span>
+            <span className="font-medium text-sm opacity-90">
+              {moment().locale("id").format("MMMM YYYY")}
             </span>
           </div>
-        </Card>
-        {cardsData &&
-          cardsData.map((item, index) => (
-            <Card className="p-3" key={index}>
-              <div className="flex flex-col">
-                <div className="flex justify-between items-center h-10">
-                  <span className="font-bold text-sm sm:text-base">
-                    {item.title}
-                  </span>
-                  <div className={`${item.color} rounded-lg p-1`}>
-                    <NotepadText color="white" />
-                  </div>
-                </div>
+          <span className="text-6xl font-bold my-4 z-10">94.91</span>
+          <span className="font-semibold text-base leading-tight z-10">
+            Kementerian
+            <br />
+            Ketenagakerjaan
+          </span>
+          <img
+            src={"/kemnaker-logo-decoration-gradient.webp"}
+            alt={"decor-1"}
+            className={`absolute right-[-5rem] bottom-[-4.5rem] rotate-[165.25deg] z-3`}
+            loading="eager"
+            width={250}
+          />
+          <img
+            src={"/kemnaker-logo-decoration-gradient.webp"}
+            alt={"decor-1"}
+            className={`absolute left-[-5rem] top-[-4.5rem] rotate-[-186.75deg] z-3`}
+            loading="eager"
+            width={250}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-4 gap-4 mb-4 rounded-lg pl-[15rem] absolute top-[6.5rem] justify-between">
+        {dummyCard &&
+          dummyCard.map((item, index) => (
+            <div
+              key={index}
+              className={`bg-white rounded-xl py-2 px-3 flex flex-col justify-between`}
+            >
+              <div className="mb-2">
+                <span
+                  className={` inline-block text-sm font-semibold px-2 py-1 rounded ${mapColorTextByIKPA(item?.value)} ${mapColorByIKPA(item?.value)}
+        `}
+                >
+                  {item.title}
+                </span>
               </div>
-              <span className="text-[50px] font-black text-blue-500">
+              <span className="text-6xl font-black leading-none py-4">
                 {item.value}
               </span>
-            </Card>
+            </div>
           ))}
-        <div className="flex flex-col justify-between">
-          <span className="font-bold">Ketentuan Penilaian</span>
-          <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-[#6FCE00]"></div>
-            <span className="text-sm">
-              {"Nilai IKPA ≥ 95"}
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            </span>
-            <span className="text-sm">:</span>
-            <span className="text-sm">Sangat Baik</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-[#2E70FD]"></div>
-            <span className="text-sm">{"89 ≤ Nilai IKPA < 95"}</span>
-            <span className="text-sm">:</span>
-            <span className="text-sm">Baik</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-[#ECFD2E]"></div>
-            <span className="text-sm">{"70 ≤ Nilai IKPA < 89"}</span>
-            <span className="text-sm">:</span>
-            <span className="text-sm">Cukup</span>
-          </div>
-          <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-[#FF4155]"></div>
-            <span className="text-sm">
-              {"Nilai IKPA < 70"}
-              &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            </span>
-            <span className="text-sm">:</span>
-            <span className="text-sm">Kurang</span>
+
+        {/* Legend Box - Spans 2 rows dan lebar lebih besar */}
+        <div className="lg:row-span-2 lg:col-span-1 rounded-xl py-1 px-2 w-full">
+          <div className="flex flex-col flex-1 justify-center gap-1">
+            <span className="font-bold text-base ">Indikator Warna</span>
+
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-[#6FCE00] rounded-sm flex-shrink-0"></div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium whitespace-nowrap">
+                  Nilai IKPA ≥ 95
+                </span>
+                <span>:</span>
+                <span className="font-semibold">Sangat Baik</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-[#2E70FD] rounded-sm flex-shrink-0"></div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium whitespace-nowrap">
+                  89 ≤ Nilai IKPA &lt; 95
+                </span>
+                <span>:</span>
+                <span className="font-semibold">Baik</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-[#ECFD2E] rounded-sm flex-shrink-0"></div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium whitespace-nowrap">
+                  70 ≤ Nilai IKPA &lt; 89
+                </span>
+                <span>:</span>
+                <span className="font-semibold">Cukup</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 bg-[#FF4155] rounded-sm flex-shrink-0"></div>
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium whitespace-nowrap">
+                  Nilai IKPA &lt; 70
+                </span>
+                <span>:</span>
+                <span className="font-semibold">Kurang</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mr-4">
-        <Card className="">
-          <div className="grid grid-cols-[90%_10%] items-center mb-4">
-            <span className="font-bold text-lg block mb-4">
-              Persentase Realisasi Anggaran per Eselon 1
-            </span>
-          </div>
+        <Card
+          className="min-h-[400px]"
+          icon={<SquareKanban size={26} color="#D5F1FF" strokeWidth={2} />}
+          color="bg-[#59C7FF]"
+          title="Persentase Realisasi Anggaran per Eselon 1"
+        >
           <div className="items-center">
             <BarChart
               data={dataset}
               height="h-72 "
-              labels={eselons}
+              // labels={eselons}
+              labels={labelsDummy}
               values={values}
             />
           </div>
         </Card>
-        <Card className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Peringkat Realisasi Kemnaker */}
+        <Card
+          className="min-h-[400px]"
+          icon={
+            <Star size={26} fill="#FFF3D0" color="#FFF3D0" strokeWidth={2} />
+          }
+          color="bg-[#FFBE02]"
+        >
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10">
             <div className="flex flex-col items-center">
+              <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-[3rem] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] flex items-center justify-center shadow">
+                <span className="text-white text-[8rem] font-bold">9</span>
+              </div>
+              <br></br>
               <span className="font-semibold text-center mb-2 text-xl">
                 Peringkat Realisasi <br /> Kemnaker
               </span>
-              <br></br>
-              <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow">
-                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">
-                  9
-                </span>
-              </div>
             </div>
-
-            {/* Peringkat Alokasi */}
             <div className="flex flex-col items-center">
+              <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[3rem] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] flex items-center justify-center shadow-md">
+                <span className="text-white text-[8rem] font-bold">16</span>
+              </div>
+              <br></br>
               <span className="font-semibold text-center mb-2 text-xl">
                 Peringkat Alokasi <br /> Seluruh Kementerian
               </span>
-              <br></br>
-              <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-full bg-gradient-to-b from-blue-400 to-blue-700 flex items-center justify-center shadow-md">
-                <span className="text-white text-6xl sm:text-7xl md:text-8xl font-bold">
-                  16
-                </span>
-              </div>
             </div>
           </div>
         </Card>

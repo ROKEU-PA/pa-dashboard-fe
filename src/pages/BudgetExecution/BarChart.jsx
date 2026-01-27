@@ -6,13 +6,13 @@ export default function BarChartHorizontal({
   labels = [],
   values = [],
 }) {
-  const val = values.slice().reverse()
+  const val = values.slice().reverse();
   const option = {
     grid: {
       top: 20,
-      right: 30,
+      right: 0,
       bottom: 20,
-      left: 80,
+      left: 10,
       containLabel: true,
     },
     xAxis: {
@@ -28,7 +28,8 @@ export default function BarChartHorizontal({
     },
     yAxis: {
       type: "category",
-      data: labels.slice().reverse(),
+      // data: labels.slice().reverse(),
+      data: labels,
       axisLabel: { fontSize: 12 },
       axisTick: { show: false },
       axisLine: { show: false },
@@ -41,8 +42,7 @@ export default function BarChartHorizontal({
           val.map((val) => ({
             value: val,
             itemStyle: {
-              color: "#2979FF",
-              borderRadius: [0, 10, 10, 0],
+              color: "#59C7FF",
             },
             label: {
               show: true,
@@ -50,11 +50,8 @@ export default function BarChartHorizontal({
               formatter: `${val.toFixed(1)}%`,
               backgroundColor: "#fff",
               padding: [4, 8],
-              borderRadius: 6,
               color: "#333",
               fontSize: 12,
-              shadowColor: "rgba(0,0,0,0.1)",
-              shadowBlur: 3,
             },
           })),
         barWidth: "40%",

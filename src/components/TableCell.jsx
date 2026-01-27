@@ -7,6 +7,7 @@ function TableCell({
   scope,
   sx = {},
   style = {},
+  index = null,
   ...props
 }) {
   const Component = component;
@@ -18,12 +19,17 @@ function TableCell({
     padding: "10px 16px",
     textAlign,
     fontWeight: component === "th" ? 600 : 400,
-    borderBottom: "1px solid #e0e0e0",
+    // borderBottom: "1px solid #e0e0e0",
     ...sx,
   };
 
   return (
-    <Component style={defaultStyle} scope={scope} {...props}>
+    <Component
+      style={defaultStyle}
+      scope={scope}
+      {...props}
+      className={`${index ? ((index + 1) % 2 !== 0 ? "bg-white" : "bg-[#EBF8FF]") : ""}`}
+    >
       {children}
     </Component>
   );

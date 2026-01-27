@@ -48,6 +48,7 @@ export async function apiRequest({
         typeof data === "string" ? data : data?.message || "Request failed";
       toast.error(errorMessage);
       if (errorMessage === "Token is Expired") {
+        sessionStorage.removeItem("auth");
         const navigate = (path) => {
           window.location.href = path;
         };
