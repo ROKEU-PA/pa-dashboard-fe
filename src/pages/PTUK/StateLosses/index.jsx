@@ -3,6 +3,8 @@ import Select from "@/components/Select";
 import { PTUKCard } from "@/pages/PTUKDashboard/components/PTUKCard";
 import { formatCurrency } from "@/services/GeneralHelper";
 import { ChartNoAxesColumn, Flame } from "lucide-react";
+import { RecapTable } from "./components/RecapTable";
+import StateLossesChart from "./components/StateLossesChart";
 
 const StateLosses = () => {
   return (
@@ -63,7 +65,10 @@ const StateLosses = () => {
         className="h-fit"
         icon={<ChartNoAxesColumn size={26} color="#2F8AFD" strokeWidth={2} />}
         color="bg-blue-bg"
-      ></Card>
+      >
+        <StateLossesChart />
+        <RecapTable />
+      </Card>
     </div>
   );
 };
