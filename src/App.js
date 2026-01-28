@@ -30,6 +30,9 @@ import { useAuth } from "./contexts/AuthContexts";
 import StatusPSP from "./pages/StateProperty/PspStatus";
 import KondisiAset from "./pages/StateProperty/assetCondition";
 import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
+import PTUKDashboard from "./pages/PTUKDashboard";
+import PTUKLHP from "./pages/PTUK/LHP";
+import StateLosses from "./pages/PTUK/StateLosses";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -45,7 +48,7 @@ function App() {
           path="/"
           element={
             isInitializing ? null : isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
+              <Navigate to="/dashboard-utama" replace />
             ) : (
               <LoginPage />
             )
@@ -310,6 +313,36 @@ function App() {
                 userName="Administrator"
               >
                 <ReportingAccounting />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/dashboard"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PTUKDashboard />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/lhp-kementrian"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PTUKLHP />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/kerugian-negara"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <StateLosses />
               </AppLayout>
             </PrivateRoute>
           }
