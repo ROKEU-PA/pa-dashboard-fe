@@ -22,6 +22,10 @@ import {
   FileText,
   Box,
   Activity,
+  DollarSign,
+  Flame,
+  BadgeCent,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export const menuItems = [
@@ -32,9 +36,29 @@ export const menuItems = [
   },
   {
     name: "PTUK",
-    path: "/ptuk/tuntutan-ganti-rugi",
+    path: "/ptuk/dashboard",
     adminOnly: true,
     children: [
+      {
+        name: "LHP Kementrian",
+        path: "/ptuk/lhp-kementrian",
+        icon: <DollarSign strokeWidth={3} />,
+      },
+      {
+        name: "Kerugian Negara",
+        path: "/ptuk/kerugian-negara",
+        icon: <Flame strokeWidth={3} />,
+      },
+      {
+        name: "PNBP",
+        path: "/ptuk/tuntutan-ganti-rugi",
+        icon: <BadgeCent strokeWidth={3} />,
+      },
+      {
+        name: "Pengelola Keuangan",
+        path: "/ptuk/tuntutan-ganti-rugi",
+        icon: <ArrowLeftRight strokeWidth={3} />,
+      },
       {
         name: "Tuntutan Ganti Rugi",
         path: "/ptuk/tuntutan-ganti-rugi",

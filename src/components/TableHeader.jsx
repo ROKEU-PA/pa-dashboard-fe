@@ -1,6 +1,6 @@
 import React from "react";
 
-function TableHeader({ children }) {
+function TableHeader({ children, className }) {
   const headerStyle = {
     backgroundColor: "#2F8AFD",
     textAlign: "left",
@@ -8,7 +8,11 @@ function TableHeader({ children }) {
     fontWeight: 600,
     color: "#ffffff",
   };
-  return <thead style={headerStyle}>{children}</thead>;
+  return (
+    <thead className={className} style={headerStyle}>
+      {children}
+    </thead>
+  );
 }
 
 export default TableHeader;

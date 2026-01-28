@@ -10,6 +10,7 @@ const Card = ({
   subCaption = "",
   overflow = "overflow-hidden",
   cardClassName = "",
+  details,
 }) => {
   return (
     <div className={`relative ${cardClassName}`}>
@@ -25,9 +26,10 @@ const Card = ({
       <div
         className={`bg-white rounded-xl pt-8 px-6 pb-6 border border-gray-200 ${className}`}
       >
-        {/* Header */}
         {title && (
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+          <div
+            className={`flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 ${!details && "mb-4"}`}
+          >
             <h3 className="font-bold text-lg">{title}</h3>
             {subCaption && (
               <span className="text-sm font-bold text-gray-400">
@@ -36,8 +38,12 @@ const Card = ({
             )}
           </div>
         )}
+        {details && (
+          <div className="mb-3">
+            <span className="text-sm font-bold text-gray-400">{details}</span>
+          </div>
+        )}
 
-        {/* Children Container with overflow control */}
         <div className={`${overflow}`}>{children}</div>
       </div>
     </div>
