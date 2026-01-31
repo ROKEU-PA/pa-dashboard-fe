@@ -33,6 +33,8 @@ import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import PTUKDashboard from "./pages/PTUKDashboard";
 import PTUKLHP from "./pages/PTUK/LHP";
 import StateLosses from "./pages/PTUK/StateLosses";
+import PNBP from "./pages/PTUK/PNBP";
+import FinancialAdiministrator from "./pages/PTUK/FinancialAdministrator";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -348,11 +350,21 @@ function App() {
           }
         />
         <Route
-          path="/ptuk/tuntutan-ganti-rugi"
+          path="/ptuk/pnbp"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
-                <PTUKSub1Page />
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PNBP />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/pengelola-keuangan"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <FinancialAdiministrator />
               </AppLayout>
             </PrivateRoute>
           }

@@ -51,18 +51,13 @@ export const menuItems = [
       },
       {
         name: "PNBP",
-        path: "/ptuk/tuntutan-ganti-rugi",
+        path: "/ptuk/pnbp",
         icon: <BadgeCent strokeWidth={3} />,
       },
       {
         name: "Pengelola Keuangan",
-        path: "/ptuk/tuntutan-ganti-rugi",
+        path: "/ptuk/pengelola-keuangan",
         icon: <ArrowLeftRight strokeWidth={3} />,
-      },
-      {
-        name: "Tuntutan Ganti Rugi",
-        path: "/ptuk/tuntutan-ganti-rugi",
-        icon: <Building strokeWidth={3} />,
       },
     ],
     icon: <Layers strokeWidth={3} />,

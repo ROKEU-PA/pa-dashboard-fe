@@ -1,0 +1,66 @@
+import Card from "@/components/Card";
+import Select from "@/components/Select";
+import { ChartNoAxesColumn } from "lucide-react";
+import { PieCharts } from "./components/PIECharts";
+import { TableFinancialManager2 } from "./components/TableFinancialManager2";
+
+export const FinancialManager2 = () => {
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex justify-between">
+        <div className="flex">
+          <Select
+            label="Eselon 1"
+            name="eselon_code"
+            // onChange={(e) =>
+            //   setFilter((prev) => ({
+            //     ...prev,
+            //     eselonKey: e.target.value ?? "",
+            //   }))
+            // }
+            // value={filter.eselonKey}
+            // options={es1Data.map((q) => ({
+            //   label: q.name,
+            //   value: q.eselon_code,
+            // }))}
+            style={{ width: "20rem" }}
+            // isOpen={selectOpen}
+            // setIsOpen={setSelectOpen}
+          />
+        </div>
+        <Select
+          label="Jabatan"
+          placeholder="Pilih Jabatan"
+          style={{ width: "calc(100vw/4.2)" }}
+          //   value={filter.searchKey}
+          //   onChange={(e) =>
+          //     setFilter((prev) => ({
+          //       ...prev,
+          //       searchKey: e.target.value,
+          //     }))
+          //   }
+        />
+        <Select
+          label="Jabatan Fungsional"
+          placeholder="Pilih Jabatan Fungsional"
+          style={{ width: "calc(100vw/4.2)" }}
+          //   value={filter.searchKey}
+          //   onChange={(e) =>
+          //     setFilter((prev) => ({
+          //       ...prev,
+          //       searchKey: e.target.value,
+          //     }))
+          //   }
+        />
+      </div>
+      <Card
+        className="h-fit"
+        icon={<ChartNoAxesColumn size={26} color="#2F8AFD" strokeWidth={2} />}
+        color="bg-blue-bg"
+      >
+        <PieCharts />
+        <TableFinancialManager2 />
+      </Card>
+    </div>
+  );
+};

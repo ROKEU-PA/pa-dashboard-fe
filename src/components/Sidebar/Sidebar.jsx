@@ -242,7 +242,6 @@ function Sidebar() {
         }}
       >
         <span
-          onClick={handleLogout}
           style={{
             position: "relative",
             gap: "8px",

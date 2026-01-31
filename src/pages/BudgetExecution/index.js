@@ -9,6 +9,7 @@ import { SquareKanban, Star } from "lucide-react";
 
 function BudgetExecution() {
   const [cardsData, setCardsData] = useState([]);
+  const year = moment().format("YYYY");
   const [es1Data, setEs1Data] = useState({ columns: [], data: [] });
   const mapColorByIKPA = (ikpa) => {
     if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
@@ -43,7 +44,6 @@ function BudgetExecution() {
   const [values, setValues] = useState([
     70.7, 33.39, 50.48, 9.41, 83.77, 33.1, 31.96, 29.94,
   ]);
-  const [year, setYear] = useState("2025");
 
   const es1Options = async () => {
     try {
@@ -124,65 +124,70 @@ function BudgetExecution() {
 
   return (
     <div>
-      <div className="grid grid-cols-5 gap-4 mb-4 bg-[#F1FAFF] rounded-lg">
-        <div className="lg:row-span-2 relative bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] text-white rounded-xl px-7 py-10 flex flex-col gap-12 overflow-hidden">
-          <div className="flex flex-col gap-1 z-10">
-            <span className="font-bold text-2xl">Nilai IKPA</span>
-            <span className="font-medium text-sm opacity-90">
-              {moment().locale("id").format("MMMM YYYY")}
+      <div className="grid grid-cols-5 gap-x-4 gap-y-0 mb-4 bg-[#F1FAFF] rounded-lg justify-between">
+        <div className="row-span-2 z-0">
+          <div className="lg:row-span-2 relative bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] text-white rounded-xl px-7 py-10 flex flex-col gap-12 overflow-hidden">
+            <div className="flex flex-col gap-1 z-10">
+              <span className="font-bold text-lg md:text-xl lg:text-2xl">
+                Nilai IKPA
+              </span>
+              <span className="font-medium  text-xs md:text-sm opacity-90">
+                {moment().locale("id").format("MMMM YYYY")}
+              </span>
+            </div>
+            <span className="text-4xl md:text-5xl lg:text-6xl font-bold my-4 z-10">
+              94.91
             </span>
+            <span className="font-semibold text-sm md:text-baseleading-tight z-10">
+              Kementerian
+              <br />
+              Ketenagakerjaan
+            </span>
+            <img
+              src={"/kemnaker-logo-decoration-gradient.webp"}
+              alt={"decor-1"}
+              className={`absolute right-[-5rem] bottom-[-4.5rem] rotate-[165.25deg] z-3`}
+              loading="eager"
+              width={250}
+            />
+            <img
+              src={"/kemnaker-logo-decoration-gradient.webp"}
+              alt={"decor-1"}
+              className={`absolute left-[-5rem] top-[-4.5rem] rotate-[-186.75deg] z-3`}
+              loading="eager"
+              width={250}
+            />
           </div>
-          <span className="text-6xl font-bold my-4 z-10">94.91</span>
-          <span className="font-semibold text-base leading-tight z-10">
-            Kementerian
-            <br />
-            Ketenagakerjaan
-          </span>
-          <img
-            src={"/kemnaker-logo-decoration-gradient.webp"}
-            alt={"decor-1"}
-            className={`absolute right-[-5rem] bottom-[-4.5rem] rotate-[165.25deg] z-3`}
-            loading="eager"
-            width={250}
-          />
-          <img
-            src={"/kemnaker-logo-decoration-gradient.webp"}
-            alt={"decor-1"}
-            className={`absolute left-[-5rem] top-[-4.5rem] rotate-[-186.75deg] z-3`}
-            loading="eager"
-            width={250}
-          />
         </div>
-      </div>
-      <div className="grid grid-cols-4 gap-4 mb-4 rounded-lg pl-[15rem] absolute top-[6.5rem] justify-between">
         {dummyCard &&
           dummyCard.map((item, index) => (
             <div
               key={index}
-              className={`bg-white rounded-xl py-2 px-3 flex flex-col justify-between`}
+              className={`bg-white rounded-xl py-2 px-3 flex flex-col my-4 ml-[-3rem] mr-[3rem] z-10`}
             >
               <div className="mb-2">
                 <span
-                  className={` inline-block text-sm font-semibold px-2 py-1 rounded ${mapColorTextByIKPA(item?.value)} ${mapColorByIKPA(item?.value)}
+                  className={` inline-block text-xs md:text-sm font-semibold px-2 py-1 rounded ${mapColorTextByIKPA(item?.value)} ${mapColorByIKPA(item?.value)}
         `}
                 >
                   {item.title}
                 </span>
               </div>
-              <span className="text-6xl font-black leading-none py-4">
+              <span className="text-4xl md:text-5xl lg:text-6xl font-black leading-none py-4">
                 {item.value}
               </span>
             </div>
           ))}
 
-        {/* Legend Box - Spans 2 rows dan lebar lebih besar */}
-        <div className="lg:row-span-2 lg:col-span-1 rounded-xl py-1 px-2 w-full">
+        <div className="lg:row-span-2 lg:col-span-1 rounded-xl py-1 px-2 w-full h-fit ml-[-3rem]">
           <div className="flex flex-col flex-1 justify-center gap-1">
-            <span className="font-bold text-base ">Indikator Warna</span>
+            <span className="font-bold text-sm md:text-base">
+              Indikator Warna
+            </span>
 
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#6FCE00] rounded-sm flex-shrink-0"></div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
                 <span className="font-medium whitespace-nowrap">
                   Nilai IKPA ≥ 95
                 </span>
@@ -193,7 +198,7 @@ function BudgetExecution() {
 
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#2E70FD] rounded-sm flex-shrink-0"></div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
                 <span className="font-medium whitespace-nowrap">
                   89 ≤ Nilai IKPA &lt; 95
                 </span>
@@ -204,7 +209,7 @@ function BudgetExecution() {
 
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#ECFD2E] rounded-sm flex-shrink-0"></div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
                 <span className="font-medium whitespace-nowrap">
                   70 ≤ Nilai IKPA &lt; 89
                 </span>
@@ -215,7 +220,7 @@ function BudgetExecution() {
 
             <div className="flex items-center gap-3">
               <div className="w-4 h-4 bg-[#FF4155] rounded-sm flex-shrink-0"></div>
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
                 <span className="font-medium whitespace-nowrap">
                   Nilai IKPA &lt; 70
                 </span>
@@ -254,27 +259,29 @@ function BudgetExecution() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-10">
             <div className="flex flex-col items-center">
               <div className="w-40 h-40 sm:w-52 sm:h-52 rounded-[3rem] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] flex items-center justify-center shadow">
-                <span className="text-white text-[8rem] font-bold">9</span>
+                <span className="text-white text-6xl md:text-7xl lg:text-[8rem] font-bold">
+                  9
+                </span>
               </div>
               <br></br>
-              <span className="font-semibold text-center mb-2 text-xl">
+              <span className="font-semibold  text-center mb-2 text-base md:text-lg lg:text-xl">
                 Peringkat Realisasi <br /> Kemnaker
               </span>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-40 h-40 sm:w-48 sm:h-48 md:w-52 md:h-52 rounded-[3rem] bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] flex items-center justify-center shadow-md">
-                <span className="text-white text-[8rem] font-bold">16</span>
+                <span className="text-white text-6xl md:text-7xl lg:text-[8rem] font-bold">
+                  16
+                </span>
               </div>
               <br></br>
-              <span className="font-semibold text-center mb-2 text-xl">
+              <span className="font-semibold  text-center mb-2 text-base md:text-lg lg:text-xl">
                 Peringkat Alokasi <br /> Seluruh Kementerian
               </span>
             </div>
           </div>
         </Card>
       </div>
-
-      {/* <TableBudgetExecution dataTable={es1Data} /> */}
     </div>
   );
 }
