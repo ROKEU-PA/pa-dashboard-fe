@@ -147,11 +147,7 @@ export const menuItems = [
     adminOnly: true,
     path: "/tata-usaha",
     children: [
-      {
-        name: "Dashboard",
-        path: "/tata-usaha",
-        icon: <Axis3D strokeWidth={3} />,
-      },
+      
     ],
     icon: <BookUser strokeWidth={3} />,
   },
