@@ -81,7 +81,7 @@ function StateProperty() {
   );
 
   return (
-    <div className="bg-[#F8F9FA] h-[830] w-full flex flex-col">
+    <div className="bg-[#F8F9FA] h-[830] w-full flex flex-col p-2 md:p-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4  items-stretch">
         <Card className="rounded-3xl bg-white h-[440px] shadow-sm relative border-none flex flex-col">
           <CardIcon

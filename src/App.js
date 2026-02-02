@@ -249,7 +249,7 @@ function App() {
           path="/dashboard/:subPage"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Helpdesk" userName="Administrator">
                 <DashboardPage />
               </AppLayout>
             </PrivateRoute>

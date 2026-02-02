@@ -105,7 +105,7 @@ function KondisiAset() {
 
   return (
     <div>
-      <div className="bg-gray-50 max-h-screen font-sans">
+      <div className="bg-gray-50 max-h-screen font-sans p-2 md:p-4">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8 pt-4">
           {/* CARD  KONDISI ASET */}
           <Card className="rounded-[2rem] bg-white max-h-[430px] shadow-sm border border-gray-100 relative overflow-visible">
