@@ -27,14 +27,15 @@ import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
 import { useAuth } from "./contexts/AuthContexts";
-import StatusPSP from "./pages/StateProperty/PspStatus";
-import KondisiAset from "./pages/StateProperty/assetCondition";
-import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import PTUKDashboard from "./pages/PTUKDashboard";
 import PTUKLHP from "./pages/PTUK/LHP";
 import StateLosses from "./pages/PTUK/StateLosses";
 import PNBP from "./pages/PTUK/PNBP";
 import FinancialAdiministrator from "./pages/PTUK/FinancialAdministrator";
+import StatusPSP from "./pages/StateProperty/PspStatus"; 
+import KondisiAset from "./pages/StateProperty/assetCondition"; 
+import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
+import StrukturOrganisasi from "./pages/OrganizationalStructure";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -251,6 +252,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Helpdesk" userName="Administrator">
                 <DashboardPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/dashboard/struktur-organisasi"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Struktur Organisasi">
+                <StrukturOrganisasi/>
               </AppLayout>
             </PrivateRoute>
           }
