@@ -8,6 +8,7 @@ function TableCell({
   sx = {},
   style = {},
   index = null,
+  className = "",
   ...props
 }) {
   const Component = component;
@@ -28,7 +29,7 @@ function TableCell({
       style={defaultStyle}
       scope={scope}
       {...props}
-      className={`${index ? ((index + 1) % 2 !== 0 ? "bg-white" : "bg-[#EBF8FF]") : ""}`}
+      className={`${className} ${index ? ((index + 1) % 2 !== 0 ? "bg-white" : "bg-[#EBF8FF]") : ""}`}
     >
       {children}
     </Component>

@@ -5,9 +5,13 @@ export async function apiRequest({
   method = "GET",
   options = {},
   isMultiType = false,
-  token,
+  token = null,
 }) {
-  if (!token) return;
+  const auth = sessionStorage.getItem("auth");
+  const accessToken = !token ? JSON.parse(auth)?.accessToken : token;
+
+  if (!accessToken) return;
+
   const path = process.env.REACT_APP_API_BASE_URL + url;
   const { body } = options;
 
@@ -20,10 +24,10 @@ export async function apiRequest({
     const headers = !isMultiType
       ? {
           "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         }
       : {
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         };
 
     const response = await fetch(path, {

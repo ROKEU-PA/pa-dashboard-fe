@@ -39,8 +39,8 @@ function Button({
       backgroundColor: isActive
         ? "#e6f0f8"
         : isHovered
-        ? "#f3faff"
-        : "transparent",
+          ? "#f3faff"
+          : "transparent",
       border: "2px solid #59C7FF",
       color: "#59C7FF",
     },
@@ -103,7 +103,12 @@ function Button({
       <div style={{ display: "inline-flex", gap: "0.5em" }}>
         {icon && icon}
         {children && (
-          <span style={{ lineHeight: icon ? "25px" : 0 }}>{children}</span>
+          <span
+            className="whitespace-nowrap"
+            style={{ lineHeight: icon ? "25px" : 0 }}
+          >
+            {children}
+          </span>
         )}
       </div>
     </button>

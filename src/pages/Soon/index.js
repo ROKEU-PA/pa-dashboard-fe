@@ -6,8 +6,6 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 function SoonPage() {
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Soon", path: "/soon" }]} />
-      <Title>Under Construct</Title>
       <Paper
         elevation={3}
         style={{
@@ -26,7 +24,9 @@ function SoonPage() {
             justifyContent: "center",
           }}
         >
-          <h1 style={{ color: "#795548", margin: 0 }}>Halaman sedang dalam pengembangan :)</h1>
+          <h1 style={{ color: "#795548", margin: 0 }}>
+            Halaman sedang dalam pengembangan :)
+          </h1>
           <img
             src="/under-construct.gif"
             alt="under-maintenance"

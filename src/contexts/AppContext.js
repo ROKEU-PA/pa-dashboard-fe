@@ -18,7 +18,6 @@ export const AppProvider = ({ children }) => {
       const loadMenu = async () => {
         try {
           const menuData = await fetchMenu(token);
-          console.log(auth?.accessToken, menuData);
           setListMenu(menuData.data);
         } catch (error) {
           console.error("Error loading menu:", error);
