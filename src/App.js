@@ -198,7 +198,7 @@ function App() {
             })()}
             element={
               <PrivateRoute>
-                <AppLayout isAdmin={isAdmin}>
+                <AppLayout isAdmin={isAdmin} title={`Pengajuan`}>
                   <ListSatuanKerjaPage />
                 </AppLayout>
               </PrivateRoute>
@@ -299,7 +299,7 @@ function App() {
           path="/tanda-terima"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Tanda Terima SPP">
                 <TandaTerimaPage />
               </AppLayout>
             </PrivateRoute>

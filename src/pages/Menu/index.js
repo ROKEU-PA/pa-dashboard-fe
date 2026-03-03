@@ -12,7 +12,6 @@ function MenuPage() {
     useContext(AppContext);
 
   useEffect(() => {
-    console.log("menupage", auth);
     const loadMenu = async () => {
       try {
         const menuData = await fetchMenu(auth?.accessToken);
@@ -27,7 +26,6 @@ function MenuPage() {
 
   return (
     <div style={{ padding: "10px 1rem" }}>
-      <Breadcrumbs items={[{ name: "Satuan Kerja", path: "/satuan-kerja" }]} />
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full"
         // style={{

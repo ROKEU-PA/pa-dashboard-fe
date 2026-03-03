@@ -90,7 +90,7 @@ function CompilationPage() {
           : "",
       });
       const data = await apiRequest({
-        url: `/api/archive/compilation?${query}`,
+        url: `/archive/compilation?${query}`,
       });
       let result = data?.data;
       if (data.success) {
@@ -117,8 +117,6 @@ function CompilationPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Kompilasi", path: "/compilation" }]} />
-      <Title>Kompilasi</Title>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
@@ -222,7 +220,7 @@ function CompilationPage() {
                         : "default",
                   }}
                 >
-                    {row.document?.filename}
+                  {row.document?.filename}
                 </TableCell>
                 <TableCell align="center">Revisi ke-{row.rev}</TableCell>
               </TableRow>

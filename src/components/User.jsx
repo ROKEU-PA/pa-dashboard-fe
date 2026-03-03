@@ -50,7 +50,7 @@ const User = ({
       };
 
       const result = await apiRequest({
-        url: `/api/user/edit/${id}`,
+        url: `/user/edit/${id}`,
         method: "POST",
         options: {
           body: payload,
