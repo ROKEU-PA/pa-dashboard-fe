@@ -51,7 +51,7 @@ export default function DashboardPage() {
         }
 
         const id = IMAGE_MAP[subPage] || "UTM";
-        const response = await apiRequest({ url: `/api/dashboard/${id}` });
+        const response = await apiRequest({ url: `/dashboard/${id}` });
         setImageUrl(response.data);
       } catch (error) {
         console.error("Failed to fetch dashboard image:", error);
@@ -67,9 +67,6 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Dashboard Utama", path: "/dashboard" }]} />
-      <Title>{title}</Title>
-
       <Paper elevation={3} className="bg-[#F5F6F7] p-4 sm:p-6 md:p-8">
         <div className="flex justify-center items-center min-h-[400px]">
           {loading ? (

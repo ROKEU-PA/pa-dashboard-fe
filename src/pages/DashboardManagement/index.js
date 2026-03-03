@@ -63,7 +63,6 @@ function DashboardManagementPage() {
         },
         isMultiType: true,
       });
-      console.log(result);
     } catch (error) {
       console.error(error);
     }
@@ -71,12 +70,6 @@ function DashboardManagementPage() {
 
   return (
     <div>
-      <Breadcrumbs
-        items={[
-          { name: "Dashboard Management", path: "/dashboard-management" },
-        ]}
-      />
-      <Title>Manajemen Dashboard</Title>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}

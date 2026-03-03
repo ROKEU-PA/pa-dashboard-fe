@@ -17,7 +17,7 @@ export default function StrukturOrganisasi() {
     const fetchStruktur = async () => {
       try {
         setLoading(true);
-        const response = await apiRequest({ url: `/api/dashboard/SOP` });
+        const response = await apiRequest({ url: `/dashboard/SOP` });
 
         if (response && response.data) {
           setImageUrl(response.data);

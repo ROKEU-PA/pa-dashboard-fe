@@ -73,7 +73,7 @@ function TandaTerimaPage() {
 
   const fetchCount = async () => {
     try {
-      const data = await apiRequest({ url: `/api/archive/summary/status` });
+      const data = await apiRequest({ url: `/archive/summary/status` });
       let result = data.data;
       if (data.success) {
         setDataTable(result);
@@ -101,7 +101,7 @@ function TandaTerimaPage() {
           : "",
       });
       const data = await apiRequest({
-        url: `/api/archive/summary/receipt?${query}`,
+        url: `/archive/summary/receipt?${query}`,
       });
       let result = data.data;
       if (data.success) {
@@ -128,19 +128,14 @@ function TandaTerimaPage() {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <Breadcrumbs items={[{ name: "Status", path: "/status" }]} />
-        <User name={userData?.name} previlege={userData?.role.toUpperCase()} />
-      </div>
-      <Title>Tanda Terima SPP</Title>
       <Paper
         elevation={3}
         // style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       >
         <h3>Tanda Terima</h3>
         <br></br>
-        <div 
-        className="flex flex-col md:flex-row gap-2 mb-4 overflow-x-auto text-sm md:text-base"
+        <div
+          className="flex flex-col md:flex-row gap-2 mb-4 overflow-x-auto text-sm md:text-base"
           style={{
             display: "flex",
             gap: 20,
@@ -215,10 +210,10 @@ function TandaTerimaPage() {
                           {row?.[col.key] === "approved"
                             ? "Telah Diuji"
                             : row?.[col.key] === "reject"
-                            ? "Ditolak"
-                            : row?.[col.key] === "sp2d"
-                            ? "SP2D"
-                            : "Baru"}
+                              ? "Ditolak"
+                              : row?.[col.key] === "sp2d"
+                                ? "SP2D"
+                                : "Baru"}
                         </TableCell>
                       );
                     }
@@ -271,7 +266,7 @@ function TandaTerimaPage() {
             <TableBody>
               {(userData?.role === "user"
                 ? dataTable.filter(
-                    (row) => row.kode_satker === userData?.biro_code
+                    (row) => row.kode_satker === userData?.biro_code,
                   )
                 : dataTable
               ).map((row, index) => (

@@ -91,7 +91,6 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   }
 
   const userRole = userData.role;
-  console.log("userROlE", userRole);
   const normalizedPath = normalizePath(pathname);
 
   console.log("Authorization check:", {

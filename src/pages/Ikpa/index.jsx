@@ -33,7 +33,7 @@ function IkpaPage() {
         search_key: filter.searchKey,
       });
       const data = await apiRequest({
-        url: `/api/pa/ikpa/all?${query}`,
+        url: `/pa/ikpa/all?${query}`,
       });
       let result = data?.data;
       if (data.success) {
@@ -47,12 +47,11 @@ function IkpaPage() {
   const es1Options = async () => {
     try {
       const data = await apiRequest({
-        url: `/api/pa/ikpa/all`,
+        url: `/pa/ikpa/all`,
       });
       let result = data?.data.filter((q) => q.satker_code === null);
       if (data.success) {
         result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
-        console.log(result);
         setEs1Data(result);
       }
     } catch (error) {
@@ -81,7 +80,6 @@ function IkpaPage() {
         },
         isMultiType: true,
       });
-      console.log(result);
     } catch (error) {
       console.error(error);
     }
@@ -89,7 +87,6 @@ function IkpaPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     let isAnyFile = formData?.dokumen || formData?.document;
 

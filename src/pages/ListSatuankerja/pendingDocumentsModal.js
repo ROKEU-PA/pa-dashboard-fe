@@ -15,7 +15,7 @@ export default function PendingDocumentsModal({ open, onClose, code }) {
   const fetchData = async () => {
     try {
       const res = await apiRequest({
-        url: `/api/archive/summary/lack?biro_code=${code}`,
+        url: `/archive/summary/lack?biro_code=${code}`,
       });
       if (res.success) setDocs(res.data);
     } catch (e) {
@@ -69,7 +69,9 @@ export default function PendingDocumentsModal({ open, onClose, code }) {
             overflowX: "auto",
           }}
         >
-          <table style={{ width: "100%", borderCollapse: "collapse",minWidth: 600, }}>
+          <table
+            style={{ width: "100%", borderCollapse: "collapse", minWidth: 600 }}
+          >
             <thead
               style={{ backgroundColor: "#f9fafb", position: "sticky", top: 0 }}
             >

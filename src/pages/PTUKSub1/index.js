@@ -1,13 +1,9 @@
-import React, { useContext, useEffect, useState } from "react";
-import Title from "@/components/Title";
+import React from "react";
 import Paper from "@/components/Paper";
-import Breadcrumbs from "@/components/Breadcrumbs";
 
 function PTUKSub1Page() {
   return (
     <div>
-      <Breadcrumbs items={[{ name: "Dashboard Utama", path: "/dashboard" }]} />
-      <Title>Tuntutan Ganti Rugi</Title>
       <Paper elevation={3} style={{ backgroundColor: "#F5F6F7" }}>
         <div
           style={{

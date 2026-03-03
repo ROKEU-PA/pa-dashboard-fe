@@ -48,7 +48,7 @@ function BudgetExecution() {
   const es1Options = async () => {
     try {
       const data = await apiRequest({
-        url: `/api/pa/ikpa/all`,
+        url: `/pa/ikpa/all`,
       });
       let mapped = data?.data
         .filter((q) => q.satker_code === null)

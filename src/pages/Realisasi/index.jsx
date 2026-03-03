@@ -103,7 +103,7 @@ function RealisasiPage() {
       payload.append("excel", formData.dokumen);
 
       const result = await apiRequest({
-        url: "/api/pa/realization/import",
+        url: "/pa/realization/import",
         method: "POST",
         options: {
           body: payload,

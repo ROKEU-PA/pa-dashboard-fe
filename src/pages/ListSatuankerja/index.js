@@ -5,22 +5,15 @@ import TablePagination from "@/components/TablePagination";
 import TableHeader from "@/components/TableHeader";
 import TableCell from "@/components/TableCell";
 import { TableBody } from "@/components/TableBody";
-import Title from "@/components/Title";
 import Paper from "@/components/Paper";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
-import MultiSelect from "@/components/MultiSelect";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { Book, Plus } from "lucide-react";
 import FileInput from "@/components/FileInput";
-import {
-  buildQueryString,
-  formatUrlPathToTitle,
-  validationSchema,
-} from "@/services/GeneralHelper";
+import { buildQueryString, validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
 import DatePickerInput from "@/components/DatePickerInput";
 import CustomPDFViewer from "@/components/PDFViewer";
@@ -28,26 +21,28 @@ import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import moment from "moment";
-import User from "@/components/User";
 import {
   columns,
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
 import PendingDocumentsModal from "./pendingDocumentsModal";
+import {
+  statusColorClass,
+  statusColorText,
+  statusLabel,
+} from "./constants/styleConstants";
+import ChecklistComponent from "./components/ChecklistComponent";
 
 function ListSatuanKerjaPage() {
-  const isMobile = window.innerWidth < 768; //responsif
-
-  const { menuName, listMenu, userData } = useContext(AppContext);
+  const { listMenu, userData } = useContext(AppContext);
   const location = useLocation();
 
   const [currentMenu, setCurrentMenu] = useState(
-    getCurrentSatuanKerja(listMenu, location.pathname)
+    getCurrentSatuanKerja(listMenu, location.pathname),
   );
-  const menuTitle = formatUrlPathToTitle(location.pathname);
   const [filter, setFilter] = useState({
     tahun: "",
     searchKey: "",
@@ -92,7 +87,10 @@ function ListSatuanKerjaPage() {
   const [selectOpenStatus, setSelectOpenStatus] = useState(false);
   const [selectOpenJenis, setSelectOpenJenis] = useState(false);
   const [jenisFile, setJenisFile] = useState("file");
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
+
+  const auth = sessionStorage.getItem("auth");
+  const accessToken = JSON.parse(auth)?.accessToken;
 
   const getFileExtension = (url) => {
     try {
@@ -163,9 +161,9 @@ function ListSatuanKerjaPage() {
   const fetchType = async (id) => {
     try {
       if (id) {
-        const data = await apiRequest({ url: `/api/pa/spp/type?id=` + id });
+        const data = await apiRequest({ url: `/pa/spp/type?id=` + id });
         const verif = await apiRequest({
-          url: `/api/pa/spp/type?id=verifikasi`,
+          url: `/pa/spp/type?id=verifikasi`,
         });
         let result = data.data;
         let resultVerif = verif.data;
@@ -174,11 +172,11 @@ function ListSatuanKerjaPage() {
           setVerifications(resultVerif[0].questions);
         }
       } else {
-        const data = await apiRequest({ url: `/api/pa/spp/type?id=` });
+        const data = await apiRequest({ url: `/pa/spp/type?id=` });
         let result = data.data;
         if (data.success) {
           const filteredResult = result.filter(
-            (item) => item.type_id !== "verifikasi"
+            (item) => item.type_id !== "verifikasi",
           );
           setTypes(filteredResult);
         }
@@ -210,9 +208,12 @@ function ListSatuanKerjaPage() {
           ? moment(filter.endDate).format("YYYY-MM-DD").toString()
           : "",
       });
-      const data = await apiRequest({ url: `/api/archive/list?${query}` });
-      let result = data.data;
-      if (data.success) {
+      const data = await apiRequest({
+        url: `/archive/list?${query}`,
+        token: accessToken,
+      });
+      let result = data?.data;
+      if (data?.success) {
         setTotalPages(result?.last_page);
         setDataTable(result?.data);
       }
@@ -226,7 +227,7 @@ function ListSatuanKerjaPage() {
       let CryptoJS = require("crypto-js");
       let encryptedLink = CryptoJS.AES.encrypt(
         formData.link,
-        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
 
       const payload = new FormData();
@@ -242,9 +243,6 @@ function ListSatuanKerjaPage() {
         payload.append("status", "arsip");
       }
       payload.append("uploaded_name", formData.uploaded_by);
-      // for (let [key, value] of payload.entries()) {
-      //   console.log(`${key}:`, value);
-      // }
 
       if (formData.dokumen !== null) {
         const defaultToken = localStorage.getItem("token");
@@ -295,14 +293,14 @@ function ListSatuanKerjaPage() {
           };
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/api/archive/create`
+            `${process.env.REACT_APP_API_BASE_URL}/archive/create`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
         });
       } else {
         const result = await apiRequest({
-          url: "/api/archive/create",
+          url: "/archive/create",
           method: "POST",
           options: {
             body: payload,
@@ -322,7 +320,7 @@ function ListSatuanKerjaPage() {
       let CryptoJS = require("crypto-js");
       let encryptedLink = CryptoJS.AES.encrypt(
         formData.link,
-        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
       payload.append("kode_biro", currentMenu?.code);
       payload.append("no_spp", formData.no_spp);
@@ -352,9 +350,6 @@ function ListSatuanKerjaPage() {
       if (formData.dokumen_sp2d instanceof File) {
         payload.append("dokumen_sp2d", formData.dokumen_sp2d);
       }
-      // for (let [key, value] of payload.entries()) {
-      //   console.log(`${key}:`, value);
-      // }
 
       const defaultToken = localStorage.getItem("token");
 
@@ -411,14 +406,14 @@ function ListSatuanKerjaPage() {
 
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/api/archive/edit/${formData?.id}`
+            `${process.env.REACT_APP_API_BASE_URL}/archive/edit/${formData?.id}`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
         });
       } else {
         const result = await apiRequest({
-          url: `/api/archive/edit/${formData?.id}`,
+          url: `/archive/edit/${formData?.id}`,
           method: "POST",
           options: {
             body: payload,
@@ -438,11 +433,11 @@ function ListSatuanKerjaPage() {
       const verifikasiChecked = formData.verifikasi.map((item) => item.value);
 
       const allKelengkapanChecked = questions.every((q) =>
-        kelengkapanChecked.includes(q.id_question)
+        kelengkapanChecked.includes(q.id_question),
       );
 
       const allVerifikasiChecked = verifications.every((v) =>
-        verifikasiChecked.includes(v.id_question)
+        verifikasiChecked.includes(v.id_question),
       );
 
       return allKelengkapanChecked && allVerifikasiChecked;
@@ -506,12 +501,12 @@ function ListSatuanKerjaPage() {
 
         const fileName = file.name?.toLowerCase();
         const isAccepted = acceptedExtension.some((ext) =>
-          fileName.endsWith(ext)
+          fileName.endsWith(ext),
         );
 
         if (!isAccepted) {
           toast.error(
-            `File yang diizinkan hanya: ${acceptedExtension.join(", ")}`
+            `File yang diizinkan hanya: ${acceptedExtension.join(", ")}`,
           );
           return;
         }
@@ -536,7 +531,7 @@ function ListSatuanKerjaPage() {
 
       if (!checklistIsValid()) {
         toast.error(
-          "Semua Kelengkapan dan Verifikasi harus dicentang sebelum status dirubah Telah Diuji."
+          "Semua Kelengkapan dan Verifikasi harus dicentang sebelum status dirubah Telah Diuji.",
         );
         return;
       }
@@ -570,51 +565,36 @@ function ListSatuanKerjaPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-  useEffect(
-    () => {
-      fetchTable();
-      fetchType();
-      setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
-      setShowModal(true);
-    },
-    [
-      filter.tahun,
-      filter.searchKey,
-      page + 1,
-      rowsPerPage,
-      sortBy,
-      sortDir,
-      filter.startDate,
-      filter.endDate,
-    ],
-    [listMenu]
-  );
-  // console.log(fileExtension);
+
+  useEffect(() => {
+    fetchTable();
+    fetchType();
+    setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+  }, [
+    filter.tahun,
+    filter.searchKey,
+    page + 1,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+    listMenu,
+  ]);
 
   return (
     <div>
-      <div className="flex justify-between">
-        <Breadcrumbs
-          items={[
-            { name: "Satuan Kerja", path: "/satuan-kerja" },
-            { name: menuName.name },
-          ]}
-        />
-        <User
-          name={userData?.name}
-          previlege={userData?.role?.toUpperCase()}
-          username={userData?.biro_code}
-          role={userData?.role}
-          access_code={userData?.access_code}
-          id={userData?.id}
-        />
-      </div>
-      <Title>{menuName.name || menuTitle}</Title>
       <Paper
         elevation={3}
-        style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          alignItems: "center",
+        }}
       >
         <div
+          className="mb-4"
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -622,11 +602,25 @@ function ListSatuanKerjaPage() {
             gap: "16px",
           }}
         >
-          {/* Kolom Kiri: Tombol */}
-          <div style={{ flex: 1 }}>
-            {userData &&
-              (!isPengajuanPath(location.pathname) ? (
-                // Tombol "Tambah Arsip" bisa semua role
+          {userData &&
+            (!isPengajuanPath(location.pathname) ? (
+              <Button
+                onClick={() => {
+                  setIsOpenModal(true);
+                  setFormData((prev) => ({
+                    ...prev,
+                    tahun: moment().year(),
+                  }));
+                  setVariantModal("Add");
+                }}
+                style={{ width: "fit-content" }}
+                letiant="danger"
+                icon={<Plus size={20} />}
+              >
+                Tambah Arsip
+              </Button>
+            ) : (
+              userData?.role === "user" && (
                 <Button
                   onClick={() => {
                     setIsOpenModal(true);
@@ -636,33 +630,13 @@ function ListSatuanKerjaPage() {
                     }));
                     setVariantModal("Add");
                   }}
-                  style={{ width: "fit-content" }}
                   letiant="danger"
                   icon={<Plus size={20} />}
                 >
-                  Tambah Arsip
+                  Tambah Pengajuan
                 </Button>
-              ) : (
-                // Tombol "Tambah Pengajuan" - hanya user
-                userData?.role === "user" && (
-                  <Button
-                    onClick={() => {
-                      setIsOpenModal(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        tahun: moment().year(),
-                      }));
-                      setVariantModal("Add");
-                    }}
-                    style={{ width: "fit-content" }}
-                    letiant="danger"
-                    icon={<Plus size={20} />}
-                  >
-                    Tambah Pengajuan
-                  </Button>
-                )
-              ))}
-          </div>
+              )
+            ))}
 
           {/* Kolom Kanan: Form Filter */}
           <div
@@ -672,6 +646,7 @@ function ListSatuanKerjaPage() {
               gap: "1rem",
               justifyContent: "flex-end",
               width: "100%",
+              alignItems: "center",
             }}
           >
             <a
@@ -682,7 +657,6 @@ function ListSatuanKerjaPage() {
               rel="noopener noreferrer"
             >
               <Button
-                onClick={() => {}}
                 style={{ width: "fit-content" }}
                 letiant="secondary"
                 icon={<Book size={20} />}
@@ -736,7 +710,7 @@ function ListSatuanKerjaPage() {
                     (col) =>
                       !(
                         col.hiddenInArsip && !isPengajuanPath(location.pathname)
-                      )
+                      ),
                   )
                   .map((col) => (
                     <TableCell
@@ -770,7 +744,7 @@ function ListSatuanKerjaPage() {
                         !(
                           col.hiddenInArsip &&
                           !isPengajuanPath(location.pathname)
-                        )
+                        ),
                     )
                     .map((col) => {
                       if (col.key == "spp_number") {
@@ -795,35 +769,17 @@ function ListSatuanKerjaPage() {
                         );
                       }
                       if (col.key === "status") {
-                        const statusValue = row?.[col.key];
-
-                        // Label yang akan ditampilkan
-                        const statusLabel =
-                          statusValue === "approved"
-                            ? "Telah Diuji"
-                            : statusValue === "reject"
-                            ? "Ditolak"
-                            : statusValue === "sp2d"
-                            ? "SP2D"
-                            : "Baru";
-
-                        // Class warna berdasarkan status
-                        const statusColorClass =
-                          statusValue === "approved"
-                            ? "bg-green-500"
-                            : statusValue === "reject"
-                            ? "bg-red-500"
-                            : statusValue === "sp2d"
-                            ? "bg-yellow-500"
-                            : "bg-blue-500";
-
                         return (
                           <TableCell key={col.key} align="center">
-                            <span
-                              className={`px-2 py-1 rounded text-white text-sm ${statusColorClass}`}
+                            <div
+                              className={`${statusColorClass(row?.[col.key])} rounded-lg p-1`}
                             >
-                              {statusLabel}
-                            </span>
+                              <span
+                                className={`px-2 py-1 rounded text-sm whitespace-nowrap ${statusColorText(row?.[col.key])}`}
+                              >
+                                {statusLabel(row?.[col.key])}
+                              </span>
+                            </div>
                           </TableCell>
                         );
                       }
@@ -965,12 +921,17 @@ function ListSatuanKerjaPage() {
                             row.status === "reject" ||
                             row.status === "sp2d");
 
-                        const showDash = false; //!isPengajuan && role === "user";
+                        const showDash = false;
 
                         return (
-                          <TableCell key={col.key} align="center">
+                          <TableCell
+                            key={col.key}
+                            align="center"
+                            className="flex flex-col gap-2"
+                          >
                             {showEditButton && (
-                              <Button
+                              <div
+                                className="bg-blue-400 p-3 rounded-lg text-white cursor-pointer hover:bg-blue-500 active:bg-blue-600 w-full"
                                 onClick={() => {
                                   if (
                                     row.document.filename.includes("file_drive")
@@ -987,20 +948,20 @@ function ListSatuanKerjaPage() {
                                   });
                                   setIsOpenModal(true);
                                 }}
-                                style={{ width: "fit-content", margin: "5px" }}
                               >
                                 Edit
-                              </Button>
+                              </div>
                             )}
 
                             {showPengujianButton && (
-                              <Button
+                              <div
+                                className="bg-orange-400 p-3 rounded-lg text-white cursor-pointer hover:bg-orange-500 active:bg-orange-600 w-full whitespace-nowrap"
                                 onClick={() => {
                                   const kelengkapanWithLabel = questions
                                     .filter((q) =>
                                       row.question_checklist?.includes(
-                                        q.id_question
-                                      )
+                                        q.id_question,
+                                      ),
                                     )
                                     .map((q) => ({
                                       label: q.text,
@@ -1010,8 +971,8 @@ function ListSatuanKerjaPage() {
                                   const verifikasiWithLabel = verifications
                                     .filter((v) =>
                                       row.verification_checklist?.includes(
-                                        v.id_question
-                                      )
+                                        v.id_question,
+                                      ),
                                     )
                                     .map((v) => ({
                                       label: v.text,
@@ -1029,24 +990,17 @@ function ListSatuanKerjaPage() {
                                   setPDFtoOpen(row.document?.url);
                                   setIsCheckModal(true);
                                 }}
-                                style={{
-                                  minWidth: "100px",
-                                  padding: "6px 12px",
-                                  margin: "5px",
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                }}
                                 letiant="danger"
                               >
                                 {row.status === "approved"
                                   ? "Ubah Status"
                                   : "Pengujian"}
-                              </Button>
+                              </div>
                             )}
 
                             {showDetailButton && (
-                              <Button
+                              <div
+                                className="bg-[#BCDD51] p-3 rounded-lg text-white cursor-pointer hover:bg-[#A2C827] active:bg-[#b2d836] w-full"
                                 onClick={() => {
                                   fetchType(row.type_id);
                                   setFormData({
@@ -1057,10 +1011,9 @@ function ListSatuanKerjaPage() {
                                   });
                                   setIsDetailModal(true);
                                 }}
-                                style={{ width: "fit-content" }}
                               >
                                 Detail
-                              </Button>
+                              </div>
                             )}
 
                             {showDash && <>-</>}
@@ -1296,14 +1249,6 @@ function ListSatuanKerjaPage() {
         width={fileExtension === "pdf" ? "80vw" : "5vw"}
         maxWidth="95vw"
       >
-        {/* <CustomPDFViewer pdfSource="/pdf-tester.pdf" /> */}
-        {/* <CustomPDFViewer pdfSource={pdfToOpen} /> */}
-        {/* <CustomPDFViewer pdfSource="https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf" /> */}
-        {/* <iframe
-          src={`https://rokeubmn.kemnaker.go.id/storage/documents/BrQcOw5eryN4Y8q2CRHWtBZ1gDreuhdAXXoBenI8.pdf`}
-          style={{ width: "100%", height: "500px" }}
-          title="PDF Viewer"
-        /> */}
         {fileExtension === "pdf" ? (
           <div
             style={{
@@ -1338,18 +1283,17 @@ function ListSatuanKerjaPage() {
         width={fileExtension === "pdf" ? "95vw" : "80vw"}
         maxWidth="95vw"
         bodyStyle={{
-          maxHeight: "80vh",
+          maxHeight: "85vh",
           overflowY: "auto",
         }}
       >
         <div
           style={{
-            maxHeight: "75vh",
+            maxHeight: "80vh",
             overflowY: "auto",
-            padding: window.innerWidth <= 768 ? "2px" : "20px",
+            padding: window.innerWidth <= 768 ? "2px" : "0 20px",
           }}
         >
-          {/* Container utama */}
           <div
             style={{
               display: "flex",
@@ -1370,8 +1314,7 @@ function ListSatuanKerjaPage() {
               <div
                 style={{
                   width: window.innerWidth <= 768 ? "100%" : "50%",
-                  maxHeight:
-                    window.innerWidth <= 768 ? "45vh" : "calc(100vh - 200px)",
+                  maxHeight: window.innerWidth <= 768 ? "45vh" : "100%",
                   overflowY: "auto",
                   padding: 0,
                 }}
@@ -1398,7 +1341,6 @@ function ListSatuanKerjaPage() {
             <div
               style={{
                 width: window.innerWidth <= 768 ? "100%" : "50%",
-                overflowY: "auto",
                 maxHeight:
                   window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
                 paddingRight: 10,
@@ -1444,31 +1386,19 @@ function ListSatuanKerjaPage() {
                     setSelectOpen(open);
                   }}
                 />
-                <MultiSelect
-                  label="Kelengkapan"
-                  name="kelengkapan"
-                  value={formData.kelengkapan}
-                  onChange={(selectedOptions) =>
+                <ChecklistComponent
+                  title="Kelengkapan"
+                  items={questions.map((q) => ({
+                    id: q.id_question,
+                    label: q.text,
+                  }))}
+                  selectedIds={formData.kelengkapan}
+                  onChange={(updated) =>
                     setFormData((prev) => ({
                       ...prev,
-                      kelengkapan: selectedOptions,
+                      kelengkapan: updated,
                     }))
                   }
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={questions.map((q) => ({
-                    label: q.text,
-                    value: q.id_question,
-                  }))}
-                  isOpen={multiSelectOneOpen}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setSelectOpenStatus(false);
-                      setMultiSelectTwoOpen(false);
-                    }
-                    setMultiSelectOneOpen(open);
-                  }}
                   disabled={formData.status === "sp2d"}
                 />
                 <Select
@@ -1493,31 +1423,19 @@ function ListSatuanKerjaPage() {
                     setSelectOpenStatus(open);
                   }}
                 />
-                <MultiSelect
-                  label="Verifikasi"
-                  name="verifikasi"
-                  value={formData?.verifikasi}
-                  onChange={(selectedOptions) =>
+                <ChecklistComponent
+                  title="Verifikasi"
+                  items={verifications.map((q) => ({
+                    id: q.id_question,
+                    label: q.text,
+                  }))}
+                  selectedIds={formData?.verifikasi}
+                  onChange={(updated) =>
                     setFormData((prev) => ({
                       ...prev,
-                      verifikasi: selectedOptions,
+                      verifikasi: updated,
                     }))
                   }
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={verifications.map((q) => ({
-                    label: q.text,
-                    value: q.id_question,
-                  }))}
-                  isOpen={multiSelectTwoOpen}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setSelectOpenStatus(false);
-                      setMultiSelectOneOpen(false);
-                    }
-                    setMultiSelectTwoOpen(open);
-                  }}
                   disabled={formData.status === "sp2d"}
                 />
                 <Textarea

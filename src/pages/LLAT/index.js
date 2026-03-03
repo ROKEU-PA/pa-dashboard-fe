@@ -24,7 +24,7 @@ export default function LLATPage() {
     const now = new Date();
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
       2,
-      "0"
+      "0",
     )}`;
   });
   const colors = ["#E3F2FD", "#E8F5E9", "#FFF9C4", "#FCE4EC", "#D1C4E9"];
@@ -37,7 +37,7 @@ export default function LLATPage() {
     const middle = new Date((info.start.getTime() + info.end.getTime()) / 2);
 
     const ym = `${middle.getFullYear()}-${String(
-      middle.getMonth() + 1
+      middle.getMonth() + 1,
     ).padStart(2, "0")}`;
 
     setCurrentMonth(ym);
@@ -75,7 +75,7 @@ export default function LLATPage() {
       };
 
       const result = await apiRequest({
-        url: "/api/calendar/create",
+        url: "/calendar/create",
         method: "POST",
         options: { body: payload },
       });
@@ -92,8 +92,8 @@ export default function LLATPage() {
                   color: saved.color ?? colorToUse,
                   ...saved,
                 }
-              : ev
-          )
+              : ev,
+          ),
         );
       } else {
         setEvents((prev) => prev.filter((ev) => ev.id !== optimisticId));
@@ -141,7 +141,7 @@ export default function LLATPage() {
   const fetchNotes = async (month) => {
     try {
       const response = await apiRequest({
-        url: `/api/calendar?month=${month}`,
+        url: `/calendar?month=${month}`,
       });
       if (response.success) {
         setEvents(response.data);
@@ -159,13 +159,6 @@ export default function LLATPage() {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <Breadcrumbs
-          items={[{ name: "Pelaksanaan Anggaran / LLAT", path: "/llat" }]}
-        />
-        <User name={userData?.name} previlege={userData?.role?.toUpperCase()} />
-      </div>
-      <Title>Langkah - Langkah Akhir Tahun</Title>
       <div className="flex gap-6 flex-col md:flex-row">
         {/* Kalender */}
         <Card className="w-full md:w-3/5 p-2 md:p-4 text-xs md:text-base">
@@ -231,7 +224,7 @@ export default function LLATPage() {
               <h3 className="text-sm md:text-base text-gray-600 mb-2">
                 {selectedDate
                   ? `Tambah catatan untuk ${new Date(
-                      selectedDate
+                      selectedDate,
                     ).toLocaleDateString("id-ID")}`
                   : "Klik tanggal di kalender untuk memilih tanggal"}
               </h3>
@@ -247,7 +240,7 @@ export default function LLATPage() {
                 <Button
                   onClick={handleAddNote}
                   disabled={!selectedDate || !newNote.trim()}
-                   className="w-full md:w-auto"
+                  className="w-full md:w-auto"
                 >
                   Tambah
                 </Button>

@@ -32,13 +32,6 @@ function ReportingAccounting() {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <Breadcrumbs
-          items={[{ name: "Dashboard Utama", path: "/dashboard" }]}
-        />
-        <User name={"Test"} previlege={"Administrator"} />
-      </div>
-      <Title>Dashboard Akuntansi Pelaporan</Title>
       <div className="grid grid-cols-2 gap-4">
         <Card className="">
           <h2 className="font-bold text-2xl mb-4">
@@ -105,7 +98,9 @@ function ReportingAccounting() {
         <Card className="">
           <div className="flex justify-between items-center mb-4">
             <div className="flex gap-4 items-center">
-              <span className="font-semibold text-2xl">LRA 30 Juni 2025 dan 30 Juni 2024</span>
+              <span className="font-semibold text-2xl">
+                LRA 30 Juni 2025 dan 30 Juni 2024
+              </span>
             </div>
           </div>
           <div className="grid grid-cols-[65%_35%] gap-2 items-center">
