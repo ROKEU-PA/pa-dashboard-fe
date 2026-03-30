@@ -23,6 +23,7 @@ import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
 import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
+import Meeting from "./pages/Administrator/meetingAgenda";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
@@ -155,11 +156,23 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout
-                isAdmin={isAdmin}
                 title="Tata Usaha"
                 userName="Administrator"
               >
                 <Administrator />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tata-usaha/agenda-rapat"
+          element={
+            <PrivateRoute>
+              <AppLayout
+                title="Agenda Rapat"
+                userName="Administrator"
+              >
+                <Meeting />
               </AppLayout>
             </PrivateRoute>
           }

@@ -5,10 +5,8 @@ import Card from "@/components/Card";
 import DonutChart from "./DonutChart";
 import BarChart from "./BarChart";
 
-// Cukup import satu sumber data utama
-import { DASHBOARD_DATA } from "./constants";
 
-// --- Komponen Helper ---
+import { DASHBOARD_DATA } from "./constants";
 
 function LegendItem({ color, label, value }) {
   return (
@@ -29,7 +27,6 @@ function LegendItem({ color, label, value }) {
 }
 
 function IKKCard({ title, dataset }) {
-  // Ambil nilai  dari dataset constants.jsx
   const targetValue = dataset.values[0];
   const realisasiValue = dataset.values[1];
 
@@ -75,7 +72,6 @@ function Administrator() {
   return (
     <div className="min-h-screen p-2 bg-gray-50">
       <div className="mx-auto space-y-6">
-        {/* Donut Charts Pegawai & Pendidikan */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Card className="relative h-[400px] rounded-[2rem] shadow-sm border-none bg-white ">
             <div className="absolute -top-5 left-6 w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 border border-white shadow-sm">
@@ -183,13 +179,11 @@ function Administrator() {
               Kenaikan Gaji Berkala
             </h3>
             <div className="w-full pt-4">
-              {/* Mengambil data gaji dari DASHBOARD_DATA */}
               <BarChart dataset={gaji} height="h-72" isGajiChart={true} />
             </div>
           </Card>
         </div>
 
-        {/*  IKK Section (Mengambil dari objek ikk) */}
         <div className="relative p-6 rounded-[2rem] shadow-sm border-none bg-white grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
           <div className="absolute -top-5 left-6 w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-600 border border-white shadow-sm">
             <Activity size={18} />

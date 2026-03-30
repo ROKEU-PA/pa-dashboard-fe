@@ -26,6 +26,7 @@ import {
   Flame,
   BadgeCent,
   ArrowLeftRight,
+  CalendarClock
 } from "lucide-react";
 
 export const menuItems = [
@@ -108,7 +109,6 @@ export const menuItems = [
   {
     name: "Barang Milik Negara",
     adminOnly: true,
-    // path: "/dashboard/barang-milik-negara",
     path: "/barang-milik-negara",
     children: [
       {
@@ -144,10 +144,13 @@ export const menuItems = [
   },
   {
     name: "Tata Usaha",
-    adminOnly: true,
     path: "/tata-usaha",
     children: [
-      
+      {
+        name: "Agenda Rapat",
+        path: "/tata-usaha/agenda-rapat",
+        icon: <CalendarClock  strokeWidth={3} />,
+      },
     ],
     icon: <BookUser strokeWidth={3} />,
   },

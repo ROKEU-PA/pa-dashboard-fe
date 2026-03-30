@@ -60,7 +60,7 @@ function AkuntansiPelaporan() {
             <h2 className="font-bold text-2xl mb-2">
               Opini Badan Pemeriksa Keuangan
             </h2>
-            {/* Mobile: 2 Kolom, Tablet/Desktop: 4 Kolom */}
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 justify-items-center">
               {trophies.map((item, idx) => (
                 <div
@@ -89,7 +89,6 @@ function AkuntansiPelaporan() {
             </div>
           </Card>
 
-          {/* === CARD 2: NILAI MATURITAS SPIP === */}
           <Card className="relative md:h-[410px] ">
             <div className="flex justify-between items-center">
               <div className="flex gap-4 items-center">
@@ -105,7 +104,7 @@ function AkuntansiPelaporan() {
             </div>
 
             <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-4 md:mt-12">
-              {/* BOX 1 */}
+
               <div className="flex flex-col items-center gap-2 w-full md:w-auto">
                 <div className="bg-[#898a8d] rounded-3xl text-center h-[140px] md:h-[180px] w-full md:w-[260px] flex items-center justify-center shadow-md">
                   <span className="text-6xl md:text-[85px] font-black text-white scale-y-125 md:scale-y-150 transition-all">
@@ -117,11 +116,8 @@ function AkuntansiPelaporan() {
                 </span>
               </div>
 
-              {/* GARIS PUTUS-PUTUS (Responsive Divider) */}
               <div className="hidden md:block h-[200px] border-l-2 border-dashed border-gray-300 mx-4"></div>
               <div className="block md:hidden w-[80%] border-t-2 border-dashed border-gray-300 my-2"></div>
-
-              {/* BOX 2 */}
               <div className="flex flex-col items-center gap-2 w-full md:w-auto">
                 <div className="bg-gradient-to-r from-[#59c7ff] to-[#2f8afd] rounded-3xl text-center h-[140px] md:h-[180px] w-full md:w-[260px] flex items-center justify-center shadow-md">
                   <span className="text-6xl md:text-[85px] font-black text-white scale-y-125 md:scale-y-150 transition-all">
@@ -137,7 +133,6 @@ function AkuntansiPelaporan() {
         </div>
 
         {/*  LRA & NERACA */}
-
         <div className="bg-white md:h-[900px]  rounded-2xl border border-gray-100 shadow-sm p-6 relative">
           <div className="absolute -top-5 left-6 w-10 h-10 rounded-full bg-[#fff3d0] flex items-center justify-center shadow-sm border border-white z-20">
             <div className="w-6 h-6 rounded-full bg-[#ffbe02] flex items-center justify-center text-white">
@@ -148,7 +143,7 @@ function AkuntansiPelaporan() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             {/* LRA */}
             <div className="space-y-4">
-              <h1 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+              <h1 className=" font-bold text-gray-800 uppercase tracking-wider">
                 LRA 30 Juni 2024 & 2025
               </h1>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -186,7 +181,7 @@ function AkuntansiPelaporan() {
           {/*  LPE & LO */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
             <div className="space-y-4">
-              <h1 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+              <h1 className=" font-bold text-gray-800 uppercase tracking-wider">
                 LPE Semester I 30 Juni 2025 & 30 Juni 2024
               </h1>
               <BarChart
@@ -208,7 +203,7 @@ function AkuntansiPelaporan() {
               />
             </div>
             <div className="space-y-4">
-              <h1 className="text-sm font-bold text-gray-800 uppercase tracking-wider">
+              <h1 className=" font-bold text-gray-800 uppercase tracking-wider">
                 LO Semester I
               </h1>
               <BarChart

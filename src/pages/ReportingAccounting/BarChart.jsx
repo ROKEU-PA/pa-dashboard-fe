@@ -35,7 +35,7 @@ export default function GenericBarChart({
       data: categories,
 
       axisLine: {
-        show: true, // garis di 0
+        show: true, 
         onZero: true,
         lineStyle: { color: "#D1D5DB" }
       },
@@ -63,9 +63,8 @@ export default function GenericBarChart({
 
   return (
     <div className="bg-white rounded-xl  flex flex-col gap-4 ">
-      {/* HEADER: Judul & Bunderan Legenda */}
       <div className="flex justify-between items-start">
-        <h3 className="text-sm font-bold text-gray-800 max-w-[60%] ">
+        <h3 className=" font-bold text-gray-800 max-w-[60%] ">
           {title}
         </h3>
         <div className="flex gap-4">
@@ -82,7 +81,7 @@ export default function GenericBarChart({
 
       {/* TABLE SECTION */}
       <div className="rounded-md border border-gray-300 overflow-hidden">
-        <table className="w-full text-[11px] border-collapse">
+        <table className="w-full text-[11px] md:text-[14px] border-collapse">
           <thead className="bg-gray-50">
             <tr>
               {tableHeaders.map((header, i) => (
