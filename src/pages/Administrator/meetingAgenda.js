@@ -74,27 +74,45 @@ export default function AgendaRapat() {
   }, [currentTime]);
 
   // Fetch solat
-  useEffect(() => {
-    if (isGuest) {
-      const fetchSholat = async () => {
-        try {
-          const year = currentTime.getFullYear();
-          const month = currentTime.getMonth() + 1;
-          const response = await fetch(
-            `https://api.aladhan.com/v1/calendar?latitude=-6.2088&longitude=106.8456&method=11&month=${month}&year=${year}`
-          );
-          const data = await response.json();
-          const todayIdx = currentTime.getDate() - 1;
+    useEffect(() => {
+      if (isGuest) {
+        const fetchSholat = async () => {
+          try {
+            setLoadingSholat(true);
+            const year = currentTime.getFullYear();
+            const month = currentTime.getMonth() + 1;
 
-          setSholatData(data.data.slice(todayIdx, todayIdx + 3)); //hari
-          setLoadingSholat(false);
-        } catch (error) {
-          console.error("Gagal load jadwal sholat", error);
-        }
-      };
-      fetchSholat();
-    }
-  }, [isGuest]);
+            const response = await fetch(
+              `https://api.aladhan.com/v1/calendar?latitude=-6.2088&longitude=106.8456&method=11&month=${month}&year=${year}`
+            );
+            const data = await response.json();
+            const todayIdx = currentTime.getDate() - 1;
+
+            let combinedData = data.data.slice(todayIdx, todayIdx + 3);
+
+            if (combinedData.length < 3) {
+              const nextMonth = month === 12 ? 1 : month + 1;
+              const nextYear = month === 12 ? year + 1 : year;
+              
+              const responseNext = await fetch(
+                `https://api.aladhan.com/v1/calendar?latitude=-6.2088&longitude=106.8456&method=11&month=${nextMonth}&year=${nextYear}`
+              );
+              const dataNext = await responseNext.json();
+              
+              const needed = 3 - combinedData.length;
+              combinedData = [...combinedData, ...dataNext.data.slice(0, needed)];
+            }
+
+            setSholatData(combinedData);
+            setLoadingSholat(false);
+          } catch (error) {
+            console.error("Gagal load jadwal sholat", error);
+            setLoadingSholat(false);
+          }
+        };
+        fetchSholat();
+      }
+    }, [isGuest, currentTime.getMonth()]); 
 
   const handleDateClick = (info) => {
     setSelectedDate(info.dateStr);
@@ -496,7 +514,7 @@ export default function AgendaRapat() {
                         <div className="flex justify-between items-center  border-b  border-slate-50">
                           <h2 className="md:text-2xl text-xl font-black  uppercase tracking-tight">
                             Jadwal{" "}
-                            <span className="text-blue-600">{label}</span>
+                            <span className="text-[#308BFD]">{label}</span>
                           </h2>
                           <p className="font-bold  italic text-sm">
                             {targetDate.toLocaleDateString("id-ID", {
@@ -508,7 +526,7 @@ export default function AgendaRapat() {
                         <div className="overflow-x-auto">
                           <table className="w-full text-center border-separate border-spacing-y-4">
                             <thead>
-                              <tr className="bg-blue-500 text-white shadow-xl shadow-blue-100">
+                              <tr className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] text-white shadow-xl shadow-blue-100">
                                 <th className="py-1 md:py-3 px-1 md:px-3 rounded-l-2xl font-black  uppercase tracking-widest text-[12px] md:text-[15px]">
                                   Waktu
                                 </th>
@@ -575,7 +593,7 @@ export default function AgendaRapat() {
                 })}
               </Swiper>
 
-              <button className="prev-btn absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-white p-4 rounded-full shadow-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all opacity-0 group-hover:opacity-100">
+              <button className="prev-btn absolute left-6 top-1/2 -translate-y-1/2 z-10 bg-white p-4 rounded-full shadow-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100">
                 <ChevronLeft size={24} />
               </button>
               <button className="next-btn absolute right-6 top-1/2 -translate-y-1/2 z-10 bg-white p-4 rounded-full shadow-xl text-blue-500 hover:bg-blue-600 hover:text-white transition-all duration-300 opacity-0 group-hover:opacity-100">
@@ -587,26 +605,26 @@ export default function AgendaRapat() {
               <div className="overflow-x-auto">
                 <table className="w-full text-center border-separate border-spacing-y-2">
                   <thead>
-                    <tr className="bg-blue-400 text-white shadow-sm">
-                      <th className="py-3 rounded-l-xl font-bold italic text-sm md:text-base">
+                    <tr className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] text-white shadow-sm">
+                      <th className="py-3 rounded-l-xl font-bold  text-sm md:text-base">
                         Tanggal
                       </th>
-                      <th className="py-3 font-bold italic text-sm md:text-base">
+                      <th className="py-3 font-bold  text-sm md:text-base">
                         Imsak
                       </th>
-                      <th className="py-3 font-bold italic text-sm md:text-base">
+                      <th className="py-3 font-bold  text-sm md:text-base">
                         Subuh
                       </th>
-                      <th className="py-3 font-bold italic text-sm md:text-base">
+                      <th className="py-3 font-bold  text-sm md:text-base">
                         Dzuhur
                       </th>
-                      <th className="py-3 font-bold italic text-sm md:text-base">
+                      <th className="py-3 font-bold  text-sm md:text-base">
                         Ashar
                       </th>
-                      <th className="py-3 font-bold italic text-sm md:text-base">
+                      <th className="py-3 font-bold  text-sm md:text-base">
                         Maghrib
                       </th>
-                      <th className="py-3 rounded-r-xl font-bold italic text-sm md:text-base">
+                      <th className="py-3 rounded-r-xl font-bold  text-sm md:text-base">
                         Isya
                       </th>
                     </tr>
@@ -615,7 +633,7 @@ export default function AgendaRapat() {
                     {!loadingSholat ? (
                       sholatData.map((day, idx) => (
                         <tr key={idx}>
-                          <td className="py-4 text-xs md:text-sm font-black text-blue-500 bg-blue-50/50 rounded-l-xl italic">
+                          <td className="py-4 text-xs md:text-sm font-black text-[#308BFD] bg-blue-50/50 rounded-l-xl">
                             {day.date.readable.split(" ")[0]}/
                             {currentTime.getMonth() + 1}/
                             {currentTime.getFullYear()}
@@ -629,12 +647,12 @@ export default function AgendaRapat() {
                           ].map((time, i) => (
                             <td
                               key={i}
-                              className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 italic"
+                              className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 "
                             >
                               {time.split(" ")[0]}
                             </td>
                           ))}
-                          <td className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 rounded-r-xl italic">
+                          <td className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 rounded-r-xl ">
                             {day.timings.Isha.split(" ")[0]}
                           </td>
                         </tr>
@@ -661,7 +679,7 @@ export default function AgendaRapat() {
 }
 function StatCard({ label, value }) {
   return (
-    <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-[2.5rem]  text-center text-white shadow-2xl relative overflow-hidden group">
+    <div className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] rounded-[2.5rem]  text-center text-white shadow-2xl relative overflow-hidden group">
       <div className="relative z-10">
         <p className="font-black text-sm md:text-lg mb-2 opacity-80 tracking-tighter uppercase">
           {label}
@@ -671,8 +689,8 @@ function StatCard({ label, value }) {
         </p>
       </div>
       <img
-        src="rapat.webp"
-        className="absolute -top-10 -right-10 opacity-10 text-[12rem] font-black group-hover:rotate-12 transition-all duration-1000 italic"
+        src="/rapat.webp"
+        className="absolute right-[-1rem] bottom-[-1rem]  w-20 md:w-[140px] z-0 transition-transform duration-1000"
       />
     </div>
   );
