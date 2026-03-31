@@ -26,14 +26,21 @@ import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
 import LLATPage from "./pages/LLAT";
-import StatusPSP from "./pages/StateProperty/statusSpp"; 
-import KondisiAset from "./pages/StateProperty/kondisiAset"; 
-import JumlahJenisBMN from "./pages/StateProperty/jenisBMN";
+import { useAuth } from "./contexts/AuthContexts";
+import StatusPSP from "./pages/StateProperty/PspStatus";
+import KondisiAset from "./pages/StateProperty/assetCondition";
+import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
+import PTUKDashboard from "./pages/PTUKDashboard";
+import PTUKLHP from "./pages/PTUK/LHP";
+import StateLosses from "./pages/PTUK/StateLosses";
+import PNBP from "./pages/PTUK/PNBP";
+import FinancialAdiministrator from "./pages/PTUK/FinancialAdministrator";
 // import "@/PDFWorkerSetup";
 
 function App() {
   const { isAdmin, listMenu, userData } = useContext(AppContext);
-  const token = localStorage.getItem("token");
+  const { auth, isInitializing } = useAuth();
+  const isAuthenticated = !!auth?.accessToken;
 
   return (
     <>
@@ -41,7 +48,13 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={token ? <Navigate to="/dashboard-utama" /> : <LoginPage />}
+          element={
+            isInitializing ? null : isAuthenticated ? (
+              <Navigate to="/dashboard-utama" replace />
+            ) : (
+              <LoginPage />
+            )
+          }
         />
         <Route
           path="/satuan-kerja"
@@ -57,7 +70,11 @@ function App() {
           path="/dashboard-utama"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Dashboard" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Dashboard"
+                userName="Administrator"
+              >
                 <MainDashboard />
               </AppLayout>
             </PrivateRoute>
@@ -67,7 +84,11 @@ function App() {
           path="/pelaksanaan-anggaran"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Pelaksanaan Anggaran"
+                userName="Administrator"
+              >
                 <BudgetExecution />
               </AppLayout>
             </PrivateRoute>
@@ -77,7 +98,11 @@ function App() {
           path="/barang-milik-negara"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Barang Milik Negara"
+                userName="Administrator"
+              >
                 <StateProperty />
               </AppLayout>
             </PrivateRoute>
@@ -87,7 +112,11 @@ function App() {
           path="/barang-milik-negara/status-psp"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Barang Milik Negara"
+                userName="Administrator"
+              >
                 <StatusPSP />
               </AppLayout>
             </PrivateRoute>
@@ -97,7 +126,11 @@ function App() {
           path="/barang-milik-negara/kondisi-aset"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Barang Milik Negara"
+                userName="Administrator"
+              >
                 <KondisiAset />
               </AppLayout>
             </PrivateRoute>
@@ -107,7 +140,11 @@ function App() {
           path="/barang-milik-negara/jumlah-jenis"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Barang Milik Negara" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Barang Milik Negara"
+                userName="Administrator"
+              >
                 <JumlahJenisBMN />
               </AppLayout>
             </PrivateRoute>
@@ -117,7 +154,11 @@ function App() {
           path="/tata-usaha"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Tata Usaha" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Tata Usaha"
+                userName="Administrator"
+              >
                 <Administrator />
               </AppLayout>
             </PrivateRoute>
@@ -157,7 +198,7 @@ function App() {
             })()}
             element={
               <PrivateRoute>
-                <AppLayout isAdmin={isAdmin}>
+                <AppLayout isAdmin={isAdmin} title={`Pengajuan`}>
                   <ListSatuanKerjaPage />
                 </AppLayout>
               </PrivateRoute>
@@ -208,7 +249,7 @@ function App() {
           path="/dashboard/:subPage"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Helpdesk" userName="Administrator">
                 <DashboardPage />
               </AppLayout>
             </PrivateRoute>
@@ -228,7 +269,7 @@ function App() {
           path="/ikpa"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
                 <IkpaPage />
               </AppLayout>
             </PrivateRoute>
@@ -238,7 +279,7 @@ function App() {
           path="/realisasi"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
                 <RealisasiPage />
               </AppLayout>
             </PrivateRoute>
@@ -248,7 +289,7 @@ function App() {
           path="/llat"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
                 <LLATPage />
               </AppLayout>
             </PrivateRoute>
@@ -258,7 +299,7 @@ function App() {
           path="/tanda-terima"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Tanda Terima SPP">
                 <TandaTerimaPage />
               </AppLayout>
             </PrivateRoute>
@@ -268,18 +309,62 @@ function App() {
           path="/akuntansi-pelaporan"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Akutansi dan Pelaporan" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Akutansi dan Pelaporan"
+                userName="Administrator"
+              >
                 <ReportingAccounting />
               </AppLayout>
             </PrivateRoute>
           }
         />
         <Route
-          path="/ptuk/tuntutan-ganti-rugi"
+          path="/ptuk/dashboard"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
-                <PTUKSub1Page />
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PTUKDashboard />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/lhp-kementrian"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PTUKLHP />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/kerugian-negara"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <StateLosses />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/pnbp"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <PNBP />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/ptuk/pengelola-keuangan"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="PTUK">
+                <FinancialAdiministrator />
               </AppLayout>
             </PrivateRoute>
           }

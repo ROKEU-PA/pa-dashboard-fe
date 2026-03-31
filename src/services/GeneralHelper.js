@@ -116,6 +116,7 @@ export function filterDataByCode(dataArray, targetCode) {
 }
 
 export const isAuthorizedRoute = (pathname, userData, menus = []) => {
+  console.log("user", userData);
   const isSuperAdmin = userData?.role === "super_admin";
   const isAdmin = userData?.role === "admin";
   const isUser = userData?.role === "user";
@@ -139,7 +140,6 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     const cleanedPath = (() => {
       if (pathname.startsWith("/satuan-kerja/pengajuan")) {
         const parts = pathname.split("/").filter(Boolean);
-        // Ambil bagian terakhir dan gabungkan dengan "/satuan-kerja"
         return `/satuan-kerja/${parts[parts.length - 1]}`;
       }
       return pathname;

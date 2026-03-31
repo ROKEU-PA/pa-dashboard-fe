@@ -19,7 +19,6 @@ function TableSortLabel({
         cursor: "pointer",
         userSelect: "none",
         gap: "4px",
-        color: active ? "#1976d2" : "#424242",
       }}
     >
       <span>{children}</span>

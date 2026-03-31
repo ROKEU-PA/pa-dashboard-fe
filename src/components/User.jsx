@@ -1,9 +1,11 @@
 import { useAuth } from "@/contexts/AuthContexts";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { toast } from "react-toastify";
 import { apiRequest } from "@/services/APIHelper";
 import { cryptoEncrypter } from "@/services/GeneralHelper";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Power } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { AppContext } from "@/contexts/AppContext";
 
 const User = ({
   className = "",
@@ -14,11 +16,13 @@ const User = ({
   access_code,
   id,
 }) => {
+  const { userData } = useContext(AppContext);
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     new_password: "",
   });
-  const { logout } = useAuth();
+  const { setAuth } = useAuth();
 
   const dropdownRef = useRef(null);
 
@@ -46,7 +50,7 @@ const User = ({
       };
 
       const result = await apiRequest({
-        url: `/api/user/edit/${id}`,
+        url: `/user/edit/${id}`,
         method: "POST",
         options: {
           body: payload,
@@ -56,10 +60,21 @@ const User = ({
       toast.success("Password berhasil diubah!");
       setOpen(false);
       setPasswordForm({ new_password: "" });
-      logout();
+      setAuth({
+        accessToken: null,
+        user: null,
+      });
     } catch (err) {
       toast.error("Gagal mengubah password.");
     }
+  };
+
+  const logout = () => {
+    setAuth({
+      accessToken: null,
+      user: null,
+    });
+    navigate("./");
   };
 
   return (
@@ -70,39 +85,48 @@ const User = ({
       >
         <div className="w-8 h-8 rounded-full bg-red-500"></div>
         <div className="flex flex-col text-right">
-          <span className="text-[14px] font-bold">{name}</span>
+          <span className="text-[14px] font-bold">{userData?.name}</span>
         </div>
         <ChevronDown size={20} />
       </div>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-4 z-50">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <div>
-              <p className="font-bold text-sm">{name}</p>
-              <p className="text-xs text-gray-500">{previlege}</p>
-            </div>
-            <input
-              type="password"
-              placeholder="Password Baru"
-              required
-              className="border px-2 py-1 rounded text-sm"
-              value={passwordForm.new_password}
-              onChange={(e) =>
-                setPasswordForm((prev) => ({
-                  ...prev,
-                  new_password: e.target.value,
-                }))
-              }
-            />
-            <button
-              type="submit"
-              className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
-            >
-              Ganti Password
-            </button>
-          </form>
+        <div className="flex flex-col gap-6 px-4 absolute right-0 mt-1 w-fit bg-white shadow-lg rounded-md p-4 z-50">
+          <div
+            onClick={() => logout()}
+            className="cursor-pointer flex gap-4 text-red-600 hover:bg-red-100 p-3 rounded"
+          >
+            <Power />
+            <span className="font-bold">logout</span>
+          </div>
         </div>
+        // <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-4 z-50">
+        //   <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        //     <div>
+        //       <p className="font-bold text-sm">{name}</p>
+        //       <p className="text-xs text-gray-500">{previlege}</p>
+        //     </div>
+        //     <input
+        //       type="password"
+        //       placeholder="Password Baru"
+        //       required
+        //       className="border px-2 py-1 rounded text-sm"
+        //       value={passwordForm.new_password}
+        //       onChange={(e) =>
+        //         setPasswordForm((prev) => ({
+        //           ...prev,
+        //           new_password: e.target.value,
+        //         }))
+        //       }
+        //     />
+        //     <button
+        //       type="submit"
+        //       className="bg-blue-600 text-white text-sm px-3 py-1 rounded hover:bg-blue-700"
+        //     >
+        //       Ganti Password
+        //     </button>
+        //   </form>
+        // </div>
       )}
     </div>
   );

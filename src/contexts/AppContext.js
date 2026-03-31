@@ -1,21 +1,23 @@
 import { fetchMenu, fetchUser } from "@/pages/Menu/menuHooks";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./AuthContexts";
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
+  const { auth } = useAuth();
   const [menuName, setMenuName] = useState("");
   const [listMenu, setListMenu] = useState([]);
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(null);
   const [isSAdmin, setIsSAdmin] = useState(null);
-  const token = localStorage.getItem("token");
+  const token = auth?.accessToken;
 
   useEffect(() => {
     if (token) {
       const loadMenu = async () => {
         try {
-          const menuData = await fetchMenu();
+          const menuData = await fetchMenu(token);
           setListMenu(menuData.data);
         } catch (error) {
           console.error("Error loading menu:", error);
@@ -48,7 +50,7 @@ export const AppProvider = ({ children }) => {
 
   const LoadUser = async () => {
     try {
-      const userData = await fetchUser();
+      const userData = await fetchUser(token);
       setUserData(userData.data);
     } catch (error) {
       console.error("Error loading menu:", error);

@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar";
 
-function AppLayout({ children, isAdmin, title, userName}) {
+function AppLayout({ children, isAdmin, title, userName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   // OTOMATIS: Tutup sidebar setiap kali path/URL berubah
@@ -31,8 +31,7 @@ function AppLayout({ children, isAdmin, title, userName}) {
         <Sidebar isAdmin={isAdmin} onNavigate={() => setSidebarOpen(false)} />
       </aside>
 
-     
-           {!sidebarOpen && (
+      {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
           className="fixed top-3 left-4 z-[60] md:hidden p-2.5 bg-white rounded-xl shadow-md border border-gray-100 text-gray-800 animate-in fade-in duration-300"
@@ -40,17 +39,11 @@ function AppLayout({ children, isAdmin, title, userName}) {
           ☰
         </button>
       )}
-          
 
-      {/* Konten utama */}
       <main className="flex-1 overflow-auto transition-all duration-300">
-        
-          <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} />
-      
-        <div className="p-2 md:p-4">
+        <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} />
 
-          {children}
-        </div>
+        <div className="p-2 md:p-4 sm:px-5 lg:px-6">{children}</div>
       </main>
     </div>
   );

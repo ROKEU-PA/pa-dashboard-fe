@@ -1,35 +1,27 @@
-export const AssetConditions = [
-  {
-    title: "Total Aset",
-    value: 530156,
-    containerStyle:
-      "bg-blue-400 rounded px-2 w-[60%] text-white text-center items-center",
+// constants.js
+export const DASHBOARD_DATA = {
+  pegawai: [
+    { name: "Pria", value: 31 },
+    { name: "Wanita", value: 17 },
+  ],
+  pendidikan: [
+    { name: "Diploma", value: 13 },
+    { name: "Sarjana", value: 32 },
+    { name: "Magister", value: 3 },
+  ],
+  kehadiran: [
+    { name: "Hadir", value: 210 },
+    { name: "Alfa", value: 1 },
+    { name: "Telat", value: 44 },
+  ],
+  gaji: {
+    labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct"],
+    values: [100, 85, 10, 55, 65, 100, 70, 68, 85, 90],
   },
-  { title: "Kondisi Baik", value: 480685 },
-  { title: "Rusak Ringan", value: 1295 },
-  { title: "Rusak Berat", value: 48146 },
-  { title: "Nilai Aset", value: 16184055648805, style: "col-span-2" },
-];
-
-export const datasetPegawai = [
-  { name: "Pria", value: 17 },
-  { name: "Wanita", value: 31 },
-];
-export const datasetPendidikan = [
-  { name: "Diploma", value: 13 },
-  { name: "S1", value: 32 },
-  { name: "S2", value: 3 },
-  { name: "S3", value: 0 },
-];
-export const datasetKehadiran = [
-  { name: "Kehadiran", value: 50 },
-  { name: "Terlambat", value: 43 },
-  { name: "Tidak Hadir", value: 3 },
-];
-
-export const datasetBarChart = {
-  IKK_IPA: { labels: ["Target IPA", "Realisasi IPA"], values: [3.20,3.59] },
-  IKK: { labels: ["Target IPA", "Realisasi IPA"], values: [70.55,69.36] },
-  IKK_IKPA: { labels: ["Target IPA", "Realisasi IPA"], values: [93.50,94.99] },
-  IKK_SPIP: { labels: ["Target IPA", "Realisasi IPA"], values: [3.93,3.93] },
+  ikk: {
+    tindakLanjut: { labels: ["2024", "2025"], values: [55, 80] },
+    maturitas: { labels: ["2024", "2025"], values: [2.6, 4] },
+    aset: { labels: ["2024", "2025"], values: [2.6, 4] },
+    ikpa: { labels: ["2024", "2025"], values: [55, 80] },
+  }
 };

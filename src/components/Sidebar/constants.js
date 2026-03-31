@@ -19,9 +19,13 @@ import {
   Table,
   CircleDollarSign,
   Calendar,
-  FileText, // Icon Baru
-  Box,      // Icon Baru
+  FileText,
+  Box,
   Activity,
+  DollarSign,
+  Flame,
+  BadgeCent,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export const menuItems = [
@@ -32,13 +36,28 @@ export const menuItems = [
   },
   {
     name: "PTUK",
-    path: "/ptuk/tuntutan-ganti-rugi",
+    path: "/ptuk/dashboard",
     adminOnly: true,
     children: [
       {
-        name: "Tuntutan Ganti Rugi",
-        path: "/ptuk/tuntutan-ganti-rugi",
-        icon: <Building strokeWidth={3} />,
+        name: "LHP Kementrian",
+        path: "/ptuk/lhp-kementrian",
+        icon: <DollarSign strokeWidth={3} />,
+      },
+      {
+        name: "Kerugian Negara",
+        path: "/ptuk/kerugian-negara",
+        icon: <Flame strokeWidth={3} />,
+      },
+      {
+        name: "PNBP",
+        path: "/ptuk/pnbp",
+        icon: <BadgeCent strokeWidth={3} />,
+      },
+      {
+        name: "Pengelola Keuangan",
+        path: "/ptuk/pengelola-keuangan",
+        icon: <ArrowLeftRight strokeWidth={3} />,
       },
     ],
     icon: <Layers strokeWidth={3} />,
@@ -92,7 +111,7 @@ export const menuItems = [
     // path: "/dashboard/barang-milik-negara",
     path: "/barang-milik-negara",
     children: [
-     {
+      {
         name: "Status PSP",
         path: "/barang-milik-negara/status-psp",
         icon: <FileText size={18} />,
@@ -128,11 +147,7 @@ export const menuItems = [
     adminOnly: true,
     path: "/tata-usaha",
     children: [
-      {
-        name: "Dashboard",
-        path: "/tata-usaha",
-        icon: <Axis3D strokeWidth={3} />,
-      },
+      
     ],
     icon: <BookUser strokeWidth={3} />,
   },

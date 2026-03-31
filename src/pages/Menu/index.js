@@ -3,8 +3,10 @@ import { Link, useParams } from "react-router-dom";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { AppContext } from "@/contexts/AppContext";
 import { fetchMenu } from "./menuHooks";
+import { useAuth } from "@/contexts/AuthContexts";
 
 function MenuPage() {
+  const { auth } = useAuth();
   const { subPage } = useParams();
   const { handleChangeMenu, listMenu, setListMenu, userData, isAdmin } =
     useContext(AppContext);
@@ -12,7 +14,7 @@ function MenuPage() {
   useEffect(() => {
     const loadMenu = async () => {
       try {
-        const menuData = await fetchMenu();
+        const menuData = await fetchMenu(auth?.accessToken);
         setListMenu(menuData.data);
       } catch (error) {
         console.error("Error loading menu:", error);
@@ -24,7 +26,6 @@ function MenuPage() {
 
   return (
     <div style={{ padding: "10px 1rem" }}>
-      <Breadcrumbs items={[{ name: "Satuan Kerja", path: "/satuan-kerja" }]} />
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 w-full"
         // style={{

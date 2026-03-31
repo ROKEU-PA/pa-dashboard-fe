@@ -91,7 +91,7 @@ function UserManagementPage() {
       console.log(payload);
 
       const result = await apiRequest({
-        url: "/api/user/register",
+        url: "/user/register",
         method: "POST",
         options: {
           body: payload,
@@ -131,7 +131,7 @@ function UserManagementPage() {
       }
 
       const result = await apiRequest({
-        url: `/api/user/edit/${formData?.id}`,
+        url: `/user/edit/${formData?.id}`,
         method: "POST",
         options: {
           body: payload,
@@ -191,7 +191,7 @@ function UserManagementPage() {
       const response = await fetchHelperGET(
         urlPath,
         "GET",
-        localStorage.getItem("token")
+        localStorage.getItem("token"),
       );
 
       if (response?.success) {
@@ -223,18 +223,14 @@ function UserManagementPage() {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <Breadcrumbs
-          items={[{ name: "Manajemen Akun", path: "/user-management" }]}
-        />
-        <User name={userData?.name} previlege={userData?.role.toUpperCase()} />
-      </div>
-      <Title>Manajemen Akun</Title>
       <Paper
         elevation={3}
         style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between" }} className="text-sm md:text-base gap-2">
+        <div
+          style={{ display: "flex", justifyContent: "space-between" }}
+          className="text-sm md:text-base gap-2"
+        >
           <Button
             onClick={() => {
               setIsOpenModal(true);
@@ -267,7 +263,7 @@ function UserManagementPage() {
               onChange={(e) => setSearchKey(e.target.value)}
             />
           </div>
-        </div >
+        </div>
         <div className="overflow-x-auto text-sm md:text-base">
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHeader>
@@ -302,7 +298,7 @@ function UserManagementPage() {
                       label={
                         row.last_activity &&
                         moment(row.last_activity).isAfter(
-                          moment().subtract(5, "minutes")
+                          moment().subtract(5, "minutes"),
                         )
                           ? "Online"
                           : "Offline"
@@ -311,7 +307,7 @@ function UserManagementPage() {
                         color:
                           row.last_activity &&
                           moment(row.last_activity).isAfter(
-                            moment().subtract(5, "minutes")
+                            moment().subtract(5, "minutes"),
                           )
                             ? "green"
                             : "white",
@@ -319,7 +315,7 @@ function UserManagementPage() {
                         backgroundColor:
                           row.last_activity &&
                           moment(row.last_activity).isAfter(
-                            moment().subtract(5, "minutes")
+                            moment().subtract(5, "minutes"),
                           )
                             ? "#E7FEE7"
                             : "#858585ff",
@@ -334,26 +330,26 @@ function UserManagementPage() {
                           row?.["privilege"] === "super_admin"
                             ? "#858585ff"
                             : row?.["privilege"] === "admin"
-                            ? "#fef5c3ff"
-                            : row?.["privilege"] === "user"
-                            ? "#cee3f9ff"
-                            : row?.["privilege"] === "pic"
-                            ? "#E7FEE7"
-                            : row?.["privilege"] === "guest"
-                            ? "#FEDCE1"
-                            : "#000000",
+                              ? "#fef5c3ff"
+                              : row?.["privilege"] === "user"
+                                ? "#cee3f9ff"
+                                : row?.["privilege"] === "pic"
+                                  ? "#E7FEE7"
+                                  : row?.["privilege"] === "guest"
+                                    ? "#FEDCE1"
+                                    : "#000000",
                         color:
                           row?.["privilege"] === "super_admin"
                             ? "#000000"
                             : row?.["privilege"] === "admin"
-                            ? "#FFD700"
-                            : row?.["privilege"] === "user"
-                            ? "#007BFF"
-                            : row?.["privilege"] === "pic"
-                            ? "#28A745"
-                            : row?.["privilege"] === "guest"
-                            ? "#FF4C4C"
-                            : "#FFFFFF",
+                              ? "#FFD700"
+                              : row?.["privilege"] === "user"
+                                ? "#007BFF"
+                                : row?.["privilege"] === "pic"
+                                  ? "#28A745"
+                                  : row?.["privilege"] === "guest"
+                                    ? "#FF4C4C"
+                                    : "#FFFFFF",
                       }}
                     />{" "}
                   </TableCell>
@@ -470,7 +466,7 @@ function UserManagementPage() {
                 Array.isArray(formData.access_code)
                   ? listMenu
                       .filter((item) =>
-                        formData.access_code.includes(item.code)
+                        formData.access_code.includes(item.code),
                       )
                       .map((item) => ({
                         label: item.name,

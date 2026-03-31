@@ -5,11 +5,15 @@ export async function apiRequest({
   method = "GET",
   options = {},
   isMultiType = false,
+  token = null,
 }) {
+  const auth = sessionStorage.getItem("auth");
+  const accessToken = !token ? JSON.parse(auth)?.accessToken : token;
+
+  if (!accessToken) return;
+
   const path = process.env.REACT_APP_API_BASE_URL + url;
-  const defaultToken = localStorage.getItem("token");
   const { body } = options;
-  const token = options.token || defaultToken;
 
   if (!path || typeof path !== "string") {
     toast.error("Invalid API URL");
@@ -20,10 +24,10 @@ export async function apiRequest({
     const headers = !isMultiType
       ? {
           "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         }
       : {
-          ...(token && { Authorization: `Bearer ${token}` }),
+          ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
         };
 
     const response = await fetch(path, {
@@ -48,11 +52,11 @@ export async function apiRequest({
         typeof data === "string" ? data : data?.message || "Request failed";
       toast.error(errorMessage);
       if (errorMessage === "Token is Expired") {
+        sessionStorage.removeItem("auth");
         const navigate = (path) => {
           window.location.href = path;
         };
         navigate("/");
-        localStorage.removeItem("token");
       }
       throw new Error(errorMessage);
     }

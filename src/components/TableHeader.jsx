@@ -1,15 +1,18 @@
 import React from "react";
 
-function TableHeader({ children }) {
+function TableHeader({ children, className }) {
   const headerStyle = {
-    backgroundColor: "#DBE9F8",
+    backgroundColor: "#2F8AFD",
     textAlign: "left",
     padding: "0.75rem 1rem",
     fontWeight: 600,
-    color: "#424242",
-    borderBottom: "1px solid #e0e0e0",
+    color: "#ffffff",
   };
-  return <thead style={headerStyle}>{children}</thead>;
+  return (
+    <thead className={className} style={headerStyle}>
+      {children}
+    </thead>
+  );
 }
 
 export default TableHeader;

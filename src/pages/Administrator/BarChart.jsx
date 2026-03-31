@@ -2,75 +2,124 @@ import React from "react";
 import ReactECharts from "echarts-for-react";
 
 export default function BarChart({
-  height = "h-72", // Tailwind height: h-64 / h-72 / h-80
+  height = "h-72",
   dataset,
+  isGajiChart = false,
 }) {
-  const years = dataset.labels;
-  const values = dataset.values;
+  const labels = dataset?.labels || [];
+  const values = dataset?.values || [];
 
   const option = {
     grid: {
-      top: 30, // distance from top
-      right: 0, // distance from right
-      bottom: 30, // distance from bottom
-      left: 35, // distance from left
-      containLabel: true, // make sure labels are inside the chart
+      top: "10%",
+      right: "2%",
+      bottom: "15%",
+      left: "5%",
+      containLabel: true,
     },
     xAxis: {
       type: "category",
-      gridIndex: 0,
-      data: years,
-      axisTick: { show: false },
-      axisLine: { show: false },
-      axisLabel: { fontSize: 12, show: false },
+      data: labels,
+      // MENAMPILKAN LINE KECIL DI SUMBU X (BULAN)
+      axisTick: { 
+        show: true, 
+        alignWithLabel: true, // Memastikan garis lurus di tengah batang
+        lineStyle: { color: "#000000" } 
+      },
+      axisLine: { 
+        show: false, 
+      },
+      axisLabel: { fontSize: 10, color: "#000000" },
     },
     yAxis: {
       type: "value",
-      gridIndex: 0,
-      nameGap: 45, // increase spacing between axis name and labels
-      nameTextStyle: {
-        fontSize: 14,
-        fontFamily: "Funnel Display",
+      splitLine: { 
+        show: false, 
+        lineStyle: { 
+          type: "solid", 
+          color: "#e8e8e8" 
+        } 
       },
-      // min: 0,
-      // max: 100,
-      splitLine: { show: false },
       axisLine: { show: false },
-      axisTick: { show: false },
-      axisLabel: { fontSize: 12 },
+      // ANGKA SAMPING 
+      axisLabel: { 
+        show: true, 
+        fontSize: 10, 
+        color: "#000000" 
+      },
+      axisTick: { 
+        show: true, 
+        alignWithLabel: true, // Memastikan garis lurus di tengah batang
+        lineStyle: { color: "#000000" } 
+      },
+    },
+    tooltip: {
+      trigger: "item",
+      backgroundColor: "none",
+      shadowBlur: 0,
+      borderWidth: 0,
+      extraCssText: "box-shadow: none;",
+      formatter: function (params) {
+        let statusText = "";
+
+        if (isGajiChart) {
+          statusText = `GAJI ${params.name}`;
+        } else {
+          // Logika untuk IKK:
+          // Jika index 0 biasanya Target (abu-abu), index 1 Realisasi (biru)
+          statusText =
+            params.dataIndex === 0
+              ? `TARGET ${params.name}`
+              : `REALISASI ${params.name}`;
+        }
+
+        return `<div style="color: #374151; font-weight: bold; font-size: 13px; text-align: center; line-height: 1.2;">
+                  <span style="font-size: 10px; color: #9CA3AF; text-transform: uppercase; display: block; margin-bottom: 2px;">
+                    ${statusText}
+                  </span>
+                  ${params.value}
+                </div>`;
+      },
     },
     series: [
       {
         type: "bar",
-        data:
-          values.length > 0 &&
-          values?.map((val, idx) => ({
-            value: val,
+        data: values.map((val, idx) => ({
+          value: val,
+          itemStyle: {
+            color: isGajiChart
+              ? "#5CC2F6"
+              : idx === values.length - 1
+              ? "#5CC2F6"
+              : "#e8e8e8",
+            borderRadius: [4, 4, 0, 0],
+          },
+          // Efek warna saat kursor mengarah
+          emphasis: {
             itemStyle: {
-              color: idx === values.length - 1 ? "#2979FF" : "#ccc",
-              borderRadius: [10, 10, 0, 0],
+              color:
+                isGajiChart || idx === values.length - 1
+                  ? "#1E90FF" // Biru Tua (Pekat)
+                  : "#9CA3AF", // Abu-abu Tua (Pekat)
             },
-            label: {
-              show: true,
-              position: "top",
-              formatter: val.toFixed(2),
-              backgroundColor: "#fff",
-              padding: [4, 8],
-              borderRadius: 6,
-              color: idx === values.length - 1 ? "#2979FF" : "#333",
-              fontWeight: idx === values.length - 1 ? "bold" : "normal",
-              shadowColor: "rgba(0,0,0,0.1)",
-              shadowBlur: 4,
-            },
-          })),
-        barWidth: "40%",
+          },
+        })),
+        barWidth: isGajiChart ? "60%" : "40%",
+        emphasis: {
+          scale: true, // Membuat batang membesar
+          focus: "none", // Memastikan batang lain tidak memudar (tetap terlihat jelas)
+        },
       },
     ],
   };
 
   return (
     <div className={`w-full ${height}`}>
-      <ReactECharts option={option} style={{ width: "100%", height: "100%" }} />
+      <ReactECharts
+        option={option}
+        style={{ width: "100%", height: "100%" }}
+        lazyUpdate={true}
+      />
     </div>
   );
 }

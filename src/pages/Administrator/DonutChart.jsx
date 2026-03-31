@@ -1,44 +1,29 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-/**
- * props:
- * - title?: string
- * - subtitle?: string
- * - data: Array<{ name: string; value: number }>
- * - height?: string (Tailwind or inline height)
- */
-export default function DonutChart({
-  height = "h-72",
-  dataset, // Tailwind height: h-64 / h-72 / h-80
-}) {
+export default function DonutChart({ height = "h-64", dataset, colors }) {
   const option = {
-    color: ["#47B5FF", "#616484", "#FFF000", "#FF0000"], // blue, dark purple, yellow (example)
-    legend: {
-      orient: "horizontal",
-      bottom: "-2%",
+    color: colors,
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: <b>{c}</b> ({d}%)', // Format: Nama: Nilai (Persen%)
+      backgroundColor: 'rgba(255, 255, 255, 0.9)',
+      textStyle: { color: '#374151' },
+      borderWidth: 0,
+      extraCssText: 'box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 8px;'
     },
-    title: {
-      show: false, // pastikan tidak ada title
-    },
-
     series: [
       {
         type: "pie",
-        radius: ["35%", "75%"], // inner and outer radius → bigger hole
+        radius: ["30%", "85%"], // Ukuran donut yang lebih pas
         avoidLabelOverlap: false,
-        center: ["50%", "40%"],
-        label: {
-          show: false, // ❌ hide percentage labels
-        },
-        labelLine: {
-          show: false,
-        },
-
+        minAngle: 15,
+        center: ["50%", "50%"],
+        label: { show: false },
+        labelLine: { show: false },
         itemStyle: {
-          borderRadius: 1, // ❌ remove rounded corners
           borderColor: "#fff",
-          borderWidth: 2,
+          borderWidth: 4, // Memberi jarak antar potongan
         },
         data: dataset,
       },
@@ -47,12 +32,8 @@ export default function DonutChart({
 
   return (
     <div className={`w-full ${height}`}>
-      <ReactECharts
-        option={option}
-        style={{ height: "100%", width: "100%" }}
-        notMerge
-        lazyUpdate
-      />
+      <ReactECharts option={option} style={{ height: "100%", width: "100%" }} notMerge  />
+    
     </div>
   );
 }

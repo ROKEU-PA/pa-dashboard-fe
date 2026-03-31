@@ -25,8 +25,8 @@ function Sidebar() {
           ...item,
           children: item.children?.filter((child) =>
             ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP", "LLAT"].includes(
-              child.name
-            )
+              child.name,
+            ),
           ),
         }));
     }
@@ -35,7 +35,7 @@ function Sidebar() {
       return menuItems
         .filter(
           (item) =>
-            item.name === "Pelaksanaan Anggaran" || item.name === "Management"
+            item.name === "Pelaksanaan Anggaran" || item.name === "Management",
         )
         .map((item) => ({
           ...item,
@@ -46,7 +46,7 @@ function Sidebar() {
               "Tanda Terima SPP",
               "User Manage",
               "LLAT",
-            ].includes(child.name)
+            ].includes(child.name),
           ),
         }));
     }
@@ -67,8 +67,8 @@ function Sidebar() {
               ...item,
               children: item.children?.filter((child) =>
                 ["Dashboard", "IKPA", "Realisasi", "LLAT", "About"].includes(
-                  child.name
-                )
+                  child.name,
+                ),
               ),
             };
           }
@@ -99,7 +99,7 @@ function Sidebar() {
     const currentPath = location.pathname;
 
     const matchedMenu = getFilteredMenuItems().find((item) =>
-      item.children?.some((child) => currentPath.startsWith(child.path))
+      item.children?.some((child) => currentPath.startsWith(child.path)),
     );
 
     if (matchedMenu) {
@@ -151,7 +151,7 @@ function Sidebar() {
                     className={`dropdown-parent${
                       openDropdown === item.name ? " open" : ""
                     }`}
-                    onClick={() => toggleDropdown(item)}
+                    onClick={() => navigate(item?.path)}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -171,7 +171,7 @@ function Sidebar() {
                       {item.icon}
                       <span>{item.name}</span>
                     </div>
-                    <div>
+                    <div onClick={() => toggleDropdown(item)}>
                       {openDropdown === item.name ? (
                         <ChevronUp size={16} />
                       ) : (
@@ -242,7 +242,6 @@ function Sidebar() {
         }}
       >
         <span
-          onClick={handleLogout}
           style={{
             position: "relative",
             gap: "8px",
