@@ -3,37 +3,19 @@ import Card from "@/components/Card";
 import moment from "moment";
 import "moment/locale/id";
 import { labelsDummy, dataTable } from "./constants";
-import { apiRequest } from "@/services/APIHelper";
 import BarChart from "./BarChart";
 import { SquareKanban, Star } from "lucide-react";
+import { useBudgetExecution } from "@/hooks/useBudgetExecution";
 
 function BudgetExecution() {
-  const [cardsData, setCardsData] = useState([]);
   const year = moment().format("YYYY");
-  const [es1Data, setEs1Data] = useState({ columns: [], data: [] });
-  const mapColorByIKPA = (ikpa) => {
-    if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
-    if (ikpa >= 89) return "bg-blue-bg"; // Baik
-    if (ikpa >= 79) return "bg-orange-bg"; // Cukup
-    return "bg-red-bg"; // Kurang
+  const period = {
+    year: moment().subtract(1, "years").year(),
+    month: moment().subtract(30, "days").format("M"),
   };
 
-  const mapColorTextByIKPA = (ikpa) => {
-    if (ikpa >= 95) return "text-green-text"; // Sangat Baik
-    if (ikpa >= 89) return "text-blue-text"; // Baik
-    if (ikpa >= 79) return "text-orange-text"; // Cukup
-    return "text-red-text"; // Kurang
-  };
-
-  const dummyCard = [
-    { title: "Sekertariat Jenderal", value: 88.23 },
-    { title: "Inspektorat Jenderal", value: 95.29 },
-    { title: "Ditjen Binapenta dan PKK", value: 94.2 },
-    { title: "PHI & Jamsostek", value: 72.88 },
-    { title: "Binwasnaker & K3", value: 95.29 },
-    { title: "Barenbang Ketenagakerjaan", value: 95.29 },
-    { title: "Binalavotas", value: 97.08 },
-  ];
+  const { data, filteredData, refetch, mapColorByValue, mapColorTextByValue } =
+    useBudgetExecution();
 
   const dataset = [
     { name: "Completed", value: 320 },
@@ -45,81 +27,8 @@ function BudgetExecution() {
     70.7, 33.39, 50.48, 9.41, 83.77, 33.1, 31.96, 29.94,
   ]);
 
-  const es1Options = async () => {
-    try {
-      const data = await apiRequest({
-        url: `/pa/ikpa/all`,
-      });
-      let mapped = data?.data
-        .filter((q) => q.satker_code === null)
-        .map((item, index) => {
-          const constantItem = dataTable.data[index];
-
-          return {
-            eselon: constantItem?.eselon || item.name,
-            revisiDipa: item.revisi_dipa,
-            deviasiHalIII: item.deviasi_hal3_dipa,
-            realisasiAnggaran: item.realisasi_anggaran,
-            belanjaKontraktual: item.belanja_kontraktual,
-            penyelesaianTagihan: item.penyelesaian_tagihan,
-            pengelolaanUPTUP: item.pengelolaan_up_tup,
-            capaianOutput: item.capaian_output,
-            dispensasiSPM: item.dispensasi_spm,
-            nilaiIKPA: item.nilai_ikpa,
-          };
-        });
-
-      setEs1Data({
-        columns: dataTable.columns,
-        data: mapped,
-      });
-
-      let mappedCards = mapped
-        .filter((q) => q.eselon !== "Kementerian Ketenagakerjaan")
-        .map((item) => ({
-          title: item.eselon,
-          value: item.nilaiIKPA.toFixed(2),
-          color: mapColorByIKPA(item.nilaiIKPA),
-        }));
-      setCardsData(mappedCards);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  //   try {
-  //     const data = await apiRequest({
-  //       url: `/api/bmn/pnbp?tahun=` + year,
-  //     });
-  //     setMonth(
-  //       data?.data?.years.length === 0
-  //         ? [
-  //             "Jan",
-  //             "Feb",
-  //             "Mar",
-  //             "Apr",
-  //             "May",
-  //             "Jun",
-  //             "Jul",
-  //             "Aug",
-  //             "Sep",
-  //             "Oct",
-  //             "Nov",
-  //             "Dec",
-  //           ]
-  //         : data?.data?.years
-  //     );
-  //     setValues(
-  //       data?.data?.values.length === 0
-  //         ? [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  //         : data?.data?.values.map((v) => Number(v))
-  //     );
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-  const eselons = es1Data?.data?.map((item) => item.eselon);
   useEffect(() => {
-    es1Options();
+    refetch(period);
   }, [year]);
 
   return (
@@ -132,11 +41,11 @@ function BudgetExecution() {
                 Nilai IKPA
               </span>
               <span className="font-medium  text-xs md:text-sm opacity-90">
-                {moment().locale("id").format("MMMM YYYY")}
+                {moment(period?.month).format("MMM")} {period?.year}
               </span>
             </div>
             <span className="text-4xl md:text-5xl lg:text-6xl font-bold my-4 z-10">
-              94.91
+              {data?.data?.[0]?.nilaiIKPA}
             </span>
             <span className="font-semibold text-sm md:text-baseleading-tight z-10">
               Kementerian
@@ -159,15 +68,15 @@ function BudgetExecution() {
             />
           </div>
         </div>
-        {dummyCard &&
-          dummyCard.map((item, index) => (
+        {filteredData &&
+          filteredData.map((item, index) => (
             <div
               key={index}
               className={`bg-white rounded-xl py-2 px-3 flex flex-col my-4 ml-[-3rem] mr-[3rem] z-10`}
             >
               <div className="mb-2">
                 <span
-                  className={` inline-block text-xs md:text-sm font-semibold px-2 py-1 rounded ${mapColorTextByIKPA(item?.value)} ${mapColorByIKPA(item?.value)}
+                  className={` inline-block text-xs md:text-sm font-semibold px-2 py-1 rounded ${mapColorTextByValue(item?.value)} ${mapColorByValue(item?.value)}
         `}
                 >
                   {item.title}

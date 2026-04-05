@@ -3,7 +3,6 @@ import Card from "@/components/Card";
 import Modal from "@/components/Modal";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
-import { buildQueryString } from "@/services/GeneralHelper";
 import { apiRequest } from "@/services/APIHelper";
 import { TableProperties, Upload } from "lucide-react";
 import { toast } from "react-toastify";
@@ -11,53 +10,27 @@ import FileInput from "@/components/FileInput";
 import Select from "@/components/Select";
 import { AppContext } from "@/contexts/AppContext";
 import { TableIKPA } from "./TableIKPA";
+import { useFetchIKPA } from "./hooks/useFetchIKPA";
+import { useBudgetExecution } from "@/hooks/useBudgetExecution";
 
 function IkpaPage() {
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
-  const [dataTable, setDataTable] = useState([]);
-  const [es1Data, setEs1Data] = useState([]);
   const [filter, setFilter] = useState({
     searchKey: "",
-    eselonKey: "",
+    eselonKey: "all",
   });
   const [formData, setFormData] = useState({
     dokumen: null,
   });
 
-  const fetchTable = async () => {
-    try {
-      const query = buildQueryString({
-        eselon_code: filter.eselonKey,
-        search_key: filter.searchKey,
-      });
-      const data = await apiRequest({
-        url: `/pa/ikpa/all?${query}`,
-      });
-      let result = data?.data;
-      if (data.success) {
-        setDataTable(result);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { data: es1Data, refetch: fetchEs1Data } = useBudgetExecution();
 
-  const es1Options = async () => {
-    try {
-      const data = await apiRequest({
-        url: `/pa/ikpa/all`,
-      });
-      let result = data?.data.filter((q) => q.satker_code === null);
-      if (data.success) {
-        result.unshift({ eselon_code: "all", name: "SEMUA SATKER" });
-        setEs1Data(result);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const { data: dataTable, refetch } = useFetchIKPA({
+    eselonCode: filter?.eselonKey,
+    searchKey: filter?.searchKey,
+  });
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -106,29 +79,16 @@ function IkpaPage() {
       setFormData({
         dokumen: null,
       });
-      fetchTable();
+      refetch();
     } catch (err) {
       console.error(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
 
-  const groupedData = dataTable.reduce((acc, row) => {
-    const group = row.eselon_code;
-    if (!acc[group]) acc[group] = { parent: null, children: [] };
-
-    if (!row.satker_code) {
-      acc[group].parent = row;
-    } else {
-      acc[group].children.push(row);
-    }
-
-    return acc;
-  }, {});
-
   useEffect(() => {
-    fetchTable();
-    es1Options();
+    refetch();
+    fetchEs1Data();
   }, [filter.searchKey, filter.eselonKey]);
 
   return (
@@ -171,7 +131,7 @@ function IkpaPage() {
                 }))
               }
               value={filter.eselonKey}
-              options={es1Data.map((q) => ({
+              options={es1Data?.map((q) => ({
                 label: q.name,
                 value: q.eselon_code,
               }))}
@@ -196,7 +156,7 @@ function IkpaPage() {
           </div>
         </div>
 
-        <TableIKPA />
+        <TableIKPA dataTable={dataTable} />
       </Card>
       <Modal
         open={isOpenModal}
