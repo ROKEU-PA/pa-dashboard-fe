@@ -27,7 +27,6 @@ export const columns = [
   },
   { key: "nilai_ikpa", label: "Nilai IKPA", rowSpan: 10 },
   { key: "dispensasi_spm", label: "Dispensasi SPM", rowSpan: 11 },
-  { key: "tanggal_sumber_data", label: "Tanggal Sumber Data", rowSpan: 12 },
 ];
 
 export const dummyGroupedData = {

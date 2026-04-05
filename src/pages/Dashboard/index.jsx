@@ -110,10 +110,8 @@ export default function Helpdesk() {
             className=" h-auto object-contain drop-shadow-md"
           />
         </div>
-        {/* --- KONTEN UTAMA --- */}
         <div className="relative z-10  flex flex-col items-center text-center space-y-6 md:space-y-8 mt-4 md:mt-0 mb-8">
           <div className="flex flex-col items-center space-y-3">
-            {/* Logo Kementerian */}
             <img
               src="/logo-kemnaker-ori.webp"
               alt="Logo Kemnaker"

@@ -73,16 +73,16 @@ function Select({
         ? "-0.6rem"
         : "0.7rem"
       : placeholder
-      ? "-0.6rem"
-      : "0.7rem",
+        ? "-0.6rem"
+        : "0.7rem",
     left: "0.75rem",
     fontSize: noPlaceholder
       ? showFloatingLabel
         ? "0.75rem"
         : "1rem"
       : placeholder
-      ? "0.75rem"
-      : "1rem",
+        ? "0.75rem"
+        : "1rem",
     color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
     backgroundColor: "white",
     padding: "0 4px",
@@ -115,11 +115,20 @@ function Select({
           cursor: disabled ? "not-allowed" : "pointer",
         }}
       >
-        {selectedLabel || (
-          <span style={{ color: "#999" }}>
-            {noPlaceholder ? "" : placeholder}
-          </span>
-        )}
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            width: "100%", // 🔥 IMPORTANT
+          }}
+        >
+          {selectedLabel || (
+            <span style={{ color: "#999" }}>
+              {noPlaceholder ? "" : placeholder}
+            </span>
+          )}
+        </div>
       </div>
       {isOpen && (
         <div
@@ -171,7 +180,7 @@ Select.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onChange: PropTypes.func.isRequired,
   options: PropTypes.arrayOf(
-    PropTypes.shape({ label: PropTypes.string, value: PropTypes.string })
+    PropTypes.shape({ label: PropTypes.string, value: PropTypes.string }),
   ).isRequired,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
