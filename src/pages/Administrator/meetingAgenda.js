@@ -20,6 +20,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Holidays from "date-holidays";
+
 export default function AgendaRapat() {
   const { userData } = useContext(AppContext);
   const calendarRef = useRef(null);
@@ -227,6 +228,25 @@ export default function AgendaRapat() {
       .replace(":", ".");
   };
 
+  const isCurrentPrayTime = (prayTimeStr, nextPrayTimeStr) => {
+    const now = currentTime.getHours() * 60 + currentTime.getMinutes();
+    
+    const parseTime = (str) => {
+      if (!str) return null;
+      const [h, m] = str.split(" ")[0].split(":").map(Number);
+      return h * 60 + m;
+    };
+
+    const pray = parseTime(prayTimeStr);
+    const next = parseTime(nextPrayTimeStr);
+
+    if (next) {
+      return now >= pray && now < next;
+    } else {
+      return now >= pray && now < 1440; 
+    }
+  };
+
   const getEventsByDate = (dateISO) => {
     return events.filter((ev) => ev.start === dateISO);
   };
@@ -235,7 +255,7 @@ export default function AgendaRapat() {
   const prevMonth = () => calendarRef.current.getApi().prev();
 
   return (
-    <div className="min-h-screen bg-gray-100 font-sans">
+    <div className="min-h-screen bg-gray-100 ">
       <div>
         {!isGuest ? (
           <div className="bg-white relative rounded-[2rem] mt-2 md:mt-0 shadow-xl border border-slate-100 p-8  relative">
@@ -244,7 +264,7 @@ export default function AgendaRapat() {
                 <div className="absolute -top-4 left-6 w-10 h-10 rounded-full bg-[#59c7ff] text-[#d5f1ff]  flex items-center justify-center shadow-sm border border-white z-20">
                   <Calendar size={24} />
                 </div>
-                <h3 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight italic">
+                <h3 className="text-2xl md:text-4xl font-black text-slate-800 tracking-tight ">
                   {viewTitle ||
                     currentTime.toLocaleString("id-ID", {
                       month: "long",
@@ -305,7 +325,7 @@ export default function AgendaRapat() {
             [&_.fc-event]:border-none [&_.fc-event]:rounded-md md:[&_.fc-event]:rounded-lg 
             [&_.fc-event]:px-1 md:[&_.fc-event]:px-1.5 [&_.fc-event]:mb-0.5
             [&_.fc-event-title]:text-[7px] md:[&_.fc-event-title]:text-[9px] 
-            [&_.fc-event-title]:font-black [&_.fc-event-title]:uppercase [&_.fc-event-title]:italic"
+            [&_.fc-event-title]:font-black [&_.fc-event-title]:uppercase [&_.fc-event-title]:"
             >
             <FullCalendar
                 ref={calendarRef}
@@ -368,7 +388,7 @@ export default function AgendaRapat() {
               {showModal && (
                 <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 rounded-[2rem]">
                   <div className="bg-[#f1f5f9] w-full max-w-sm rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl border-4 border-white animate-in zoom-in duration-200 overflow-y-auto">
-                    <h4 className="text-center font-black text-slate-600 text-[10px] mb-6 italic uppercase tracking-widest">
+                    <h4 className="text-center font-black text-slate-600 text-[10px] mb-6 uppercase tracking-widest">
                       {isEditing ? "Edit Agenda" : "Tambah Agenda"} •{" "}
                       {selectedDate}
                     </h4>
@@ -442,13 +462,13 @@ export default function AgendaRapat() {
                               ? handleDelete(isEditing)
                               : setShowModal(false)
                           }
-                          className="flex-1 py-4 bg-slate-400 text-white font-black rounded-xl text-[10px] md:text-xs uppercase italic"
+                          className="flex-1 py-4 bg-slate-400 text-white font-black rounded-xl text-[10px] md:text-xs uppercase "
                         >
                           {isEditing ? "Hapus" : "Batal"}
                         </button>
                         <button
                           onClick={handleSaveAgenda}
-                          className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl text-[10px] md:text-xs uppercase italic shadow-lg"
+                          className="flex-1 py-4 bg-blue-600 text-white font-black rounded-xl text-[10px] md:text-xs uppercase shadow-lg"
                         >
                           {isEditing ? "Update" : "Simpan"}
                         </button>
@@ -460,8 +480,8 @@ export default function AgendaRapat() {
             </div>
           </div>
         ) : (
-          <div className="space-y-4 md:space-y-6 bg-white">
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-6 lg:gap-20 md:gap-20 gap-2">
+          <div className=" bg-white rounded-[2.5rem]">
+            <div className="grid grid-cols-1 md:grid-cols-3  lg:gap-40 p-5  md:gap-30 gap-2">
               <StatCard
                 label="Total Rapat Bulan Ini"
                 value={
@@ -472,10 +492,7 @@ export default function AgendaRapat() {
                 }
               />
               <div className="bg-white rounded-[2.5rem] p-2 text-center shadow-xl border border-slate-100 flex flex-col justify-center">
-                <p className="text-xs md:text-sm font-bold  uppercase tracking-[0.5em] mb-4">
-                  Jam Digital{" "}
-                </p>
-                <p className="text-5xl md:text-6xl font-black  tracking-tighter italic leading-none">
+                <p className="text-5xl md:text-6xl font-black  tracking-tighter leading-none">
                   {formatTime(currentTime)}
                 </p>
               </div>
@@ -510,23 +527,21 @@ export default function AgendaRapat() {
 
                   return (
                     <SwiperSlide key={offset}>
-                      <div className="p-6 pt-1 md:p-8 md:pt-3 min-h-[300px]">
+                      <div className="p-6  md:p-8  min-h-[300px]">
                         <div className="flex justify-between items-center  border-b  border-slate-50">
-                          <h2 className="md:text-2xl text-xl font-black  uppercase tracking-tight">
+                          <h2 className="md:text-2xl text-xl font-black tracking-tight uppercase">
                             Jadwal{" "}
                             <span className="text-[#308BFD]">{label}</span>
                           </h2>
-                          <p className="font-bold  italic text-sm">
-                            {targetDate.toLocaleDateString("id-ID", {
-                              dateStyle: "long",
-                            })}
+                          <p className="md:text-2xl text-xl font-black ">
+                            {targetDate.toLocaleDateString("id-ID", { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                           </p>
                         </div>
 
                         <div className="overflow-x-auto">
                           <table className="w-full text-center border-separate border-spacing-y-4">
                             <thead>
-                              <tr className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] text-white shadow-xl shadow-blue-100">
+                              <tr className="bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] text-white shadow-xl shadow-blue-100">
                                 <th className="py-1 md:py-3 px-1 md:px-3 rounded-l-2xl font-black  uppercase tracking-widest text-[12px] md:text-[15px]">
                                   Waktu
                                 </th>
@@ -578,7 +593,7 @@ export default function AgendaRapat() {
                                 <tr>
                                   <td
                                     colSpan="4"
-                                    className="py-24 text-slate-200 italic font-black text-3xl tracking-widest uppercase opacity-50"
+                                    className="py-24 text-slate-200 font-black text-3xl tracking-widest uppercase opacity-50"
                                   >
                                     Tidak ada jadwal rapat
                                   </td>
@@ -601,11 +616,11 @@ export default function AgendaRapat() {
               </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-4">
+            <div className="bg-white rounded-2xl  overflow-hidden p-4">
               <div className="overflow-x-auto">
                 <table className="w-full text-center border-separate border-spacing-y-2">
                   <thead>
-                    <tr className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] text-white shadow-sm">
+                    <tr className=" bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] text-white shadow-sm">
                       <th className="py-3 rounded-l-xl font-bold  text-sm md:text-base">
                         Tanggal
                       </th>
@@ -633,35 +648,46 @@ export default function AgendaRapat() {
                     {!loadingSholat ? (
                       sholatData.map((day, idx) => (
                         <tr key={idx}>
-                          <td className="py-4 text-xs md:text-sm font-black text-[#308BFD] bg-blue-50/50 rounded-l-xl">
-                            {day.date.readable.split(" ")[0]}/
-                            {currentTime.getMonth() + 1}/
-                            {currentTime.getFullYear()}
+                          <td className="py-4 text-sm font-black text-[#308BFD] bg-blue-50/50 rounded-l-xl">
+                            {new Intl.DateTimeFormat('id-ID', { weekday: 'long' }).format(new Date(day.date.timestamp * 1000))}, {day.date.readable.split(" ")[0]}/{currentTime.getMonth() + 1}/{currentTime.getFullYear()}
                           </td>
                           {[
-                            day.timings.Imsak,
-                            day.timings.Fajr,
-                            day.timings.Dhuhr,
-                            day.timings.Asr,
-                            day.timings.Maghrib,
-                          ].map((time, i) => (
-                            <td
-                              key={i}
-                              className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 "
-                            >
-                              {time.split(" ")[0]}
-                            </td>
-                          ))}
-                          <td className="py-4 text-xs md:text-sm text-slate-500 font-bold bg-blue-50/50 rounded-r-xl ">
-                            {day.timings.Isha.split(" ")[0]}
-                          </td>
+                            { name: "Imsak", time: day.timings.Imsak, next: day.timings.Fajr },
+                            { name: "Subuh", time: day.timings.Fajr, next: day.timings.Dhuhr },
+                            { name: "Dzuhur", time: day.timings.Dhuhr, next: day.timings.Asr },
+                            { name: "Ashar", time: day.timings.Asr, next: day.timings.Maghrib },
+                            { name: "Maghrib", time: day.timings.Maghrib, next: day.timings.Isha },
+                            { name: "Isya", time: day.timings.Isha, next: null }
+                          ].map((pray, i) => {
+                            const isNow = idx === 0 && isCurrentPrayTime(pray.time, pray.next);
+                            return (
+                              <td
+                                key={i}
+                                className={`py-4 text-xl font-bold transition-all  ${
+                                  isNow 
+                                    ? "bg-gradient-to-b from-[#59C7FF] to-[#2F8AFD] text-white shadow-inner text-xl  rounded-lg" 
+                                    : "bg-blue-50/50"
+                                } ${i === 5 ? "rounded-r-xl" : ""}`}
+                              >
+                               <div className="text-center">
+                                <span className={`block font-black leading-none ${
+                                  isNow 
+                                    ? "text-lg md:text-xl tracking-normal" 
+                                    : "text-xs md:text-sm opacity-70"
+                                }`}>
+                                  {pray.time.split(" ")[0]}
+                                </span>       
+                              </div>
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))
                     ) : (
                       <tr>
                         <td
                           colSpan="7"
-                          className="py-10 text-gray-400 italic font-medium"
+                          className="py-10 text-gray-400 font-medium"
                         >
                           Memuat Jadwal Sholat...
                         </td>
@@ -679,18 +705,18 @@ export default function AgendaRapat() {
 }
 function StatCard({ label, value }) {
   return (
-    <div className="bg-gradient-to-br from-[#59C6FF] to-[#308BFD] rounded-[2.5rem]  text-center text-white shadow-2xl relative overflow-hidden group">
+    <div className=" bg-gradient-to-r from-[#59C7FF] to-[#2F8AFD] rounded-[2.5rem] p-3  text-center text-white shadow-2xl relative overflow-hidden group">
       <div className="relative z-10">
-        <p className="font-black text-sm md:text-lg mb-2 opacity-80 tracking-tighter uppercase">
+        <p className="font-black text-lg md:text-xl mb-1 opacity-80 tracking-tighter uppercase">
           {label}
         </p>
-        <p className="text-5xl md:text-6xl font-black tracking-tighter drop-shadow-md">
+        <p className="text-5xl md:text-6xl font-black tracking-tighter drop-shadow-md p-3">
           {value}
         </p>
       </div>
       <img
         src="/rapat.webp"
-        className="absolute right-[-1rem] bottom-[-1rem]  w-20 md:w-[140px] z-0 transition-transform duration-1000"
+        className="absolute right-[0rem] bottom-[0rem]  w-20 md:w-[140px] z-0 transition-transform duration-1000"
       />
     </div>
   );
