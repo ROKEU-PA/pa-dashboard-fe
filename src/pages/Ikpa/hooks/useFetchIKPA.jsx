@@ -1,9 +1,9 @@
 import { apiRequest } from "@/services/APIHelper";
 import { buildQueryString } from "@/services/GeneralHelper";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export const useFetchIKPA = ({ eselonCode, searchKey }) => {
+export const useFetchIKPA = ({ eselonCode, searchKey, month, year }) => {
   const [data, setData] = useState(null);
 
   const fetchTable = async () => {
@@ -11,8 +11,10 @@ export const useFetchIKPA = ({ eselonCode, searchKey }) => {
       const query = buildQueryString({
         eselon_code: eselonCode,
         search_key: searchKey,
-        year: moment().subtract(1, "years").year(),
-        month: moment().subtract(30, "days").format("M"),
+        year: year ?? moment().subtract(1, "years").year(),
+        month:
+          moment(month, "MMMM").format("MM") ??
+          moment().subtract(30, "days").format("M"),
         ikpas: true,
       });
       const data = await apiRequest({
@@ -26,6 +28,10 @@ export const useFetchIKPA = ({ eselonCode, searchKey }) => {
       console.error(error);
     }
   };
+
+  useEffect(() => {
+    fetchTable();
+  }, [eselonCode, month, year, searchKey]);
 
   return {
     data,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { requiredValidator } from "../services/GeneralHelper";
 import themeColors from "../constants/color";
@@ -21,7 +21,9 @@ function Select({
   innerHeight = "3.0rem",
   setIsOpen,
 }) {
-  // const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const [hovered, setHovered] = useState(null);
   const isFocused = false;
 
   const [localError, setLocalError] = useState("");
@@ -97,8 +99,25 @@ function Select({
     marginLeft: "0.25rem",
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [setIsOpen]);
+
   return (
-    <div style={containerStyle}>
+    <div ref={containerRef} style={containerStyle}>
       {label && (
         <label htmlFor={name} style={labelStyle}>
           {label}
@@ -149,17 +168,24 @@ function Select({
             <div
               key={opt.value}
               onClick={() => handleOptionClick(opt.value)}
+              onMouseEnter={() => setHovered(opt.value)}
+              onMouseLeave={() => setHovered(null)}
               style={{
                 padding: "0.75rem",
                 color:
                   opt.value === value
                     ? themeColors.card
-                    : themeColors.primary.light,
+                    : hovered === opt.value
+                      ? "#000"
+                      : themeColors.primary.light,
                 backgroundColor:
                   opt.value === value
-                    ? themeColors.primary.light
-                    : themeColors.background,
+                    ? "#59C7FF"
+                    : hovered === opt.value
+                      ? "#EAF6FF"
+                      : themeColors.background,
                 cursor: "pointer",
+                transition: "all 0.2s ease",
               }}
             >
               {opt.label}

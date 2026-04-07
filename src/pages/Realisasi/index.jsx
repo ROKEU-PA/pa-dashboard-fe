@@ -8,86 +8,41 @@ import { toast } from "react-toastify";
 import FileInput from "@/components/FileInput";
 import { AppContext } from "@/contexts/AppContext";
 import Card from "@/components/Card";
-import { dataTable } from "../BudgetExecution/constants";
-import { dataTables } from "./constants";
 import { RealizationTable } from "./Components/RealizationTable";
 import { RealizationBox } from "./Components/RealizationBox";
 import { RealizationCard } from "./Components/RealizationCard";
+import { useBudgetExecution } from "@/hooks/useBudgetExecution";
+import { useFetchRealization } from "./hooks/useFetchRealization";
+import { formatNumberID } from "@/utils/number";
+import { toTitleCase } from "@/utils/text";
 
 function RealisasiPage() {
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
 
-  const [es1Data, setEs1Data] = useState([]);
   const [filter, setFilter] = useState({
     searchKey: "",
-    eselonKey: "",
+    eselonKey: "all",
+    year: moment().year(),
+    month: moment().subtract(30, "days").format("MMMM"),
   });
   const [formData, setFormData] = useState({
     dokumen: null,
   });
   const [cardsData, setCardsData] = useState([]);
-  const formatMiliar = (num) => {
-    if (!num && num !== 0) return "-";
-    return (num / 1_000_000_000).toFixed(2) + " M";
-  };
-  // const fetchTable = async () => {
-  //   try {
-  //     const query = buildQueryString({
-  //       eselon_code: filter.eselonKey,
-  //       search_key: filter.searchKey,
-  //     });
-  //     const data = await apiRequest({
-  //       url: `/api/pa/ikpa/all?${query}`,
-  //     });
-  //     let result = data?.data;
-  //     if (data.success) {
-  //       setDataTable(result);
-  //     }
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
-  const es1Options = async () => {
-    try {
-      const data = { success: true, data: dataTables };
-
-      if (!data?.success || !data?.data) return;
-      let mapped = data.data
-        // .filter((q) => q.satker_code === null)
-        .map((item, index) => {
-          const constantItem = dataTable.data[index];
-          const perJenis = item.per_jenis || {};
-
-          const totalPagu = item.pagu || 0;
-          const totalRealisasi = item.realisasi || 0;
-          const totalPersen = item.persen_realisasi || 0;
-          const totalSisa = item.sisa || 0;
-
-          const pegawai = perJenis["51"] || {};
-          const barang = perJenis["52"] || {};
-          const modal = perJenis["53"] || {};
-
-          return {
-            title: constantItem?.eselon || item.name,
-            pagu: totalPagu,
-            realisasiNominal: totalRealisasi,
-            realisasiPersen: totalPersen,
-            blokir: totalSisa,
-            blokirPersen: ((totalSisa / totalPagu) * 100).toFixed(2),
-            targetNominal: totalPagu * 0.95,
-            targetPersen: 95,
-          };
-        });
-
-      console.log("cardsData mapped:", mapped);
-      setCardsData(mapped);
-    } catch (error) {
-      console.error("Error mapping data:", error);
-    }
-  };
+  const { data: es1Data } = useBudgetExecution();
+  const {
+    data: dataTable,
+    dataCard,
+    loading,
+  } = useFetchRealization(
+    filter?.eselonKey,
+    filter?.searchKey,
+    filter?.month,
+    filter?.year,
+  );
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -110,7 +65,6 @@ function RealisasiPage() {
         },
         isMultiType: true,
       });
-      console.log(result);
     } catch (error) {
       console.error(error);
     }
@@ -118,7 +72,6 @@ function RealisasiPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
 
     let isAnyFile = formData?.dokumen || formData?.document;
 
@@ -144,24 +97,6 @@ function RealisasiPage() {
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
-
-  const groupedData = dataTables.reduce((acc, row) => {
-    const group = row.eselon_code;
-    if (!acc[group]) acc[group] = { parent: null, children: [] };
-
-    if (!row.satker_code) {
-      acc[group].parent = row;
-    } else {
-      acc[group].children.push(row);
-    }
-
-    return acc;
-  }, {});
-
-  useEffect(() => {
-    // fetchTable();
-    es1Options();
-  }, [filter.searchKey, filter.eselonKey]);
 
   return (
     <div>
@@ -189,74 +124,76 @@ function RealisasiPage() {
               <RealizationBox
                 bgIcon={"bg-blue-text"}
                 title="Total PAGU"
-                value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
+                value={`Rp. ${formatNumberID(dataCard?.[0]?.pagu) ?? "0"}`}
                 border={"border-2 border-blue-text"}
                 main
               />
               <RealizationBox
                 bgIcon={"bg-red-text"}
                 title="Blokir"
-                value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
+                value={`Rp. 0`}
                 border={"border-2 border-red-text"}
-                delta={"20%"}
+                delta={"-%"}
                 deltaClassName={"text-red-text bg-red-bg "}
                 main
               />
               <RealizationBox
                 bgIcon={"bg-green-text"}
                 title="Realisasi"
-                value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
+                value={`Rp. ${formatNumberID(dataCard?.[0]?.realisasi) ?? "0"}`}
                 border={"border-2 border-green-text"}
-                delta={"58%"}
+                delta={`Rp. ${formatNumberID(dataCard?.[0]?.persen_realisasi) ?? "-"}`}
                 deltaClassName={"text-green-text bg-green-bg "}
                 main
               />
               <RealizationBox
                 bgIcon={"bg-orange-text"}
-                title="Realisasi"
-                value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
+                title="Sisa"
+                value={`Rp. ${formatNumberID(dataCard?.[0]?.sisa) ?? "0"}`}
                 border={"border-2 border-orange-text"}
-                delta={"58%"}
+                delta={`${formatNumberID(dataCard?.[0]?.persen_sisa) ?? "-"}%`}
                 deltaClassName={"text-orange-text bg-orange-bg "}
                 main
               />
             </div>
           </Card>
         </div>
-        {cardsData
+        {dataCard
           ?.filter((_, index) => index !== 0)
           .map((item, index) => {
             return (
-              <RealizationCard title={item?.title}>
-                <div className="flex flex-col text-sm font-medium">
-                  <RealizationBox
-                    title="Total PAGU"
-                    value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
-                    border={"border-2 border-blue-text"}
-                  />
-                  <RealizationBox
-                    title="Blokir"
-                    value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
-                    border={"border-2 border-red-text"}
-                    delta={"20%"}
-                    deltaClassName={"text-red-text bg-red-bg "}
-                  />
-                  <RealizationBox
-                    title="Realisasi"
-                    value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
-                    border={"border-2 border-green-text"}
-                    delta={"58%"}
-                    deltaClassName={"text-green-text bg-green-bg "}
-                  />
-                  <RealizationBox
-                    title="Realisasi"
-                    value={`Rp ${(2123 / 1_000).toFixed(2)} M`}
-                    border={"border-2 border-orange-text"}
-                    delta={"58%"}
-                    deltaClassName={"text-orange-text bg-orange-bg "}
-                  />
-                </div>
-              </RealizationCard>
+              <>
+                <RealizationCard title={toTitleCase(item?.name)} key={index}>
+                  <div className="flex flex-col text-sm font-medium">
+                    <RealizationBox
+                      title="Total PAGU"
+                      value={`Rp. ${formatNumberID(dataCard?.[index]?.pagu) ?? "0"}`}
+                      border={"border-2 border-blue-text"}
+                    />
+                    <RealizationBox
+                      title="Blokir"
+                      value={`Rp. ${formatNumberID(dataCard?.[index]?.blokir) ?? "0"}`}
+                      delta={`${formatNumberID(dataCard?.[index]?.persen_blokir) ?? "-"}%`}
+                      border={"border-2 border-red-text"}
+                      deltaClassName={"text-red-text bg-red-bg "}
+                    />
+                    <RealizationBox
+                      title="Realisasi"
+                      value={`Rp. ${formatNumberID(dataCard?.[index]?.realisasi) ?? "0"}`}
+                      delta={`${formatNumberID(dataCard?.[index]?.persen_realisasi) ?? "-"}%`}
+                      border={"border-2 border-green-text"}
+                      deltaClassName={"text-green-text bg-green-bg "}
+                    />
+                    <RealizationBox
+                      title="Sisa"
+                      value={`Rp. ${formatNumberID(dataCard?.[index]?.sisa) ?? "0"}`}
+                      delta={`${formatNumberID(dataCard?.[index]?.persen_sisa) ?? "-"}%`}
+                      border={"border-2 border-orange-text"}
+                      deltaClassName={"text-orange-text bg-orange-bg "}
+                    />
+                  </div>
+                </RealizationCard>
+              </>
             );
           })}
       </div>
@@ -269,6 +206,7 @@ function RealisasiPage() {
         setSelectOpen={setSelectOpen}
         userData={userData}
         setIsOpenModal={setIsOpenModal}
+        dataTable={dataTable}
       />
       <Modal
         open={isOpenModal}

@@ -2,7 +2,7 @@ import { dataTable } from "@/pages/BudgetExecution/constants";
 import { apiRequest } from "@/services/APIHelper";
 import { buildQueryString } from "@/services/GeneralHelper";
 import moment from "moment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export const useBudgetExecution = () => {
   const [data, setData] = useState([]);
@@ -86,6 +86,10 @@ export const useBudgetExecution = () => {
     if (ikpa >= 79) return "text-orange-text"; // Cukup
     return "text-red-text"; // Kurang
   };
+
+  useEffect(() => {
+    fetchEs1Data();
+  }, []);
 
   return {
     data,

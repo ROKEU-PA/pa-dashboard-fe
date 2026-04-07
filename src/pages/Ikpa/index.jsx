@@ -12,15 +12,23 @@ import { AppContext } from "@/contexts/AppContext";
 import { TableIKPA } from "./TableIKPA";
 import { useFetchIKPA } from "./hooks/useFetchIKPA";
 import { useBudgetExecution } from "@/hooks/useBudgetExecution";
+import { getYears, months } from "@/constants/general";
+import moment from "moment";
+import { toTitleCase } from "@/utils/text";
 
 function IkpaPage() {
   const { userData } = useContext(AppContext);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
+  const [selectOpenMonth, setSelectOpenMonth] = useState(false);
+  const [selectOpenYear, setSelectOpenYear] = useState(false);
   const [filter, setFilter] = useState({
     searchKey: "",
     eselonKey: "all",
+    year: moment().subtract(1, "years").year(),
+    month: moment().format("MMMM"),
   });
+
   const [formData, setFormData] = useState({
     dokumen: null,
   });
@@ -30,6 +38,8 @@ function IkpaPage() {
   const { data: dataTable, refetch } = useFetchIKPA({
     eselonCode: filter?.eselonKey,
     searchKey: filter?.searchKey,
+    month: filter?.month,
+    year: filter?.year,
   });
 
   const handleChange = (e) => {
@@ -120,7 +130,43 @@ function IkpaPage() {
               }))
             }
           />
-          <div className="flex">
+          <div className="flex gap-2">
+            <Select
+              label="Bulan"
+              name="Month"
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  month: e.target.value ?? "",
+                }))
+              }
+              value={filter.month}
+              options={months?.map((q) => ({
+                label: q,
+                value: q,
+              }))}
+              style={{ width: "7.25rem" }}
+              isOpen={selectOpenMonth}
+              setIsOpen={setSelectOpenMonth}
+            />
+            <Select
+              label="Tahun"
+              name="year"
+              onChange={(e) =>
+                setFilter((prev) => ({
+                  ...prev,
+                  year: e.target.value ?? "",
+                }))
+              }
+              value={filter.year}
+              options={getYears()?.map((q) => ({
+                label: q,
+                value: q,
+              }))}
+              style={{ width: "7.25rem" }}
+              isOpen={selectOpenYear}
+              setIsOpen={setSelectOpenYear}
+            />
             <Select
               label="Eselon 1"
               name="eselon_code"
@@ -132,7 +178,7 @@ function IkpaPage() {
               }
               value={filter.eselonKey}
               options={es1Data?.map((q) => ({
-                label: q.name,
+                label: toTitleCase(q.name),
                 value: q.eselon_code,
               }))}
               style={{ width: "20rem" }}
