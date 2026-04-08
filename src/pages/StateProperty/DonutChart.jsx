@@ -1,25 +1,21 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
 
-export default function DonutChart({
-  height = "h-52",
-  data = [], 
-   
-}) {
+export default function DonutChart({ height = "h-40", data = [] }) {
   const option = {
     tooltip: {
       trigger: "item",
       formatter: "{b}: {c} ({d}%)",
     },
     legend: {
-      show: false, 
+      show: false,
     },
     series: [
       {
         name: "Access From",
         type: "pie",
-        center :["50%", "40%"],
-        radius : ["30%", "80%"],
+        center: ["50%", "40%"],
+        radius: ["30%", "80%"],
         avoidLabelOverlap: false,
         itemStyle: {
           borderRadius: 0,
@@ -27,7 +23,7 @@ export default function DonutChart({
           borderWidth: 2,
         },
         label: {
-          show: false, 
+          show: false,
           position: "center",
         },
         emphasis: {
@@ -46,12 +42,8 @@ export default function DonutChart({
   };
 
   return (
-    <div className={`w-full ${height}`}>
-      <ReactECharts
-        option={option}
-        style={{ height: "100%", width: "100%" }}
-        // notMerge={true}
-      />
+    <div className={`w-full ${height} mt-4`}>
+      <ReactECharts option={option} style={{ height: "100%", width: "100%" }} />
     </div>
   );
 }

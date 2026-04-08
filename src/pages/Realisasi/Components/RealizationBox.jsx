@@ -22,7 +22,7 @@ export const RealizationBox = ({
         {title}
       </span>
       <div
-        className={`flex text-end ${main ? "flex-col" : "gap-2"} items-center place-content-center`}
+        className={`flex text-end ${main ? "flex-col" : "gap-2"} items-end place-content-center`}
       >
         <span className="font-medium text-lg">{value}</span>
         {delta && (

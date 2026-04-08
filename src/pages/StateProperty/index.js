@@ -3,16 +3,14 @@ import Card from "@/components/Card";
 import DonutChart from "./DonutChart";
 import { Leaf, Database, BarChart3, PieChart } from "lucide-react";
 import { formatCurrency, formatNumber } from "@/services/GeneralHelper";
+import { useFetchBMN } from "./hooks/useFetchBMN";
+import { formatToAssetPieChart } from "./hooks/useFormatChart";
 
 function StateProperty() {
+  const { dataAsset, dataGrant, dataType } = useFetchBMN();
+
   const dataStatus = { total: 520072, sudah: 336300, belum: 193826 };
-  const dataKondisi = {
-    total: 520072,
-    baik: 336300,
-    rr: 193826,
-    rb: 193826,
-    nilai: 16920388457705,
-  };
+
   const dataHibah = { sk: 1.98, belum: 18, batal: 511 };
 
   const chartStatusData = [
@@ -25,20 +23,6 @@ function StateProperty() {
       value: dataStatus.belum,
       name: "Belum PSP",
       itemStyle: { color: "#8E8E93" },
-    },
-  ];
-
-  const chartKondisiData = [
-    { value: dataKondisi.baik, name: "Baik", itemStyle: { color: "#C0D756" } },
-    {
-      value: dataKondisi.rr,
-      name: "Rusak Ringan",
-      itemStyle: { color: "#FFB300" },
-    },
-    {
-      value: dataKondisi.rb,
-      name: "Rusak Berat",
-      itemStyle: { color: "#F50057" },
     },
   ];
 
@@ -72,10 +56,10 @@ function StateProperty() {
         {isTriliun
           ? `Rp ${value} Triliun`
           : isJuta
-          ? `Rp ${value} Juta`
-          : isCurrency
-          ? formatCurrency(value)
-          : formatNumber(value)}
+            ? `Rp ${value} Juta`
+            : isCurrency
+              ? formatCurrency(value)
+              : formatNumber(value)}
       </span>
     </div>
   );
@@ -125,35 +109,35 @@ function StateProperty() {
           />
           <h3 className="text-lg font-bold text-gray-800 ">Kondisi Aset</h3>
           <div className="flex flex-col items-center w-full">
-            <DonutChart data={chartKondisiData} />
+            <DonutChart data={dataAsset && formatToAssetPieChart(dataAsset)} />
 
             <div className="flex justify-center w-full">
               <div className="grid grid-cols-2 gap-x-12 ">
                 <LegendItem
                   color="#4FC3F7"
                   label="Total Aset"
-                  value={dataKondisi.total}
+                  value={dataAsset && dataAsset?.[0].value}
                 />
                 <LegendItem
                   color="#C0D756"
                   label="Kondisi Baik"
-                  value={dataKondisi.baik}
+                  value={dataAsset && dataAsset?.[2].value}
                 />
                 <LegendItem
                   color="#FFB300"
                   label="Rusak Ringan"
-                  value={dataKondisi.rr}
+                  value={dataAsset && dataAsset?.[3].value}
                 />
                 <LegendItem
                   color="#F50057"
                   label="Rusak berat"
-                  value={dataKondisi.rb}
+                  value={dataAsset && dataAsset?.[4].value}
                 />
                 <div className="col-span-2 mt-1">
                   <LegendItem
                     color="#8E8E93"
                     label="Nilai Aset"
-                    value={dataKondisi.nilai}
+                    value={dataAsset && dataAsset?.[1].value}
                     isCurrency
                   />
                 </div>
