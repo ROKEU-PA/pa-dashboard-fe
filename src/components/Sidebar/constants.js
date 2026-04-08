@@ -147,7 +147,11 @@ export const menuItems = [
     adminOnly: true,
     path: "/tata-usaha",
     children: [
-      
+      {
+        name: "Pengambilan Persediaan",
+        path: "/tata-usaha/pengambilan-persediaan",
+        icon: <FileText size={18} />,
+      },
     ],
     icon: <BookUser strokeWidth={3} />,
   },

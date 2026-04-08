@@ -35,6 +35,7 @@ import PTUKLHP from "./pages/PTUK/LHP";
 import StateLosses from "./pages/PTUK/StateLosses";
 import PNBP from "./pages/PTUK/PNBP";
 import FinancialAdiministrator from "./pages/PTUK/FinancialAdministrator";
+import InventoryTaking from "./pages/InventoryTaking";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -160,6 +161,20 @@ function App() {
                 userName="Administrator"
               >
                 <Administrator />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+         <Route
+          path="/tata-usaha/pengambilan-persediaan"
+          element={
+            <PrivateRoute>
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Pengambilan Persediaan"
+                userName="Inventory Taking"
+              >
+                <InventoryTaking />
               </AppLayout>
             </PrivateRoute>
           }
