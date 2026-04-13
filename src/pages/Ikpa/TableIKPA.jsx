@@ -7,7 +7,7 @@ import React from "react";
 import Table from "@/components/Table";
 import { useBudgetExecution } from "@/hooks/useBudgetExecution";
 
-export const TableIKPA = ({ dataTable }) => {
+export const TableIKPA = ({ dataTable, loading }) => {
   const { getIKPAColor } = useBudgetExecution();
   return (
     <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -42,123 +42,149 @@ export const TableIKPA = ({ dataTable }) => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {dataTable &&
-          Object.entries(dataTable).map(([eselonCode, group], index) => (
-            <React.Fragment key={index}>
-              {group.parent && (
-                <TableRow
-                  sx={{ backgroundColor: "#D5F1FF", fontWeight: "bold" }}
-                >
-                  <TableCell align="center">
-                    {group.parent.eselon_code ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.name ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.revisi_dipa ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.deviasi_hal3_dipa ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.realisasi_anggaran ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.belanja_kontraktual ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.penyelesaian_tagihan ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.pengelolaan_up_tup ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.capaian_output ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    <div
-                      className={`p-1 rounded font-semibold ${getIKPAColor(
-                        group.parent.nilai_ikpa,
-                      )}`}
+        {loading ? (
+          <TableRow>
+            {" "}
+            <TableCell
+              align="center"
+              colspan={12}
+              className="justify-items-center"
+            >
+              <img
+                src="/animation/loading-animation-kemnaker-opacity.gif"
+                alt="Loading..."
+                className="m-52"
+                style={{ width: 64, height: 64, objectFit: "contain" }}
+              />
+            </TableCell>
+          </TableRow>
+        ) : (
+          <>
+            {dataTable &&
+              Object.entries(dataTable).map(([eselonCode, group], index) => (
+                <React.Fragment key={index}>
+                  {group.parent && (
+                    <TableRow
+                      sx={{ backgroundColor: "#D5F1FF", fontWeight: "bold" }}
                     >
-                      {group.parent.nilai_ikpa ?? "-"}
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.dispensasi_spm ?? "-"}
-                  </TableCell>
-                </TableRow>
-              )}
-              {group.parent && (
-                <TableRow
-                  sx={{ backgroundColor: "#ffffff", fontWeight: "bold" }}
-                >
-                  <TableCell align="center" colSpan="2">
-                    {"Nilai Aspek"}
-                  </TableCell>
-                  <TableCell align="center" colSpan="2">
-                    {Math.round(
-                      ((group.parent.revisi_dipa +
-                        group.parent.deviasi_hal3_dipa) /
-                        2) *
-                        100,
-                    ) / 100}
-                  </TableCell>
-                  <TableCell align="center" colSpan="4">
-                    {Math.round(
-                      ((group.parent.realisasi_anggaran +
-                        group.parent.belanja_kontraktual +
-                        group.parent.penyelesaian_tagihan +
-                        group.parent.pengelolaan_up_tup) /
-                        4) *
-                        100,
-                    ) / 100}
-                  </TableCell>
-                  <TableCell align="center" colSpan="1">
-                    {Math.round(group.parent.capaian_output * 100) / 100}
-                  </TableCell>
-                  <TableCell align="center" colSpan="2">
-                    {""}
-                  </TableCell>
-                </TableRow>
-              )}
-              {group.children.map((row, idx) => (
-                <TableRow
-                  key={idx}
-                  sx={{ backgroundColor: "#EBF8FF", fontWeight: "bold" }}
-                >
-                  <TableCell align="center">{row.satker_code}</TableCell>
-                  <TableCell align="center">{row.name}</TableCell>
-                  <TableCell align="center">{row.revisi_dipa}</TableCell>
-                  <TableCell align="center">{row.deviasi_hal3_dipa}</TableCell>
-                  <TableCell align="center">{row.realisasi_anggaran}</TableCell>
-                  <TableCell align="center">
-                    {row.belanja_kontraktual}
-                  </TableCell>
-                  <TableCell align="center">
-                    {row.penyelesaian_tagihan}
-                  </TableCell>
-                  <TableCell align="center">{row.pengelolaan_up_tup}</TableCell>
-                  <TableCell align="center">
-                    {group.parent.capaian_output ?? "-"}
-                  </TableCell>
-                  <TableCell align="center">
-                    <div
-                      className={`p-1 rounded font-semibold ${getIKPAColor(
-                        group.parent.nilai_ikpa,
-                      )}`}
+                      <TableCell align="center">
+                        {group.parent.eselon_code ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.name ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.revisi_dipa ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.deviasi_hal3_dipa ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.realisasi_anggaran ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.belanja_kontraktual ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.penyelesaian_tagihan ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.pengelolaan_up_tup ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.capaian_output ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <div
+                          className={`p-1 rounded font-semibold ${getIKPAColor(
+                            group.parent.nilai_ikpa,
+                          )}`}
+                        >
+                          {group.parent.nilai_ikpa ?? "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.dispensasi_spm ?? "-"}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {group.parent && (
+                    <TableRow
+                      sx={{ backgroundColor: "#ffffff", fontWeight: "bold" }}
                     >
-                      {group.parent.nilai_ikpa ?? "-"}
-                    </div>
-                  </TableCell>
-                  <TableCell align="center">
-                    {group.parent.dispensasi_spm ?? "-"}
-                  </TableCell>
-                </TableRow>
+                      <TableCell align="center" colSpan="2">
+                        {"Nilai Aspek"}
+                      </TableCell>
+                      <TableCell align="center" colSpan="2">
+                        {Math.round(
+                          ((group.parent.revisi_dipa +
+                            group.parent.deviasi_hal3_dipa) /
+                            2) *
+                            100,
+                        ) / 100}
+                      </TableCell>
+                      <TableCell align="center" colSpan="4">
+                        {Math.round(
+                          ((group.parent.realisasi_anggaran +
+                            group.parent.belanja_kontraktual +
+                            group.parent.penyelesaian_tagihan +
+                            group.parent.pengelolaan_up_tup) /
+                            4) *
+                            100,
+                        ) / 100}
+                      </TableCell>
+                      <TableCell align="center" colSpan="1">
+                        {Math.round(group.parent.capaian_output * 100) / 100}
+                      </TableCell>
+                      <TableCell align="center" colSpan="2">
+                        {""}
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  {group.children.map((row, idx) => (
+                    <TableRow
+                      key={idx}
+                      sx={{ backgroundColor: "#EBF8FF", fontWeight: "bold" }}
+                    >
+                      <TableCell align="center">{row.satker_code}</TableCell>
+                      <TableCell align="center">{row.name}</TableCell>
+                      <TableCell align="center">{row.revisi_dipa}</TableCell>
+                      <TableCell align="center">
+                        {row.deviasi_hal3_dipa}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.realisasi_anggaran}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.belanja_kontraktual}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.penyelesaian_tagihan}
+                      </TableCell>
+                      <TableCell align="center">
+                        {row.pengelolaan_up_tup}
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.capaian_output ?? "-"}
+                      </TableCell>
+                      <TableCell align="center">
+                        <div
+                          className={`p-1 rounded font-semibold ${getIKPAColor(
+                            group.parent.nilai_ikpa,
+                          )}`}
+                        >
+                          {group.parent.nilai_ikpa ?? "-"}
+                        </div>
+                      </TableCell>
+                      <TableCell align="center">
+                        {group.parent.dispensasi_spm ?? "-"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </React.Fragment>
               ))}
-            </React.Fragment>
-          ))}
+          </>
+        )}
       </TableBody>
     </Table>
   );

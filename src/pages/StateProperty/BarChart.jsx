@@ -1,18 +1,22 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
+import { formatNumberID } from "@/utils/number";
 
 export default function BarChart({
   height = "h-72",
-  years = [],
-  values = [], 
+  years = [2020, 2021, 2022, 2023, 2024, 2025, 2026],
+  values = [
+    530215012206, 480215068205, 244215029205, 348215014206, 456215079203,
+    657215037207, 774362202150,
+  ],
 }) {
   const option = {
     grid: {
-      top: 30, 
-      right: 0, 
+      top: 30,
+      right: 0,
       bottom: 30,
-      left: 35, 
-      containLabel: true, 
+      left: 35,
+      containLabel: true,
     },
     xAxis: {
       type: "category",
@@ -25,63 +29,42 @@ export default function BarChart({
     yAxis: {
       type: "value",
       gridIndex: 0,
-      name: "Juta",
       nameLocation: "middle",
-      nameGap: 45, 
+      nameGap: 45,
       nameTextStyle: {
         fontSize: 14,
         fontFamily: "Funnel Display",
       },
       axisLabel: {
         fontSize: 12,
-        margin: 10, 
+        margin: 10,
       },
-    
+
       splitLine: { show: false },
       axisLine: { show: false },
       axisTick: { show: false },
-      axisLabel: { fontSize: 12 },
     },
     series: [
       {
         type: "bar",
         data:
           values.length > 0 &&
-          values?.map((val, idx) => ({
+          values.map((val) => ({
             value: val,
             itemStyle: {
-              color: "#59c7ff", 
-              borderRadius: [0, 0, 0, 0],
+              color: "#59C7FF",
             },
             label: {
               show: true,
               position: "top",
-              formatter: val.toFixed(2),
+              formatter: `${formatNumberID(val)}`,
               backgroundColor: "#fff",
               padding: [4, 8],
-              borderRadius: 6,
               color: "#333",
-              fontWeight: "normal",
-              shadowColor: "rgba(0,0,0,0.1)",
-              shadowBlur: 4,
+              fontSize: 12,
             },
           })),
         barWidth: "40%",
-      },
-      {
-        name: "Trend",
-        type: "line", 
-        data: values, 
-        smooth: true, 
-        lineStyle: {
-          color: "#FF7043",
-          width: 2,
-        },
-        itemStyle: {
-          color: "#FF7043",
-        },
-        symbol: "circle", 
-        symbolSize: 6,
       },
     ],
     tooltip: {

@@ -35,7 +35,11 @@ function IkpaPage() {
 
   const { data: es1Data, refetch: fetchEs1Data } = useBudgetExecution();
 
-  const { data: dataTable, refetch } = useFetchIKPA({
+  const {
+    data: dataTable,
+    refetch,
+    loading,
+  } = useFetchIKPA({
     eselonCode: filter?.eselonKey,
     searchKey: filter?.searchKey,
     month: filter?.month,
@@ -202,7 +206,7 @@ function IkpaPage() {
           </div>
         </div>
 
-        <TableIKPA dataTable={dataTable} />
+        <TableIKPA dataTable={dataTable} loading={loading} />
       </Card>
       <Modal
         open={isOpenModal}
