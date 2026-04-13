@@ -23,6 +23,7 @@ export const useFetchBMN = () => {
       console.error(error);
     }
   };
+
   const fetchGrant = async () => {
     try {
       const data = await apiRequest({

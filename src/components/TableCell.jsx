@@ -9,6 +9,8 @@ function TableCell({
   style = {},
   index = null,
   className = "",
+  colspan = "1",
+  rowspan = "1",
   ...props
 }) {
   const Component = component;
@@ -27,6 +29,8 @@ function TableCell({
   return (
     <Component
       style={defaultStyle}
+      colspan={colspan}
+      rowspan={rowspan}
       scope={scope}
       {...props}
       className={`${className} ${index ? ((index + 1) % 2 !== 0 ? "bg-white" : "bg-[#EBF8FF]") : ""}`}

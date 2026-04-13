@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 
 export const useBudgetExecution = () => {
   const [data, setData] = useState([]);
+  const [KemnakerRate, setKemnakerRate] = useState(null);
   const [filteredData, setFilteredData] = useState(null);
 
   function getIKPAColor(value) {
@@ -54,6 +55,8 @@ export const useBudgetExecution = () => {
             };
           });
 
+        setKemnakerRate(mapped?.[0]);
+
         setData({
           columns: dataTable.columns,
           data: mapped,
@@ -93,6 +96,7 @@ export const useBudgetExecution = () => {
 
   return {
     data,
+    KemnakerRate,
     filteredData,
     refetch: fetchEs1Data,
     getIKPAColor,

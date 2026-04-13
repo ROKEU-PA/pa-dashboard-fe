@@ -14,8 +14,13 @@ function BudgetExecution() {
     month: moment().subtract(30, "days").format("M"),
   };
 
-  const { data, filteredData, refetch, mapColorByValue, mapColorTextByValue } =
-    useBudgetExecution();
+  const {
+    KemnakerRate,
+    filteredData,
+    refetch,
+    mapColorByValue,
+    mapColorTextByValue,
+  } = useBudgetExecution();
 
   const dataset = [
     { name: "Completed", value: 320 },
@@ -45,7 +50,7 @@ function BudgetExecution() {
               </span>
             </div>
             <span className="text-4xl md:text-5xl lg:text-6xl font-bold my-4 z-10">
-              {data?.data?.[0]?.nilaiIKPA}
+              {KemnakerRate?.nilaiIKPA ?? "-"}
             </span>
             <span className="font-semibold text-sm md:text-baseleading-tight z-10">
               Kementerian
@@ -79,11 +84,11 @@ function BudgetExecution() {
                   className={` inline-block text-xs md:text-sm font-semibold px-2 py-1 rounded ${mapColorTextByValue(item?.value)} ${mapColorByValue(item?.value)}
         `}
                 >
-                  {item.title}
+                  {item.title ?? "-"}
                 </span>
               </div>
               <span className="text-4xl md:text-5xl lg:text-6xl font-black leading-none py-4">
-                {item.value}
+                {item.value ?? "-"}
               </span>
             </div>
           ))}

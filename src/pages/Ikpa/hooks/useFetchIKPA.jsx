@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 
 export const useFetchIKPA = ({ eselonCode, searchKey, month, year }) => {
   const [data, setData] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const fetchTable = async () => {
     try {
+      setLoading(true);
       const query = buildQueryString({
         eselon_code: eselonCode,
         search_key: searchKey,
@@ -26,6 +27,8 @@ export const useFetchIKPA = ({ eselonCode, searchKey, month, year }) => {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -36,5 +39,6 @@ export const useFetchIKPA = ({ eselonCode, searchKey, month, year }) => {
   return {
     data,
     refetch: fetchTable,
+    loading,
   };
 };
