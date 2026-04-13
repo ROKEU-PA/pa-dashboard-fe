@@ -135,7 +135,7 @@ export default function Helpdesk() {
 
             <div className="p-3 bg-white rounded-2xl shadow-2xl border-4 border-white">
               <img
-                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/6281234567890"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://wa.me/6285122777026"
                 alt="QR Code WhatsApp"
                 className="w-28 h-28 md:w-40 md:h-40 object-contain rounded-lg"
               />

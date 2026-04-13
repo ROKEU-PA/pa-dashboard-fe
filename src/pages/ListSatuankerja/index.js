@@ -245,7 +245,8 @@ function ListSatuanKerjaPage() {
       payload.append("uploaded_name", formData.uploaded_by);
 
       if (formData.dokumen !== null) {
-        const defaultToken = localStorage.getItem("token");
+        //const defaultToken = localStorage.getItem("token");
+        const defaultToken = JSON.parse(sessionStorage.getItem("auth"))?.accessToken;
         return new Promise((resolve, reject) => {
           const xhr = new XMLHttpRequest();
           const toastId = toast.info("Uploading file...", {
@@ -351,7 +352,8 @@ function ListSatuanKerjaPage() {
         payload.append("dokumen_sp2d", formData.dokumen_sp2d);
       }
 
-      const defaultToken = localStorage.getItem("token");
+      //const defaultToken = localStorage.getItem("token");
+      const defaultToken = JSON.parse(sessionStorage.getItem("auth"))?.accessToken;
 
       if (hasFileUpload) {
         return new Promise((resolve, reject) => {
