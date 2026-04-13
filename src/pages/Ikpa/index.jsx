@@ -25,7 +25,7 @@ function IkpaPage() {
   const [filter, setFilter] = useState({
     searchKey: "",
     eselonKey: "all",
-    year: moment().subtract(1, "years").year(),
+    year: moment().year(),
     month: moment().format("MMMM"),
   });
 
