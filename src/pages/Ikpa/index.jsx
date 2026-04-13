@@ -26,7 +26,7 @@ function IkpaPage() {
     searchKey: "",
     eselonKey: "all",
     year: moment().year(),
-    month: moment().format("MMMM"),
+    month: moment().subtract(30, "days").format("MMMM"),
   });
 
   const [formData, setFormData] = useState({

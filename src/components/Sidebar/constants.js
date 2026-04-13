@@ -84,6 +84,11 @@ export const menuItems = [
         icon: <TrendingUpDown strokeWidth={3} />,
         adminOnly: true,
       },
+      {
+        name: "Kalender",
+        path: "/kalender",
+        icon: <Calendar strokeWidth={3} />,
+      },
     ],
     icon: <HandCoins strokeWidth={3} />,
   },

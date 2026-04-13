@@ -52,7 +52,7 @@ function Sidebar() {
             return {
               ...item,
               children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA", "Realisasi"].includes(
+                ["Dashboard", "IKPA", "Realisasi", "Kalender", "About"].includes(
                   child.name,
                 ),
               ),

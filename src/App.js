@@ -17,7 +17,6 @@ import PrivateRoute from "./components/PrivateRoute";
 import DashboardPage from "./pages/Dashboard";
 import DashboardManagementPage from "./pages/DashboardManagement";
 import IkpaPage from "./pages/Ikpa";
-import PTUKSub1Page from "./pages/PTUKSub1";
 import MainDashboard from "./pages/MainDashboard";
 import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
@@ -244,7 +243,7 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
-                <LLATPage />
+                <AboutPage />
               </AppLayout>
             </PrivateRoute>
           }
@@ -345,6 +344,16 @@ function App() {
           }
         />
         
+        <Route
+          path="/kalender"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
+                <LLATPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
         <Route
           path="/tanda-terima"
           element={

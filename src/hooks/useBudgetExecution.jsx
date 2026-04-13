@@ -10,12 +10,13 @@ export const useBudgetExecution = () => {
   const [filteredData, setFilteredData] = useState(null);
 
   function getIKPAColor(value) {
-    if (value >= 95) {
+    const num = Number(value)
+    if (num >= 95) {
       return "text-[#22c55e] bg-[#E4FAEC]";
-    } else if (value >= 89) {
+    } else if (num >= 89) {
       return "text-[#3b82f6] bg-[#DEEAFD]";
-    } else if (value >= 70) {
-      return "text-[#DAB802] bg-[#FFF9DD]";
+    } else if (num >= 70) {
+      return "text-[#000000] bg-[#ECFD2E]";
     } else {
       return "text-[#ef4444] bg-[#FCDCDC]";
     }
@@ -77,16 +78,17 @@ export const useBudgetExecution = () => {
   };
 
   const mapColorByValue = (ikpa) => {
+    console.log(ikpa)
     if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
     if (ikpa >= 89) return "bg-blue-bg"; // Baik
-    if (ikpa >= 79) return "bg-orange-bg"; // Cukup
+    if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup
     return "bg-red-bg"; // Kurang
   };
 
   const mapColorTextByValue = (ikpa) => {
     if (ikpa >= 95) return "text-green-text"; // Sangat Baik
     if (ikpa >= 89) return "text-blue-text"; // Baik
-    if (ikpa >= 79) return "text-orange-text"; // Cukup
+    if (ikpa >= 70) return "text-[#0000]-text"; // Cukup
     return "text-red-text"; // Kurang
   };
 
