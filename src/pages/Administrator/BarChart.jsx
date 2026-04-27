@@ -1,5 +1,6 @@
 import React from "react";
 import ReactECharts from "echarts-for-react";
+import { color } from "echarts";
 
 export default function BarChart({
   height = "h-72",
@@ -11,7 +12,7 @@ export default function BarChart({
 
   const option = {
     grid: {
-      top: "10%",
+      top: "15%",
       right: "2%",
       bottom: "15%",
       left: "5%",
@@ -20,10 +21,9 @@ export default function BarChart({
     xAxis: {
       type: "category",
       data: labels,
-      // MENAMPILKAN LINE KECIL DI SUMBU X (BULAN)
       axisTick: { 
         show: true, 
-        alignWithLabel: true, // Memastikan garis lurus di tengah batang
+        alignWithLabel: true, 
         lineStyle: { color: "#000000" } 
       },
       axisLine: { 
@@ -41,7 +41,6 @@ export default function BarChart({
         } 
       },
       axisLine: { show: false },
-      // ANGKA SAMPING 
       axisLabel: { 
         show: true, 
         fontSize: 10, 
@@ -49,7 +48,7 @@ export default function BarChart({
       },
       axisTick: { 
         show: true, 
-        alignWithLabel: true, // Memastikan garis lurus di tengah batang
+        alignWithLabel: true, 
         lineStyle: { color: "#000000" } 
       },
     },
@@ -65,12 +64,11 @@ export default function BarChart({
         if (isGajiChart) {
           statusText = `GAJI ${params.name}`;
         } else {
-          // Logika untuk IKK:
-          // Jika index 0 biasanya Target (abu-abu), index 1 Realisasi (biru)
+          
           statusText =
             params.dataIndex === 0
-              ? `TARGET ${params.name}`
-              : `REALISASI ${params.name}`;
+              ? `REALISASI `
+              : `TARGET `;
         }
 
         return `<div style="color: #374151; font-weight: bold; font-size: 13px; text-align: center; line-height: 1.2;">
@@ -94,20 +92,40 @@ export default function BarChart({
               : "#e8e8e8",
             borderRadius: [4, 4, 0, 0],
           },
-          // Efek warna saat kursor mengarah
+          
           emphasis: {
             itemStyle: {
               color:
                 isGajiChart || idx === values.length - 1
-                  ? "#1E90FF" // Biru Tua (Pekat)
-                  : "#9CA3AF", // Abu-abu Tua (Pekat)
+                  ? "#1E90FF" 
+                  : "#9CA3AF", 
             },
           },
         })),
+        label: {
+        show: true, 
+        position: "top", 
+        distance: 5, 
+        color: (params) => {
+            return isGajiChart || params.dataIndex === values.length - 1 ? "#0ea5e9" : "#6b7280";
+        },
+        fontSize: 12, 
+        fontWeight: 'bold', 
+        formatter: (params) => {
+          return Number(params.value).toFixed(2);
+        },
+        
+        backgroundColor: "#fff",
+        padding: [4, 8],
+        borderRadius: 6,
+        color:"#333",
+        shadowColor: "rgba(0,0,0,0.1)",
+        shadowBlur: 4,
+      },
         barWidth: isGajiChart ? "60%" : "40%",
         emphasis: {
-          scale: true, // Membuat batang membesar
-          focus: "none", // Memastikan batang lain tidak memudar (tetap terlihat jelas)
+          scale: true, 
+          focus: "none", 
         },
       },
     ],
