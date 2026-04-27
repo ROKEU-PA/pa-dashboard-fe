@@ -6,19 +6,31 @@ import { apiRequest } from "@/services/APIHelper";
 import { AppContext } from "@/contexts/AppContext";
 
 function AkuntansiPelaporan() {
-  const { token } = useContext(AppContext);
+  const { userData, token } = useContext(AppContext);
   const [dataOpini, setDataOpini] = useState([]);
   const [dataMaturitas, setDataMaturitas] = useState({ current: 0, target: 0 });
   const [reports, setReports] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const getSafeToken = useCallback(() => {
-    const savedAuth = JSON.parse(sessionStorage.getItem("auth") || "{}");
-    return localStorage.getItem("token") || token || savedAuth?.accessToken || savedAuth?.token || null;
-  }, [token]);
+ const getSafeToken = useCallback(() => {
+  const savedAuth = JSON.parse(sessionStorage.getItem("auth") || "{}");
+
+  const finalToken =
+    token ||                        
+    savedAuth?.accessToken ||      
+    localStorage.getItem("token")  
+    || null;
+
+  return finalToken;
+}, [token]);
 
   const fetchAklapData = useCallback(async () => {
     const activeToken = getSafeToken();
+    if (!activeToken) {
+        console.error("Token tidak ditemukan!");
+        setLoading(false);
+        return;
+      }
     setLoading(true);
     try {
       const [resOpini, resMaturitas, resReport] = await Promise.all([
@@ -36,7 +48,7 @@ function AkuntansiPelaporan() {
         setDataOpini(mapped);
       }
 
-      if (resMaturitas?.success) {
+     if (resMaturitas?.success && Array.isArray(resMaturitas.data)) {
         const mat2024 = resMaturitas.data.find(d => String(d.year) === "2024");
         const mat2025 = resMaturitas.data.find(d => String(d.year) === "2025");
         setDataMaturitas({
@@ -45,8 +57,8 @@ function AkuntansiPelaporan() {
         });
       }
 
-      if (resReport?.success) {
-        setReports(resReport.data); 
+      if (resReport?.success && resReport?.data) {
+        setReports(resReport.data);
       }
 
     } catch (error) {
@@ -154,7 +166,7 @@ function AkuntansiPelaporan() {
           </Card>
         </div>
 
-        <div className="bg-white md:h-[900px]  rounded-2xl border border-gray-100 shadow-sm p-6 relative">
+        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative">
           <div className="absolute -top-5 left-6 w-10 h-10 rounded-full bg-[#fff3d0] flex items-center justify-center shadow-sm border border-white z-20">
             <div className="w-6 h-6 rounded-full bg-[#ffbe02] flex items-center justify-center text-white">
               <DollarSign size={14} />

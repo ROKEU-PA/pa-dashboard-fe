@@ -289,14 +289,14 @@ export default function OrganizationalStructure() {
 
   const getSafeToken = useCallback(() => {
     const savedAuth = JSON.parse(sessionStorage.getItem("auth") || "{}");
-    return (
-      localStorage.getItem("token") ||
-      token ||
-      savedAuth?.accessToken ||
-      savedAuth?.token ||
-      null
-    );
-  }, [token]);
+    const finalToken =
+    token ||                        
+    savedAuth?.accessToken ||      
+    localStorage.getItem("token")  
+    || null;
+
+  return finalToken;
+}, [token]);
 
   const mergeApiToStructure = useCallback((structure, apiData) => {
     if (!Array.isArray(apiData)) return structure;
