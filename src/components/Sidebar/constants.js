@@ -26,6 +26,7 @@ import {
   Flame,
   BadgeCent,
   ArrowLeftRight,
+  ArchiveRestore,
 } from "lucide-react";
 
 export const menuItems = [
@@ -162,6 +163,11 @@ export const menuItems = [
     icon: <MessageSquare strokeWidth={3} />,
   },
   {
+    name: "Pengambilan Persediaan",
+    path: "/tata-usaha/pengambilan-persediaan",
+    icon: <ArchiveRestore  strokeWidth={3} />,
+  },
+  {
     name: "Management",
     icon: <Settings strokeWidth={3} />,
     children: [
@@ -178,4 +184,12 @@ export const menuItems = [
     ],
     adminOnly: true,
   },
+  {
+    name: "Inventaris Kantor",
+    icon: <Archive  strokeWidth={3} />,
+    path: "/inventaris-kantor/admin",
+    adminOnly: true,
+  },
+  
+      
 ];

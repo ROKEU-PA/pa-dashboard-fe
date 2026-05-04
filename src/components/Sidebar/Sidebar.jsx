@@ -35,7 +35,7 @@ function Sidebar() {
       return menuItems
         .filter(
           (item) =>
-            item.name === "Pelaksanaan Anggaran" || item.name === "Management",
+            item.name === "Pelaksanaan Anggaran" || item.name === "Management"|| item.name === "Inventaris Kantor",
         )
         .map((item) => ({
           ...item,
@@ -51,16 +51,9 @@ function Sidebar() {
         }));
     }
 
-    if (role !== "guest") {
-      return menuItems.map((item) => ({
-        ...item,
-        children: item.children?.filter((child) => child.name !== "About"),
-      }));
-    }
-
     if (role === "guest") {
       return menuItems
-        .filter((item) => item.name !== "Management")
+        .filter((item) => item.name !== "Management" && item.name !== "Inventaris Kantor")
         .map((item) => {
           if (item.name === "Pelaksanaan Anggaran") {
             return {

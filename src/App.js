@@ -36,6 +36,8 @@ import StatusPSP from "./pages/StateProperty/PspStatus";
 import KondisiAset from "./pages/StateProperty/assetCondition"; 
 import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import StrukturOrganisasi from "./pages/OrganizationalStructure";
+import InventoryTaking from "./pages/InventoryTaking/index";
+import InventoryTakingA from "./pages/InventoryTaking/admin";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -163,6 +165,30 @@ function App() {
                 <Administrator />
               </AppLayout>
             </PrivateRoute>
+          }
+        />
+         <Route
+          path="/tata-usaha/pengambilan-persediaan"
+          element={
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Pengambilan Persediaan"
+                userName="Inventory Taking"
+              >
+                <InventoryTaking />
+              </AppLayout>
+          }
+        />
+        <Route
+          path="/inventaris-kantor/admin"
+          element={
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Inventaris Kantor"
+                userName="Inventory Taking"
+              >
+                <InventoryTakingA />
+              </AppLayout>
           }
         />
         {listMenu.map((data) => (
