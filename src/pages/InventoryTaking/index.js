@@ -1,152 +1,211 @@
-import React, { useEffect, useState } from "react";
-import { SendHorizontal } from "lucide-react";
-
-const databaseBarang = [
-  { id: "ATK-001", nama: "Toner HP 83A", satuan: "Buah", stok: 10, img: "/TonerHP83A.png" },
-  { id: "ATK-002", nama: "Toner HP 107A", satuan: "Buah", stok: 12, img: "/TonerHP107A.png" },
-  { id: "ATK-003", nama: "Toner Fuji Xerox Biru", satuan: "Buah", stok: 5, img: "/TonerFujiXeroxBiru.png" },
-  { id: "ATK-004", nama: "Toner Fuji Xerox Merah", satuan: "Buah", stok: 5, img: "/TonerFujiXeroxMerah.png" },
-  { id: "ATK-005", nama: "Tooner Fuji Xerox Kuning", satuan: "Buah", stok: 5, img: "/TonerFujiXeroxKuning.png" },
-  { id: "ATK-006", nama: "Flashdisk 16Gb - Sandisk", satuan: "Buah", stok: 15, img: "/Flashdisk16GbSandisk.png" },
-  { id: "ATK-007", nama: "Amplop Putih no.90", satuan: "Box", stok: 20, img: "/AmplopPutihno90.png" },
-  { id: "ATK-008", nama: "Kertas A4 80Gram - Bola Dunia", satuan: "Rim", stok: 50, img: "/KertasA480GramBola Dunia.png" },
-  { id: "ATK-009", nama: "Post IT Sign Here (Pronto)", satuan: "Pack", stok: 30, img: "/PostITSignHerePronto.png" },
-  { id: "ATK-010", nama: "Post IT Memo Kuning 654 3M", satuan: "Pack", stok: 25, img: "/PostITMemoKuning654_3M.png" },
-  { id: "ATK-011", nama: "Post IT Memo Kuning 656 3M", satuan: "Pack", stok: 25, img: "/PostITMemoKuning656_3M.png" },
-  { id: "ATK-012", nama: "Bindex Pocket (Box File) - Hitam", satuan: "Buah", stok: 18, img: "/BindexPocketBox FileHitam.png" },
-  { id: "ATK-013", nama: "Bantex File (Odner Hitam)", satuan: "Buah", stok: 15, img: "/Bantex FileOdnerHitam.png" },
-  { id: "ATK-014", nama: "Pulpen Joyko Qgel GP-265", satuan: "Lusin", stok: 40, img: "/PulpenJoykoQgelGP-265.png" },
-  { id: "ATK-015", nama: "Baterai Alkaline AA", satuan: "Set", stok: 35, img: "/BateraiAlkalineAA.png" },
-  { id: "ATK-016", nama: "Lakban Putih Bening 2Inch", satuan: "Roll", stok: 20, img: "/LakbanPutihBening2Inch.png" },
-];
+import React, { useEffect, useState, useCallback } from "react";
+import { SendHorizontal, Loader2, PackageOpen, Plus, Minus, Info } from "lucide-react";
+import { apiTU } from "@/services/ApiTU"; 
 
 export default function InventoryTaking() {
+  const [databaseBarang, setDatabaseBarang] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
   const [keranjang, setKeranjang] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [listKonfirmasi, setListKonfirmasi] = useState([]);
-  const [teksWA, setTeksWA] = useState("");
+
+  const fetchBarang = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await apiTU({ url: "api/barang" });
+      setDatabaseBarang(data || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message || "Gagal mengambil data dari server");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBarang();
+  }, [fetchBarang]);
 
   const ubahJumlah = (id, perubahan, stok) => {
     setKeranjang((prev) => {
-      let jumlah = (prev[id] || 0) + perubahan;
-
-      if (jumlah < 0) jumlah = 0;
-      if (jumlah > stok) {
-        alert("Melebihi stok!");
-        jumlah = stok;
+      const jumlahSekarang = (prev[id] || 0) + perubahan;
+      if (jumlahSekarang < 0) return { ...prev, [id]: 0 };
+      if (jumlahSekarang > stok) {
+        alert("Stok tidak mencukupi!");
+        return { ...prev, [id]: stok };
       }
-
-      return { ...prev, [id]: jumlah };
+      return { ...prev, [id]: jumlahSekarang };
     });
   };
 
-  const checkoutWA = () => {
-    let list = [];
-    let teks = `Halo Admin, berikut permintaan saya:\n\n`;
+  const handleCheckout = () => {
+    const list = [];
+    let adaBarang = false;
 
-    databaseBarang.forEach((b) => {
-      const jumlah = keranjang[b.id] || 0;
-      if (jumlah > 0) {
-        list.push(`${b.nama} (${jumlah} ${b.satuan})`);
-        teks += `- ${b.nama} (${jumlah} ${b.satuan})\n`;
+    databaseBarang.forEach(b => {
+      const qty = keranjang[b.id] || 0;
+      if (qty > 0) {
+        // Untuk tampilan di modal
+        list.push(`${b.nama} (${qty} ${b.satuan})`);
+        adaBarang = true;
       }
     });
 
-    if (list.length === 0) {
-      alert("Belum pilih barang!");
+    if (!adaBarang) {
+      alert("Silahkan pilih barang terlebih dahulu!");
       return;
     }
 
-    teks += "Mohon untuk diproses,\nTerima kasih.";
-
     setListKonfirmasi(list);
-    setTeksWA(teks);
     setShowModal(true);
   };
 
   const sendToWA = () => {
-    const nomor = "085122777026"; 
-    window.location.href = `https://wa.me/${nomor}?text=${encodeURIComponent(teksWA)}`;
+    const nomor = "6285122777026";
+    let teks = "!ORDER_BARANG\n\n";
+    
+    databaseBarang.forEach((b) => {
+      const qty = keranjang[b.id] || 0;
+      if (qty > 0) {
+        teks += `- [${b.id}] ${b.nama} (${qty} ${b.satuan})\n`;
+      }
+    });
+
+    window.location.href = `https://wa.me/${nomor}?text=${encodeURIComponent(teks)}`;
+    setShowModal(false);
   };
 
-  return (
-    <div className="bg-gray-100 min-h-screen pb-24">
-      <div className="max-w-3xl mx-auto p-4">
-
-        <div className="bg-white rounded-xl shadow p-4 text-center mb-4">
-          <h1 className="text-lg font-bold">Pengambilan Persediaan</h1>
-          <p className="text-sm text-gray-500">Biro Keuangan dan BMN</p>
-        </div>
-
-        {databaseBarang.map((barang) => (
-          <div key={barang.id} className="flex items-center justify-between bg-white p-3 rounded-lg shadow mb-2">
-            <img src={barang.img} alt="" className="w-12 h-12 object-contain" />
-
-            <div className="flex-1 ml-3">
-              <h2 className="font-semibold text-sm">{barang.nama}</h2>
-              <p className="text-xs text-gray-500">
-                {barang.satuan} | Stok: {barang.stok}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => ubahJumlah(barang.id, -1, barang.stok)}
-                className="text-red-500 text-xl"
-              >
-                -
-              </button>
-
-              <span className="w-6 text-center">
-                {keranjang[barang.id] || 0}
-              </span>
-
-              <button
-                onClick={() => ubahJumlah(barang.id, 1, barang.stok)}
-                className="text-green-500 text-xl"
-              >
-                +
-              </button>
-            </div>
-          </div>
-        ))}
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50">
+        <Loader2 className="w-12 h-12 animate-spin text-blue-600 mb-4" />
+        <p className="text-slate-600 font-medium animate-pulse">Menghubungkan ke Gudang...</p>
       </div>
+    );
+  }
 
-      <div className="fixed bottom-0 left-0 right-0  md:relative flex justify-center w-full">
-        <div className="w-full  bg-white/80 backdrop-blur-md p-4 md:rounded-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <button
-            onClick={checkoutWA}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+        <div className="bg-red-50 p-8 rounded-3xl border border-red-100 max-w-sm">
+          <PackageOpen className="w-16 h-16 text-red-400 mx-auto mb-4" />
+          <h2 className="text-red-600 font-bold text-lg">Gagal Mengambil Data Barang</h2>
+          <p className="text-slate-500 text-sm mb-6 mt-2">{error}</p>
+          <button 
+            onClick={fetchBarang} 
+            className="w-full py-3 bg-red-500 text-white rounded-xl font-bold shadow-lg shadow-red-200"
           >
-            <span>Kirim ke WhatsApp</span>
+            Coba Lagi
           </button>
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className=" flex flex-col">
+      <div className="min-w-6xl mx-auto p-4">
+        <div className="bg-white rounded-2xl shadow-sm p-6 text-center mb-6 border-b-4 border-blue-500">
+          <h1 className="text-xl font-extrabold text-gray-800">Katalog Persediaan</h1>
+          <p className="text-sm text-gray-500 mt-1">Biro Keuangan dan BMN - SisKA</p>
+        </div>
+        <div className="grid gap-3">
+          {databaseBarang.map((barang) => (
+            <div key={barang.id} className="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-all">
+              <div className="w-16 h-16 bg-gray-50 rounded-xl flex items-center justify-center overflow-hidden border border-gray-100">
+                <img 
+                  src={barang.img} 
+                  alt={barang.nama} 
+                  className="w-12 h-12 object-contain"
+                  onError={(e) => { e.target.src = "https://placehold.co/100x100?text=No+Img"; }} 
+                />
+              </div>
+
+              <div className="flex-1 ml-4">
+                <h2 className="font-bold text-gray-800 text-sm md:text-base leading-tight">{barang.nama}</h2>
+                <p className="text-xs text-gray-500 mt-1">
+                  {barang.satuan} <span className="mx-1">|</span> Stok: <span className="font-bold text-blue-600">{barang.stok}</span>
+                </p>
+              </div>
+
+              <div className="flex items-center bg-gray-100 rounded-xl p-1 gap-1 border border-gray-200">
+                <button
+                  onClick={() => ubahJumlah(barang.id, -1, barang.stok)}
+                  className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-red-500 shadow-sm active:scale-90 transition-transform"
+                >
+                  <Minus className="w-4 h-4" />
+                </button>
+
+                <span className="w-8 text-center font-bold text-gray-700">
+                  {keranjang[barang.id] || 0}
+                </span>
+
+                <button
+                  onClick={() => ubahJumlah(barang.id, 1, barang.stok)}
+                  className="w-8 h-8 flex items-center justify-center bg-white rounded-lg text-green-600 shadow-sm active:scale-90 transition-transform"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+       </div>
+
+       <div className="sticky bottom-0 rounded-2xl w-full bg-white backdrop-blur-lg border-t border-gray-100">
+            <div className="max-w-5xl mx-auto p-4">
+              <div className="flex items-center justify-between gap-4">
+                
+                <div className="flex-1">
+                  <p className="text-[13px] md:text-[15px] text-gray-500">Ringkasan:</p>
+                  <p className="font-bold text-gray-900 text-[13px] md:text-[20px]">
+                    {Object.values(keranjang).reduce((a, b) => a + b, 0)} Barang Terpilih
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleCheckout}
+                  className=" bg-blue-600 text-[11] md:text-[11] hover:bg-blue-300 text-white rounded-xl shadow-lg shadow-blue-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3"
+                >
+                  <p className="text-[11] p-1">Kirim ke WhatsApp</p>
+                </button>
+
+              </div>
+            </div>
+          </div>
+       
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-5 w-full max-w-md">
-            <h2 className="font-bold mb-2">Konfirmasi</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl scale-in-center transition-all border border-gray-100">
+            <div className="flex items-center gap-2 mb-4 text-blue-600">
+              <Info className="w-5 h-5" />
+              <h2 className="text-lg font-bold text-gray-800">Konfirmasi Pesanan</h2>
+            </div>
+            
+            <div className="bg-gray-50 rounded-2xl p-4 mb-6 max-h-60 overflow-y-auto border border-gray-100">
+              <ul className="space-y-2">
+                {listKonfirmasi.map((item, i) => (
+                  <li key={i} className="text-sm text-gray-600 flex gap-2">
+                    <span className="text-blue-400 font-bold">•</span> {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-            <ul className="text-sm mb-3">
-              {listKonfirmasi.map((item, i) => (
-                <li key={i}>• {item}</li>
-              ))}
-            </ul>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-              >
-                Kembali
-              </button>
-
+            <div className="flex flex-col gap-2">
               <button
                 onClick={sendToWA}
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                className="w-full py-4 bg-blue-600 text-white rounded-2xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-100 transition-colors"
               >
-               Ya, Kirim Sekarang <SendHorizontal className=" w-4 h-4" />
+                Ya, Kirim Sekarang
+              </button>
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full py-3 bg-gray-500 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
+              >
+                Kembali
               </button>
             </div>
           </div>
