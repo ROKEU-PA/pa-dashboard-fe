@@ -16,6 +16,7 @@ const User = ({
   access_code,
   id,
 }) => {
+ 
   const { userData } = useContext(AppContext);
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -76,9 +77,9 @@ const User = ({
     });
     navigate("./");
   };
-
+  
   return (
-    <div className={`${className} pb-2 relative`} ref={dropdownRef}>
+    <div className={`${className}  relative`} ref={dropdownRef}>
       <div
         className="flex gap-2 items-center cursor-pointer pb-2"
         onClick={() => setOpen(!open)}

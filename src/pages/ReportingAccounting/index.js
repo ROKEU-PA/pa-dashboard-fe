@@ -140,22 +140,22 @@ function AkuntansiPelaporan() {
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6 mt-4 md:mt-12">
+            <div className="flex flex-col md:flex-row items-center justify-around gap-6 mt-4 md:mt-12">
               {/* BOX 1 */}
-              <div className="flex flex-col items-center gap-2 w-full md:w-auto">
-                <div className="bg-[#898a8d] rounded-3xl text-center h-[140px] md:h-[180px] w-full md:w-[260px] flex items-center justify-center shadow-md">
+              <div className="flex flex-col items-center gap-2 w-full w-auto">
+                <div className="bg-[#898a8d] rounded-3xl text-center h-[140px] md:h-[180px] w-full lg:p-15 flex items-center justify-center shadow-md">
                   <span className="text-5xl font-black text-white scale-y-125">{dataMaturitas.current}</span>
                 </div>
-                <span className="text-base md:text-lg font-medium">
-                  Nilai SPIP Tahun 2024
+                <span className="text-base md:text-lg font-medium text-center">
+                   Nilai SPIP Tahun 2024 
                 </span>
               </div>
 
               <div className="hidden md:block h-[200px] border-l-2 border-dashed border-gray-300 mx-4"></div>
               <div className="block md:hidden w-[80%] border-t-2 border-dashed border-gray-300 my-2"></div>
 
-              <div className="flex flex-col items-center gap-2 w-full md:w-auto">
-                <div className="bg-gradient-to-r from-[#59c7ff] to-[#2f8afd] rounded-3xl text-center h-[140px] md:h-[180px] w-full md:w-[260px] flex items-center justify-center shadow-md">
+              <div className="flex flex-col items-center gap-2 w-full w-auto">
+                <div className="bg-gradient-to-r from-[#59c7ff] to-[#2f8afd] rounded-3xl text-center h-[140px] md:h-[180px] w-full flex items-center justify-center shadow-md">
                   <span className="text-5xl font-black text-white scale-y-125">{dataMaturitas.target}</span>
                 </div>
                 <span className="text-base md:text-lg font-medium">

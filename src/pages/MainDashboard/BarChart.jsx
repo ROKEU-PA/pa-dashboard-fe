@@ -7,10 +7,33 @@ export default function BarChart({ height }) {
   const data2025 = [75.13, 83, 88.83, 87.13, 88.1, 93.24, 94.91];
 
   const option = {
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow", 
+      },
+      backgroundColor: "rgba(255, 255, 255, 0.9)",
+      borderWidth: 1,
+      borderColor: "#ccc",
+      textStyle: {
+        color: "#333",
+      },
+      
+      formatter: function (params) {
+        let res = `<div style="font-weight:bold; margin-bottom:4px;">${params[0].name}</div>`;
+        params.forEach((item) => {
+          res += `<div style="display:flex; justify-content:space-between; gap:15px;">
+            <span>${item.marker} ${item.seriesName}</span>
+            <span style="font-weight:bold;">${item.value.toFixed(2)}</span>
+          </div>`;
+        });
+        return res;
+      },
+    },
     grid: {
       left: "0",
       right: "0",
-      bottom: "5%",
+      bottom: "10%",
       top: "15%",
       containLabel: true,
     },
@@ -49,7 +72,7 @@ export default function BarChart({ height }) {
           color: "#D1D5DB",
         },
         barWidth: "25%",
-        barGap: "30%", // jarak antar seri
+        barGap: "30%", 
       },
       {
         name: "Tahun 2025",
