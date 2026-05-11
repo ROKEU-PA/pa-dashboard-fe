@@ -35,7 +35,7 @@ function Sidebar() {
       return menuItems
         .filter(
           (item) =>
-            item.name === "Pelaksanaan Anggaran" || item.name === "Management"|| item.name === "Inventaris Kantor",
+            item.name === "Pelaksanaan Anggaran" || item.name === "Management" && item.name !== "Inventaris Kantor",
         )
         .map((item) => ({
           ...item,
@@ -53,7 +53,7 @@ function Sidebar() {
 
     if (role === "guest") {
       return menuItems
-        .filter((item) => item.name !== "Management" && item.name !== "Inventaris Kantor")
+        .filter((item) => item.name !== "Management" && item.name !== "Inventaris Kantor" && item.name !== "Pengambilan Persediaan")
         .map((item) => {
           if (item.name === "Pelaksanaan Anggaran") {
             return {
@@ -69,8 +69,22 @@ function Sidebar() {
         });
     }
 
-    return [];
-  };
+    console.log (role);
+    if (!role) {
+    const pathname = location.pathname;
+      if (pathname.includes("/inventaris-kantor")) {
+        return menuItems.filter(
+          (item) => item.name === "Inventaris Kantor"
+        );
+      }
+      if (pathname.includes("/tata-usaha")) {
+        return menuItems.filter(
+          (item) => item.name === "Pengambilan Persediaan"
+        );
+      }
+      return [];
+        }
+    };
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;

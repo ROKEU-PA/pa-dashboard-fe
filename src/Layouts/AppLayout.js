@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext  } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar";
+import { AppContext } from "@/contexts/AppContext";
 
 function AppLayout({ children, isAdmin, title, userName }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
+  const { userData } = useContext(AppContext);
+
+  console.log("AppLayout role:", userData?.role);
   // OTOMATIS: Tutup sidebar setiap kali path/URL berubah
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
   return (
     <div className="flex h-screen  overflow-hidden">
-      {/* Overlay mobile */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
@@ -34,15 +37,14 @@ function AppLayout({ children, isAdmin, title, userName }) {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed top-3 left-4 z-[60] md:hidden p-2.5 bg-white rounded-xl shadow-md border border-gray-100 text-gray-800 animate-in fade-in duration-300"
+          className="fixed top-1 left-3 z-[60] md:hidden p-2.5 bg-[#59C7FF] rounded-xl shadow-md border border-gray-100 text-[#616484] animate-in fade-in duration-300"
         >
           ☰
         </button>
       )}
 
       <main className="flex-1 overflow-auto transition-all duration-300">
-        <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} />
-
+        <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} role={userData?.role} />
         <div className="p-2 md:p-4 sm:px-5 lg:px-6">{children}</div>
       </main>
     </div>
