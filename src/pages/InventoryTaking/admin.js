@@ -273,7 +273,6 @@ const InventoryTakingAdmin = () => {
                   <option value="">Semua Kategori</option>
                   <option value="ATK">ATK</option>
                   <option value="Elektronik">Elektronik</option>
-                  <option value="Kebersihan">Kebersihan</option>
                 </select>
              </div>
              <select 
@@ -392,7 +391,6 @@ const InventoryTakingAdmin = () => {
                   >
                     <option value="ATK">ATK</option>
                     <option value="Elektronik">Elektronik</option>
-                    <option value="Kebersihan">Kebersihan</option>
                   </select>
                 </div>
                 <div>
