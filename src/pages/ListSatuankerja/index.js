@@ -653,7 +653,7 @@ function ListSatuanKerjaPage() {
           >
             <a
               href={
-                "https://drive.google.com/file/d/1t2_URZ7ij2rciW-tmNDIDyRFhdwiZ10f/view"
+                "https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view"
               }
               target="_blank"
               rel="noopener noreferrer"
@@ -663,7 +663,7 @@ function ListSatuanKerjaPage() {
                 letiant="secondary"
                 icon={<Book size={20} />}
               >
-                PMK 039 2024
+                PMK 32 2025
               </Button>
             </a>
             <Input
