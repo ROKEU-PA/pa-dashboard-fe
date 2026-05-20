@@ -240,6 +240,17 @@ function App() {
         />
 
         <Route
+          path="/llat"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
+                <LLATPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/compilation"
           element={
             <PrivateRoute>
@@ -333,16 +344,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/llat"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
-                <LLATPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
+        
         <Route
           path="/tanda-terima"
           element={

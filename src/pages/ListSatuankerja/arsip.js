@@ -21,7 +21,7 @@ import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams} from "react-router-dom";
 import moment from "moment";
 import {
   columns,
@@ -39,6 +39,7 @@ import ChecklistComponent from "./components/ChecklistComponent";
 function Arsip() {
   const { listMenu, userData } = useContext(AppContext);
   const location = useLocation();
+  const { tahun: urlTahun } = useParams();
 
   const [currentMenu, setCurrentMenu] = useState(
     getCurrentSatuanKerja(listMenu, location.pathname)
@@ -188,9 +189,8 @@ function Arsip() {
 
   const fetchTable = async () => {
   try {
-    const now = filter.tahun ? filter.tahun : moment().year();
-    
-    const status = isPengajuanPath(location.pathname) ? "arsip" : null;
+    const now = filter.tahun ? filter.tahun : (urlTahun ? urlTahun : moment().year());
+    const status = null;
     const query = buildQueryString({
       biro_code: currentMenu?.code,
       tahun: now, 
@@ -573,6 +573,7 @@ function Arsip() {
     fetchType();
     setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
   }, [
+    urlTahun,
     filter.tahun,
     filter.searchKey,
     page + 1,

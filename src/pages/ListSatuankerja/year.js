@@ -11,27 +11,36 @@ function YearSelectionPage() {
   const years = Array.from({ length: 11 }, (_, i) => currentYear - i);
 
   const handleYearClick = (tahun) => {
-    const role = userData?.role;
-    console.log("ROLE:", role);
+  const role = userData?.role;
 
-    const adminRoles = ["admin", "super_admin", "superadmin", "pic"];
+  // Tentukan siapa saja yang boleh melihat menu daftar seluruh satker
+  const adminRoles = ["admin", "super_admin", "superadmin", "pic"];
 
-    if (adminRoles.includes(role)) {
-      navigate(`/e-arsip/${tahun}`);
+  if (adminRoles.includes(role)) {
+    // Mengarah ke <Route path="/e-arsip/:tahun" element={<MenuPage />} />
+    navigate(`/e-arsip/${tahun}`);
+  } else {
+    // Jalur untuk USER biasa (Eksplisit mencari path satuan kerja mereka)
+    const satkerMenu = listMenu.find(
+      (menu) => menu.path && menu.path.startsWith("/satuan-kerja/")
+    );
+
+    const userMenuPath = satkerMenu?.path;
+
+    if (userMenuPath) {
+      const pathParts = userMenuPath.split("/").filter(Boolean);
+      // Mengambil segmen terakhir (misal: 'biro-keuangan' atau 'binalavotas')
+      const satkerIdentifier = pathParts[pathParts.length - 1]; 
+      
+      // Mengarah ke <Route path="/arsip/:tahun/:satker" element={<ArchivePage />} />
+      navigate(`/arsip/${tahun}/${satkerIdentifier}`);
     } else {
-      const satkerMenu = listMenu.find(
-        (menu) => menu.path && menu.path !== "/"
-      );
-
-      const userMenuPath = satkerMenu?.path;
-
-      if (userMenuPath) {
-        const pathParts = userMenuPath.split("/").filter(Boolean);
-        const satker = pathParts[0];
-        navigate(`/arsip/${tahun}/${satker}`);
-      }
+      // Fallback aman jika menu user belum termuat dari API
+      console.warn("Data menu satker belum siap atau tidak ditemukan.");
+      navigate("/satuan-kerja/pengajuan");
     }
-  };
+  }
+};
 
   return (
     <div className="p-8 mx-auto min-h-screen bg-slate-50/50">
