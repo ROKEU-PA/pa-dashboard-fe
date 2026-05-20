@@ -4,9 +4,6 @@ export const columns = [
   { key: "jenis_spp", label: "Jenis SPP", sortable: true },
   { key: "tahun", label: "Tahun", sortable: true },
   { key: "document", label: "Dokumen SPP & Pendukung" },
-  { key: "document_spm", label: "Dokumen SPM" },
-  { key: "document_sp2d", label: "Dokumen SP2D" },
-  { key: "jml_hal", label: "Jumlah Lembar" },
   { key: "revisi", label: "Revisi", hiddenInArsip: true},
   { key: "status", label: "Status", hiddenInArsip: true },
   { key: "kelengkapan", label: "Kelengkapan", hiddenInArsip: true },
@@ -15,12 +12,26 @@ export const columns = [
 ];
 
 export function getCurrentSatuanKerja(menuList, pathname) {
-  const cleanPath = pathname.replace('/pengajuan', '');
-  const allowedPaths = menuList.map((item) => item.path);
-  if (!allowedPaths.includes(cleanPath)) {
-    return null;
-  }
-  return menuList.find((item) => item.path === cleanPath) || null;
+  if (!menuList || !pathname) return null;
+
+  const pathParts = pathname
+    .split("/")
+    .filter(Boolean);
+  const currentSatker = pathParts[pathParts.length - 1];
+  return (
+    menuList.find((item) => {
+      if (!item.path) return false;
+
+      const menuParts = item.path
+        .split("/")
+        .filter(Boolean);
+
+      const menuSatker =
+        menuParts[menuParts.length - 1];
+
+      return menuSatker === currentSatker;
+    }) || null
+  );
 }
 
 export function isPengajuanPath(pathname) {

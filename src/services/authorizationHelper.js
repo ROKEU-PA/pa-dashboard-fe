@@ -15,7 +15,7 @@ const ROLE_ROUTES = {
   [ROLES.USER]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
-    "/satuan-kerja",
+    "/e-arsip",
     "/satuan-kerja/pengajuan",
     "/llat",
   ],
@@ -23,7 +23,7 @@ const ROLE_ROUTES = {
   [ROLES.PIC]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
-    "/satuan-kerja",
+    "/e-arsip",
     "/satuan-kerja/pengajuan",
     "/llat",
   ],

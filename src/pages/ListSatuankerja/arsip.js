@@ -36,7 +36,7 @@ import {
 } from "./constants/styleConstants";
 import ChecklistComponent from "./components/ChecklistComponent";
 
-function ListSatuanKerjaPage() {
+function Arsip() {
   const { listMenu, userData } = useContext(AppContext);
   const location = useLocation();
 
@@ -187,40 +187,40 @@ function ListSatuanKerjaPage() {
   };
 
   const fetchTable = async () => {
-    try {
-      const now = isPengajuanPath(location.pathname)
-        ? new Date().getFullYear()
-        : filter.tahun;
-      const status = isPengajuanPath(location.pathname) ? "arsip" : null;
-      const query = buildQueryString({
-        biro_code: currentMenu?.code,
-        tahun: now,
-        status: status,
-        search_key: filter.searchKey,
-        page: page + 1,
-        per_page: rowsPerPage,
-        sort_by: sortBy,
-        sort_dir: sortDir,
-        start_date: filter.startDate
-          ? moment(filter.startDate).format("YYYY-MM-DD").toString()
-          : "",
-        end_date: filter.endDate
-          ? moment(filter.endDate).format("YYYY-MM-DD").toString()
-          : "",
-      });
-      const data = await apiRequest({
-        url: `/archive/list?${query}`,
-        token: accessToken,
-      });
-      let result = data?.data;
-      if (data?.success) {
-        setTotalPages(result?.last_page);
-        setDataTable(result?.data);
-      }
-    } catch (error) {
-      console.error(error);
+  try {
+    const now = filter.tahun ? filter.tahun : moment().year();
+    
+    const status = isPengajuanPath(location.pathname) ? "arsip" : null;
+    const query = buildQueryString({
+      biro_code: currentMenu?.code,
+      tahun: now, 
+      status: status,
+      search_key: filter.searchKey,
+      page: page + 1,
+      per_page: rowsPerPage,
+      sort_by: sortBy,
+      sort_dir: sortDir,
+      start_date: filter.startDate
+        ? moment(filter.startDate).format("YYYY-MM-DD").toString()
+        : "",
+      end_date: filter.endDate
+        ? moment(filter.endDate).format("YYYY-MM-DD").toString()
+        : "",
+    });
+    
+    const data = await apiRequest({
+      url: `/archive/list?${query}`,
+      token: accessToken,
+    });
+    let result = data?.data;
+    if (data?.success) {
+      setTotalPages(result?.last_page);
+      setDataTable(result?.data);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const submitData = async (formData) => {
     try {
@@ -245,7 +245,6 @@ function ListSatuanKerjaPage() {
       payload.append("uploaded_name", formData.uploaded_by);
 
       if (formData.dokumen !== null) {
-        //const defaultToken = localStorage.getItem("token");
         const defaultToken = JSON.parse(
           sessionStorage.getItem("auth")
         )?.accessToken;
@@ -546,9 +545,6 @@ function ListSatuanKerjaPage() {
       } else {
         await editData(formData);
       }
-
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
       setIsCheckModal(false);
@@ -596,7 +592,7 @@ function ListSatuanKerjaPage() {
       >
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4 p-4">
           {userData &&
-            (!isPengajuanPath(location.pathname) ? (
+            (location.pathname) ? (
               <Button
                 onClick={() => {
                   setIsOpenModal(true);
@@ -630,11 +626,8 @@ function ListSatuanKerjaPage() {
                   Tambah Pengajuan
                 </Button>
               )
-            ))}
-
-          {/* Kolom Kanan: Form Filter */}
-          <div
-            className="flex flex-col sm:flex-row flex-wrap items-end justify-center lg:justify-end gap-3 w-full lg:flex-1">
+            )}
+          <div className="flex flex-col sm:flex-row flex-wrap items-end justify-center lg:justify-end gap-3 w-full lg:flex-1">
             <a
               href={
                 "https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view"
@@ -657,7 +650,6 @@ function ListSatuanKerjaPage() {
               value={filter.searchKey}
               onChange={(e) => handleDateChange("searchKey", e.target.value)}
             />
-            {!isPengajuanPath(location.pathname) ? (
               <Input
                 label="Tahun"
                 style={{ width: "200px" }}
@@ -666,7 +658,6 @@ function ListSatuanKerjaPage() {
                 validate={validationSchema.tahun}
                 onChange={(e) => handleDateChange("tahun", e.target.value)}
               />
-            ) : null}
             <DatePickerInput
               label="Start Date"
               selected={filter.startDate}
@@ -686,7 +677,7 @@ function ListSatuanKerjaPage() {
             />
           </div>
         </div>
-        {/* c */}
+
         <div style={{ overflowX: "auto", width: "100%" }}>
           <Table sx={{ minWidth: 650 }} aria-label="simple table">
             <TableHeader>
@@ -893,17 +884,23 @@ function ListSatuanKerjaPage() {
                         const isPengajuan = isPengajuanPath(location.pathname);
                         const role = userData?.role;
 
+                        const adminRoles = [
+                          "admin",
+                          "pic",
+                          "super_admin",
+                          "superadmin",
+                        ];
+
+                        const isAdminRole = adminRoles.includes(role);
                         const showEditButton =
                           (isPengajuan &&
-                            role === "user" &&
+                            !isAdminRole &&
                             row.status !== "approved" &&
                             row.status !== "sp2d") ||
                           !isPengajuan;
 
                         const showPengujianButton =
-                          isPengajuan &&
-                          (role === "admin" || role === "pic") &&
-                          row.status !== "sp2d";
+                          isPengajuan && isAdminRole && row.status !== "sp2d";
 
                         const showDetailButton =
                           isPengajuan &&
@@ -931,12 +928,15 @@ function ListSatuanKerjaPage() {
                                   } else {
                                     setJenisFile("file");
                                   }
+
                                   setVariantModal("Edit");
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
                                     link: row.document.path,
                                   });
+
                                   setIsOpenModal(true);
                                 }}
                               >
@@ -969,7 +969,9 @@ function ListSatuanKerjaPage() {
                                       label: v.text,
                                       value: v.id_question,
                                     }));
+
                                   setVariantModal("Pengujian");
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
@@ -977,8 +979,11 @@ function ListSatuanKerjaPage() {
                                     verifikasi: verifikasiWithLabel,
                                     catatan: row.feedback,
                                   });
+
                                   fetchType(row.type_id);
+
                                   setPDFtoOpen(row.document?.url);
+
                                   setIsCheckModal(true);
                                 }}
                                 letiant="danger"
@@ -994,12 +999,14 @@ function ListSatuanKerjaPage() {
                                 className="bg-[#BCDD51] p-3 rounded-lg text-white cursor-pointer hover:bg-[#A2C827] active:bg-[#b2d836] w-full"
                                 onClick={() => {
                                   fetchType(row.type_id);
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
                                     kelengkapan: row.question_checklist,
                                     verifikasi: row.verification_checklist,
                                   });
+
                                   setIsDetailModal(true);
                                 }}
                               >
@@ -1011,7 +1018,6 @@ function ListSatuanKerjaPage() {
                           </TableCell>
                         );
                       }
-
                       // Default rendering
                       return (
                         <TableCell key={col.key} align="center">
@@ -1031,7 +1037,7 @@ function ListSatuanKerjaPage() {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={(value) => {
             setRowsPerPage(value);
-            setPage(0); // reset to first page when rows per page changes
+            setPage(0);
           }}
         />
       </Paper>
@@ -1575,4 +1581,4 @@ function ListSatuanKerjaPage() {
   );
 }
 
-export default ListSatuanKerjaPage;
+export default Arsip;

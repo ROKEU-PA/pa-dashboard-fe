@@ -1,27 +1,47 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { 
-  Plus, Search, Trash2, Edit3, ChevronLeft, ChevronRight, RefreshCw, X, Minus 
-} from 'lucide-react';
-import { apiTU } from "@/services/ApiTU"; 
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import {
+  Plus,
+  Search,
+  Trash2,
+  Edit3,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  X,
+  Minus,
+  LogOut,
+  Lock,
+} from "lucide-react";
+import { apiTU } from "@/services/ApiTU";
 
 const InventoryTakingAdmin = () => {
+  // ==========================================
+  // STATE AUTENTIKASI (LOGIN/LOGOUT)
+  // ==========================================
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("adminToken")
+  );
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+
   const [databaseBarang, setDatabaseBarang] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterKategori, setFilterKategori] = useState("");
   const [sortBy, setSortBy] = useState("nama");
-  const [activeTab, setActiveTab] = useState("inventaris"); 
+  const [activeTab, setActiveTab] = useState("inventaris");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null); 
-  const [formData, setFormData] = useState({ 
-    nama: "", 
-    kategori: "ATK", 
-    stok: 0, 
+  const [currentItem, setCurrentItem] = useState(null);
+  const [formData, setFormData] = useState({
+    nama: "",
+    kategori: "ATK",
+    stok: 0,
     satuan: "Pcs",
-    img: "" 
+    img: "",
   });
 
   const [toasts, setToasts] = useState([]);
@@ -34,22 +54,82 @@ const InventoryTakingAdmin = () => {
     }, 3000);
   }, []);
 
-  const loadData = useCallback(async (isManualRefresh = false) => {
-    setLoading(true);
-    try {
-      const data = await apiTU({ url: "api/barang" });
-      setDatabaseBarang(data || []);
-      // Munculin notif kalau di-klik tombol refresh manual
-      if (isManualRefresh) showToast("Data berhasil disegarkan!", "success");
-    } catch (error) {
-      console.error("Gagal load data:", error);
-      showToast("Gagal terhubung ke server VPS!", "error");
-    } finally {
-      setLoading(false);
+  // ==========================================
+  // FUNGSI HANDLE LOGIN & LOGOUT
+  // ==========================================
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    if (!username || !password) {
+      showToast("Isi username dan password!", "error");
+      return;
     }
-  }, [showToast]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+    setIsLoginLoading(true);
+    try {
+      const res = await apiTU({
+        url: "api/login",
+        method: "POST",
+        options: { body: { username, password } },
+      });
+
+      localStorage.setItem("adminToken", res.token);
+      setIsAuthenticated(true);
+      showToast("Login berhasil!", "success");
+    } catch (error) {
+      console.error("Login Error Details:", error.message);
+
+      // KOREKSI LOGIKA ERROR:
+      // apiTU lu melempar teks error asli dari backend, jadi kita cek teksnya langsung
+      const errMsg = (error.message || "").toLowerCase();
+
+      if (
+        errMsg.includes("salah") || 
+        errMsg.includes("tidak terdaftar") || 
+        errMsg.includes("401")
+      ) {
+        showToast("Username atau Password salah!", "error");
+      } else {
+        // Error server/jaringan lain (termasuk Failed to fetch)
+        showToast("Gagal terhubung. Pastikan server VPS menyala.", "error");
+      }
+    } finally {
+      setIsLoginLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("Yakin ingin keluar dari Admin Panel?")) {
+      localStorage.removeItem("adminToken");
+      setIsAuthenticated(false);
+      setUsername("");
+      setPassword("");
+      showToast("Berhasil logout", "success");
+    }
+  };
+
+  const loadData = useCallback(
+    async (isManualRefresh = false) => {
+      // Jangan nge-load data kalau belum login
+      if (!isAuthenticated) return;
+
+      setLoading(true);
+      try {
+        const data = await apiTU({ url: "api/barang" });
+        setDatabaseBarang(data || []);
+        if (isManualRefresh) showToast("Data berhasil disegarkan!", "success");
+      } catch (error) {
+        console.error("Gagal load data:", error);
+        showToast("Gagal terhubung ke server VPS!", "error");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [showToast, isAuthenticated]
+  );
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const openModal = (item = null) => {
     if (item) {
@@ -59,14 +139,20 @@ const InventoryTakingAdmin = () => {
         kategori: item.kategori || "ATK",
         stok: Number(item.stok) || 0,
         satuan: item.satuan || "Pcs",
-        img: item.img || ""
+        img: item.img || "",
       });
     } else {
       setCurrentItem(null);
-      setFormData({ nama: "", kategori: "ATK", stok: 0, satuan: "Pcs", img: "" });
+      setFormData({
+        nama: "",
+        kategori: "ATK",
+        stok: 0,
+        satuan: "Pcs",
+        img: "",
+      });
     }
     setIsModalOpen(true);
-    
+
     setTimeout(() => {
       const input = document.querySelector('input[name="nama-barang"]');
       if (input) input.focus();
@@ -122,22 +208,25 @@ const InventoryTakingAdmin = () => {
       kategori: formData.kategori,
       stok: Number(formData.stok) || 0,
       satuan: formData.satuan,
-      img: formData.img
+      img: formData.img,
     };
 
     try {
       const method = currentItem ? "PUT" : "POST";
       const url = currentItem ? `api/barang/${currentItem.id}` : `api/barang`;
-    
-      await apiTU({ 
-        url, 
-        method, 
-        options: { body: payload } 
+
+      await apiTU({
+        url,
+        method,
+        options: { body: payload },
       });
-      
+
       setIsModalOpen(false);
-      showToast(currentItem ? "Barang berhasil diperbarui!" : "Barang ditambahkan!", "success");
-      loadData(); 
+      showToast(
+        currentItem ? "Barang berhasil diperbarui!" : "Barang ditambahkan!",
+        "success"
+      );
+      loadData();
     } catch (error) {
       console.error(error);
       showToast("Terjadi kesalahan saat menyimpan data.", "error");
@@ -147,32 +236,34 @@ const InventoryTakingAdmin = () => {
   const changeStok = async (item, delta) => {
     const stokAwal = Number(item.stok) || 0;
     const newStok = stokAwal + delta;
-    
+
     if (newStok < 0) {
       showToast("Stok tidak bisa kurang dari 0!", "error");
       return;
     }
 
-    setDatabaseBarang(prev => prev.map(b => b.id === item.id ? { ...b, stok: newStok } : b));
+    setDatabaseBarang((prev) =>
+      prev.map((b) => (b.id === item.id ? { ...b, stok: newStok } : b))
+    );
 
     const payload = {
       nama: item.nama,
       kategori: item.kategori,
       stok: newStok,
       satuan: item.satuan || "Pcs",
-      img: item.img || ""
+      img: item.img || "",
     };
 
     try {
       await apiTU({
         url: `api/barang/${item.id}`,
         method: "PUT",
-        options: { body: payload }
+        options: { body: payload },
       });
       showToast(`Stok ${item.nama} diupdate!`, "success");
     } catch (error) {
       console.error(error);
-      loadData(); 
+      loadData();
       showToast("Gagal update stok di server.", "error");
     }
   };
@@ -180,11 +271,11 @@ const InventoryTakingAdmin = () => {
   const handleDelete = async (id, nama) => {
     if (!window.confirm(`Hapus permanen barang "${nama}"?`)) return;
     try {
-      await apiTU({ 
-        url: `api/barang/${id}`, 
-        method: "DELETE" 
+      await apiTU({
+        url: `api/barang/${id}`,
+        method: "DELETE",
       });
-      setDatabaseBarang(prev => prev.filter(b => b.id !== id));
+      setDatabaseBarang((prev) => prev.filter((b) => b.id !== id));
       showToast(`Barang ${nama} dihapus!`, "success");
     } catch (error) {
       console.error(error);
@@ -193,26 +284,34 @@ const InventoryTakingAdmin = () => {
   };
 
   const filteredBarang = useMemo(() => {
-    return databaseBarang.filter((item) => {
-      const search = searchTerm.toLowerCase();
-      const matchesSearch = item.nama?.toLowerCase().includes(search) || item.id?.toLowerCase().includes(search);
-      const matchesKat = filterKategori ? item.kategori === filterKategori : true;
-      const stok = Number(item.stok) || 0;
-      
-      if (activeTab === "stok-rendah") return matchesSearch && matchesKat && (stok > 0 && stok <= 3);
-      if (activeTab === "habis") return matchesSearch && matchesKat && (stok === 0);
-      return matchesSearch && matchesKat;
-    }).sort((a, b) => {
-      const stokA = Number(a.stok) || 0;
-      const stokB = Number(b.stok) || 0;
-      const namaA = a.nama?.toLowerCase() || "";
-      const namaB = b.nama?.toLowerCase() || "";
+    return databaseBarang
+      .filter((item) => {
+        const search = searchTerm.toLowerCase();
+        const matchesSearch =
+          item.nama?.toLowerCase().includes(search) ||
+          item.id?.toLowerCase().includes(search);
+        const matchesKat = filterKategori
+          ? item.kategori === filterKategori
+          : true;
+        const stok = Number(item.stok) || 0;
 
-      if (sortBy === "stok-asc") return stokA - stokB;
-      if (sortBy === "stok-desc") return stokB - stokA;
-      if (sortBy === "z-a") return namaB.localeCompare(namaA);
-      return namaA.localeCompare(namaB);
-    });
+        if (activeTab === "stok-rendah")
+          return matchesSearch && matchesKat && stok > 0 && stok <= 3;
+        if (activeTab === "habis")
+          return matchesSearch && matchesKat && stok === 0;
+        return matchesSearch && matchesKat;
+      })
+      .sort((a, b) => {
+        const stokA = Number(a.stok) || 0;
+        const stokB = Number(b.stok) || 0;
+        const namaA = a.nama?.toLowerCase() || "";
+        const namaB = b.nama?.toLowerCase() || "";
+
+        if (sortBy === "stok-asc") return stokA - stokB;
+        if (sortBy === "stok-desc") return stokB - stokA;
+        if (sortBy === "z-a") return namaB.localeCompare(namaA);
+        return namaA.localeCompare(namaB);
+      });
   }, [databaseBarang, searchTerm, filterKategori, sortBy, activeTab]);
 
   const totalPages = Math.ceil(filteredBarang.length / itemsPerPage);
@@ -222,185 +321,394 @@ const InventoryTakingAdmin = () => {
   }, [filteredBarang, currentPage]);
 
   const stats = useMemo(() => {
-    return databaseBarang.reduce((acc, curr) => {
-      const s = Number(curr.stok) || 0; acc.total++; acc.stok += s;
-      if (s > 0 && s <= 3) acc.low++;
-      if (s <= 0) acc.out++;
-      return acc;
-    }, { total: 0, stok: 0, low: 0, out: 0 });
+    return databaseBarang.reduce(
+      (acc, curr) => {
+        const s = Number(curr.stok) || 0;
+        acc.total++;
+        acc.stok += s;
+        if (s > 0 && s <= 3) acc.low++;
+        if (s <= 0) acc.out++;
+        return acc;
+      },
+      { total: 0, stok: 0, low: 0, out: 0 }
+    );
   }, [databaseBarang]);
 
   return (
-    <div className="flex h-screen w-full text-[#1f2937] font-sans overflow-hidden">
-      <main className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
-        <header className="h-14 bg-white border-b border-blue-600/10 px-6 flex items-center justify-between shrink-0">
-          <div>
-            <h1 className="text-[15px] font-semibold uppercase tracking-tight">Inventaris Admin</h1>
-            <p className="text-[11px] text-gray-400">Pusat Manajemen Barang</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={() => loadData(true)} className="p-2 border rounded-lg hover:bg-gray-50 text-gray-500 transition-all active:scale-95">
-              <RefreshCw size={15} className={loading ? "animate-spin text-blue-500" : ""} />
-            </button>
-            <button 
-              onClick={() => openModal(null)} 
-              className="h-[34px] bg-[#2563eb] text-white px-4 rounded-lg text-[13px] font-medium flex items-center gap-1.5 hover:bg-[#1d4ed8] transition-all"
-            >
-              <Plus size={15} /> Tambah Barang
-            </button>
-          </div>
-        </header>
+    <div className="flex h-screen w-full text-[#1f2937] font-sans overflow-hidden bg-gray-50">
+      {/* RENDER BERSYARAT: Kalau belum login, tampilkan Form Login. Kalau udah, tampilkan Admin Panel */}
+      {!isAuthenticated ? (
+        <div className="flex-1 flex flex-col items-center justify-center p-6">
+          <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-gray-100">
+            <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Lock size={32} />
+            </div>
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-2">
+              Welcome
+            </h2>
+            <p className="text-center text-sm text-gray-500 mb-8">
+              Please Login to Admin Dashboard
+            </p>
 
-        <section className="p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-4">
-          <div className="grid grid-cols-4 gap-3 shrink-0">
-            <StatCard label="Total Jenis" value={stats.total} sub="produk" active={activeTab === 'inventaris'} onClick={() => {setActiveTab('inventaris'); setCurrentPage(1);}} />
-            <StatCard label="Total Stok" value={stats.stok} sub="unit" color="text-[#15803d]" />
-            <StatCard label="Stok Rendah" value={stats.low} sub="perlu cek" color="text-[#b45309]" active={activeTab === 'stok-rendah'} onClick={() => {setActiveTab('stok-rendah'); setCurrentPage(1);}} />
-            <StatCard label="Stok Habis" value={stats.out} sub="kosong" color="text-[#b91c1c]" active={activeTab === 'habis'} onClick={() => {setActiveTab('habis'); setCurrentPage(1);}} />
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">
+                  Username
+                </label>
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="Username"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase mb-1.5 block">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  placeholder="Password"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={isLoginLoading}
+                className="w-full mt-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200 transition-all disabled:opacity-50"
+              >
+                {isLoginLoading ? "Memeriksa..." : "Login"}
+              </button>
+            </form>
           </div>
+        </div>
+      ) : (
+        <main className="flex-1 flex flex-col h-full min-h-0 overflow-hidden">
+          <header className="h-[72px] bg-white border-b border-gray-200 px-6 flex items-center justify-between shrink-0">
+            <div>
+              <h1 className="text-2xl font-extrabold text-gray-800 uppercase tracking-tight">
+                Inventaris Admin
+              </h1>
+              <p className="text-[13px] font-medium text-gray-500 mt-0.5">
+                Pusat Manajemen Barang
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => loadData(true)}
+                className="p-2 border rounded-lg hover:bg-gray-50 text-gray-500 transition-all active:scale-95"
+                title="Refresh Data"
+              >
+                <RefreshCw
+                  size={15}
+                  className={loading ? "animate-spin text-blue-500" : ""}
+                />
+              </button>
+              <button
+                onClick={() => openModal(null)}
+                className="h-[34px] bg-[#2563eb] text-white px-4 rounded-lg text-[13px] font-medium flex items-center gap-1.5 hover:bg-[#1d4ed8] transition-all"
+              >
+                <Plus size={15} /> Tambah Barang
+              </button>
 
-          <div className="flex justify-between items-center shrink-0">
-             <div className="flex gap-2">
+              {/* TOMBOL LOGOUT BARU */}
+              <button
+                onClick={handleLogout}
+                className="h-[34px] bg-red-50 text-red-600 px-3 rounded-lg text-[13px] font-medium flex items-center gap-1.5 hover:bg-red-100 transition-all ml-2"
+                title="Keluar"
+              >
+                <LogOut size={15} />
+              </button>
+            </div>
+          </header>
+
+          <section className="p-6 flex-1 flex flex-col min-h-0 overflow-hidden gap-4">
+            <div className="grid grid-cols-4 gap-3 shrink-0">
+              <StatCard
+                label="Total Jenis"
+                value={stats.total}
+                sub="produk"
+                active={activeTab === "inventaris"}
+                onClick={() => {
+                  setActiveTab("inventaris");
+                  setCurrentPage(1);
+                }}
+              />
+              <StatCard
+                label="Total Stok"
+                value={stats.stok}
+                sub="unit"
+                color="text-[#15803d]"
+              />
+              <StatCard
+                label="Stok Rendah"
+                value={stats.low}
+                sub="perlu cek"
+                color="text-[#b45309]"
+                active={activeTab === "stok-rendah"}
+                onClick={() => {
+                  setActiveTab("stok-rendah");
+                  setCurrentPage(1);
+                }}
+              />
+              <StatCard
+                label="Stok Habis"
+                value={stats.out}
+                sub="kosong"
+                color="text-[#b91c1c]"
+                active={activeTab === "habis"}
+                onClick={() => {
+                  setActiveTab("habis");
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
+            <div className="flex justify-between items-center shrink-0">
+              <div className="flex gap-2">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-                  <input 
-                    type="text" placeholder="Cari SKU atau Nama..." 
+                  <Search
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    size={14}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Cari SKU atau Nama..."
                     className="h-9 w-64 pl-9 pr-3 text-[13px] border border-gray-200 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none"
-                    value={searchTerm} onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}}
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
                   />
                 </div>
-                <select className="h-9 px-3 text-[13px] border border-gray-200 rounded-lg outline-none bg-white cursor-pointer" value={filterKategori} onChange={(e) => {setFilterKategori(e.target.value); setCurrentPage(1);}}>
+                <select
+                  className="h-9 px-3 text-[13px] border border-gray-200 rounded-lg outline-none bg-white cursor-pointer"
+                  value={filterKategori}
+                  onChange={(e) => {
+                    setFilterKategori(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                >
                   <option value="">Semua Kategori</option>
                   <option value="ATK">ATK</option>
                   <option value="Elektronik">Elektronik</option>
                 </select>
-             </div>
-             <select 
+              </div>
+              <select
                 className="h-9 px-3 text-[13px] border border-gray-200 rounded-lg outline-none bg-white cursor-pointer"
-                value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
               >
                 <option value="nama">Urutan: A-Z</option>
                 <option value="z-a">Urutan: Z-A</option>
                 <option value="stok-asc">Stok: Terendah</option>
                 <option value="stok-desc">Stok: Tertinggi</option>
               </select>
-          </div>
-
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
-            <div className="flex-1 overflow-y-auto">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
-                  <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    <th className="px-4 py-3 w-12 text-center">No</th>
-                    <th className="px-4 py-3">Barang</th>
-                    <th className="px-4 py-3">Kategori</th>
-                    <th className="px-4 py-3">Satuan</th>
-                    <th className="px-4 py-3 w-40">Stok</th>
-                    <th className="px-4 py-3 w-28">Status</th>
-                    <th className="px-4 py-3 text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {paginatedBarang.map((item, idx) => (
-                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-4 py-3 text-[13px] text-gray-400 text-center">{(currentPage - 1) * itemsPerPage + idx + 1}</td>
-                      <td className="px-4 py-3 flex items-center gap-3">
-                        {item.img && (
-                          <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg overflow-hidden flex shrink-0">
-                             <img src={item.img} alt={item.nama} className="w-full h-full object-contain p-1" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="text-[13px] font-semibold text-gray-700">{item.nama}</div>
-                          <div className="text-[10px] text-gray-400 font-mono uppercase">{item.id}</div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-tight">{item.kategori}</span>
-                      </td>
-                      <td className="px-4 py-3 text-[13px] font-medium text-gray-600">
-                        {item.satuan || "Pcs"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-3">
-                          <button onClick={() => changeStok(item, -1)} className="w-6 h-6 border rounded flex items-center justify-center text-gray-500 hover:bg-gray-100"><Minus size={12}/></button>
-                          <span className="text-[13px] font-bold text-gray-800 w-6 text-center">{item.stok}</span>
-                          <button onClick={() => changeStok(item, 1)} className="w-6 h-6 border rounded flex items-center justify-center text-gray-500 hover:bg-gray-100"><Plus size={12}/></button>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                         <StatusBadge stok={item.stok} />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex justify-center gap-1">
-                          <button onClick={() => openModal(item)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"><Edit3 size={15}/></button>
-                          <button onClick={() => handleDelete(item.id, item.nama)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"><Trash2 size={15}/></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {paginatedBarang.length === 0 && (
-                     <tr>
-                       <td colSpan={7} className="text-center py-10 text-gray-400 text-sm">Tidak ada data ditemukan.</td>
-                     </tr>
-                  )}
-                </tbody>
-              </table>
             </div>
-            
-            <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/30 shrink-0">
-              <span className="text-[11px] text-gray-400 font-medium tracking-tight">Menampilkan {paginatedBarang.length} dari {filteredBarang.length} item</span>
-              <div className="flex gap-1">
-                <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="w-8 h-8 flex items-center justify-center border rounded-md disabled:opacity-30 bg-white hover:bg-gray-50"><ChevronLeft size={14}/></button>
-                <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(p => p + 1)} className="w-8 h-8 flex items-center justify-center border rounded-md disabled:opacity-30 bg-white hover:bg-gray-50"><ChevronRight size={14}/></button>
+
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col flex-1 min-h-0 overflow-hidden">
+              <div className="flex-1 overflow-y-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
+                    <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                      <th className="px-4 py-3 w-12 text-center">No</th>
+                      <th className="px-4 py-3">Barang</th>
+                      <th className="px-4 py-3">Kategori</th>
+                      <th className="px-4 py-3">Satuan</th>
+                      <th className="px-4 py-3 w-40">Stok</th>
+                      <th className="px-4 py-3 w-28">Status</th>
+                      <th className="px-4 py-3 text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {paginatedBarang.map((item, idx) => (
+                      <tr
+                        key={item.id}
+                        className="hover:bg-gray-50/50 transition-colors"
+                      >
+                        <td className="px-4 py-3 text-[13px] text-gray-400 text-center">
+                          {(currentPage - 1) * itemsPerPage + idx + 1}
+                        </td>
+                        <td className="px-4 py-3 flex items-center gap-3">
+                          {item.img && (
+                            <div className="w-10 h-10 bg-white border border-gray-200 rounded-lg overflow-hidden flex shrink-0">
+                              <img
+                                src={item.img}
+                                alt={item.nama}
+                                className="w-full h-full object-contain p-1"
+                              />
+                            </div>
+                          )}
+                          <div>
+                            <div className="text-[13px] font-semibold text-gray-700">
+                              {item.nama}
+                            </div>
+                            <div className="text-[10px] text-gray-400 font-mono uppercase">
+                              {item.id}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[11px] font-medium uppercase tracking-tight">
+                            {item.kategori}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-[13px] font-medium text-gray-600">
+                          {item.satuan || "Pcs"}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => changeStok(item, -1)}
+                              className="w-6 h-6 border rounded flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                            >
+                              <Minus size={12} />
+                            </button>
+                            <span className="text-[13px] font-bold text-gray-800 w-6 text-center">
+                              {item.stok}
+                            </span>
+                            <button
+                              onClick={() => changeStok(item, 1)}
+                              className="w-6 h-6 border rounded flex items-center justify-center text-gray-500 hover:bg-gray-100"
+                            >
+                              <Plus size={12} />
+                            </button>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge stok={item.stok} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center gap-1">
+                            <button
+                              onClick={() => openModal(item)}
+                              className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors"
+                            >
+                              <Edit3 size={15} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item.id, item.nama)}
+                              className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {paginatedBarang.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="text-center py-10 text-gray-400 text-sm"
+                        >
+                          Tidak ada data ditemukan.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 border-t border-gray-100 flex justify-between items-center bg-gray-50/30 shrink-0">
+                <span className="text-[11px] text-gray-400 font-medium tracking-tight">
+                  Menampilkan {paginatedBarang.length} dari{" "}
+                  {filteredBarang.length} item
+                </span>
+                <div className="flex gap-1">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                    className="w-8 h-8 flex items-center justify-center border rounded-md disabled:opacity-30 bg-white hover:bg-gray-50"
+                  >
+                    <ChevronLeft size={14} />
+                  </button>
+                  <button
+                    disabled={currentPage === totalPages || totalPages === 0}
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    className="w-8 h-8 flex items-center justify-center border rounded-md disabled:opacity-30 bg-white hover:bg-gray-50"
+                  >
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      </main>
+          </section>
+        </main>
+      )}
 
-      {isModalOpen && (
+      {/* Modal Tambah/Edit Barang (Hanya muncul kalau isAuthenticated true & isModalOpen true) */}
+      {isModalOpen && isAuthenticated && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={() => setIsModalOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-[2px]"
+            onClick={() => setIsModalOpen(false)}
+          />
           <div className="relative bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
             <div className="p-5 border-b flex items-center justify-between bg-gray-50/50">
-              <h3 className="font-bold text-[16px] text-gray-800">{currentItem ? 'Edit Barang' : 'Tambah Barang Baru'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={20} /></button>
+              <h3 className="font-bold text-[16px] text-gray-800">
+                {currentItem ? "Edit Barang" : "Tambah Barang Baru"}
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={20} />
+              </button>
             </div>
-            
+
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">Nama Barang <span className="text-red-500">*</span></label>
-                <input 
+                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">
+                  Nama Barang <span className="text-red-500">*</span>
+                </label>
+                <input
                   name="nama-barang"
-                  type="text" required
+                  type="text"
+                  required
                   className="w-full h-10 px-3 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                   placeholder="Contoh: Kertas A4 80gr"
                   value={formData.nama}
-                  onChange={(e) => setFormData({...formData, nama: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, nama: e.target.value })
+                  }
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">Kategori <span className="text-red-500">*</span></label>
-                  <select 
+                  <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">
+                    Kategori <span className="text-red-500">*</span>
+                  </label>
+                  <select
                     className="w-full h-10 px-2 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-blue-500 transition-all bg-white"
                     value={formData.kategori}
-                    onChange={(e) => setFormData({...formData, kategori: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, kategori: e.target.value })
+                    }
                   >
                     <option value="ATK">ATK</option>
                     <option value="Elektronik">Elektronik</option>
                   </select>
                 </div>
                 <div>
-                  <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">Satuan <span className="text-red-500">*</span></label>
-                  <select 
+                  <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">
+                    Satuan <span className="text-red-500">*</span>
+                  </label>
+                  <select
                     className="w-full h-10 px-2 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-blue-500 transition-all bg-white"
                     value={formData.satuan}
-                    onChange={(e) => setFormData({...formData, satuan: e.target.value})}
+                    onChange={(e) =>
+                      setFormData({ ...formData, satuan: e.target.value })
+                    }
                   >
-                    <option value="" disabled>Pilih...</option>
+                    <option value="" disabled>
+                      Pilih...
+                    </option>
                     <option value="Pcs">Pcs</option>
                     <option value="Pack">Pack</option>
                     <option value="Dus">Dus</option>
@@ -412,44 +720,57 @@ const InventoryTakingAdmin = () => {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">Stok Saat Ini <span className="text-red-500">*</span></label>
-                <input 
-                  type="number" required min="0"
+                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">
+                  Stok Saat Ini <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
                   className="w-full h-10 px-3 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-blue-500 transition-all"
                   value={formData.stok}
-                  onChange={(e) => setFormData({...formData, stok: e.target.value})}
+                  onChange={(e) =>
+                    setFormData({ ...formData, stok: e.target.value })
+                  }
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">Foto Barang (Opsional)</label>
+                <label className="text-[11px] font-bold text-gray-400 uppercase mb-1.5 block">
+                  Foto Barang (Opsional)
+                </label>
                 <div className="flex items-center gap-3">
-                   {formData.img && (
-                     <div className="w-12 h-12 rounded-lg border border-gray-200 overflow-hidden shrink-0">
-                       <img src={formData.img} alt="preview" className="w-full h-full object-contain bg-gray-50"/>
-                     </div>
-                   )}
-                   <input 
-                     type="file" accept="image/*"
-                     className="w-full text-[12px] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[12px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
-                     onChange={handleImageChange}
-                   />
+                  {formData.img && (
+                    <div className="w-12 h-12 rounded-lg border border-gray-200 overflow-hidden shrink-0">
+                      <img
+                        src={formData.img}
+                        alt="preview"
+                        className="w-full h-full object-contain bg-gray-50"
+                      />
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="w-full text-[12px] file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-[12px] file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all cursor-pointer"
+                    onChange={handleImageChange}
+                  />
                 </div>
               </div>
 
               <div className="pt-4 flex gap-3">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsModalOpen(false)}
                   className="flex-1 h-11 border border-gray-200 rounded-xl text-[13px] font-semibold text-gray-500 hover:bg-gray-50 transition-all"
                 >
                   Batal
                 </button>
-                <button 
+                <button
                   type="submit"
                   className="flex-[2] h-11 bg-[#2563eb] text-white rounded-xl text-[13px] font-semibold hover:bg-[#1d4ed8] shadow-lg shadow-blue-500/20 transition-all active:scale-[0.98]"
                 >
-                  {currentItem ? 'Simpan Perubahan' : 'Tambah Barang'}
+                  {currentItem ? "Simpan Perubahan" : "Tambah Barang"}
                 </button>
               </div>
             </form>
@@ -457,13 +778,35 @@ const InventoryTakingAdmin = () => {
         </div>
       )}
 
+      {/* Sistem Notifikasi (Toast) ditaruh di luar biar bisa diakses halaman Login & Admin */}
       <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2 pointer-events-none">
         {toasts.map((t) => (
-          <div key={t.id} className={`flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-[13px] text-white transition-all duration-300 transform translate-x-0 opacity-100 ${t.type === 'success' ? 'bg-[#15803d]' : 'bg-[#b91c1c]'}`}>
-            {t.type === 'success' ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M20 6L9 17l-5-5"/></svg>
+          <div
+            key={t.id}
+            className={`flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-[13px] text-white transition-all duration-300 transform translate-x-0 opacity-100 ${
+              t.type === "success" ? "bg-[#15803d]" : "bg-[#b91c1c]"
+            }`}
+          >
+            {t.type === "success" ? (
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="w-4 h-4"
+              >
+                <path d="M20 6L9 17l-5-5" />
+              </svg>
             ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-4 h-4"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                className="w-4 h-4"
+              >
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
             )}
             {t.msg}
           </div>
@@ -473,9 +816,25 @@ const InventoryTakingAdmin = () => {
   );
 };
 
-const StatCard = ({ label, value, sub, color = "text-gray-800", active, onClick }) => (
-  <div onClick={onClick} className={`bg-white border p-4 rounded-xl shadow-sm cursor-pointer transition-all duration-300 ${active ? 'ring-2 ring-blue-500 border-transparent bg-blue-50/30' : 'border-gray-100 hover:border-blue-200'}`}>
-    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">{label}</div>
+const StatCard = ({
+  label,
+  value,
+  sub,
+  color = "text-gray-800",
+  active,
+  onClick,
+}) => (
+  <div
+    onClick={onClick}
+    className={`bg-white border p-4 rounded-xl shadow-sm cursor-pointer transition-all duration-300 ${
+      active
+        ? "ring-2 ring-blue-500 border-transparent bg-blue-50/30"
+        : "border-gray-100 hover:border-blue-200"
+    }`}
+  >
+    <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-1">
+      {label}
+    </div>
     <div className={`text-2xl font-bold tracking-tight ${color}`}>{value}</div>
     <div className="text-[10px] text-gray-400 mt-1 font-medium">{sub}</div>
   </div>
@@ -483,9 +842,23 @@ const StatCard = ({ label, value, sub, color = "text-gray-800", active, onClick 
 
 const StatusBadge = ({ stok }) => {
   const s = Number(stok);
-  if (s <= 0) return <span className="bg-red-50 text-red-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">Habis</span>;
-  if (s <= 3) return <span className="bg-amber-50 text-amber-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">Rendah</span>;
-  return <span className="bg-green-50 text-green-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">Tersedia</span>;
+  if (s <= 0)
+    return (
+      <span className="bg-red-50 text-red-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">
+        Habis
+      </span>
+    );
+  if (s <= 3)
+    return (
+      <span className="bg-amber-50 text-amber-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">
+        Rendah
+      </span>
+    );
+  return (
+    <span className="bg-green-50 text-green-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tight">
+      Tersedia
+    </span>
+  );
 };
 
 export default InventoryTakingAdmin;
