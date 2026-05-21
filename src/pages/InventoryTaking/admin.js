@@ -347,7 +347,7 @@ const InventoryTakingAdmin = () => {
               Welcome
             </h2>
             <p className="text-center text-sm text-gray-500 mb-8">
-              Please Login to Admin Dashboard
+              Dashboard Persediaan Barang
             </p>
 
             <form onSubmit={handleLogin} className="space-y-4">

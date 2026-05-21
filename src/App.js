@@ -38,6 +38,7 @@ import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import StrukturOrganisasi from "./pages/OrganizationalStructure";
 import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
+import AdminMasterDataTU from "./pages/MasterDataTU";
 import YearSelectionPage from "./pages/ListSatuankerja/year";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
 // import "@/PDFWorkerSetup";
@@ -164,6 +165,7 @@ function App() {
           element={<InventoryTaking />}
         />
         <Route path="/inventaris-kantor/admin" element={<InventoryTakingA />} />
+        <Route path="/master-data-tu" element={<AdminMasterDataTU />} />
         {listMenu.map((data) => (
           <Route
             key={data?.id}
