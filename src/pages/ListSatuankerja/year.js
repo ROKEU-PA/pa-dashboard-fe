@@ -16,6 +16,7 @@ function YearSelectionPage() {
   const adminLikeRoles = ["admin", "super_admin", "superadmin", "pic"];
 
   if (adminLikeRoles.includes(role)) {
+    navigate(`/e-arsip/${tahun}`);
   } else {
 
     const userAccessCode = userData?.access_code?.[0];

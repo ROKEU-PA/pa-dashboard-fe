@@ -687,8 +687,8 @@ function ListSatuanKerjaPage() {
           </div>
         </div>
         {/* c */}
-        <div style={{ overflowX: "auto", width: "100%" }}>
-          <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm scrollbar-thin scrollbar-thumb-gray-300">
+          <Table sx={{ minWidth: 650 }} aria-label="interactive data table">
             <TableHeader>
               <TableRow>
                 {columns
@@ -723,7 +723,8 @@ function ListSatuanKerjaPage() {
             </TableHeader>
             <TableBody>
               {dataTable.map((row, index) => (
-                <TableRow key={index}>
+                <TableRow key={index}
+                className="transition-all duration-200 hover:bg-blue-50/80 group border-b border-gray-100 last:border-none">
                   {columns
                     .filter(
                       (col) =>

@@ -26,7 +26,7 @@ function MenuPage() {
 
   return (
     <div className="px-4 py-3">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid grid-cols-1 md:auto-rows-fr gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {listMenu &&
           listMenu.map((data, index) => {
             const pathParts = data.path.split("/").filter(Boolean);
@@ -55,7 +55,7 @@ function MenuPage() {
               <Link
                 key={index}
                 to={targetPath}
-                className={!hasAccess ? "pointer-events-none" : ""}
+                className={`flex h-full ${!hasAccess ? "pointer-events-none" : ""}`}
                 onClick={() => {
                   if (hasAccess) {
                     handleChangeMenu({
@@ -67,7 +67,7 @@ function MenuPage() {
               >
                 <div
                   className={`
-                    overflow-hidden rounded-xl border border-slate-200 bg-white
+                    flex flex-col h-full w-full overflow-hidden rounded-xl border border-slate-200 bg-white
                     shadow-sm transition-all duration-300
                     hover:-translate-y-1 hover:shadow-xl
                     ${
@@ -84,15 +84,13 @@ function MenuPage() {
                     "
                   >
                     <span
-                      className="
-                        ml-4 select-none text-[90px]
-                        font-black leading-none text-[#2bb490]
+                      className=" select-none  ml-1 text-[80px] font-black leading-none text-[#2bb490]
                       "
                     >
                       {data.code}
                     </span>
                   </div>
-                  <div className="p-5">
+                  <div className="p-5 ">
                     <h2 className="text-base font-semibold text-slate-800">
                       {data.name}
                     </h2>
