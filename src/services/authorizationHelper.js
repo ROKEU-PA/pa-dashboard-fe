@@ -14,6 +14,16 @@ const ROLE_ROUTES = {
   
   [ROLES.GUEST]: [
     "/dashboard-utama",
+    "/dashboard-utama",
+    "/pelaksanaan-anggaran",
+    "/dashboard",
+    "/ptuk",
+    "/ikpa",
+    "/realisasi",
+    "/tata-usaha",
+    "/barang-milik-negara",
+    "/llat",
+    "/akuntansi-pelaporan"
   ],
 
   [ROLES.USER]: [
