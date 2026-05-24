@@ -57,6 +57,9 @@ const InventoryTakingAdmin = () => {
   // ==========================================
   // FUNGSI HANDLE LOGIN & LOGOUT
   // ==========================================
+  // ==========================================
+  // FUNGSI HANDLE LOGIN & LOGOUT
+  // ==========================================
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -64,32 +67,50 @@ const InventoryTakingAdmin = () => {
       return;
     }
 
+    // LOGIKA DETEKSI ROLE (Karena ini halaman Admin Barang)
+    let roleTerdeteksi = "pegawai";
+    if (username === "admin_barang" || username.includes("barang")) {
+      roleTerdeteksi = "barang";
+    }
+
     setIsLoginLoading(true);
     try {
+      // Bikin body yang rapi, SAMA PERSIS kayak yang diminta backend VPS
+      const requestBody = {
+        username: username.trim(),
+        password: password,
+        role: roleTerdeteksi // <-- INI WAJIB MASUK!
+      };
+
+      console.log("Data dikirim:", requestBody); // Buat bantu debug
+
       const res = await apiTU({
         url: "api/login",
         method: "POST",
-        options: { body: { username, password } },
+        options: { body: requestBody }, // Passing body yang udah bener
       });
 
-      localStorage.setItem("adminToken", res.token);
-      setIsAuthenticated(true);
-      showToast("Login berhasil!", "success");
+      if (res && res.token) {
+        localStorage.setItem("adminToken", res.token);
+        setIsAuthenticated(true);
+        showToast("Login berhasil!", "success");
+      } else {
+        throw new Error("Token tidak valid");
+      }
     } catch (error) {
       console.error("Login Error Details:", error.message);
 
       // KOREKSI LOGIKA ERROR:
-      // apiTU lu melempar teks error asli dari backend, jadi kita cek teksnya langsung
       const errMsg = (error.message || "").toLowerCase();
 
       if (
         errMsg.includes("salah") || 
         errMsg.includes("tidak terdaftar") || 
+        errMsg.includes("match") || // Tambahan buat nangkap error role nggak match
         errMsg.includes("401")
       ) {
         showToast("Username atau Password salah!", "error");
       } else {
-        // Error server/jaringan lain (termasuk Failed to fetch)
         showToast("Gagal terhubung. Pastikan server VPS menyala.", "error");
       }
     } finally {

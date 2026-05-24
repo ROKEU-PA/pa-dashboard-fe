@@ -45,6 +45,7 @@ export default function AdminMasterDataTU() {
   }, []);
 
   // FUNGSI LOGIN (Nembak API Backend)
+  // FUNGSI LOGIN (Nembak API Backend)
   const handleLogin = async (e) => {
     e.preventDefault();
     setErrorMsg("");
@@ -54,27 +55,37 @@ export default function AdminMasterDataTU() {
       return;
     }
 
-    // LOGIKA DETEKSI ROLE OTOMATIS
-    const roleTerdeteksi = usernameInput.includes("barang")
-      ? "barang"
-      : "pegawai";
+    // LOGIKA DETEKSI ROLE OTOMATIS (Disesuaikan persis dengan backend)
+    let roleTerdeteksi = "pegawai";
+    if (usernameInput === "admin_barang" || usernameInput.includes("barang")) {
+      roleTerdeteksi = "barang";
+    }
 
     setIsLoginLoading(true);
     try {
+      // PENTING: Bikin object request body yang jelas dan bersih
+      const requestBody = {
+        username: usernameInput.trim(),
+        password: passwordInput,
+        role: roleTerdeteksi
+      };
+
+      console.log("Ngirim data login:", requestBody); // Buat ngebantu lu nge-debug di browser console (F12)
+
       const res = await apiTU({
         url: "api/login",
         method: "POST",
         options: {
-          body: {
-            username: usernameInput,
-            password: passwordInput,
-            role: roleTerdeteksi,
-          },
+          body: requestBody, // Langsung passing object yang udah bersih
         },
       });
 
-      localStorage.setItem("masterdataToken", res.token);
-      setIsLoggedIn(true);
+      if (res && res.token) {
+        localStorage.setItem("masterdataToken", res.token);
+        setIsLoggedIn(true);
+      } else {
+        throw new Error("Token tidak diterima dari server");
+      }
     } catch (error) {
       console.error("Login Error:", error.message);
       setErrorMsg("Username atau Password salah, brad!");
