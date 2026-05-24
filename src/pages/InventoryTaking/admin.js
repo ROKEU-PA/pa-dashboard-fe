@@ -15,9 +15,6 @@ import {
 import { apiTU } from "@/services/ApiTU";
 
 const InventoryTakingAdmin = () => {
-  // ==========================================
-  // STATE AUTENTIKASI (LOGIN/LOGOUT)
-  // ==========================================
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken")
   );
@@ -54,12 +51,6 @@ const InventoryTakingAdmin = () => {
     }, 3000);
   }, []);
 
-  // ==========================================
-  // FUNGSI HANDLE LOGIN & LOGOUT
-  // ==========================================
-  // ==========================================
-  // FUNGSI HANDLE LOGIN & LOGOUT
-  // ==========================================
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -75,19 +66,19 @@ const InventoryTakingAdmin = () => {
 
     setIsLoginLoading(true);
     try {
-      // Bikin body yang rapi, SAMA PERSIS kayak yang diminta backend VPS
+     
       const requestBody = {
         username: username.trim(),
         password: password,
-        role: roleTerdeteksi // <-- INI WAJIB MASUK!
+        role: roleTerdeteksi 
       };
 
-      console.log("Data dikirim:", requestBody); // Buat bantu debug
+      console.log("Data dikirim:", requestBody); 
 
       const res = await apiTU({
         url: "api/login",
         method: "POST",
-        options: { body: requestBody }, // Passing body yang udah bener
+        options: { body: requestBody }, 
       });
 
       if (res && res.token) {
@@ -106,7 +97,7 @@ const InventoryTakingAdmin = () => {
       if (
         errMsg.includes("salah") || 
         errMsg.includes("tidak terdaftar") || 
-        errMsg.includes("match") || // Tambahan buat nangkap error role nggak match
+        errMsg.includes("match") || 
         errMsg.includes("401")
       ) {
         showToast("Username atau Password salah!", "error");
@@ -130,7 +121,6 @@ const InventoryTakingAdmin = () => {
 
   const loadData = useCallback(
     async (isManualRefresh = false) => {
-      // Jangan nge-load data kalau belum login
       if (!isAuthenticated) return;
 
       setLoading(true);
@@ -662,7 +652,6 @@ const InventoryTakingAdmin = () => {
         </main>
       )}
 
-      {/* Modal Tambah/Edit Barang (Hanya muncul kalau isAuthenticated true & isModalOpen true) */}
       {isModalOpen && isAuthenticated && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
@@ -799,7 +788,7 @@ const InventoryTakingAdmin = () => {
         </div>
       )}
 
-      {/* Sistem Notifikasi (Toast) ditaruh di luar biar bisa diakses halaman Login & Admin */}
+
       <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2 pointer-events-none">
         {toasts.map((t) => (
           <div
