@@ -1,43 +1,35 @@
 import React, { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; 
 import { AppContext } from "@/contexts/AppContext";
 import { Calendar } from "lucide-react";
 
 function YearSelectionPage() {
   const navigate = useNavigate();
+  const location = useLocation(); 
   const { listMenu, userData } = useContext(AppContext);
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 11 }, (_, i) => currentYear - i);
 
-  const handleYearClick = (tahun) => {
-  const role = userData?.role;
+ const handleYearClick = (tahun) => {
+  const role = userData?.role?.toLowerCase()?.trim();
+  const adminLikeRoles = ["admin", "super_admin", "superadmin", "pic"];
 
-  // Tentukan siapa saja yang boleh melihat menu daftar seluruh satker
-  const adminRoles = ["admin", "super_admin", "superadmin", "pic"];
-
-  if (adminRoles.includes(role)) {
-    // Mengarah ke <Route path="/e-arsip/:tahun" element={<MenuPage />} />
-    navigate(`/e-arsip/${tahun}`);
+  if (adminLikeRoles.includes(role)) {
   } else {
-    // Jalur untuk USER biasa (Eksplisit mencari path satuan kerja mereka)
-    const satkerMenu = listMenu.find(
-      (menu) => menu.path && menu.path.startsWith("/satuan-kerja/")
+
+    const userAccessCode = userData?.access_code?.[0];
+    const userSatkerMenu = listMenu.find(
+      (menu) => Number(menu.code) === Number(userAccessCode)
     );
 
-    const userMenuPath = satkerMenu?.path;
-
-    if (userMenuPath) {
-      const pathParts = userMenuPath.split("/").filter(Boolean);
-      // Mengambil segmen terakhir (misal: 'biro-keuangan' atau 'binalavotas')
+    if (userSatkerMenu && userSatkerMenu.path) {
+      const pathParts = userSatkerMenu.path.split("/").filter(Boolean);
       const satkerIdentifier = pathParts[pathParts.length - 1]; 
-      
-      // Mengarah ke <Route path="/arsip/:tahun/:satker" element={<ArchivePage />} />
       navigate(`/arsip/${tahun}/${satkerIdentifier}`);
     } else {
-      // Fallback aman jika menu user belum termuat dari API
-      console.warn("Data menu satker belum siap atau tidak ditemukan.");
-      navigate("/satuan-kerja/pengajuan");
+      console.warn("Menu satker yang sesuai dengan access code tidak ditemukan.");
+      navigate(`/e-arsip/${tahun}`);
     }
   }
 };

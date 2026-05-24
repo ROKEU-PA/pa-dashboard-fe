@@ -11,7 +11,7 @@ import Modal from "@/components/Modal";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
-import { Book, Plus } from "lucide-react";
+import { Book, Plus, Folder} from "lucide-react";
 import FileInput from "@/components/FileInput";
 import { buildQueryString, validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
@@ -892,7 +892,7 @@ function ListSatuanKerjaPage() {
                       if (col.key === "action") {
                         const isPengajuan = isPengajuanPath(location.pathname);
                         const role = userData?.role;
-
+                       
                         const showEditButton =
                           (isPengajuan &&
                             role === "user" &&
@@ -1011,8 +1011,7 @@ function ListSatuanKerjaPage() {
                           </TableCell>
                         );
                       }
-
-                      // Default rendering
+                      // rendering
                       return (
                         <TableCell key={col.key} align="center">
                           {row[col.key] ?? "-"}
@@ -1257,11 +1256,28 @@ function ListSatuanKerjaPage() {
             <Button style={{ width: "100%" }}>Buka</Button>
           </a>
         ) : (
-          <a href={pdfToOpen} download>
-            <p>File SPP ber-format (.rar)</p>
-            <br />
-            <Button style={{ width: "100%" }}>Download File</Button>
-          </a>
+          <div className="m-4 mx-auto bg-white border border-blue-100 rounded-2xl p-6 shadow-xl shadow-blue-200/50 flex flex-col items-center text-center">
+            <div className="relative text-[#308BFD]">
+              <Folder size={84} strokeWidth={1.5} />
+              <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider">
+                RAR
+              </span>
+            </div>
+            <p className="mt-4 text-slate-600">
+              File SPP ber-format (.rar)
+            </p>
+            <Button
+              className="mt-4 w-full h-[30px] flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-[#59C6FF] to-[#308BFD] hover:from-[#49bbf5] hover:to-[#257be0] text-white font-bold rounded-xl transition-all duration-200"
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = pdfToOpen;
+                link.download = "";
+                link.click();
+              }}
+            >
+              Download File
+            </Button>
+          </div>
         )}
       </Modal>
       {/* modal pengujian */}
@@ -1314,20 +1330,37 @@ function ListSatuanKerjaPage() {
                 <CustomPDFViewer pdfSource={pdfToOpen} />
               </div>
             ) : (
-              <div style={{ width: window.innerWidth <= 768 ? "100%" : "50%" }}>
-                <p>File SPP ber-format (.rar)</p>
-                <br />
-                <Button
-                  style={{ width: "100%" }}
-                  onClick={() => {
-                    const linkSPP = document.createElement("a");
-                    linkSPP.href = pdfToOpen;
-                    linkSPP.download = "";
-                    linkSPP.click();
-                  }}
-                >
-                  Download File
-                </Button>
+              <div className="w-full md:w-1/2 flex items-center justify-center">
+                <div className="w-full max-w-md border border-blue-100 bg-white rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col items-center text-center">
+                  
+                  <div className="relative text-[#308BFD]">
+                    <Folder
+                      size={window.innerWidth < 640 ? 60 : 84}
+                      strokeWidth={1.5}
+                    />
+
+                    <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider">
+                      RAR
+                    </span>
+                  </div>
+
+                  <p className="mt-4 text-sm sm:text-base text-slate-600">
+                    File SPP ber-format (.rar)
+                  </p>
+
+                  <Button
+                    className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 sm:px-6 bg-gradient-to-r from-[#59C6FF] to-[#308BFD] hover:from-[#49bbf5] hover:to-[#257be0] text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-200 active:scale-[0.98]"
+                    onClick={() => {
+                      const linkSPP = document.createElement("a");
+                      linkSPP.href = pdfToOpen;
+                      linkSPP.download = "";
+                      linkSPP.click();
+                    }}
+                  >
+              
+                    Download File
+                  </Button>
+                </div>
               </div>
             )}
             <div

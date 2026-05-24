@@ -11,23 +11,29 @@ const PUBLIC_ROUTES = ["/"];
 const ROLE_ROUTES = {
   [ROLES.SUPER_ADMIN]: "*",
   [ROLES.ADMIN]: "*",
-  [ROLES.GUEST]: "*",
+  
+  [ROLES.GUEST]: [
+    "/dashboard-utama",
+  ],
+
   [ROLES.USER]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
-    "/e-arsip",                  // Mengizinkan masuk ke halaman pilih tahun
-    "/arsip",                    // Mengizinkan rute dinamis arsip pertahun (/arsip/2018/biro-hukum)
-    "/satuan-kerja/pengajuan",   // Menu grid utama pengajuan
-    "/llat",                     // Modul pelaksanaan anggaran mandiri
+    "/satuan-kerja",
+    "/satuan-kerja/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/llat",
   ],
 
   [ROLES.PIC]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
-    "/e-arsip",                  // Mengizinkan masuk ke halaman pilih tahun
-    "/arsip",                    // Mengizinkan rute dinamis arsip pertahun (/arsip/2018/biro-hukum)
-    "/satuan-kerja/pengajuan",   // Menu grid utama pengajuan
-    "/llat",                     // Modul pelaksanaan anggaran mandiri
+    "/satuan-kerja",
+    "/satuan-kerja/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/llat",
   ],
 };
 
@@ -50,23 +56,17 @@ const matchesRoute = (pathname, route) => {
   return false;
 };
 
-// Fungsi pembersihan path agar cocok dengan path mentah database (Contoh database: /satuan-kerja/biro-hukum)
 const getCleanedPathForMenuMatch = (pathname) => {
-  // 1. Jika rute dinamis pengajuan satker: /satuan-kerja/pengajuan/biro-hukum -> /satuan-kerja/biro-hukum
-  if (pathname.startsWith("/satuan-kerja/pengajuan")) {
+  if (pathname.startsWith("/satuan-kerja/pengajuan/")) {
     const parts = pathname.split("/").filter(Boolean);
-    if (parts.length <= 2) return pathname; 
     return `/satuan-kerja/${parts[parts.length - 1]}`;
   }
-
-  // 2. Jika rute dinamis arsip pertahun: /arsip/2018/biro-hukum -> /satuan-kerja/biro-hukum
-  if (pathname.startsWith("/arsip")) {
+  if (pathname.startsWith("/arsip/")) {
     const parts = pathname.split("/").filter(Boolean);
     if (parts.length >= 3) {
-      return `/satuan-kerja/${parts[2]}`; // Ambil nama satker pada elemen ke-3 URL
+      return `/satuan-kerja/${parts[2]}`; 
     }
   }
-
   return pathname;
 };
 
@@ -103,44 +103,41 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     accessCodes: userData.access_code,
   });
 
-  // 1. Jalur Publik
   if (PUBLIC_ROUTES.includes(normalizedPath)) {
     return true;
   }
 
-  // 2. Akses Penuh Admin / Super Admin
   if (userRole === ROLES.SUPER_ADMIN || userRole === ROLES.ADMIN) {
     return true;
   }
 
-  // 3. Aturan Khusus Halaman Manajemen Admin
   if (ADMIN_ONLY_ROUTES.some((route) => normalizedPath === route)) {
     return userRole === ROLES.SUPER_ADMIN || userRole === ROLES.ADMIN;
   }
 
-  // 4. Bypass Modul Tanda Terima
   if (normalizedPath.startsWith("/tanda-terima")) {
     return userRole === ROLES.USER || userRole === ROLES.PIC;
   }
 
-  // 5. Filter Berdasarkan Role & Bypass Halaman Utama/Mandiri
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-
-  if (hasRouteAccess(normalizedPath, allowedRoutes)) {
-    // KUNCI PERBAIKAN: Berikan izin langsung untuk halaman grid utama dan modul mandiri (LLAT)
+  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     if (
       normalizedPath === "/satuan-kerja/pengajuan" || 
-      normalizedPath.startsWith("/e-arsip") ||
-      normalizedPath.startsWith("/llat") // Modul LLAT lolos murni tanpa harus masuk pengecekan kode satker backend
+      normalizedPath === "/e-arsip" ||
+      normalizedPath.startsWith("/e-arsip/")||
+      normalizedPath === "/llat" ||             
+      normalizedPath.startsWith("/llat/")
     ) {
       return true;
     }
   }
 
-  // 6. Pengecekan Ketat untuk Detail Satker berdasarkan Access Code Database
-  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
-    return hasMenuAccess(normalizedPath, userData, menus);
+  if (hasRouteAccess(normalizedPath, allowedRoutes)) {
+    if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+      return hasMenuAccess(normalizedPath, userData, menus);
+    }
+    return true;
   }
 
   console.warn("Access denied:", { pathname: normalizedPath, role: userRole });
@@ -164,8 +161,7 @@ export const getDefaultRedirectPath = (userRole) => {
 export const getRedirectPathOnDenied = (pathname, userRole) => {
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     const parts = pathname.split("/").filter(Boolean);
-
-    if (parts[0] === "satuan-kerja" && parts.length > 2) {
+    if ((parts[0] === "satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
       return "/" + parts.slice(0, -1).join("/");
     }
 

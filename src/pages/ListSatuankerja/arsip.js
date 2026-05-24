@@ -11,7 +11,7 @@ import Modal from "@/components/Modal";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
 import Textarea from "@/components/TextArea";
-import { Book, Plus } from "lucide-react";
+import { Book, Plus, Folder} from "lucide-react";
 import FileInput from "@/components/FileInput";
 import { buildQueryString, validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
@@ -1264,197 +1264,31 @@ function Arsip() {
             <Button style={{ width: "100%" }}>Buka</Button>
           </a>
         ) : (
-          <a href={pdfToOpen} download>
-            <p>File SPP ber-format (.rar)</p>
-            <br />
-            <Button style={{ width: "100%" }}>Download File</Button>
-          </a>
-        )}
-      </Modal>
-      {/* modal pengujian */}
-      <Modal
-        open={isCheckModal}
-        onClose={() => {
-          setIsCheckModal(false);
-          setVariantModal("");
-        }}
-        title="Form Pengujian"
-        width={fileExtension === "pdf" ? "95vw" : "80vw"}
-        maxWidth="95vw"
-        bodyStyle={{
-          maxHeight: "85vh",
-          overflowY: "auto",
-        }}
-      >
-        <div
-          style={{
-            maxHeight: "80vh",
-            overflowY: "auto",
-            padding: window.innerWidth <= 768 ? "2px" : "0 20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: window.innerWidth <= 768 ? "column" : "row", // FIX
-              gap: 20,
-              width: "100%",
-              padding: window.innerWidth <= 768 ? "0 2px" : 0,
-              height: "auto",
-              overflow: "auto",
-            }}
-          >
-            {fileExtension === "pdf" ? (
-              // <iframe
-              //   src={`${pdfToOpen}#zoom=120`}
-              //   style={{ width: "100%", height: "100%" }}
-              //   title="PDF Viewer"
-              // />
-              <div
-                style={{
-                  width: window.innerWidth <= 768 ? "100%" : "50%",
-                  maxHeight: window.innerWidth <= 768 ? "45vh" : "100%",
-                  overflowY: "auto",
-                  padding: 0,
-                }}
-              >
-                <CustomPDFViewer pdfSource={pdfToOpen} />
-              </div>
-            ) : (
-              <div style={{ width: window.innerWidth <= 768 ? "100%" : "50%" }}>
-                <p>File SPP ber-format (.rar)</p>
-                <br />
-                <Button
-                  style={{ width: "100%" }}
-                  onClick={() => {
-                    const linkSPP = document.createElement("a");
-                    linkSPP.href = pdfToOpen;
-                    linkSPP.download = "";
-                    linkSPP.click();
-                  }}
-                >
-                  Download File
-                </Button>
-              </div>
-            )}
-            <div
-              style={{
-                width: window.innerWidth <= 768 ? "100%" : "50%",
-                maxHeight:
-                  window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
-                paddingRight: 10,
+           <div className="m-4 mx-auto bg-white border border-blue-100 rounded-2xl p-6 shadow-xl shadow-blue-200/50 flex flex-col items-center text-center">
+            <div className="relative text-[#308BFD]">
+              <Folder size={84} strokeWidth={1.5} />
+              <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider">
+                RAR
+              </span>
+            </div>
+            <p className="mt-4 text-slate-600">
+              File SPP ber-format (.rar)
+            </p>
+            <Button
+              className="mt-4 w-full h-[30px] flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-[#59C6FF] to-[#308BFD] hover:from-[#49bbf5] hover:to-[#257be0] text-white font-bold rounded-xl transition-all duration-200"
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = pdfToOpen;
+                link.download = "";
+                link.click();
               }}
             >
-              <form
-                onSubmit={handleSubmit}
-                style={{
-                  padding: 20,
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 20,
-                  fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                }}
-              >
-                <Input
-                  label="No. SPP"
-                  name="no_spp"
-                  value={formData?.["no_spp"]}
-                  disabled
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                />
-                <Select
-                  label="Jenis SPP"
-                  name="type"
-                  value={formData?.type_id}
-                  disabled
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={types.map((q) => ({
-                    label: q.type,
-                    value: q.type_id,
-                  }))}
-                  isOpen={selectOpen}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setSelectOpenStatus(false);
-                    }
-                    setSelectOpen(open);
-                  }}
-                />
-                <ChecklistComponent
-                  title="Kelengkapan"
-                  items={questions.map((q) => ({
-                    id: q.id_question,
-                    label: q.text,
-                  }))}
-                  selectedIds={formData.kelengkapan}
-                  onChange={(updated) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      kelengkapan: updated,
-                    }))
-                  }
-                  disabled={formData.status === "sp2d"}
-                />
-                <Select
-                  label="Status"
-                  name="status"
-                  value={formData?.status}
-                  onChange={handleChange}
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={[
-                    { label: "Ditolak", value: "reject" },
-                    { label: "Diproses (Lengkap)", value: "approved" },
-                    { label: "Diproses (Butuh Perbaikan)", value: "fix" },
-                    { label: "SP2D", value: "sp2d" },
-                  ]}
-                  isOpen={selectOpenStatus}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setMultiSelectOneOpen(false);
-                      setMultiSelectTwoOpen(false);
-                    }
-                    setSelectOpenStatus(open);
-                  }}
-                />
-                <ChecklistComponent
-                  title="Verifikasi"
-                  items={verifications.map((q) => ({
-                    id: q.id_question,
-                    label: q.text,
-                  }))}
-                  selectedIds={formData?.verifikasi}
-                  onChange={(updated) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      verifikasi: updated,
-                    }))
-                  }
-                  disabled={formData.status === "sp2d"}
-                />
-                <Textarea
-                  label="Catatan"
-                  name="catatan"
-                  value={formData?.catatan ?? formData?.feedback ?? ""}
-                  onChange={handleChange}
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                />
-                <Button type="submit" style={{ width: "100%" }}>
-                  Submit
-                </Button>
-              </form>
-            </div>
+              Download File
+            </Button>
           </div>
-        </div>
+        )}
       </Modal>
+      
       {/* modal detail */}
       <Modal
         open={isDetailModal}
