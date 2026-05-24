@@ -7,17 +7,13 @@ export default function InventoryTaking() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State untuk Filter & Search
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedKategori, setSelectedKategori] = useState("Semua");
-  
-  // State untuk Sortir default ke A-Z
+
   const [sortBy, setSortBy] = useState("A-Z");
 
-  // State untuk Zoom Gambar (Lightbox)
   const [zoomedImg, setZoomedImg] = useState(null);
 
-  // Struktur keranjang: { [id]: { qty: 0, satuan: "Pcs" } }
   const [keranjang, setKeranjang] = useState({});
   const [showModal, setShowModal] = useState(false);
 
@@ -69,7 +65,7 @@ export default function InventoryTaking() {
   };
 
   const sendToWA = () => {
-    const nomor = "6285122777026"; // Ganti dengan nomor WA bot/admin yang benar
+    const nomor = "6285122777026"; 
     let teks = "!ORDER_BARANG\n\n";
 
     databaseBarang.forEach((b) => {
@@ -83,10 +79,7 @@ export default function InventoryTaking() {
     setShowModal(false);
   };
 
-  // EKSTRAK KATEGORI UNTUK DROPDOWN (Unik dan otomatis)
   const daftarKategori = [...new Set(databaseBarang.map(b => b.kategori).filter(Boolean))];
-
-  // LOGIKA FILTER, SEARCH, DAN REVISI INTEGRASI SORTIR BARU
   const filteredBarang = databaseBarang
     .filter(barang => {
       const matchSearch = barang.nama.toLowerCase().includes(searchTerm.toLowerCase());
@@ -101,10 +94,10 @@ export default function InventoryTaking() {
         return (b.nama || "").localeCompare(a.nama || "");
       }
       if (sortBy === "STOK_TINGGI") {
-        return b.stok - a.stok; // Dari angka besar ke kecil
+        return b.stok - a.stok; 
       }
       if (sortBy === "STOK_RENDAH") {
-        return a.stok - b.stok; // Dari angka kecil ke besar
+        return a.stok - b.stok; 
       }
       return (a.nama || "").localeCompare(b.nama || "");
     });
@@ -141,10 +134,7 @@ export default function InventoryTaking() {
           <p className="text-sm text-gray-500 mt-1">Biro Keuangan dan BMN - SisKA</p>
         </div>
 
-        {/* TOOLBAR: SEARCH, FILTER, & DROPDOWN SORTIR BARU */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-          
-          {/* Kelompok Input Cari (Lebar Penuh di HP) */}
           <div className="relative col-span-2 sm:col-span-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -156,7 +146,6 @@ export default function InventoryTaking() {
             />
           </div>
 
-          {/* Kelompok Pilihan Kategori */}
           <div className="relative col-span-1">
             <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <select
@@ -164,7 +153,7 @@ export default function InventoryTaking() {
               onChange={(e) => setSelectedKategori(e.target.value)}
               className="w-full pl-8 pr-3 py-2.5 bg-white border border-gray-200 rounded-xl text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all"
             >
-              {/* Teksnya diganti jadi "Semua Kategori" biar jelas */}
+
               <option value="Semua">Semua Kategori</option>
               
               {daftarKategori.map(kat => (
@@ -173,7 +162,6 @@ export default function InventoryTaking() {
             </select>
           </div>
 
-          {/* Dropdown Urutkan Data (Dibelah Dua di HP) */}
           <div className="relative col-span-1">
             <Filter className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 transform rotate-180" />
             <select
@@ -189,7 +177,7 @@ export default function InventoryTaking() {
           </div>
         </div>
 
-        {/* LIST BARANG */}
+
         <div className="grid gap-3">
           {filteredBarang.length > 0 ? (
             filteredBarang.map((barang) => (
@@ -241,7 +229,6 @@ export default function InventoryTaking() {
         </div>
       </div>
 
-      {/* STICKY BOTTOM BAR */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 shadow-[0_-4px_10px_rgba(0,0,0,0.05)] z-40">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div>
@@ -261,7 +248,6 @@ export default function InventoryTaking() {
         </div>
       </div>
 
-      {/* MODAL KONFIRMASI CHECKOUT */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl">
@@ -306,8 +292,6 @@ export default function InventoryTaking() {
           </div>
         </div>
       )}
-
-      {/* MODAL ZOOM GAMBAR (LIGHTBOX) */}
       {zoomedImg && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
