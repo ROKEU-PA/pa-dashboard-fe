@@ -2,7 +2,7 @@ import React from "react";
 
 function TableCell({
   children,
-  align = "left",
+  align = [],
   component = "td",
   scope,
   sx = {},

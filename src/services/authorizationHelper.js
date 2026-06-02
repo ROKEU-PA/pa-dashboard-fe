@@ -11,12 +11,28 @@ const PUBLIC_ROUTES = ["/"];
 const ROLE_ROUTES = {
   [ROLES.SUPER_ADMIN]: "*",
   [ROLES.ADMIN]: "*",
-  [ROLES.GUEST]: "*",
+  
+  [ROLES.GUEST]: [
+    "/dashboard-utama",
+    "/dashboard-utama",
+    "/pelaksanaan-anggaran",
+    "/dashboard",
+    "/ptuk",
+    "/ikpa",
+    "/realisasi",
+    "/tata-usaha",
+    "/barang-milik-negara",
+    "/llat",
+    "/akuntansi-pelaporan"
+  ],
+
   [ROLES.USER]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
     "/satuan-kerja/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
     "/llat",
   ],
 
@@ -25,19 +41,10 @@ const ROLE_ROUTES = {
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
     "/satuan-kerja/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
     "/llat",
   ],
-
-  // [ROLES.GUEST]: [
-  //   "/dashboard",
-  //   "/ptuk",
-  //   "/pelaksanaan-anggaran",
-  //   "/ikpa",
-  //   "/realisasi",
-  //   "/tata-usaha",
-  //   "/barang-milik-negara",
-  //   "/llat",
-  // ],
 };
 
 const ADMIN_ONLY_ROUTES = ["/compilation", "/user-management"];
@@ -64,6 +71,12 @@ const getCleanedPathForMenuMatch = (pathname) => {
     const parts = pathname.split("/").filter(Boolean);
     return `/satuan-kerja/${parts[parts.length - 1]}`;
   }
+  if (pathname.startsWith("/arsip/")) {
+    const parts = pathname.split("/").filter(Boolean);
+    if (parts.length >= 3) {
+      return `/satuan-kerja/${parts[2]}`; 
+    }
+  }
   return pathname;
 };
 
@@ -84,6 +97,7 @@ const hasRouteAccess = (pathname, allowedRoutes) => {
 
   return allowedRoutes.some((route) => matchesRoute(pathname, route));
 };
+
 export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   if (!pathname || !userData) {
     console.warn("isAuthorizedRoute: Missing pathname or userData");
@@ -117,13 +131,23 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
 
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-
-  if (hasRouteAccess(normalizedPath, allowedRoutes)) {
-    return true;
+  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+    if (
+      normalizedPath === "/satuan-kerja/pengajuan" || 
+      normalizedPath === "/e-arsip" ||
+      normalizedPath.startsWith("/e-arsip/")||
+      normalizedPath === "/llat" ||             
+      normalizedPath.startsWith("/llat/")
+    ) {
+      return true;
+    }
   }
 
-  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
-    return hasMenuAccess(normalizedPath, userData, menus);
+  if (hasRouteAccess(normalizedPath, allowedRoutes)) {
+    if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+      return hasMenuAccess(normalizedPath, userData, menus);
+    }
+    return true;
   }
 
   console.warn("Access denied:", { pathname: normalizedPath, role: userRole });
@@ -147,8 +171,7 @@ export const getDefaultRedirectPath = (userRole) => {
 export const getRedirectPathOnDenied = (pathname, userRole) => {
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     const parts = pathname.split("/").filter(Boolean);
-
-    if (parts[0] === "satuan-kerja" && parts.length > 2) {
+    if ((parts[0] === "satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
       return "/" + parts.slice(0, -1).join("/");
     }
 

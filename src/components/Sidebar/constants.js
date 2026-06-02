@@ -66,17 +66,7 @@ export const menuItems = [
   {
     name: "Pelaksanaan Anggaran",
     path: "/pelaksanaan-anggaran",
-    children: [
-      {
-        name: "Tanda Terima SPP",
-        path: "/tanda-terima",
-        icon: <Table strokeWidth={3} />,
-      },
-      {
-        name: "Pengajuan SPP",
-        path: "/satuan-kerja/pengajuan",
-        icon: <FolderCheck strokeWidth={3} />,
-      },
+    children: [ 
       {
         name: "IKPA",
         path: "/ikpa",
@@ -87,25 +77,36 @@ export const menuItems = [
         path: "/realisasi",
         icon: <CircleDollarSign strokeWidth={3} />,
       },
-      {
-        name: "Arsip SPM",
-        path: "/satuan-kerja",
-        icon: <Archive strokeWidth={3} />,
-      },
+      
       {
         name: "Kompilasi",
         path: "/compilation",
         icon: <TrendingUpDown strokeWidth={3} />,
         adminOnly: true,
       },
-      {
-        name: "LLAT",
-        path: "/llat",
-        icon: <Calendar strokeWidth={3} />,
-      },
     ],
     icon: <HandCoins strokeWidth={3} />,
   },
+  {
+    name: "E-SPP",
+    path: "/satuan-kerja/pengajuan",
+    icon: <FolderCheck strokeWidth={3} />,
+  },
+  {
+    name: "Tanda Terima SPP",
+    path: "/tanda-terima",
+    icon: <Table strokeWidth={3} />,
+  },
+  {
+    name: "E-Arsip",
+    path: "/e-arsip",
+    icon: <Archive strokeWidth={3} />,
+  },
+  {
+    name: "LLAT",
+    path: "/llat",
+    icon: <Calendar strokeWidth={3} />,
+  },    
   {
     name: "Barang Milik Negara",
     adminOnly: true,
@@ -135,11 +136,6 @@ export const menuItems = [
     adminOnly: true,
     path: "/akuntansi-pelaporan",
     children: [
-      // {
-      //   name: "Dashboard",
-      //   path: "/dashboard/akuntansi-pelaporan",
-      //   icon: <Axis3D strokeWidth={3} />,
-      // },
     ],
     icon: <FileChartColumn strokeWidth={3} />,
   },

@@ -32,12 +32,14 @@ import PTUKLHP from "./pages/PTUK/LHP";
 import StateLosses from "./pages/PTUK/StateLosses";
 import PNBP from "./pages/PTUK/PNBP";
 import FinancialAdiministrator from "./pages/PTUK/FinancialAdministrator";
-import StatusPSP from "./pages/StateProperty/PspStatus"; 
-import KondisiAset from "./pages/StateProperty/assetCondition"; 
+import StatusPSP from "./pages/StateProperty/PspStatus";
+import KondisiAset from "./pages/StateProperty/assetCondition";
 import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import StrukturOrganisasi from "./pages/OrganizationalStructure";
 import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
+import YearSelectionPage from "./pages/ListSatuankerja/year";
+import ArchivePage from "./pages/ListSatuankerja/arsip";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -57,16 +59,6 @@ function App() {
             ) : (
               <LoginPage />
             )
-          }
-        />
-        <Route
-          path="/satuan-kerja"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
-                <MenuPage />
-              </AppLayout>
-            </PrivateRoute>
           }
         />
         <Route
@@ -167,30 +159,11 @@ function App() {
             </PrivateRoute>
           }
         />
-         <Route
-          path="/tata-usaha/pengambilan-persediaan"
-          element={
-              <AppLayout
-                isAdmin={isAdmin}
-                title="Pengambilan Persediaan"
-                userName="Inventory Taking"
-              >
-                <InventoryTaking />
-              </AppLayout>
-          }
-        />
         <Route
-          path="/inventaris-kantor/admin"
-          element={
-              <AppLayout
-                isAdmin={isAdmin}
-                title="Inventaris Kantor"
-                userName="Inventory Taking"
-              >
-                <InventoryTakingA />
-              </AppLayout>
-          }
+          path="/tata-usaha/pengambilan-persediaan"
+          element={<InventoryTaking />}
         />
+        <Route path="/inventaris-kantor/admin" element={<InventoryTakingA />} />
         {listMenu.map((data) => (
           <Route
             key={data?.id}
@@ -232,6 +205,51 @@ function App() {
             }
           />
         ))}
+
+        <Route
+          path="/e-arsip"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="E-Arsip">
+                <YearSelectionPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/e-arsip/:tahun"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Satuan Kerja">
+                <MenuPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/arsip/:tahun/:satker"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Arsip">
+                <ArchivePage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/llat"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
+                <LLATPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/compilation"
           element={
@@ -276,7 +294,11 @@ function App() {
           path="/dashboard/:subPage"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Helpdesk" userName="Administrator">
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Helpdesk"
+                userName="Administrator"
+              >
                 <DashboardPage />
               </AppLayout>
             </PrivateRoute>
@@ -287,7 +309,7 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Struktur Organisasi">
-                <StrukturOrganisasi/>
+                <StrukturOrganisasi />
               </AppLayout>
             </PrivateRoute>
           }
@@ -322,16 +344,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/llat"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
-                <LLATPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
+        
         <Route
           path="/tanda-terima"
           element={

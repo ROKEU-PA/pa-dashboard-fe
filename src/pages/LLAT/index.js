@@ -158,10 +158,10 @@ export default function LLATPage() {
   }, [currentMonth]);
 
   return (
-    <div>
-      <div className="flex gap-6 flex-col md:flex-row">
+    <div className="p-4 md:p-6  min-h-screen">
+      <div className=" mx-auto flex flex-col lg:flex-row gap-12">
         {/* Kalender */}
-        <Card className="w-full md:w-3/5 p-2 md:p-4 text-xs md:text-base">
+        <Card className="w-full">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, interactionPlugin]}
@@ -179,7 +179,7 @@ export default function LLATPage() {
         </Card>
 
         {/* Panel Catatan Bulanan */}
-        <Card className="w-full md:w-2/5 p-6 flex flex-col gap-4 overflow-y-auto max-h-[80vh] md:max-h-[100vh] text-sm md:text-base">
+        <Card className="w-full p-6 flex flex-col gap-4 overflow-y-auto text-sm md:text-base">
           <h2 className="text-xl font-semibold text-gray-700">
             Catatan Bulan{" "}
             {new Date(`${currentMonth}-01`).toLocaleString("id-ID", {

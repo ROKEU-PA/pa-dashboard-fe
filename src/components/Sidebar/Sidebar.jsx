@@ -19,17 +19,9 @@ function Sidebar() {
     if (role === "super_admin") return menuItems;
 
     if (role === "user" || role === "pic") {
-      return menuItems
-        .filter((item) => item.name === "Pelaksanaan Anggaran")
-        .map((item) => ({
-          ...item,
-          children: item.children?.filter((child) =>
-            ["Pengajuan SPP", "Arsip SPM", "Tanda Terima SPP", "LLAT"].includes(
-              child.name,
-            ),
-          ),
-        }));
-    }
+      const allowedMenus = ["E-SPP", "E-Arsip", "Tanda Terima SPP", "LLAT"];
+      return menuItems.filter(item => allowedMenus.includes(item.name));
+    }   
 
     if (role === "admin") {
       return menuItems
@@ -52,14 +44,15 @@ function Sidebar() {
     }
 
     if (role === "guest") {
+      const excludedMenus = ["Management", "Inventaris Kantor", "Pengambilan Persediaan","E-SPP", "E-Arsip", "Tanda Terima SPP"];
       return menuItems
-        .filter((item) => item.name !== "Management" && item.name !== "Inventaris Kantor" && item.name !== "Pengambilan Persediaan")
+        .filter((item) => !excludedMenus.includes(item.name))
         .map((item) => {
           if (item.name === "Pelaksanaan Anggaran") {
             return {
               ...item,
               children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA", "Realisasi", "LLAT", "About"].includes(
+                ["Dashboard", "IKPA", "Realisasi"].includes(
                   child.name,
                 ),
               ),

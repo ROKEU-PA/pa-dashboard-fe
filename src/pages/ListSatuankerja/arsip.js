@@ -21,7 +21,7 @@ import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams} from "react-router-dom";
 import moment from "moment";
 import {
   columns,
@@ -36,9 +36,10 @@ import {
 } from "./constants/styleConstants";
 import ChecklistComponent from "./components/ChecklistComponent";
 
-function ListSatuanKerjaPage() {
+function Arsip() {
   const { listMenu, userData } = useContext(AppContext);
   const location = useLocation();
+  const { tahun: urlTahun } = useParams();
 
   const [currentMenu, setCurrentMenu] = useState(
     getCurrentSatuanKerja(listMenu, location.pathname)
@@ -187,40 +188,39 @@ function ListSatuanKerjaPage() {
   };
 
   const fetchTable = async () => {
-    try {
-      const now = isPengajuanPath(location.pathname)
-        ? new Date().getFullYear()
-        : filter.tahun;
-      const status = isPengajuanPath(location.pathname) ? "arsip" : null;
-      const query = buildQueryString({
-        biro_code: currentMenu?.code,
-        tahun: now,
-        status: status,
-        search_key: filter.searchKey,
-        page: page + 1,
-        per_page: rowsPerPage,
-        sort_by: sortBy,
-        sort_dir: sortDir,
-        start_date: filter.startDate
-          ? moment(filter.startDate).format("YYYY-MM-DD").toString()
-          : "",
-        end_date: filter.endDate
-          ? moment(filter.endDate).format("YYYY-MM-DD").toString()
-          : "",
-      });
-      const data = await apiRequest({
-        url: `/archive/list?${query}`,
-        token: accessToken,
-      });
-      let result = data?.data;
-      if (data?.success) {
-        setTotalPages(result?.last_page);
-        setDataTable(result?.data);
-      }
-    } catch (error) {
-      console.error(error);
+  try {
+    const now = filter.tahun ? filter.tahun : (urlTahun ? urlTahun : moment().year());
+    const status = null;
+    const query = buildQueryString({
+      biro_code: currentMenu?.code,
+      tahun: now, 
+      status: status,
+      search_key: filter.searchKey,
+      page: page + 1,
+      per_page: rowsPerPage,
+      sort_by: sortBy,
+      sort_dir: sortDir,
+      start_date: filter.startDate
+        ? moment(filter.startDate).format("YYYY-MM-DD").toString()
+        : "",
+      end_date: filter.endDate
+        ? moment(filter.endDate).format("YYYY-MM-DD").toString()
+        : "",
+    });
+    
+    const data = await apiRequest({
+      url: `/archive/list?${query}`,
+      token: accessToken,
+    });
+    let result = data?.data;
+    if (data?.success) {
+      setTotalPages(result?.last_page);
+      setDataTable(result?.data);
     }
-  };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   const submitData = async (formData) => {
     try {
@@ -245,7 +245,6 @@ function ListSatuanKerjaPage() {
       payload.append("uploaded_name", formData.uploaded_by);
 
       if (formData.dokumen !== null) {
-        //const defaultToken = localStorage.getItem("token");
         const defaultToken = JSON.parse(
           sessionStorage.getItem("auth")
         )?.accessToken;
@@ -546,9 +545,6 @@ function ListSatuanKerjaPage() {
       } else {
         await editData(formData);
       }
-
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
       setIsCheckModal(false);
@@ -577,6 +573,7 @@ function ListSatuanKerjaPage() {
     fetchType();
     setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
   }, [
+    urlTahun,
     filter.tahun,
     filter.searchKey,
     page + 1,
@@ -596,7 +593,7 @@ function ListSatuanKerjaPage() {
       >
         <div className="flex flex-col lg:flex-row justify-between items-center gap-4 p-4">
           {userData &&
-            (!isPengajuanPath(location.pathname) ? (
+            (location.pathname) ? (
               <Button
                 onClick={() => {
                   setIsOpenModal(true);
@@ -630,11 +627,8 @@ function ListSatuanKerjaPage() {
                   Tambah Pengajuan
                 </Button>
               )
-            ))}
-
-          {/* Kolom Kanan: Form Filter */}
-          <div
-            className="flex flex-col sm:flex-row flex-wrap items-end justify-center lg:justify-end gap-3 w-full lg:flex-1">
+            )}
+          <div className="flex flex-col sm:flex-row flex-wrap items-end justify-center lg:justify-end gap-3 w-full lg:flex-1">
             <a
               href={
                 "https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view"
@@ -657,7 +651,6 @@ function ListSatuanKerjaPage() {
               value={filter.searchKey}
               onChange={(e) => handleDateChange("searchKey", e.target.value)}
             />
-            {!isPengajuanPath(location.pathname) ? (
               <Input
                 label="Tahun"
                 style={{ width: "200px" }}
@@ -666,7 +659,6 @@ function ListSatuanKerjaPage() {
                 validate={validationSchema.tahun}
                 onChange={(e) => handleDateChange("tahun", e.target.value)}
               />
-            ) : null}
             <DatePickerInput
               label="Start Date"
               selected={filter.startDate}
@@ -686,7 +678,7 @@ function ListSatuanKerjaPage() {
             />
           </div>
         </div>
-        {/* c */}
+
         <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm scrollbar-thin scrollbar-thumb-gray-300">
           <Table sx={{ minWidth: 650 }} aria-label="interactive data table">
             <TableHeader>
@@ -723,7 +715,7 @@ function ListSatuanKerjaPage() {
             </TableHeader>
             <TableBody>
               {dataTable.map((row, index) => (
-                <TableRow key={index}
+               <TableRow key={index}
                 className="transition-all duration-200 hover:bg-blue-50/80 group border-b border-gray-100 last:border-none">
                   {columns
                     .filter(
@@ -893,18 +885,24 @@ function ListSatuanKerjaPage() {
                       if (col.key === "action") {
                         const isPengajuan = isPengajuanPath(location.pathname);
                         const role = userData?.role;
-                       
+
+                        const adminRoles = [
+                          "admin",
+                          "pic",
+                          "super_admin",
+                          "superadmin",
+                        ];
+
+                        const isAdminRole = adminRoles.includes(role);
                         const showEditButton =
                           (isPengajuan &&
-                            role === "user" &&
+                            !isAdminRole &&
                             row.status !== "approved" &&
                             row.status !== "sp2d") ||
                           !isPengajuan;
 
                         const showPengujianButton =
-                          isPengajuan &&
-                          (role === "admin" || role === "pic") &&
-                          row.status !== "sp2d";
+                          isPengajuan && isAdminRole && row.status !== "sp2d";
 
                         const showDetailButton =
                           isPengajuan &&
@@ -932,12 +930,15 @@ function ListSatuanKerjaPage() {
                                   } else {
                                     setJenisFile("file");
                                   }
+
                                   setVariantModal("Edit");
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
                                     link: row.document.path,
                                   });
+
                                   setIsOpenModal(true);
                                 }}
                               >
@@ -970,7 +971,9 @@ function ListSatuanKerjaPage() {
                                       label: v.text,
                                       value: v.id_question,
                                     }));
+
                                   setVariantModal("Pengujian");
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
@@ -978,8 +981,11 @@ function ListSatuanKerjaPage() {
                                     verifikasi: verifikasiWithLabel,
                                     catatan: row.feedback,
                                   });
+
                                   fetchType(row.type_id);
+
                                   setPDFtoOpen(row.document?.url);
+
                                   setIsCheckModal(true);
                                 }}
                                 letiant="danger"
@@ -995,12 +1001,14 @@ function ListSatuanKerjaPage() {
                                 className="bg-[#BCDD51] p-3 rounded-lg text-white cursor-pointer hover:bg-[#A2C827] active:bg-[#b2d836] w-full"
                                 onClick={() => {
                                   fetchType(row.type_id);
+
                                   setFormData({
                                     ...row,
                                     type: row.jenis_spp,
                                     kelengkapan: row.question_checklist,
                                     verifikasi: row.verification_checklist,
                                   });
+
                                   setIsDetailModal(true);
                                 }}
                               >
@@ -1012,7 +1020,7 @@ function ListSatuanKerjaPage() {
                           </TableCell>
                         );
                       }
-                      // rendering
+                      // Default rendering
                       return (
                         <TableCell key={col.key} align="center">
                           {row[col.key] ?? "-"}
@@ -1031,7 +1039,7 @@ function ListSatuanKerjaPage() {
           rowsPerPage={rowsPerPage}
           onRowsPerPageChange={(value) => {
             setRowsPerPage(value);
-            setPage(0); // reset to first page when rows per page changes
+            setPage(0);
           }}
         />
       </Paper>
@@ -1257,7 +1265,7 @@ function ListSatuanKerjaPage() {
             <Button style={{ width: "100%" }}>Buka</Button>
           </a>
         ) : (
-          <div className="m-4 mx-auto bg-white border border-blue-100 rounded-2xl p-6 shadow-xl shadow-blue-200/50 flex flex-col items-center text-center">
+           <div className="m-4 mx-auto bg-white border border-blue-100 rounded-2xl p-6 shadow-xl shadow-blue-200/50 flex flex-col items-center text-center">
             <div className="relative text-[#308BFD]">
               <Folder size={84} strokeWidth={1.5} />
               <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider">
@@ -1281,207 +1289,7 @@ function ListSatuanKerjaPage() {
           </div>
         )}
       </Modal>
-      {/* modal pengujian */}
-      <Modal
-        open={isCheckModal}
-        onClose={() => {
-          setIsCheckModal(false);
-          setVariantModal("");
-        }}
-        title="Form Pengujian"
-        width={fileExtension === "pdf" ? "95vw" : "80vw"}
-        maxWidth="95vw"
-        bodyStyle={{
-          maxHeight: "85vh",
-          overflowY: "auto",
-        }}
-      >
-        <div
-          style={{
-            maxHeight: "80vh",
-            overflowY: "auto",
-            padding: window.innerWidth <= 768 ? "2px" : "0 20px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: window.innerWidth <= 768 ? "column" : "row", // FIX
-              gap: 20,
-              width: "100%",
-              padding: window.innerWidth <= 768 ? "0 2px" : 0,
-              height: "auto",
-              overflow: "auto",
-            }}
-          >
-            {fileExtension === "pdf" ? (
-              // <iframe
-              //   src={`${pdfToOpen}#zoom=120`}
-              //   style={{ width: "100%", height: "100%" }}
-              //   title="PDF Viewer"
-              // />
-              <div
-                style={{
-                  width: window.innerWidth <= 768 ? "100%" : "50%",
-                  maxHeight: window.innerWidth <= 768 ? "45vh" : "100%",
-                  overflowY: "auto",
-                  padding: 0,
-                }}
-              >
-                <CustomPDFViewer pdfSource={pdfToOpen} />
-              </div>
-            ) : (
-              <div className="w-full md:w-1/2 flex items-center justify-center">
-                <div className="w-full max-w-md border border-blue-100 bg-white rounded-2xl p-5 sm:p-6 shadow-lg flex flex-col items-center text-center">
-                  
-                  <div className="relative text-[#308BFD]">
-                    <Folder
-                      size={window.innerWidth < 640 ? 60 : 84}
-                      strokeWidth={1.5}
-                    />
-
-                    <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider">
-                      RAR
-                    </span>
-                  </div>
-
-                  <p className="mt-4 text-sm sm:text-base text-slate-600">
-                    File SPP ber-format (.rar)
-                  </p>
-
-                  <Button
-                    className="mt-5 w-full flex items-center justify-center gap-2 py-2.5 sm:py-3 px-4 sm:px-6 bg-gradient-to-r from-[#59C6FF] to-[#308BFD] hover:from-[#49bbf5] hover:to-[#257be0] text-white text-sm sm:text-base font-semibold rounded-xl transition-all duration-200 active:scale-[0.98]"
-                    onClick={() => {
-                      const linkSPP = document.createElement("a");
-                      linkSPP.href = pdfToOpen;
-                      linkSPP.download = "";
-                      linkSPP.click();
-                    }}
-                  >
-              
-                    Download File
-                  </Button>
-                </div>
-              </div>
-            )}
-            <div
-              style={{
-                width: window.innerWidth <= 768 ? "100%" : "50%",
-                maxHeight:
-                  window.innerWidth <= 768 ? "auto" : "calc(100vh - 150px)",
-                paddingRight: 10,
-              }}
-            >
-              <form
-                onSubmit={handleSubmit}
-                style={{
-                  padding: 20,
-                  width: "100%",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 20,
-                  fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                }}
-              >
-                <Input
-                  label="No. SPP"
-                  name="no_spp"
-                  value={formData?.["no_spp"]}
-                  disabled
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                />
-                <Select
-                  label="Jenis SPP"
-                  name="type"
-                  value={formData?.type_id}
-                  disabled
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={types.map((q) => ({
-                    label: q.type,
-                    value: q.type_id,
-                  }))}
-                  isOpen={selectOpen}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setSelectOpenStatus(false);
-                    }
-                    setSelectOpen(open);
-                  }}
-                />
-                <ChecklistComponent
-                  title="Kelengkapan"
-                  items={questions.map((q) => ({
-                    id: q.id_question,
-                    label: q.text,
-                  }))}
-                  selectedIds={formData.kelengkapan}
-                  onChange={(updated) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      kelengkapan: updated,
-                    }))
-                  }
-                  disabled={formData.status === "sp2d"}
-                />
-                <Select
-                  label="Status"
-                  name="status"
-                  value={formData?.status}
-                  onChange={handleChange}
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                  options={[
-                    { label: "Ditolak", value: "reject" },
-                    { label: "Diproses (Lengkap)", value: "approved" },
-                    { label: "Diproses (Butuh Perbaikan)", value: "fix" },
-                    { label: "SP2D", value: "sp2d" },
-                  ]}
-                  isOpen={selectOpenStatus}
-                  setIsOpen={(open) => {
-                    if (open) {
-                      setMultiSelectOneOpen(false);
-                      setMultiSelectTwoOpen(false);
-                    }
-                    setSelectOpenStatus(open);
-                  }}
-                />
-                <ChecklistComponent
-                  title="Verifikasi"
-                  items={verifications.map((q) => ({
-                    id: q.id_question,
-                    label: q.text,
-                  }))}
-                  selectedIds={formData?.verifikasi}
-                  onChange={(updated) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      verifikasi: updated,
-                    }))
-                  }
-                  disabled={formData.status === "sp2d"}
-                />
-                <Textarea
-                  label="Catatan"
-                  name="catatan"
-                  value={formData?.catatan ?? formData?.feedback ?? ""}
-                  onChange={handleChange}
-                  style={{
-                    fontSize: window.innerWidth <= 768 ? "14px" : "16px",
-                  }}
-                />
-                <Button type="submit" style={{ width: "100%" }}>
-                  Submit
-                </Button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </Modal>
+      
       {/* modal detail */}
       <Modal
         open={isDetailModal}
@@ -1609,4 +1417,4 @@ function ListSatuanKerjaPage() {
   );
 }
 
-export default ListSatuanKerjaPage;
+export default Arsip;
