@@ -27,6 +27,11 @@ import {
   BadgeCent,
   ArrowLeftRight,
   ArchiveRestore,
+  Monitor,
+  MonitorDot,
+  Ratio,
+  Award,
+  CirclePercent,
 } from "lucide-react";
 
 export const menuItems = [
@@ -93,14 +98,14 @@ export const menuItems = [
     icon: <HandCoins strokeWidth={3} />,
   },
   {
-    name: "E-SPP",
-    path: "/satuan-kerja/pengajuan",
-    icon: <FolderCheck strokeWidth={3} />,
+    name: "Monitoring",
+    path: "/monitoring",
+    icon: <MonitorDot strokeWidth={3} />,
   },
   {
-    name: "Tanda Terima SPP",
-    path: "/tanda-terima",
-    icon: <Table strokeWidth={3} />,
+    name: "E-SPP",
+    path: "/satuan-kerja",
+    icon: <FolderCheck strokeWidth={3} />,
   },
   {
     name: "E-Arsip",
@@ -108,8 +113,19 @@ export const menuItems = [
     icon: <Archive strokeWidth={3} />,
   },
   {
-    name: "LLAT",
-    path: "/llat",
+    name: "IKPA",
+    path: "/ikpa",
+    icon: <Award strokeWidth={3} />,
+  },
+  
+  {
+    name: "Realisasi",
+    path: "/realisasi",
+    icon: <CirclePercent strokeWidth={3} />,
+  },
+  {
+    name: "Kalender",
+    path: "/kalender",
     icon: <Calendar strokeWidth={3} />,
   },    
   {

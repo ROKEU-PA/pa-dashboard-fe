@@ -20,7 +20,6 @@ import IkpaPage from "./pages/Ikpa";
 import MainDashboard from "./pages/MainDashboard";
 import BudgetExecution from "./pages/BudgetExecution";
 import StateProperty from "./pages/StateProperty";
-import TandaTerimaPage from "./pages/TandaTerima";
 import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
@@ -39,6 +38,7 @@ import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
 import YearSelectionPage from "./pages/ListSatuankerja/year";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
+import MonitoringPage from "./pages/Monitoring";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -177,7 +177,7 @@ function App() {
           />
         ))}
         <Route
-          path="/satuan-kerja/:subPage"
+          path="/satuan-kerja"
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
@@ -193,7 +193,7 @@ function App() {
               const pathParts = data.path.split("/").filter(Boolean);
               const base = "/" + pathParts[0];
               const end = pathParts.slice(1).join("/");
-              return `${base}/pengajuan/${end}`;
+              return `${base}/${end}`;
             })()}
             element={
               <PrivateRoute>
@@ -233,17 +233,6 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Arsip">
                 <ArchivePage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/llat"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
-                <AboutPage />
               </AppLayout>
             </PrivateRoute>
           }
@@ -355,11 +344,11 @@ function App() {
           }
         />
         <Route
-          path="/tanda-terima"
+          path="/monitoring"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Tanda Terima SPP">
-                <TandaTerimaPage />
+              <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP">
+                <MonitoringPage />
               </AppLayout>
             </PrivateRoute>
           }

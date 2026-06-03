@@ -9,8 +9,6 @@ function AppLayout({ children, isAdmin, title, userName }) {
   const location = useLocation();
   const { userData } = useContext(AppContext);
 
-  console.log("AppLayout role:", userData?.role);
-  // OTOMATIS: Tutup sidebar setiap kali path/URL berubah
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);

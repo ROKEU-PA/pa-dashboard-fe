@@ -78,7 +78,6 @@ export const useBudgetExecution = () => {
   };
 
   const mapColorByValue = (ikpa) => {
-    console.log(ikpa)
     if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
     if (ikpa >= 89) return "bg-blue-bg"; // Baik
     if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup

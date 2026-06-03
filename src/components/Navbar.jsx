@@ -1,7 +1,7 @@
 import React from "react";
 import User from "./User";
 
-function Navbar({ menuName, user,role }) {console.log("Navbar role:", role)
+function Navbar({ menuName, user,role }) {
   return (
     
     <div className="bg-white w-full px-4">

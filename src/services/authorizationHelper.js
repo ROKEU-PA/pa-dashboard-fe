@@ -14,7 +14,6 @@ const ROLE_ROUTES = {
   
   [ROLES.GUEST]: [
     "/dashboard-utama",
-    "/dashboard-utama",
     "/pelaksanaan-anggaran",
     "/dashboard",
     "/ptuk",
@@ -22,7 +21,7 @@ const ROLE_ROUTES = {
     "/realisasi",
     "/tata-usaha",
     "/barang-milik-negara",
-    "/llat",
+    "/kalender",
     "/akuntansi-pelaporan"
   ],
 
@@ -30,20 +29,18 @@ const ROLE_ROUTES = {
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
-    "/satuan-kerja/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
-    "/llat",
+    "/kalender",
   ],
 
   [ROLES.PIC]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
-    "/satuan-kerja/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
-    "/llat",
+    "/kalender",
   ],
 };
 
@@ -66,23 +63,9 @@ const matchesRoute = (pathname, route) => {
   return false;
 };
 
-const getCleanedPathForMenuMatch = (pathname) => {
-  if (pathname.startsWith("/satuan-kerja/pengajuan/")) {
-    const parts = pathname.split("/").filter(Boolean);
-    return `/satuan-kerja/${parts[parts.length - 1]}`;
-  }
-  if (pathname.startsWith("/arsip/")) {
-    const parts = pathname.split("/").filter(Boolean);
-    if (parts.length >= 3) {
-      return `/satuan-kerja/${parts[2]}`; 
-    }
-  }
-  return pathname;
-};
 
 const hasMenuAccess = (pathname, userData, menus) => {
-  const cleanedPath = getCleanedPathForMenuMatch(pathname);
-  const matchedMenu = menus.find((menu) => menu.path === cleanedPath);
+  const matchedMenu = menus.find((menu) => menu.path === pathname);
 
   if (!matchedMenu) return false;
 
@@ -107,11 +90,11 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   const userRole = userData.role;
   const normalizedPath = normalizePath(pathname);
 
-  console.log("Authorization check:", {
-    pathname: normalizedPath,
-    role: userRole,
-    accessCodes: userData.access_code,
-  });
+  // console.log("Authorization check:", {
+  //   pathname: normalizedPath,
+  //   role: userRole,
+  //   accessCodes: userData.access_code,
+  // });
 
   if (PUBLIC_ROUTES.includes(normalizedPath)) {
     return true;
@@ -125,7 +108,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     return userRole === ROLES.SUPER_ADMIN || userRole === ROLES.ADMIN;
   }
 
-  if (normalizedPath.startsWith("/tanda-terima")) {
+  if (normalizedPath.startsWith("/monitoring")) {
     return userRole === ROLES.USER || userRole === ROLES.PIC;
   }
 
@@ -133,11 +116,12 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   if (allowedRoutes === "*") return true;
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     if (
-      normalizedPath === "/satuan-kerja/pengajuan" || 
+      normalizedPath === "/satuan-kerja" || 
       normalizedPath === "/e-arsip" ||
       normalizedPath.startsWith("/e-arsip/")||
-      normalizedPath === "/llat" ||             
-      normalizedPath.startsWith("/llat/")
+      normalizedPath.startsWith("/arsip/")||
+      normalizedPath === "/kalender" ||             
+      normalizedPath.startsWith("/kalender/")
     ) {
       return true;
     }
@@ -162,7 +146,7 @@ export const getDefaultRedirectPath = (userRole) => {
       return "/dashboard-utama";
     case ROLES.USER:
     case ROLES.PIC:
-      return "/satuan-kerja/pengajuan";
+      return "/satuan-kerja";
     default:
       return "/";
   }
@@ -175,7 +159,7 @@ export const getRedirectPathOnDenied = (pathname, userRole) => {
       return "/" + parts.slice(0, -1).join("/");
     }
 
-    return "/satuan-kerja/pengajuan";
+    return "/satuan-kerja";
   }
 
   return getDefaultRedirectPath(userRole);

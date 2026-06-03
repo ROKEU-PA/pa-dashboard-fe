@@ -88,7 +88,7 @@ function UserManagementPage() {
         access: JSON.stringify(formData?.access_code),
         nama: formData?.name,
       };
-      console.log(payload);
+      // console.log(payload);
 
       const result = await apiRequest({
         url: "/user/register",

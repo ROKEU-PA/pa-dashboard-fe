@@ -40,7 +40,6 @@ const User = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(username);
     try {
       const payload = {
         kode_biro: username,

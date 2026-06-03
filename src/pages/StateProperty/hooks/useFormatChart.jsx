@@ -1,5 +1,5 @@
 export function formatToAssetPieChart(data = []) {
-  console.log("dataAsset    ", data);
+  // console.log("dataAsset    ", data);
   return data
     ?.filter((_, index) => index > 1)
     .map((item, idx) => ({

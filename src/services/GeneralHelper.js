@@ -116,7 +116,7 @@ export function filterDataByCode(dataArray, targetCode) {
 }
 
 export const isAuthorizedRoute = (pathname, userData, menus = []) => {
-  console.log("user", userData);
+  // console.log("user", userData);
   const isSuperAdmin = userData?.role === "super_admin";
   const isAdmin = userData?.role === "admin";
   const isUser = userData?.role === "user";
@@ -130,22 +130,12 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   // 2. User bisa akses Pelaksanaan Anggaran (aktualisasi)
   if (isUser || isPIC) {
     if (pathname === "/dashboard/pelaksanaan-anggaran") return true;
-    if (pathname.startsWith("/tanda-terima")) return true;
+    if (pathname.startsWith("monitoring")) return true;
     if (pathname === "/pelaksanaan-anggaran") return true;
     if (pathname === "/satuan-kerja") return true;
-    if (pathname === "/satuan-kerja/pengajuan") return true;
-    if (pathname === "/llat") return true;
+    if (pathname === "/kalender") return true;
 
-    // Validasi berdasarkan listMenu dan biro_code
-    const cleanedPath = (() => {
-      if (pathname.startsWith("/satuan-kerja/pengajuan")) {
-        const parts = pathname.split("/").filter(Boolean);
-        return `/satuan-kerja/${parts[parts.length - 1]}`;
-      }
-      return pathname;
-    })();
-
-    const matched = menus.find((menu) => menu.path === cleanedPath);
+    const matched = menus.find((menu) => menu.path === pathname);
     if (!matched) return false;
 
     return userData?.access_code?.includes(Number(matched.code));
@@ -160,7 +150,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     if (pathname === "/realisasi") return true;
     if (pathname.startsWith("/tata-usaha")) return true;
     if (pathname.startsWith("/barang-milik-negara")) return true;
-    if (pathname === "/llat") return true;
+    if (pathname === "/kalender") return true;
   }
 
   if (pathname === "/") return true;
