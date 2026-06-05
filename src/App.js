@@ -6,7 +6,6 @@ import LoginPage from "./pages/LoginPage";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
 import CompilationPage from "./pages/Compilation";
-import SoonPage from "./pages/Soon";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -39,6 +38,7 @@ import InventoryTakingA from "./pages/InventoryTaking/admin";
 import YearSelectionPage from "./pages/ListSatuankerja/year";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
 import MonitoringPage from "./pages/Monitoring";
+import PerformanceIndicator from "./pages/PerformanceIndicator";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -163,7 +163,7 @@ function App() {
           element={<InventoryTaking />}
         />
         <Route path="/inventaris-kantor/admin" element={<InventoryTakingA />} />
-        {listMenu.map((data) => (
+        {/* {listMenu.map((data) => (
           <Route
             key={data?.id}
             path={`${data?.path}`}
@@ -175,7 +175,7 @@ function App() {
               </PrivateRoute>
             }
           />
-        ))}
+        ))} */}
         <Route
           path="/satuan-kerja"
           element={
@@ -191,6 +191,7 @@ function App() {
             key={data?.id}
             path={(() => {
               const pathParts = data.path.split("/").filter(Boolean);
+              console.log(pathParts)
               const base = "/" + pathParts[0];
               const end = pathParts.slice(1).join("/");
               return `${base}/${end}`;
@@ -254,16 +255,6 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin}>
                 <UserManagementPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/soon"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
-                <SoonPage />
               </AppLayout>
             </PrivateRoute>
           }
@@ -349,6 +340,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP">
                 <MonitoringPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/report/ikpa"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Indikator Kinerja Pelaksanaan Anggaran">
+                <PerformanceIndicator />
               </AppLayout>
             </PrivateRoute>
           }

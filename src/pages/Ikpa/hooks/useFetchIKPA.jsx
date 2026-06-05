@@ -61,7 +61,7 @@ export const useFetchIKPA = ({ eselonCode, searchKey, month, year }) => {
 
   return {
     data,
-    refetch: fetchTable,
+    refetchIkpas: fetchTable,
     loading,
   };
 };

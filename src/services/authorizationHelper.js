@@ -90,12 +90,6 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   const userRole = userData.role;
   const normalizedPath = normalizePath(pathname);
 
-  // console.log("Authorization check:", {
-  //   pathname: normalizedPath,
-  //   role: userRole,
-  //   accessCodes: userData.access_code,
-  // });
-
   if (PUBLIC_ROUTES.includes(normalizedPath)) {
     return true;
   }
@@ -120,8 +114,8 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
       normalizedPath === "/e-arsip" ||
       normalizedPath.startsWith("/e-arsip/")||
       normalizedPath.startsWith("/arsip/")||
-      normalizedPath === "/kalender" ||             
-      normalizedPath.startsWith("/kalender/")
+      normalizedPath.startsWith("/report/")||
+      normalizedPath === "/kalender"
     ) {
       return true;
     }
@@ -146,7 +140,7 @@ export const getDefaultRedirectPath = (userRole) => {
       return "/dashboard-utama";
     case ROLES.USER:
     case ROLES.PIC:
-      return "/satuan-kerja";
+      return "/monitoring";
     default:
       return "/";
   }
@@ -155,11 +149,11 @@ export const getDefaultRedirectPath = (userRole) => {
 export const getRedirectPathOnDenied = (pathname, userRole) => {
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     const parts = pathname.split("/").filter(Boolean);
-    if ((parts[0] === "satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
+    if ((parts[0] === "/satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
       return "/" + parts.slice(0, -1).join("/");
     }
 
-    return "/satuan-kerja";
+    return "/monitoring";
   }
 
   return getDefaultRedirectPath(userRole);

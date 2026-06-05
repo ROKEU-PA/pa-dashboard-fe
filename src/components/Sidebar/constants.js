@@ -114,7 +114,7 @@ export const menuItems = [
   },
   {
     name: "IKPA",
-    path: "/ikpa",
+    path: "/report/ikpa",
     icon: <Award strokeWidth={3} />,
   },
   

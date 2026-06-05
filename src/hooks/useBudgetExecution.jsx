@@ -29,7 +29,7 @@ export const useBudgetExecution = () => {
           ? `/pa/ikpa/all?${buildQueryString(period)}`
           : `/pa/ikpa/all?year=${moment().subtract(1, "years").year()}&month=1`,
       });
-
+      console.log(data)
       if (!period) {
         let result = data?.data.filter((q) => q.satker_code === null);
         if (data.success) {
@@ -41,7 +41,6 @@ export const useBudgetExecution = () => {
           .filter((q) => q.satker_code === null)
           .map((item, index) => {
             const constantItem = dataTable.data[index];
-
             return {
               eselon: constantItem?.eselon || item.name,
               revisiDipa: item.revisi_dipa,
@@ -84,6 +83,13 @@ export const useBudgetExecution = () => {
     return "bg-red-bg"; // Kurang
   };
 
+  const mapColorByValueIndicator = (ikpa) => {
+    if (ikpa >= 95) return "bg-[#6FCE00]"; // Sangat Baik
+    if (ikpa >= 89) return "bg-[#2E70FD]"; // Baik
+    if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup
+    return "bg-[#FF4155]"; // Kurang
+  };
+
   const mapColorTextByValue = (ikpa) => {
     if (ikpa >= 95) return "text-green-text"; // Sangat Baik
     if (ikpa >= 89) return "text-blue-text"; // Baik
@@ -102,6 +108,7 @@ export const useBudgetExecution = () => {
     refetch: fetchEs1Data,
     getIKPAColor,
     mapColorByValue,
+    mapColorByValueIndicator,
     mapColorTextByValue,
   };
 };

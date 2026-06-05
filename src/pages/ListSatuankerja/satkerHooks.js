@@ -35,5 +35,5 @@ export function getCurrentSatuanKerja(menuList, pathname) {
 }
 
 export function isPengajuanPath(pathname) {
-  return pathname.includes('/pengajuan');
+  return pathname.includes('/satuan-kerja');
 }

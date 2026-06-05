@@ -10,10 +10,11 @@ import { useFetchRealization } from "../Realisasi/hooks/useFetchRealization";
 
 function BudgetExecution() {
   const year = moment().format("YYYY");
-  const period = {
+  const [currentPeriod, setCurrentPeriod] = useState({
     year: moment().year(),
-    month: moment().subtract(30, "days").format("M"),
-  };
+    month: moment().subtract(30, "days").format("MM"),
+  });
+  const [attempts, setAttempts] = useState(0);
 
   const {
     KemnakerRate,
@@ -28,8 +29,8 @@ function BudgetExecution() {
   } = useFetchRealization(
     "all",
     "",
-    moment().subtract(30, "days").format("M"),
-    moment().year(),
+    currentPeriod.month,
+    currentPeriod.year,
   );
 
   const dataset = [
@@ -43,13 +44,30 @@ function BudgetExecution() {
   const [labels, setLabels] = useState([]);
 
   useEffect(() => {
-    refetch(period);
-    if (!dataCard || dataCard.length === 0) return;
+    refetch(currentPeriod);
+  }, [currentPeriod]); 
+  
+  useEffect(() => {
+    if (!dataCard || dataCard.length === 0) {
+      if (attempts < 12) {
+        const prevDate = moment(
+          `${currentPeriod.year}-${currentPeriod.month}`,
+          "YYYY-MM"
+        ).subtract(1, "months");
+
+        setCurrentPeriod({
+          year: prevDate.year(),
+          month: prevDate.format("MM"),
+        });
+        
+        setAttempts((prev) => prev + 1);
+      }
+      return;
+    }
 
     setValues(dataCard.map((item) => item.persen_realisasi));
-
     setLabels(dataCard.map((item) => item.name));
-  }, [year, dataCard]);
+  }, [dataCard]);
 
   return (
     <div>
@@ -61,7 +79,7 @@ function BudgetExecution() {
                 Nilai IKPA
               </span>
               <span className="font-medium  text-lg md:text-lg opacity-90">
-                {moment(period?.month).format("MMM")} {period?.year}
+                {moment(currentPeriod?.month).format("MMM")} {currentPeriod?.year}
               </span>
             </div>
             <span className="text-4xl md:text-5xl lg:text-6xl font-bold my-4 z-10">

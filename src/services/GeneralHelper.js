@@ -141,7 +141,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     return userData?.access_code?.includes(Number(matched.code));
   }
 
-  // 3. Guest bisa akses /satuan-kerja
+  // 3. Guest tidak bisa akses /satuan-kerja
   if (isGuest) {
     if (pathname.startsWith("/dashboard")) return true;
     if (pathname.startsWith("/ptuk")) return true;
