@@ -6,7 +6,11 @@ import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
 import { buildQueryString } from "@/services/GeneralHelper";
 // Import konstanta dan helper yang sudah Anda miliki
-import { columns, getCurrentSatuanKerja, isPengajuanPath } from "@/pages/ListSatuankerja/satkerHooks";
+import {
+  columns,
+  getCurrentSatuanKerja,
+  isPengajuanPath,
+} from "@/pages/ListSatuankerja/satkerHooks";
 
 export function useSatkerLogic() {
   const { listMenu, userData } = useContext(AppContext);
@@ -19,9 +23,9 @@ export function useSatkerLogic() {
   // 1. STATE MANAGEMENT
   // ==========================================
   const [currentMenu, setCurrentMenu] = useState(
-    getCurrentSatuanKerja(listMenu, location.pathname)
+    getCurrentSatuanKerja(listMenu, location.pathname),
   );
-  
+
   const [filter, setFilter] = useState({
     tahun: "",
     searchKey: "",
@@ -84,7 +88,11 @@ export function useSatkerLogic() {
   const handleDateChange = (key, value) => {
     setFilter((prev) => {
       const newFilter = { ...prev, [key]: value };
-      if (key === "startDate" && newFilter.endDate && value > newFilter.endDate) {
+      if (
+        key === "startDate" &&
+        newFilter.endDate &&
+        value > newFilter.endDate
+      ) {
         newFilter.endDate = null;
       }
       return newFilter;
@@ -99,12 +107,21 @@ export function useSatkerLogic() {
     }));
   };
 
+  const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
+
+  const isFileSizeValid = (file, maxSizeMB = 100) => {
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    return file.size <= maxSizeBytes;
+  };
+
   // ==========================================
   // 3. API CALLS
   // ==========================================
   const fetchTable = async () => {
     try {
-      const now = isPengajuanPath(location.pathname) ? new Date().getFullYear() : filter.tahun;
+      const now = isPengajuanPath(location.pathname)
+        ? new Date().getFullYear()
+        : filter.tahun;
       const status = isPengajuanPath(location.pathname) ? "arsip" : null;
       const query = buildQueryString({
         biro_code: currentMenu?.code,
@@ -115,11 +132,18 @@ export function useSatkerLogic() {
         per_page: rowsPerPage,
         sort_by: sortBy,
         sort_dir: sortDir,
-        start_date: filter.startDate ? moment(filter.startDate).format("YYYY-MM-DD") : "",
-        end_date: filter.endDate ? moment(filter.endDate).format("YYYY-MM-DD") : "",
+        start_date: filter.startDate
+          ? moment(filter.startDate).format("YYYY-MM-DD")
+          : "",
+        end_date: filter.endDate
+          ? moment(filter.endDate).format("YYYY-MM-DD")
+          : "",
       });
 
-      const data = await apiRequest({ url: `/archive/list?${query}`, token: accessToken });
+      const data = await apiRequest({
+        url: `/archive/list?${query}`,
+        token: accessToken,
+      });
       if (data?.success) {
         setTotalPages(data.data?.last_page);
         setDataTable(data.data?.data);
@@ -135,13 +159,15 @@ export function useSatkerLogic() {
         const data = await apiRequest({ url: `/pa/spp/type?id=` + id });
         const verif = await apiRequest({ url: `/pa/spp/type?id=verifikasi` });
         if (data.success) {
-          setQuestions(data.data.questions);
-          setVerifications(verif.data.questions);
+          setQuestions(data.data[0].questions);
+          setVerifications(verif.data[0].questions);
         }
       } else {
         const data = await apiRequest({ url: `/pa/spp/type?id=` });
         if (data.success) {
-          const filteredResult = data.data.filter((item) => item.type_id !== "verifikasi");
+          const filteredResult = data.data.filter(
+            (item) => item.type_id !== "verifikasi",
+          );
           setTypes(filteredResult);
         }
       }
@@ -150,13 +176,354 @@ export function useSatkerLogic() {
     }
   };
 
-  // Fungsi submitData dan editData (bisa dipindahkan ke sini persis seperti aslinya)
-  // ... [Masukkan submitData dan editData Anda di sini agar tidak memanjangkan contoh] ...
+  const submitData = async (formData) => {
+    try {
+      let CryptoJS = require("crypto-js");
+      let encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
+      ).toString();
+
+      const payload = new FormData();
+      payload.append("kode_biro", currentMenu?.code);
+      payload.append("no_spp", formData.no_spp);
+      payload.append("jenis_spp", formData.type);
+      payload.append("tahun", formData.tahun);
+      payload.append("dokumen", formData.dokumen);
+      payload.append("link", encryptedLink);
+      payload.append("jml_hal", formData.jml_hal);
+      payload.append("feedback", formData.catatan ?? formData.feedback);
+      if (!isPengajuanPath(location.pathname)) {
+        payload.append("status", "arsip");
+      }
+      payload.append("uploaded_name", formData.uploaded_by);
+
+      if (formData.dokumen !== null) {
+        //const defaultToken = localStorage.getItem("token");
+        const defaultToken = JSON.parse(
+          sessionStorage.getItem("auth"),
+        )?.accessToken;
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
+          });
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+          xhr.onerror = function () {
+            toast.update(toastId, {
+              render: "Terjadi kesalahan jaringan.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            reject(new Error("Network error"));
+          };
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/archive/create`,
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
+        });
+      } else {
+        const result = await apiRequest({
+          url: "/archive/create",
+          method: "POST",
+          options: {
+            body: payload,
+          },
+          isMultiType: true,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal mengupload data.");
+    }
+  };
+
+  const editData = async (formData) => {
+    try {
+      const payload = new FormData();
+      let CryptoJS = require("crypto-js");
+      let encryptedLink = CryptoJS.AES.encrypt(
+        formData.link,
+        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
+      ).toString();
+      payload.append("kode_biro", currentMenu?.code);
+      payload.append("no_spp", formData.no_spp);
+      payload.append("feedback", formData.catatan ?? formData.feedback);
+      payload.append("status", formData.status);
+      payload.append("questions", JSON.stringify(formData.kelengkapan));
+      payload.append("verifications", JSON.stringify(formData.verifikasi));
+      payload.append("jenis_spp", formData.type);
+      payload.append("tahun", formData.tahun);
+      payload.append("link", encryptedLink);
+      payload.append("jml_hal", formData.jml_hal);
+      payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
+
+      const hasFileUpload =
+        formData.dokumen instanceof File ||
+        formData.dokumen_spm instanceof File ||
+        formData.dokumen_sp2d instanceof File;
+
+      if (formData.dokumen instanceof File) {
+        payload.append("dokumen", formData.dokumen || formData.document);
+      }
+
+      if (formData.dokumen_spm instanceof File) {
+        payload.append("dokumen_spm", formData.dokumen_spm);
+      }
+
+      if (formData.dokumen_sp2d instanceof File) {
+        payload.append("dokumen_sp2d", formData.dokumen_sp2d);
+      }
+
+      //const defaultToken = localStorage.getItem("token");
+      const defaultToken = JSON.parse(
+        sessionStorage.getItem("auth"),
+      )?.accessToken;
+
+      if (hasFileUpload) {
+        return new Promise((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+
+          const toastId = toast.info("Uploading file...", {
+            progress: 0,
+            autoClose: false,
+            closeButton: false,
+            isLoading: true,
+          });
+
+          xhr.upload.onprogress = function (event) {
+            if (event.lengthComputable) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              toast.update(toastId, {
+                render: `Uploading file... (${percent}%)`,
+                progress: percent / 100,
+              });
+            }
+          };
+
+          xhr.onload = function () {
+            if (xhr.status === 200 || xhr.status === 201) {
+              toast.update(toastId, {
+                render: "File berhasil diupload!",
+                type: "success",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              resolve(xhr.response); // ✅ sukses → Promise resolve
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+              reject(new Error("Upload gagal"));
+            }
+          };
+
+          xhr.onerror = function () {
+            toast.update(toastId, {
+              render: "Terjadi kesalahan jaringan.",
+              type: "error",
+              isLoading: false,
+              autoClose: 3000,
+            });
+            reject(new Error("Network error"));
+          };
+
+          xhr.open(
+            "POST",
+            `${process.env.REACT_APP_API_BASE_URL}/archive/edit/${formData?.id}`,
+          );
+          xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+          xhr.send(payload);
+        });
+      } else {
+        const result = await apiRequest({
+          url: `/archive/edit/${formData?.id}`,
+          method: "POST",
+          options: {
+            body: payload,
+          },
+          isMultiType: true,
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Gagal mengupload data.");
+    }
+  };
+
+  const checklistIsValid = () => {
+    if (formData.status === "approved" && isPengajuanPath(location.pathname)) {
+      const kelengkapanChecked = formData.kelengkapan.map((item) => item.value);
+      const verifikasiChecked = formData.verifikasi.map((item) => item.value);
+
+      const allKelengkapanChecked = questions.every((q) =>
+        kelengkapanChecked.includes(q.id_question),
+      );
+
+      const allVerifikasiChecked = verifications.every((v) =>
+        verifikasiChecked.includes(v.id_question),
+      );
+
+      return allKelengkapanChecked && allVerifikasiChecked;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // ... [Masukkan logika handleSubmit Anda yang panjang di sini] ...
-    // Pastikan di akhir fungsi yang sukses memanggil: fetchTable()
+
+    let isAnyFile = formData?.dokumen || formData?.document;
+    formData.type = formData.type_id;
+    try {
+      if (
+        letiantModal === "Add" &&
+        isAnyFile &&
+        isPengajuanPath(location.pathname)
+      ) {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
+          !formData.uploaded_by ||
+          !formData.dokumen
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else if (
+        letiantModal === "Add" &&
+        isAnyFile &&
+        !isPengajuanPath(location.pathname)
+      ) {
+        if (
+          !formData?.["no_spp"] ||
+          !formData.tahun ||
+          !formData.type ||
+          !formData.dokumen
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else if (letiantModal === "Edit") {
+        if (!formData?.["no_spp"] || !formData.tahun || !formData.type) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      } else if (letiantModal === "Pengujian") {
+        if (!formData.kelengkapan || !formData.status || !formData.verifikasi) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
+      }
+
+      if (isAnyFile && formData.dokumen) {
+        const file = formData.dokumen;
+        const acceptedExtension = getAcceptedFileType()
+          .replace(/\s+/g, "")
+          .split(",");
+
+        const fileName = file.name?.toLowerCase();
+        const isAccepted = acceptedExtension.some((ext) =>
+          fileName.endsWith(ext),
+        );
+
+        if (!isAccepted) {
+          toast.error(
+            `File yang diizinkan hanya: ${acceptedExtension.join(", ")}`,
+          );
+          return;
+        }
+
+        const maxSize =
+          formData.type_id === "ptup" ||
+          formData.type_id === "gup" ||
+          formData.type_id === "uptup" ||
+          formData.type_id === "gup_kkp" ||
+          formData.type_id === "gup_pnbp" ||
+          formData.type_id === "gup_rm" ||
+          formData.type_id === "ptup_rm" ||
+          formData.type_id === "ptup_pnbp"
+            ? 1536
+            : 200;
+
+        if (!isFileSizeValid(file, maxSize)) {
+          toast.error("Ukuran file melebihi " + maxSize + "MB");
+          return;
+        }
+      }
+
+      if (!checklistIsValid()) {
+        toast.error(
+          "Semua Kelengkapan dan Verifikasi harus dicentang sebelum status dirubah Telah Diuji.",
+        );
+        return;
+      }
+      if (letiantModal === "Add") {
+        await submitData(formData);
+      } else {
+        await editData(formData);
+      }
+
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      toast.success("Data berhasil disimpan!");
+      setIsOpenModal(false);
+      setIsCheckModal(false);
+      setFormData({
+        no_spp: "",
+        tahun: "",
+        type: "",
+        type_id: "",
+        dokumen: null,
+        uploaded_by: "",
+        kelengkapan: [],
+        catatan: "",
+        verifikasi: [],
+        link: "",
+        jml_hal: "",
+      });
+      fetchTable();
+    } catch (err) {
+      console.error(err);
+      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+    }
   };
 
   // ==========================================
@@ -227,13 +594,18 @@ export function useSatkerLogic() {
     fetchType();
     setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
   }, [
-    filter.tahun, filter.searchKey, page + 1, rowsPerPage, sortBy, sortDir,
-    filter.startDate, filter.endDate, listMenu, location.pathname
+    filter.tahun,
+    filter.searchKey,
+    page + 1,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+    listMenu,
+    location.pathname,
   ]);
 
-  // ==========================================
-  // 6. KEMBALIKAN SEMUA YANG DIBUTUHKAN UI
-  // ==========================================
   return {
     // Data & Context
     userData,
@@ -244,7 +616,7 @@ export function useSatkerLogic() {
     types,
     questions,
     verifications,
-    
+
     // States
     filter,
     page,
@@ -255,7 +627,7 @@ export function useSatkerLogic() {
     formData,
     jenisFile,
     pdfToOpen,
-    
+
     // Modal Flags
     isOpenModal,
     isCheckModal,
@@ -264,7 +636,7 @@ export function useSatkerLogic() {
     showModal,
     letiantModal,
 
-    // Setters (jika dibutuhkan langsung oleh komponen Modal/UI)
+    // Setters
     setPage,
     setRowsPerPage,
     setFilter,

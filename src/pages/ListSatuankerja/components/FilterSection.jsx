@@ -40,7 +40,7 @@ export default function FilterSection({
       </div>
 
       {/* Bagian Kanan: Filter Group */}
-      <div className="flex flex-col sm:flex-row flex-wrap items-center justify-end gap-3 w-full lg:flex-1 bg-slate-50 p-2 rounded-xl border border-slate-100">
+      <div className="flex flex-col sm:flex-row flex-wrap items-center justify-end gap-3 w-full lg:flex-1 bg-white-50 p-2 rounded-xl border border-slate-100">
         <a
           href="https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view"
           target="_blank"

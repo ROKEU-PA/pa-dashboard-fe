@@ -8,7 +8,6 @@ import TableSortLabel from "@/components/TableSortLabel";
 import { Edit2, Eye, FileCheck } from "lucide-react";
 import moment from "moment";
 import { isPengajuanPath } from "../satkerHooks";
-// Pastikan path import ini sesuai dengan struktur folder Anda
 import { statusColorClass, statusColorText, statusLabel } from "../constants/styleConstants";
 
 export default function SatkerTable({
@@ -42,7 +41,7 @@ export default function SatkerTable({
                   align="center"
                   onClick={() => col.sortable && handleSortChange(col.key)}
                   sx={{
-                    color: "#475569",
+                    color: "#FFFFFF",
                     fontWeight: 600,
                     fontSize: "0.75rem",
                     textTransform: "uppercase",

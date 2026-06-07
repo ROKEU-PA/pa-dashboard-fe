@@ -7,7 +7,7 @@ export const statusColorClass = (statusValue) => {
     case "reject":
       return "border border-red-500 bg-red-100";
     case "sp2d":
-      return "border border-[#08CB00] bg-[#08CB00]/50";
+      return "border border-green-500 bg-[#FFFFFF]";
     default:
       return "border border-blue-500 bg-blue-100";
   }
@@ -22,7 +22,7 @@ export const statusColorText = (statusValue) => {
     case "reject":
       return "font-semibold text-red-500";
     case "sp2d":
-      return "font-semibold text-[#08CB00]";
+      return "font-semibold text-green-500";
     default:
       return "font-semibold text-blue-500";
   }

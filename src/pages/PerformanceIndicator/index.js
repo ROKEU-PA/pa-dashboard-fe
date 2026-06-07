@@ -46,7 +46,6 @@ function PerformanceIndicator() {
     month: filter?.month,
     year: filter?.year,
   });
-
   useEffect(() => {
     refetch(currentPeriod);
     refetchIkpas(currentPeriod);
@@ -112,7 +111,7 @@ function PerformanceIndicator() {
                   </svg>
                 )}
                 <span className="text-xl md:text-2xl lg:text-4xl font-black leading-none tracking-tight text-[#FACC15]">
-                  {KemnakerRate.nilaiIKPA ?? "-"}
+                  {KemnakerRate?.nilaiIKPA ?? "-"}
                 </span>
               </div>
             </div>

@@ -52,6 +52,7 @@ function Input({
   };
 
   const showFloatingLabel = isFocused || value;
+  const isError = error || localError;
 
   const containerStyle = {
     width: style?.width ?? "100%",
@@ -66,11 +67,13 @@ function Input({
     top: showFloatingLabel ? "-0.6rem" : "0.7rem",
     left: "0.75rem",
     fontSize: showFloatingLabel ? "0.75rem" : "1rem",
-    color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
+    // Disamakan dengan warna biru Select.jsx (#308BFD)
+    color: isError ? "#d32f2f" : isFocused ? "#308BFD" : "#777",
     backgroundColor: "white",
     padding: "0 4px",
     transition: "all 0.2s ease",
     pointerEvents: "none",
+    zIndex: 10,
   };
 
   const toggleStyle = {
@@ -82,29 +85,34 @@ function Input({
     border: "none",
     cursor: "pointer",
     padding: 4,
+    color: "#777",
   };
 
   const inputStyle = {
-    // ...style,
-    // width: "100%",
-    padding: "0.75rem ",
+    padding: "0.75rem",
     fontSize: "1rem",
-    border: "1px solid #ccc",
+    width: "100%",
+    boxSizing: "border-box",
+    border: isError ? "1px solid #d32f2f" : isFocused ? "1px solid #308BFD" : "1px solid #ccc",
     borderRadius: "4px",
-    backgroundColor: "#fff",
+    backgroundColor: disabled ? "#f5f5f5" : "#fff",
     color: "#333",
+    outline: "none",
+    transition: "all 0.2s ease",
+    boxShadow: isFocused && !isError ? "0 0 0 1px #308BFD" : isFocused && isError ? "0 0 0 1px #d32f2f" : "none",
+    cursor: disabled ? "not-allowed" : "text",
   };
 
   const helperTextStyle = {
     fontSize: "0.75rem",
-    color: error || localError ? "#d32f2f" : "#777",
+    color: isError ? "#d32f2f" : "#777",
     marginTop: "0.25rem",
     marginLeft: "0.25rem",
   };
 
   return (
     <div style={containerStyle}>
-      <label style={labelStyle}>{label}</label>
+      {label && <label style={labelStyle}>{label} {required && <span style={{ color: "#d32f2f" }}>*</span>}</label>}
       <input
         type={inputType}
         name={name}
@@ -135,7 +143,7 @@ function Input({
 }
 
 Input.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   type: PropTypes.string,
   name: PropTypes.string,
   value: PropTypes.string.isRequired,

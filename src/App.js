@@ -191,7 +191,6 @@ function App() {
             key={data?.id}
             path={(() => {
               const pathParts = data.path.split("/").filter(Boolean);
-              console.log(pathParts)
               const base = "/" + pathParts[0];
               const end = pathParts.slice(1).join("/");
               return `${base}/${end}`;

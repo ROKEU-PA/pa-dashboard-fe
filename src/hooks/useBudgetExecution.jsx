@@ -29,7 +29,6 @@ export const useBudgetExecution = () => {
           ? `/pa/ikpa/all?${buildQueryString(period)}`
           : `/pa/ikpa/all?year=${moment().subtract(1, "years").year()}&month=1`,
       });
-      console.log(data)
       if (!period) {
         let result = data?.data.filter((q) => q.satker_code === null);
         if (data.success) {
