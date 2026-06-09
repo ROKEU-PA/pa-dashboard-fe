@@ -120,9 +120,6 @@ function ListSatuanKerjaPage() {
             sortBy={sortBy}
             sortDir={sortDir}
             openEditModal={openEditModal}
-            openPengujianModal={openPengujianModal}
-            openDetailModal={openDetailModal}
-            openPDFModal={openPDFModal}
           />
 
           <div className="mt-4">

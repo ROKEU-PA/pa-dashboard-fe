@@ -51,6 +51,7 @@ export const useBudgetExecution = () => {
               capaianOutput: item.capaian_output,
               dispensasiSPM: item.dispensasi_spm,
               nilaiIKPA: item.nilai_ikpa,
+              prevNilaiIKPA: item.prevValue
             };
           });
 
@@ -66,6 +67,7 @@ export const useBudgetExecution = () => {
           .map((item) => ({
             title: item.eselon,
             value: item.nilaiIKPA,
+            prevValue: item.prevNilaiIKPA,
             color: mapColorByValue(item.nilaiIKPA),
           }));
         setFilteredData(mappedCards);

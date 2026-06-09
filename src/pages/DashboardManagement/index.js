@@ -96,14 +96,17 @@ function DashboardManagementPage() {
               onChange={handleChange}
               required
               options={[
-                { label: "Dashboard Utama", value: "UTM" },
-                { label: "PTUK", value: "PTUKP" },
-                { label: "Pelaksanaan Anggaran", value: "PAP" },
-                { label: "Barang Milik Negara", value: "BMNP" },
-                { label: "Akuntansi Pelaporan", value: "ALP" },
-                { label: "Tata Usaha", value: "TUP" },
-                { label: "Struktur Organisasi", value: "SOP" },
-                { label: "Helpdesk", value: "HDP" },
+                // { label: "Dashboard Utama", value: "UTM" },
+                // { label: "PTUK", value: "PTUKP" },
+                // { label: "Pelaksanaan Anggaran", value: "PAP" },
+                // { label: "Barang Milik Negara", value: "BMNP" },
+                // { label: "Akuntansi Pelaporan", value: "ALP" },
+                // { label: "Tata Usaha", value: "TUP" },
+                // { label: "Struktur Organisasi", value: "SOP" },
+                // { label: "Helpdesk", value: "HDP" },
+                { label: "IKPA", value: "ikpa" },
+                { label: "Realisasi", value: "ikpa" },
+                { label: "SP2D", value: "sp2d" },
               ]}
               isOpen={selectImage}
               setIsOpen={(open) => {
@@ -111,8 +114,8 @@ function DashboardManagementPage() {
               }}
             />
             <FileInput
-              accept=".png, .jpg, .jpeg"
-              label="Upload Gambar"
+              accept=".png, .jpg, .jpeg, .pdf"
+              label="Upload File"
               name="image"
               onChange={handleChange}
               required

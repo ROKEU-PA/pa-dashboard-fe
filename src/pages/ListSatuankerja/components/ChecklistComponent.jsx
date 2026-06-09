@@ -40,7 +40,6 @@ function ChecklistComponent({
       {/* Header */}
       <div
         className="px-4 py-3 bg-slate-50 border-b border-slate-200 flex justify-between cursor-pointer hover:bg-slate-100 items-center transition-colors"
-        // PERBAIKAN 2: Menggunakan setIsOpen dan isOpen dari props
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="text-sm font-bold tracking-wider text-slate-700 uppercase">
@@ -86,16 +85,16 @@ function ChecklistComponent({
                   onClick={() => handleToggle(item)}
                   disabled={disabled}
                   className={`
-                  flex items-center gap-3 px-4 py-3 text-left transition
-                  border-b border-r border-slate-100
+                  flex items-start gap-3 px-4 py-3 text-left transition
+                  border-b border-r border-slate-100 w-full min-w-0 
                   ${isChecked ? "bg-emerald-50/50" : "bg-white"}
-                  ${disabled ? "cursor-not-allowed opacity-60 grayscale" : "hover:bg-slate-50"}
+                  ${disabled ? "cursor-default opacity-90" : "hover:bg-slate-50 cursor-pointer"}
                 `}
                 >
                   {/* Checkbox Icon */}
                   <div
                     className={`
-                    w-[18px] h-[18px] rounded flex items-center justify-center shrink-0
+                    mt-0.5 w-[18px] h-[18px] rounded flex items-center justify-center shrink-0
                     border-2 transition-all duration-200
                     ${
                       isChecked
@@ -105,12 +104,7 @@ function ChecklistComponent({
                   `}
                   >
                     {isChecked && (
-                      <svg
-                        width="10"
-                        height="10"
-                        viewBox="0 0 10 10"
-                        fill="none"
-                      >
+                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
                         <path
                           d="M1.5 5L3.8 7.5L8.5 2.5"
                           stroke="white"
@@ -122,9 +116,9 @@ function ChecklistComponent({
                     )}
                   </div>
 
-                  {/* Label Text */}
+                  {/* Label Text - INI YANG DITAMBAHIN min-w-0 dan break-words */}
                   <span
-                    className={`flex-1 text-sm transition-colors ${
+                    className={`flex-1 min-w-0 break-words text-sm leading-snug transition-colors pr-2 ${
                       isChecked ? "text-emerald-800 font-medium" : "text-slate-600"
                     }`}
                   >
@@ -133,11 +127,11 @@ function ChecklistComponent({
 
                   {/* Right Badge Indicator */}
                   {isChecked ? (
-                    <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                    <span className="shrink-0 mt-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
                       ✓ {checkedLabel}
                     </span>
                   ) : (
-                    <span className="text-slate-300 w-6 text-center">—</span>
+                    <span className="shrink-0 mt-0.5 text-slate-300 w-6 text-center">—</span>
                   )}
                 </button>
               );

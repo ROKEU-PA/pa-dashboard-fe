@@ -42,7 +42,7 @@ function AppLayout({ children, isAdmin, title, userName }) {
       )}
 
       <main className="flex-1 overflow-auto transition-all duration-300">
-        <Navbar className="pl-14 md:pl-0" menuName={title} user={userName} role={userData?.role} />
+        <Navbar menuName={title} user={userName} role={userData?.role} />
         <div className="p-2 md:p-4 sm:px-5 lg:px-6">{children}</div>
       </main>
     </div>

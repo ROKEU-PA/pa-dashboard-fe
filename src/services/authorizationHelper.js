@@ -29,6 +29,7 @@ const ROLE_ROUTES = {
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
+    "/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
     "/kalender",
@@ -111,10 +112,11 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     if (
       normalizedPath === "/satuan-kerja" || 
+      normalizedPath.startsWith("/pengajuan") || 
       normalizedPath === "/e-arsip" ||
-      normalizedPath.startsWith("/e-arsip/")||
-      normalizedPath.startsWith("/arsip/")||
-      normalizedPath.startsWith("/report/")||
+      normalizedPath.startsWith("/e-arsip/") ||
+      normalizedPath.startsWith("/arsip/") ||
+      normalizedPath.startsWith("/report/") ||
       normalizedPath === "/kalender"
     ) {
       return true;

@@ -120,7 +120,7 @@ export const menuItems = [
   
   {
     name: "Realisasi",
-    path: "/realisasi",
+    path: "/report/realisasi",
     icon: <CirclePercent strokeWidth={3} />,
   },
   {

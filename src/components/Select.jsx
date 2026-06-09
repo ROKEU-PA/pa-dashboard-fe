@@ -16,13 +16,29 @@ function Select({
   helperText = "",
   validate,
   required = false,
-  isOpen,
-  setIsOpen,
+  isOpen,         // Prop dari luar (opsional)
+  setIsOpen,      // Prop dari luar (opsional)
   isSearchable = false,
 }) {
   const containerRef = useRef(null);
   const [localError, setLocalError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // ==========================================
+  // JURUS HYBRID STATE (Otak Internal)
+  // ==========================================
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Gunakan isOpen dari props JIKA ada, kalau tidak pakai internalIsOpen
+  const isDropdownOpen = isOpen !== undefined ? isOpen : internalIsOpen;
+
+  const toggleDropdown = (newState) => {
+    if (setIsOpen) {
+      setIsOpen(newState); // Lapor ke modal/parent lama
+    }
+    setInternalIsOpen(newState); // Ubah state internal
+  };
+  // ==========================================
 
   const runValidation = (val) => {
     const validators = [];
@@ -49,7 +65,7 @@ function Select({
       handleChange({ target: { name, value: val } });
     }
     setSearchTerm("");
-    setIsOpen?.(false);
+    toggleDropdown(false); // Tutup setelah pilih
   };
 
   const filteredOptions = options.filter((opt) =>
@@ -60,12 +76,12 @@ function Select({
   const isError = error || localError;
 
   // LOGIKA FLOATING LABEL
-  const showFloatingLabel = value || isOpen;
+  const showFloatingLabel = value || isDropdownOpen;
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (containerRef.current && !containerRef.current.contains(event.target)) {
-        setIsOpen?.(false);
+        toggleDropdown(false);
         setSearchTerm("");
       }
     };
@@ -81,7 +97,7 @@ function Select({
     display: "flex",
     flexDirection: "column",
     position: "relative",
-    marginTop: "0.25rem", // Jaga-jaga biar label ngambang ga kepotong
+    marginTop: "0.25rem",
   };
 
   const labelStyle = {
@@ -89,8 +105,7 @@ function Select({
     top: showFloatingLabel ? "-0.6rem" : "0.75rem",
     left: "0.75rem",
     fontSize: showFloatingLabel ? "0.75rem" : "1rem",
-    // Warna biru yang persis sama dengan Input.jsx
-    color: isError ? "#d32f2f" : isOpen ? "#308BFD" : "#777",
+    color: isError ? "#d32f2f" : isDropdownOpen ? "#308BFD" : "#777",
     backgroundColor: "white",
     padding: "0 4px",
     transition: "all 0.2s ease",
@@ -103,14 +118,12 @@ function Select({
     fontSize: "1rem",
     width: "100%",
     boxSizing: "border-box",
-    // Logika border warna biru saat terbuka, merah saat error
-    border: isError ? "1px solid #d32f2f" : isOpen ? "1px solid #308BFD" : "1px solid #ccc",
+    border: isError ? "1px solid #d32f2f" : isDropdownOpen ? "1px solid #308BFD" : "1px solid #ccc",
     borderRadius: "4px",
     backgroundColor: disabled ? "#f5f5f5" : "#fff",
     color: "#333",
     transition: "all 0.2s ease",
-    // Efek Shadow / Ring biru glowing persis Input.jsx
-    boxShadow: isOpen && !isError ? "0 0 0 1px #308BFD" : isOpen && isError ? "0 0 0 1px #d32f2f" : "none",
+    boxShadow: isDropdownOpen && !isError ? "0 0 0 1px #308BFD" : isDropdownOpen && isError ? "0 0 0 1px #d32f2f" : "none",
     cursor: disabled ? "not-allowed" : "pointer",
     display: "flex",
     alignItems: "center",
@@ -127,7 +140,6 @@ function Select({
 
   return (
     <div ref={containerRef} style={containerStyle}>
-      {/* Label */}
       {label && (
         <label style={labelStyle}>
           {label} {required && <span style={{ color: "#d32f2f" }}>*</span>}
@@ -135,27 +147,24 @@ function Select({
       )}
 
       {/* Input Box (Select Trigger) */}
-      <div onClick={() => !disabled && setIsOpen?.(!isOpen)} style={triggerStyle}>
-        {/* Placeholder text logic */}
+      <div onClick={() => !disabled && toggleDropdown(!isDropdownOpen)} style={triggerStyle}>
         <span
           className={`truncate text-sm ${selectedLabel ? "font-medium text-slate-800" : (showFloatingLabel ? "text-slate-400" : "opacity-0")}`}
         >
           {selectedLabel || (noPlaceholder ? "" : placeholder)}
         </span>
-        
-        {/* Icon Panah */}
         <ChevronDown
           size={18}
           style={{
-            color: isOpen ? "#308BFD" : "#999", // Warna panah ikut jadi biru
-            transform: isOpen ? "rotate(180deg)" : "rotate(0deg)",
+            color: isDropdownOpen ? "#308BFD" : "#999",
+            transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
             transition: "all 0.2s ease"
           }}
         />
       </div>
 
-      {/* Dropdown Options List & Search (Tetap pakai Tailwind yang sudah diperbaiki) */}
-      {isOpen && (
+      {/* Dropdown Options List & Search */}
+      {isDropdownOpen && (
         <div className="absolute z-50 w-full top-[105%] left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden flex flex-col">
           
           {isSearchable && (
@@ -164,7 +173,6 @@ function Select({
                 <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
-                  // Tailwind valid untuk custom hex
                   className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#308BFD] focus:border-[#308BFD] transition-all placeholder:text-slate-400"
                   placeholder="Cari opsi..."
                   value={searchTerm}
@@ -198,7 +206,6 @@ function Select({
         </div>
       )}
 
-      {/* Helper / Error Text */}
       {(isError || helperText) && (
         <div style={helperTextStyle}>{localError || helperText}</div>
       )}

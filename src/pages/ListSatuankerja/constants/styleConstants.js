@@ -42,3 +42,18 @@ export const statusLabel = (statusValue) => {
       return "Baru ditambahkan";
   }
 };
+
+export const statusDots = (statusValue) => {
+  switch (statusValue) {
+    case "approved":
+      return "bg-green-500";
+    case "fix":
+      return "bg-yellow-500";
+    case "reject":
+      return "bg-red-500";
+    case "sp2d":
+      return "bg-green-500";
+    default:
+      return "bg-blue-500";
+  }
+};

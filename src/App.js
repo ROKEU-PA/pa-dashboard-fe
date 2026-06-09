@@ -5,7 +5,6 @@ import AppLayout from "./Layouts/AppLayout";
 import LoginPage from "./pages/LoginPage";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
-import CompilationPage from "./pages/Compilation";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
@@ -35,10 +34,11 @@ import JumlahJenisBMN from "./pages/StateProperty/typeOfBMN";
 import StrukturOrganisasi from "./pages/OrganizationalStructure";
 import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
-import YearSelectionPage from "./pages/ListSatuankerja/year";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
 import MonitoringPage from "./pages/Monitoring";
 import PerformanceIndicator from "./pages/PerformanceIndicator";
+import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
+import ShowForAll from "./pages/ShowForAll";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -197,7 +197,7 @@ function App() {
             })()}
             element={
               <PrivateRoute>
-                <AppLayout isAdmin={isAdmin} title={`Pengajuan`}>
+                <AppLayout isAdmin={isAdmin} title={`E-SPP`}>
                   <ListSatuanKerjaPage />
                 </AppLayout>
               </PrivateRoute>
@@ -206,48 +206,38 @@ function App() {
         ))}
 
         <Route
+          path="/pengajuan/pengujian/:id"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="E-SPP">
+                <PengajuanReviewPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/pengajuan/detail/:id"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="E-SPP">
+                <PengajuanReviewPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
           path="/e-arsip"
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="E-Arsip">
-                <YearSelectionPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/e-arsip/:tahun"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Satuan Kerja">
-                <MenuPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
-
-        <Route
-          path="/arsip/:tahun/:satker"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Arsip">
                 <ArchivePage />
               </AppLayout>
             </PrivateRoute>
           }
         />
 
-        <Route
-          path="/compilation"
-          element={
-            <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
-                <CompilationPage />
-              </AppLayout>
-            </PrivateRoute>
-          }
-        />
         <Route
           path="/user-management"
           element={
@@ -348,7 +338,17 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Indikator Kinerja Pelaksanaan Anggaran">
-                <PerformanceIndicator />
+                <ShowForAll />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/report/realisasi"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="Realisasi Pelaksanaan Anggaran">
+                <ShowForAll />
               </AppLayout>
             </PrivateRoute>
           }

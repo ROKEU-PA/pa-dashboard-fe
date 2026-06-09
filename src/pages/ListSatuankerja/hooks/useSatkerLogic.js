@@ -41,14 +41,12 @@ export function useSatkerLogic() {
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
 
-  // Modal States
+  // Modal States (Tinggal Add/Edit & PDF)
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isCheckModal, setIsCheckModal] = useState(false);
-  const [isDetailModal, setIsDetailModal] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
-  const [showModal, setShowModal] = useState(true);
   const [letiantModal, setVariantModal] = useState("");
   const [pdfToOpen, setPDFtoOpen] = useState("");
+  const [showModal, setShowModal] = useState("true");
 
   // Form & Input States
   const [types, setTypes] = useState([]);
@@ -176,30 +174,29 @@ export function useSatkerLogic() {
     }
   };
 
-  const submitData = async (formData) => {
+  const submitData = async (formDataToSubmit) => {
     try {
       let CryptoJS = require("crypto-js");
       let encryptedLink = CryptoJS.AES.encrypt(
-        formData.link,
+        formDataToSubmit.link || "",
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
 
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
-      payload.append("no_spp", formData.no_spp);
-      payload.append("jenis_spp", formData.type);
-      payload.append("tahun", formData.tahun);
-      payload.append("dokumen", formData.dokumen);
+      payload.append("no_spp", formDataToSubmit.no_spp);
+      payload.append("jenis_spp", formDataToSubmit.type);
+      payload.append("tahun", formDataToSubmit.tahun);
+      payload.append("dokumen", formDataToSubmit.dokumen[0]);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formData.jml_hal);
-      payload.append("feedback", formData.catatan ?? formData.feedback);
+      payload.append("jml_hal", formDataToSubmit.jml_hal);
+      payload.append("feedback", formDataToSubmit.catatan ?? formDataToSubmit.feedback);
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
       }
-      payload.append("uploaded_name", formData.uploaded_by);
+      payload.append("uploaded_name", formDataToSubmit.uploaded_by);
 
-      if (formData.dokumen !== null) {
-        //const defaultToken = localStorage.getItem("token");
+      if (formDataToSubmit.dokumen !== null) {
         const defaultToken = JSON.parse(
           sessionStorage.getItem("auth"),
         )?.accessToken;
@@ -228,7 +225,7 @@ export function useSatkerLogic() {
                 isLoading: false,
                 autoClose: 3000,
               });
-              resolve(xhr.response); // ✅ sukses → Promise resolve
+              resolve(xhr.response); 
             } else {
               toast.update(toastId, {
                 render: "Upload gagal. Silakan coba lagi.",
@@ -256,7 +253,7 @@ export function useSatkerLogic() {
           xhr.send(payload);
         });
       } else {
-        const result = await apiRequest({
+        await apiRequest({
           url: "/archive/create",
           method: "POST",
           options: {
@@ -268,47 +265,49 @@ export function useSatkerLogic() {
     } catch (error) {
       console.error(error);
       toast.error("Gagal mengupload data.");
+      throw error; // Lempar error biar ditangkap di caller
     }
   };
 
-  const editData = async (formData) => {
+  const editData = async (formDataToEdit) => {
     try {
       const payload = new FormData();
       let CryptoJS = require("crypto-js");
       let encryptedLink = CryptoJS.AES.encrypt(
-        formData.link,
+        formDataToEdit.link || "",
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
-      payload.append("kode_biro", currentMenu?.code);
-      payload.append("no_spp", formData.no_spp);
-      payload.append("feedback", formData.catatan ?? formData.feedback);
-      payload.append("status", formData.status);
-      payload.append("questions", JSON.stringify(formData.kelengkapan));
-      payload.append("verifications", JSON.stringify(formData.verifikasi));
-      payload.append("jenis_spp", formData.type);
-      payload.append("tahun", formData.tahun);
+      
+      payload.append("kode_biro", currentMenu?.code ?? formDataToEdit.kode_biro);
+      payload.append("no_spp", formDataToEdit.no_spp);
+      payload.append("feedback", formDataToEdit.catatan ?? formDataToEdit.feedback);
+      payload.append("status", formDataToEdit.status);
+      payload.append("questions", JSON.stringify(formDataToEdit.kelengkapan));
+      payload.append("verifications", JSON.stringify(formDataToEdit.verifikasi));
+      payload.append("jenis_spp", /[A-Z]/.test(formDataToEdit.type) ? formDataToEdit.type_id : formDataToEdit.type);
+      payload.append("tahun", formDataToEdit.tahun);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formData.jml_hal);
+      payload.append("jml_hal", formDataToEdit.jml_hal);
       payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =
-        formData.dokumen instanceof File ||
-        formData.dokumen_spm instanceof File ||
-        formData.dokumen_sp2d instanceof File;
+        formDataToEdit.dokumen instanceof File ||
+        formDataToEdit.dokumen_spm instanceof File ||
+        formDataToEdit.dokumen_sp2d instanceof File ||
+        formDataToEdit.dokumen instanceof FileList ||
+        formDataToEdit.dokumen_spm instanceof FileList ||
+        formDataToEdit.dokumen_sp2d instanceof FileList;
 
-      if (formData.dokumen instanceof File) {
-        payload.append("dokumen", formData.dokumen || formData.document);
+      if (formDataToEdit.dokumen instanceof File || formDataToEdit.dokumen instanceof FileList) {
+        payload.append("dokumen", formDataToEdit.dokumen[0] || formDataToEdit.document[0]);
+      }
+      if (formDataToEdit.dokumen_spm instanceof File || formDataToEdit.dokumen_spm instanceof FileList) {
+        payload.append("dokumen_spm", formDataToEdit.dokumen_spm[0]);
+      }
+      if (formDataToEdit.dokumen_sp2d instanceof File || formDataToEdit.dokumen_sp2d instanceof FileList) {
+        payload.append("dokumen_sp2d", formDataToEdit.dokumen_sp2d[0]);
       }
 
-      if (formData.dokumen_spm instanceof File) {
-        payload.append("dokumen_spm", formData.dokumen_spm);
-      }
-
-      if (formData.dokumen_sp2d instanceof File) {
-        payload.append("dokumen_sp2d", formData.dokumen_sp2d);
-      }
-
-      //const defaultToken = localStorage.getItem("token");
       const defaultToken = JSON.parse(
         sessionStorage.getItem("auth"),
       )?.accessToken;
@@ -342,7 +341,7 @@ export function useSatkerLogic() {
                 isLoading: false,
                 autoClose: 3000,
               });
-              resolve(xhr.response); // ✅ sukses → Promise resolve
+              resolve(xhr.response); 
             } else {
               toast.update(toastId, {
                 render: "Upload gagal. Silakan coba lagi.",
@@ -366,14 +365,14 @@ export function useSatkerLogic() {
 
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/archive/edit/${formData?.id}`,
+            `${process.env.REACT_APP_API_BASE_URL}/archive/edit/${formDataToEdit?.id}`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
         });
       } else {
-        const result = await apiRequest({
-          url: `/archive/edit/${formData?.id}`,
+        await apiRequest({
+          url: `/archive/edit/${formDataToEdit?.id}`,
           method: "POST",
           options: {
             body: payload,
@@ -384,20 +383,23 @@ export function useSatkerLogic() {
     } catch (error) {
       console.error(error);
       toast.error("Gagal mengupload data.");
+      throw error;
     }
   };
 
-  const checklistIsValid = () => {
-    if (formData.status === "approved" && isPengajuanPath(location.pathname)) {
-      const kelengkapanChecked = formData.kelengkapan.map((item) => item.value);
-      const verifikasiChecked = formData.verifikasi.map((item) => item.value);
+  const checklistIsValid = (dataToCheck = formData) => {
+    const strictStatuses = ["approved", "sp2d"];
 
-      const allKelengkapanChecked = questions.every((q) =>
-        kelengkapanChecked.includes(q.id_question),
+    if (strictStatuses.includes(dataToCheck.status)) {
+      const kelengkapanChecked = dataToCheck.kelengkapan.map((item) => item.value);
+      const verifikasiChecked = dataToCheck.verifikasi.map((item) => item.value);
+
+      const allKelengkapanChecked = (questions || []).every((q) =>
+        kelengkapanChecked.includes(q.id_question)
       );
 
-      const allVerifikasiChecked = verifications.every((v) =>
-        verifikasiChecked.includes(v.id_question),
+      const allVerifikasiChecked = (verifications || []).every((v) =>
+        verifikasiChecked.includes(v.id_question)
       );
 
       return allKelengkapanChecked && allVerifikasiChecked;
@@ -406,6 +408,7 @@ export function useSatkerLogic() {
     return true;
   };
 
+  // HANYA UNTUK MODAL ADD/EDIT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -446,20 +449,16 @@ export function useSatkerLogic() {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
         }
-      } else if (letiantModal === "Pengujian") {
-        if (!formData.kelengkapan || !formData.status || !formData.verifikasi) {
-          toast.error("Mohon lengkapi semua field yang diperlukan.");
-          return;
-        }
       }
 
       if (isAnyFile && formData.dokumen) {
         const file = formData.dokumen;
+        // console.log(file)
         const acceptedExtension = getAcceptedFileType()
           .replace(/\s+/g, "")
           .split(",");
 
-        const fileName = file.name?.toLowerCase();
+        const fileName = file[0].name?.toLowerCase();
         const isAccepted = acceptedExtension.some((ext) =>
           fileName.endsWith(ext),
         );
@@ -483,29 +482,20 @@ export function useSatkerLogic() {
             ? 1536
             : 200;
 
-        if (!isFileSizeValid(file, maxSize)) {
+        if (!isFileSizeValid(file[0], maxSize)) {
           toast.error("Ukuran file melebihi " + maxSize + "MB");
           return;
         }
       }
 
-      if (!checklistIsValid()) {
-        toast.error(
-          "Semua Kelengkapan dan Verifikasi harus dicentang sebelum status dirubah Telah Diuji.",
-        );
-        return;
-      }
       if (letiantModal === "Add") {
         await submitData(formData);
       } else {
         await editData(formData);
       }
 
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-
       toast.success("Data berhasil disimpan!");
       setIsOpenModal(false);
-      setIsCheckModal(false);
       setFormData({
         no_spp: "",
         tahun: "",
@@ -527,7 +517,7 @@ export function useSatkerLogic() {
   };
 
   // ==========================================
-  // 4. MODAL OPENERS (Merapikan UI dari onClick yang panjang)
+  // 4. MODAL OPENERS
   // ==========================================
   const openAddModal = () => {
     setIsOpenModal(true);
@@ -544,39 +534,6 @@ export function useSatkerLogic() {
     setVariantModal("Edit");
     setFormData({ ...row, type: row.jenis_spp, link: row.document?.path });
     setIsOpenModal(true);
-  };
-
-  const openPengujianModal = (row) => {
-    const kelengkapanWithLabel = questions
-      .filter((q) => row.question_checklist?.includes(q.id_question))
-      .map((q) => ({ label: q.text, value: q.id_question }));
-
-    const verifikasiWithLabel = verifications
-      .filter((v) => row.verification_checklist?.includes(v.id_question))
-      .map((v) => ({ label: v.text, value: v.id_question }));
-
-    setVariantModal("Pengujian");
-    setFormData({
-      ...row,
-      type: row.jenis_spp,
-      kelengkapan: kelengkapanWithLabel,
-      verifikasi: verifikasiWithLabel,
-      catatan: row.feedback,
-    });
-    fetchType(row.type_id);
-    setPDFtoOpen(row.document?.url);
-    setIsCheckModal(true);
-  };
-
-  const openDetailModal = (row) => {
-    fetchType(row.type_id);
-    setFormData({
-      ...row,
-      type: row.jenis_spp,
-      kelengkapan: row.question_checklist,
-      verifikasi: row.verification_checklist,
-    });
-    setIsDetailModal(true);
   };
 
   const openPDFModal = (url) => {
@@ -630,10 +587,7 @@ export function useSatkerLogic() {
 
     // Modal Flags
     isOpenModal,
-    isCheckModal,
-    isDetailModal,
     isOpenPDF,
-    showModal,
     letiantModal,
 
     // Setters
@@ -643,23 +597,27 @@ export function useSatkerLogic() {
     setFormData,
     setJenisFile,
     setIsOpenModal,
-    setIsCheckModal,
-    setIsDetailModal,
     setIsOpenPDF,
-    setShowModal,
     setVariantModal,
+    setPDFtoOpen, // Tambahan expose untuk mengubah PDF
 
     // Handlers
     handleSortChange,
     handleDateChange,
     handleChange,
     handleSubmit,
+    checklistIsValid,
 
     // Action Openers
     openAddModal,
     openEditModal,
-    openPengujianModal,
-    openDetailModal,
     openPDFModal,
+    setShowModal,
+    showModal,
+
+    // API Calls (Di-export untuk dipakai di Halaman Review)
+    fetchType,
+    editData,
+    fetchTable
   };
 }

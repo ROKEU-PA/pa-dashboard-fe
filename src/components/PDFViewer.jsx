@@ -1,78 +1,14 @@
-// Usage examples:
-// 1. Public file: <PDFViewer pdfSource="/sample.pdf" />
-// 2. External URL: <PDFViewer pdfSource="https://example.com/doc.pdf" />
-// 3. Blob: <PDFViewer pdfSource={pdfBlob} />
-
 import React, { useState, useEffect } from "react";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import { fetchPDFAsBlob } from "@/pages/ListSatuankerja/satkerHooks";
-import { toast } from "react-toastify";
 
-// const CustomPDFViewer = ({ pdfSource }) => {
-//   const [processedUrl, setProcessedUrl] = useState("");
-//   const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
-//   useEffect(() => {
-//     const processUrl = (url) => {
-//       // Handle Google Drive URLs
-//       if (url.includes("drive.google.com")) {
-//         const fileId = url.match(/filed([^]+)/)?.[1];
-//         if (fileId) {
-//           return `https://drive.google.com/uc?export=download&id=${fileId}`;
-//         }
-//       }
-//       return url;
-//     };
-
-//     if (typeof pdfSource === "string") {
-//       setProcessedUrl(processUrl(pdfSource));
-//     } else if (pdfSource instanceof Blob) {
-//       const url = URL.createObjectURL(pdfSource);
-//       setProcessedUrl(url);
-//       return () => URL.revokeObjectURL(url);
-//     }
-//   }, [pdfSource]);
-
-//   useEffect(() => {
-//     const loadPDF = async () => {
-//       try {
-//         const blob = await fetchPDFAsBlob(pdfSource);
-//         const url = URL.createObjectURL(blob);
-//       } catch (err) {
-//         toast.error("Gagal memuat dokumen PDF");
-//       }
-//     };
-
-//     if (typeof pdfSource === "string" && pdfSource.includes("rokeubmn-pa.id")) {
-//       loadPDF();
-//     }
-//   }, [pdfSource]);
-
-//   if (!processedUrl) return <div>Loading PDF...</div>;
-
-//   return (
-//     <div style={{ width: "90%",
-//         maxWidth: "1200px",
-//         height: "80vh",
-//         margin: "0 auto", }}>
-//       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-//         <Viewer
-//           fileUrl={processedUrl}
-//           plugins={[defaultLayoutPluginInstance]}
-//         />
-//       </Worker>
-//     </div>
-//   );
-// };
-
-// export default CustomPDFViewer;
-
-const CustomPDFViewer = ({ pdfSource }) => {
+const CustomPDFViewer = ({ pdfSource, frameless = false }) => {
   const [url, setUrl] = useState(null);
+  
+  // Inisialisasi plugin bawaan (yang ada toolbar-nya)
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   useEffect(() => {
@@ -82,7 +18,6 @@ const CustomPDFViewer = ({ pdfSource }) => {
     if (typeof pdfSource === "string") {
       setUrl(pdfSource);
     }
-
     // Jika blob
     else if (pdfSource instanceof Blob) {
       const objectUrl = URL.createObjectURL(pdfSource);
@@ -98,12 +33,19 @@ const CustomPDFViewer = ({ pdfSource }) => {
     <div
       style={{
         width: "100%",
-        height: "100vh",
-        overflow: "hidden",
+        // Kalau frameless, biarin height ngikutin parent biar ga kepotong scroll-nya
+        height: frameless ? "100%" : "100vh", 
+        overflow: "auto", // Ganti hidden jadi auto biar halamannya tetep bisa di-scroll ke bawah
       }}
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-        <Viewer fileUrl={url} plugins={[defaultLayoutPluginInstance]} />
+        <Viewer 
+          fileUrl={url} 
+          // KUNCINYA DI SINI BOS:
+          // Kalau frameless true -> plugin kosongin (toolbar hilang, sisa kertas PDF doang)
+          // Kalau frameless false -> pake layout plugin (muncul toolbar lengkap)
+          plugins={frameless ? [] : [defaultLayoutPluginInstance]} 
+        />
       </Worker>
     </div>
   );

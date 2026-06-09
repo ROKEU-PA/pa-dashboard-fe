@@ -8,6 +8,7 @@ function Modal({
   title,
   children,
   width = "auto",
+  minWidth = "40vw",
   maxWidth = "90%",
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -48,7 +49,7 @@ function Modal({
           backgroundColor: "#fff",
           borderRadius: "8px",
           padding: "24px",
-          minWidth: "40vw",
+          minWidth: minWidth,
           maxWidth: maxWidth,
           width: width,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
