@@ -21,7 +21,7 @@ import StateProperty from "./pages/StateProperty";
 import Administrator from "./pages/Administrator";
 import RealisasiPage from "./pages/Realisasi";
 import ReportingAccounting from "./pages/ReportingAccounting";
-import LLATPage from "./pages/LLAT";
+import CalendarPage from "./pages/Calendar";
 import { useAuth } from "./contexts/AuthContexts";
 import PTUKDashboard from "./pages/PTUKDashboard";
 import PTUKLHP from "./pages/PTUK/LHP";
@@ -180,7 +180,7 @@ function App() {
           path="/satuan-kerja"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title={"Satuan Kerja"}>
                 <MenuPage />
               </AppLayout>
             </PrivateRoute>
@@ -317,8 +317,8 @@ function App() {
           path="/kalender"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
-                <LLATPage />
+              <AppLayout isAdmin={isAdmin} title="Kalender Pelaksanaan Anggaran">
+                <CalendarPage />
               </AppLayout>
             </PrivateRoute>
           }
@@ -329,6 +329,16 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP">
                 <MonitoringPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/report/sp2d"
+          element={
+            <PrivateRoute>
+              <AppLayout isAdmin={isAdmin} title="SP2D">
+                <ShowForAll />
               </AppLayout>
             </PrivateRoute>
           }

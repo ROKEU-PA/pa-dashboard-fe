@@ -15,8 +15,6 @@ import {
   MessageSquare,
   Network,
   Archive,
-  Axis3D,
-  Table,
   CircleDollarSign,
   Calendar,
   FileText,
@@ -27,11 +25,10 @@ import {
   BadgeCent,
   ArrowLeftRight,
   ArchiveRestore,
-  Monitor,
   MonitorDot,
-  Ratio,
   Award,
   CirclePercent,
+  Files,
 } from "lucide-react";
 
 export const menuItems = [
@@ -111,6 +108,11 @@ export const menuItems = [
     name: "E-Arsip",
     path: "/e-arsip",
     icon: <Archive strokeWidth={3} />,
+  },
+  {
+    name: "SP2D",
+    path: "/report/sp2d",
+    icon: <Files strokeWidth={3} />,
   },
   {
     name: "IKPA",

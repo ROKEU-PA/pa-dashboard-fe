@@ -19,7 +19,7 @@ function Sidebar() {
     if (role === "super_admin") return menuItems;
 
     if (role === "user" || role === "pic") {
-      const allowedMenus = ["E-SPP", "E-Arsip", "Monitoring", "IKPA", "Realisasi", "Kalender"];
+      const allowedMenus = ["E-SPP", "E-Arsip", "Monitoring", "IKPA", "SP2D", "Realisasi", "Kalender"];
       return menuItems.filter(item => allowedMenus.includes(item.name));
     }   
 

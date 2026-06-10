@@ -37,9 +37,6 @@ function ListSatuanKerjaPage() {
     setRowsPerPage,
     openAddModal,
     openEditModal,
-    openPengujianModal,
-    openDetailModal,
-    openPDFModal,
     // Modal states
     isOpenModal,
     setIsOpenModal,
