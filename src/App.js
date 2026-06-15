@@ -35,7 +35,6 @@ import StrukturOrganisasi from "./pages/OrganizationalStructure";
 import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
 import AdminMasterDataTU from "./pages/MasterDataTU";
-import YearSelectionPage from "./pages/ListSatuankerja/year";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
 import MonitoringPage from "./pages/Monitoring";
 import PerformanceIndicator from "./pages/PerformanceIndicator";
