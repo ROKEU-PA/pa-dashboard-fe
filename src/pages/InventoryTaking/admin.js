@@ -15,9 +15,6 @@ import {
 import { apiTU } from "@/services/ApiTU";
 
 const InventoryTakingAdmin = () => {
-  // ==========================================
-  // STATE AUTENTIKASI (LOGIN/LOGOUT)
-  // ==========================================
   const [isAuthenticated, setIsAuthenticated] = useState(
     !!localStorage.getItem("adminToken")
   );
@@ -54,9 +51,6 @@ const InventoryTakingAdmin = () => {
     }, 3000);
   }, []);
 
-  // ==========================================
-  // FUNGSI HANDLE LOGIN & LOGOUT
-  // ==========================================
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -64,32 +58,50 @@ const InventoryTakingAdmin = () => {
       return;
     }
 
+    // LOGIKA DETEKSI ROLE (Karena ini halaman Admin Barang)
+    let roleTerdeteksi = "pegawai";
+    if (username === "admin_barang" || username.includes("barang")) {
+      roleTerdeteksi = "barang";
+    }
+
     setIsLoginLoading(true);
     try {
+     
+      const requestBody = {
+        username: username.trim(),
+        password: password,
+        role: roleTerdeteksi 
+      };
+
+      console.log("Data dikirim:", requestBody); 
+
       const res = await apiTU({
         url: "api/login",
         method: "POST",
-        options: { body: { username, password } },
+        options: { body: requestBody }, 
       });
 
-      localStorage.setItem("adminToken", res.token);
-      setIsAuthenticated(true);
-      showToast("Login berhasil!", "success");
+      if (res && res.token) {
+        localStorage.setItem("adminToken", res.token);
+        setIsAuthenticated(true);
+        showToast("Login berhasil!", "success");
+      } else {
+        throw new Error("Token tidak valid");
+      }
     } catch (error) {
       console.error("Login Error Details:", error.message);
 
       // KOREKSI LOGIKA ERROR:
-      // apiTU lu melempar teks error asli dari backend, jadi kita cek teksnya langsung
       const errMsg = (error.message || "").toLowerCase();
 
       if (
         errMsg.includes("salah") || 
         errMsg.includes("tidak terdaftar") || 
+        errMsg.includes("match") || 
         errMsg.includes("401")
       ) {
         showToast("Username atau Password salah!", "error");
       } else {
-        // Error server/jaringan lain (termasuk Failed to fetch)
         showToast("Gagal terhubung. Pastikan server VPS menyala.", "error");
       }
     } finally {
@@ -109,7 +121,6 @@ const InventoryTakingAdmin = () => {
 
   const loadData = useCallback(
     async (isManualRefresh = false) => {
-      // Jangan nge-load data kalau belum login
       if (!isAuthenticated) return;
 
       setLoading(true);
@@ -347,7 +358,7 @@ const InventoryTakingAdmin = () => {
               Welcome
             </h2>
             <p className="text-center text-sm text-gray-500 mb-8">
-              Please Login to Admin Dashboard
+              Dashboard Persediaan Barang
             </p>
 
             <form onSubmit={handleLogin} className="space-y-4">
@@ -641,7 +652,6 @@ const InventoryTakingAdmin = () => {
         </main>
       )}
 
-      {/* Modal Tambah/Edit Barang (Hanya muncul kalau isAuthenticated true & isModalOpen true) */}
       {isModalOpen && isAuthenticated && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
@@ -778,7 +788,7 @@ const InventoryTakingAdmin = () => {
         </div>
       )}
 
-      {/* Sistem Notifikasi (Toast) ditaruh di luar biar bisa diakses halaman Login & Admin */}
+
       <div className="fixed bottom-6 right-6 z-[200] flex flex-col gap-2 pointer-events-none">
         {toasts.map((t) => (
           <div
