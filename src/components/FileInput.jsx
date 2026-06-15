@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useId } from "react";
 import PropTypes from "prop-types";
-import themeColors from "../constants/color";
-import { requiredValidator } from "../services/GeneralHelper";
 import { toast } from "react-toastify";
+import { UploadCloud, File, CheckCircle2 } from "lucide-react";
 import "react-toastify/dist/ReactToastify.css";
 
 function FileInput({
@@ -11,108 +10,191 @@ function FileInput({
   onChange,
   accept = "*",
   required = false,
-  style = {},
   helperText = "",
-  validate,
-  value = null,
+  value = null, // File existing dari database
 }) {
   const [loading, setLoading] = useState(false);
+  const [newFileName, setNewFileName] = useState("");
   const [localError, setLocalError] = useState("");
-  const [isFilled, setIsFilled] = useState(value ? true : false);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const runValidation = (val) => {
-    const validators = [];
+  // Bikin ID unik untuk mengamankan fungsi Klik pada Label
+  const uniqueId = useId();
 
-    if (required) validators.push(requiredValidator(label)); // use label as field name
-    if (validate) validators.push(validate);
+  const processFile = async (file, eventToPass) => {
+    if (!file) return;
 
-    for (const fn of validators) {
-      const result = fn(val);
-      if (result) return result;
-    }
-
-    return "";
-  };
-
-  const handleChange = async (e) => {
-    const file = e.target.files[0];
-    setIsFilled(true);
-    onChange(e); // propagate the event first
-
-    const errorMessage = runValidation(file?.name);
-    setLocalError(errorMessage);
-
-    if (errorMessage) return;
+    setNewFileName(file.name);
+    setLocalError("");
 
     try {
       setLoading(true);
-      toast.info("Menambahkan file...");
 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      toast.success("File ditambahkan!");
+      if (eventToPass) {
+        onChange(eventToPass);
+      }
+      toast.info("Memproses file...", { autoClose: 1000 });
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("File siap dilampirkan!");
     } catch (err) {
-      console.error(err);
-      toast.error("Failed gagal ditambahkan.");
+      console.error("Error process file:", err);
+      toast.error("Gagal memproses file.");
+      setNewFileName(""); // Reset kalau gagal
     } finally {
-      setIsFilled(false);
       setLoading(false);
     }
   };
 
-  const containerStyle = {
-    padding: "1rem",
-    border: `1px dotted ${themeColors.primary.default}`,
-    borderRadius: 5,
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      processFile(file, e);
+    }
   };
 
-  const labelStyle = {
-    display: "block",
-    marginBottom: "0.5rem",
-    color: "#333",
+  const preventDragDefault = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
   };
 
-  const inputStyle = {
-    padding: "0.5rem 0",
-    fontSize: "1rem",
-    ...style,
+  const handleDragOver = (e) => {
+    preventDragDefault(e);
+    e.dataTransfer.dropEffect = "copy";
+    if (!loading) setIsDragging(true);
   };
 
-  const helperTextStyle = {
-    fontSize: "0.75rem",
-    color: localError ? "#d32f2f" : "#777",
-    marginTop: "0.25rem",
-    marginLeft: "0.25rem",
+  const handleDragLeave = (e) => {
+    preventDragDefault(e);
+    setIsDragging(false);
   };
+
+  const handleDragEnter = (e) => {
+    preventDragDefault(e);
+    if (!loading) setIsDragging(true);
+  };
+
+  const handleDrop = (e) => {
+    preventDragDefault(e);
+    setIsDragging(false);
+
+    if (loading) return;
+
+    const files = Array.from(e.dataTransfer.files); // Convert ke array biasa
+
+    if (files.length === 0) {
+      console.log("Tidak ada file — cek apakah dragover juga di-handle");
+      return;
+    }
+
+    const file = files[0];
+    const syntheticEvent = {
+      target: {
+        name: name,
+        files: e.dataTransfer.files, // pakai yang asli
+        type: "file",
+        value: "",
+      },
+    };
+
+    processFile(file, syntheticEvent);
+  };
+
+  // Validasi visual merah jika wajib tapi masih kosong
+  const isError =
+    localError !== "" ||
+    (required && !value && !newFileName && localError === "trigger");
 
   return (
-    <div style={containerStyle}>
-      <label htmlFor={name} style={labelStyle}>
-        {label}
+    <div className="flex flex-col gap-1.5 w-full">
+      {/* Label Title */}
+      <label className="text-md text-[#ccc]-700 ml-1">
+        {label} {required && <span className="text-red-500">*</span>}
       </label>
-      {value && isFilled && (
-        <div style={{ marginBottom: "0.5rem" }}>
-          <a
-            href={value.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "blue", textDecoration: "underline" }}
-          >
-            {value.filename}
-          </a>
+
+      {/* Tampilan Dokumen Existing */}
+      {value && !newFileName && (
+        <div className="mb-2 p-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-between">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <File size={16} className="text-blue-500 shrink-0" />
+            <a
+              href={value.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-blue-600 hover:text-blue-800 underline truncate font-medium"
+              title={value.filename}
+            >
+              {value.filename || "Lihat Dokumen"}
+            </a>
+          </div>
+          <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded font-semibold shrink-0">
+            Existing File
+          </span>
         </div>
       )}
-      <input
-        id={name}
-        type="file"
-        name={name}
-        onChange={handleChange}
-        accept={accept}
-        disabled={loading}
-        style={inputStyle}
-      />
-      {(helperText || localError) && (
-        <div style={helperTextStyle}>{localError || helperText}</div>
+
+      {/* Kotak Drag & Drop menggunakan tag LABEL agar Klik otomatis jalan */}
+      <label
+        htmlFor={uniqueId}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragEnter={handleDragEnter}
+        className={`
+          flex flex-col items-center justify-center w-full min-h-[120px] p-6 
+          border-2 border-dashed rounded-xl transition-all duration-200 group
+          ${loading ? "opacity-50 cursor-wait bg-slate-50" : "bg-slate-50 hover:bg-blue-50/50 cursor-pointer"}
+          ${isError ? "border-red-400" : isDragging ? "border-blue-500 bg-blue-100/50 scale-[1.02]" : newFileName ? "border-emerald-400 bg-emerald-50/30" : "border-slate-300 hover:border-blue-400"}
+        `}
+      >
+        <div className="flex flex-col items-center justify-center pt-2 pb-3 pointer-events-none">
+          {newFileName ? (
+            <>
+              <CheckCircle2 size={36} className="text-emerald-500 mb-3" />
+              <p className="mb-1 text-sm font-semibold text-emerald-700 text-center truncate max-w-[250px]">
+                {newFileName}
+              </p>
+              <p className="text-xs text-slate-500">
+                Klik atau seret file lain untuk mengganti
+              </p>
+            </>
+          ) : (
+            <>
+              <UploadCloud
+                size={36}
+                className={`mb-3 transition-colors ${isDragging ? "text-blue-600" : "text-blue-500"}`}
+              />
+              <p className="mb-1 text-sm font-semibold text-slate-700 text-center">
+                <span className="text-blue-600">Klik untuk upload</span> atau
+                seret file ke sini
+              </p>
+              <p className="text-xs text-slate-400 mt-1 uppercase tracking-wider">
+                {accept}
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* Input File Asli yang disembunyikan tapi diikat oleh htmlFor label */}
+        <input
+          id={uniqueId}
+          type="file"
+          name={name}
+          onChange={handleFileChange}
+          accept={accept}
+          disabled={loading}
+          className="hidden"
+        />
+      </label>
+
+      {/* Pesan Helper / Error */}
+      {(isError || helperText) && (
+        <span
+          className={`text-xs ml-1 font-medium ${isError ? "text-red-500" : "text-slate-500"}`}
+        >
+          {localError ||
+            helperText ||
+            (required && !newFileName && !value ? "Dokumen wajib diisi" : "")}
+        </span>
       )}
     </div>
   );
@@ -124,9 +206,6 @@ FileInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   accept: PropTypes.string,
   required: PropTypes.bool,
-  style: PropTypes.object,
-  required: PropTypes.bool,
-  validate: PropTypes.func,
 };
 
 export default FileInput;

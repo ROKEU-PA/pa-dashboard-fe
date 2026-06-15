@@ -19,7 +19,7 @@ function Sidebar() {
     if (role === "super_admin") return menuItems;
 
     if (role === "user" || role === "pic") {
-      const allowedMenus = ["E-SPP", "E-Arsip", "Tanda Terima SPP", "LLAT"];
+      const allowedMenus = ["E-SPP", "E-Arsip", "Monitoring", "IKPA", "SP2D", "Realisasi", "Kalender"];
       return menuItems.filter(item => allowedMenus.includes(item.name));
     }   
 
@@ -35,16 +35,16 @@ function Sidebar() {
             [
               "Pengajuan SPP",
               "Arsip SPM",
-              "Tanda Terima SPP",
+              "Monitoring E-SPP",
               "User Manage",
-              "LLAT",
+              "Kalender",
             ].includes(child.name),
           ),
         }));
     }
 
     if (role === "guest") {
-      const excludedMenus = ["Management", "Inventaris Kantor", "Pengambilan Persediaan","E-SPP", "E-Arsip", "Tanda Terima SPP"];
+      const excludedMenus = ["Management", "Inventaris Kantor", "Pengambilan Persediaan","E-SPP", "E-Arsip", "Monitoring", "IKPA", "Realisasi", "Kalender"];
       return menuItems
         .filter((item) => !excludedMenus.includes(item.name))
         .map((item) => {
@@ -52,7 +52,7 @@ function Sidebar() {
             return {
               ...item,
               children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA", "Realisasi"].includes(
+                ["Dashboard", "IKPA", "Realisasi", "Kalender"].includes(
                   child.name,
                 ),
               ),
@@ -62,7 +62,6 @@ function Sidebar() {
         });
     }
 
-    console.log (role);
     if (!role) {
     const pathname = location.pathname;
       if (pathname.includes("/inventaris-kantor")) {
@@ -131,7 +130,6 @@ function Sidebar() {
           overflowY: "auto",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-          justifyItems: "center",
         }}
         className="sidebar-scroll"
       >
@@ -139,13 +137,14 @@ function Sidebar() {
           src="/rokeu_logo_white.webp"
           alt="logo"
           width="150"
-          className="mt-5 mb-10"
+          className="mt-5 mb-10 ml-5"
         />
-        <nav>
+      
+        <nav style={{ display: "flex", flexDirection: "column", width: "100%" }}>
           {getFilteredMenuItems().map((item, index) => {
             if (item.children) {
               return (
-                <div key={index}>
+                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   {/* Parent dropdown */}
                   <div
                     className={`dropdown-parent${
@@ -156,22 +155,28 @@ function Sidebar() {
                       display: "flex",
                       justifyContent: "space-between",
                       alignItems: "center",
-                      padding: "10px",
+                      padding: "10px 16px",
                       cursor: "pointer",
-                      marginBottom: "5px",
+                      margin: "0 auto 5px auto",
+                      borderRadius: "8px",
+                      width: "85%",
+                      boxSizing: "border-box",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
+                        gap: "12px",
                       }}
                     >
                       {item.icon}
                       <span>{item.name}</span>
                     </div>
-                    <div onClick={() => toggleDropdown(item)}>
+                    <div onClick={(e) => {
+                        e.stopPropagation();
+                        toggleDropdown(item);
+                    }}>
                       {openDropdown === item.name ? (
                         <ChevronUp size={16} />
                       ) : (
@@ -182,7 +187,7 @@ function Sidebar() {
 
                   {/* Submenu */}
                   {openDropdown === item.name && (
-                    <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
+                    <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", marginTop: "2px" }}>
                       {item.children.map((subItem) => (
                         <NavLink
                           to={subItem.path}
@@ -193,11 +198,16 @@ function Sidebar() {
                           }
                           style={{
                             display: "flex",
+                            justifyContent: "flex-start",
                             alignItems: "center",
-                            gap: "8px",
-                            padding: "6px 6px",
+                            gap: "12px",
+                            padding: "8px 16px",
                             textDecoration: "none",
                             fontSize: "0.9rem",
+                            borderRadius: "8px",
+                            width: "80%",
+                            margin: "0 auto 4px auto",
+                            boxSizing: "border-box",
                           }}
                         >
                           {subItem.icon}
@@ -219,11 +229,15 @@ function Sidebar() {
                   }
                   style={{
                     display: "flex",
+                    justifyContent: "flex-start",
                     alignItems: "center",
-                    gap: "8px",
-                    padding: "10px",
+                    gap: "12px",
+                    padding: "10px 16px",
                     textDecoration: "none",
-                    borderRadius: "5px",
+                    borderRadius: "8px",
+                    margin: "0 auto 5px auto",
+                    width: "85%",
+                    boxSizing: "border-box",
                   }}
                 >
                   {item.icon}

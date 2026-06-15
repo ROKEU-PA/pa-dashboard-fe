@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 import { requiredValidator } from "../services/GeneralHelper";
-import themeColors from "../constants/color";
+import { ChevronDown, Search } from "lucide-react";
 
 function Select({
   label = null,
@@ -10,190 +10,203 @@ function Select({
   onChange,
   options = [],
   noPlaceholder = false,
-  placeholder = `Pilih ${label} dari opsi berikut`,
+  placeholder = `Pilih opsi...`,
   disabled = false,
   error = false,
   helperText = "",
-  style,
   validate,
   required = false,
-  isOpen,
-  innerHeight = "3.0rem",
-  setIsOpen,
+  isOpen,         // Prop dari luar (opsional)
+  setIsOpen,      // Prop dari luar (opsional)
+  isSearchable = false,
 }) {
   const containerRef = useRef(null);
-
-  const [hovered, setHovered] = useState(null);
-  const isFocused = false;
-
   const [localError, setLocalError] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // ==========================================
+  // JURUS HYBRID STATE (Otak Internal)
+  // ==========================================
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Gunakan isOpen dari props JIKA ada, kalau tidak pakai internalIsOpen
+  const isDropdownOpen = isOpen !== undefined ? isOpen : internalIsOpen;
+
+  const toggleDropdown = (newState) => {
+    if (setIsOpen) {
+      setIsOpen(newState); // Lapor ke modal/parent lama
+    }
+    setInternalIsOpen(newState); // Ubah state internal
+  };
+  // ==========================================
 
   const runValidation = (val) => {
     const validators = [];
-
-    if (required) validators.push(requiredValidator(label)); // use label as field name
+    if (required) validators.push(requiredValidator(label));
     if (validate) validators.push(validate);
 
     for (const fn of validators) {
       const result = fn(val);
       if (result) return result;
     }
-
     return "";
   };
 
   const handleChange = (e) => {
     const val = e.target.value;
     onChange(e);
-    const errorMessage = runValidation(val);
-    setLocalError(errorMessage);
+    setLocalError(runValidation(val));
   };
 
   const handleOptionClick = (val) => {
     if (val === value) {
-      handleChange({ target: { name, value: "" } }); // unselect
+      handleChange({ target: { name, value: "" } });
     } else {
       handleChange({ target: { name, value: val } });
     }
-    setIsOpen(false);
+    setSearchTerm("");
+    toggleDropdown(false); // Tutup setelah pilih
   };
+
+  const filteredOptions = options.filter((opt) =>
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
+  const isError = error || localError;
 
+  // LOGIKA FLOATING LABEL
+  const showFloatingLabel = value || isDropdownOpen;
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        toggleDropdown(false);
+        setSearchTerm("");
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setIsOpen]);
+
+  // ==========================================
+  // STYLE IDENTIK 100% DENGAN INPUT.JSX
+  // ==========================================
   const containerStyle = {
-    ...style,
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
     position: "relative",
-    width: style?.width || "100%",
+    marginTop: "0.25rem",
   };
-
-  const showFloatingLabel = value;
 
   const labelStyle = {
     position: "absolute",
-    top: noPlaceholder
-      ? showFloatingLabel
-        ? "-0.6rem"
-        : "0.7rem"
-      : placeholder
-        ? "-0.6rem"
-        : "0.7rem",
+    top: showFloatingLabel ? "-0.6rem" : "0.75rem",
     left: "0.75rem",
-    fontSize: noPlaceholder
-      ? showFloatingLabel
-        ? "0.75rem"
-        : "1rem"
-      : placeholder
-        ? "0.75rem"
-        : "1rem",
-    color: error ? "#d32f2f" : isFocused ? "#3f51b5" : "#777",
+    fontSize: showFloatingLabel ? "0.75rem" : "1rem",
+    color: isError ? "#d32f2f" : isDropdownOpen ? "#308BFD" : "#777",
     backgroundColor: "white",
     padding: "0 4px",
     transition: "all 0.2s ease",
     pointerEvents: "none",
+    zIndex: 10,
+  };
+
+  const triggerStyle = {
+    padding: "0.75rem",
+    fontSize: "1rem",
+    width: "100%",
+    boxSizing: "border-box",
+    border: isError ? "1px solid #d32f2f" : isDropdownOpen ? "1px solid #308BFD" : "1px solid #ccc",
+    borderRadius: "4px",
+    backgroundColor: disabled ? "#f5f5f5" : "#fff",
+    color: "#333",
+    transition: "all 0.2s ease",
+    boxShadow: isDropdownOpen && !isError ? "0 0 0 1px #308BFD" : isDropdownOpen && isError ? "0 0 0 1px #d32f2f" : "none",
+    cursor: disabled ? "not-allowed" : "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    userSelect: "none",
   };
 
   const helperTextStyle = {
     fontSize: "0.75rem",
-    color: error || localError ? "#d32f2f" : "#777",
+    color: isError ? "#d32f2f" : "#777",
     marginTop: "0.25rem",
     marginLeft: "0.25rem",
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(event.target)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [setIsOpen]);
-
   return (
     <div ref={containerRef} style={containerStyle}>
       {label && (
-        <label htmlFor={name} style={labelStyle}>
-          {label}
+        <label style={labelStyle}>
+          {label} {required && <span style={{ color: "#d32f2f" }}>*</span>}
         </label>
       )}
-      <div
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        style={{
-          padding: "0.75rem",
-          height: innerHeight,
-          border: `1px solid ${error ? "#d93025" : "#ccc"}`,
-          borderRadius: "4px",
-          backgroundColor: disabled ? "#f5f5f5" : "#fff",
-          cursor: disabled ? "not-allowed" : "pointer",
-        }}
-      >
-        <div
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            width: "100%", // 🔥 IMPORTANT
-          }}
+
+      {/* Input Box (Select Trigger) */}
+      <div onClick={() => !disabled && toggleDropdown(!isDropdownOpen)} style={triggerStyle}>
+        <span
+          className={`truncate text-sm ${selectedLabel ? "font-medium text-slate-800" : (showFloatingLabel ? "text-slate-400" : "opacity-0")}`}
         >
-          {selectedLabel || (
-            <span style={{ color: "#999" }}>
-              {noPlaceholder ? "" : placeholder}
-            </span>
-          )}
-        </div>
+          {selectedLabel || (noPlaceholder ? "" : placeholder)}
+        </span>
+        <ChevronDown
+          size={18}
+          style={{
+            color: isDropdownOpen ? "#308BFD" : "#999",
+            transform: isDropdownOpen ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "all 0.2s ease"
+          }}
+        />
       </div>
-      {isOpen && (
-        <div
-          style={{
-            position: "absolute",
-            top: "100%",
-            left: 0,
-            width: "100%",
-            border: "1px solid #ccc",
-            borderRadius: "4px",
-            backgroundColor: themeColors.background,
-            zIndex: 10,
-            maxHeight: "200px",
-            overflowY: "auto",
-          }}
-        >
-          {options.map((opt) => (
-            <div
-              key={opt.value}
-              onClick={() => handleOptionClick(opt.value)}
-              onMouseEnter={() => setHovered(opt.value)}
-              onMouseLeave={() => setHovered(null)}
-              style={{
-                padding: "0.75rem",
-                color:
-                  opt.value === value
-                    ? themeColors.card
-                    : hovered === opt.value
-                      ? "#000"
-                      : themeColors.primary.light,
-                backgroundColor:
-                  opt.value === value
-                    ? "#59C7FF"
-                    : hovered === opt.value
-                      ? "#EAF6FF"
-                      : themeColors.background,
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-              }}
-            >
-              {opt.label}
+
+      {/* Dropdown Options List & Search */}
+      {isDropdownOpen && (
+        <div className="absolute z-50 w-full top-[105%] left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto overflow-x-hidden flex flex-col">
+          
+          {isSearchable && (
+            <div className="p-2 border-b border-slate-100 sticky top-0 bg-white/95 backdrop-blur-sm z-10">
+              <div className="relative">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  className="w-full pl-8 pr-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#308BFD] focus:border-[#308BFD] transition-all placeholder:text-slate-400"
+                  placeholder="Cari opsi..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onClick={(e) => e.stopPropagation()} 
+                />
+              </div>
             </div>
-          ))}
+          )}
+
+          <div className="flex flex-col">
+            {filteredOptions.length === 0 ? (
+              <div className="p-4 text-center text-sm text-slate-400">Pencarian tidak ditemukan</div>
+            ) : (
+              filteredOptions.map((opt) => (
+                <div
+                  key={opt.value}
+                  onClick={() => handleOptionClick(opt.value)}
+                  className={`
+                    px-4 py-2.5 text-sm cursor-pointer transition-colors break-words
+                    ${opt.value === value 
+                      ? "bg-[#EAF4FF] text-[#308BFD] font-semibold border-l-4 border-[#308BFD]" 
+                      : "text-slate-700 hover:bg-slate-50 hover:text-[#308BFD] border-l-4 border-transparent"}
+                  `}
+                >
+                  {opt.label}
+                </div>
+              ))
+            )}
+          </div>
         </div>
       )}
-      {(helperText || localError) && (
+
+      {(isError || helperText) && (
         <div style={helperTextStyle}>{localError || helperText}</div>
       )}
     </div>
@@ -201,20 +214,20 @@ function Select({
 }
 
 Select.propTypes = {
-  label: PropTypes.string.isRequired,
+  label: PropTypes.string,
   name: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   onChange: PropTypes.func.isRequired,
-  options: PropTypes.arrayOf(
-    PropTypes.shape({ label: PropTypes.string, value: PropTypes.string }),
-  ).isRequired,
+  options: PropTypes.arrayOf(PropTypes.shape({ label: PropTypes.string, value: PropTypes.string })).isRequired,
   placeholder: PropTypes.string,
   disabled: PropTypes.bool,
   error: PropTypes.bool,
   helperText: PropTypes.string,
-  style: PropTypes.object,
   validate: PropTypes.func,
   required: PropTypes.bool,
+  isOpen: PropTypes.bool,
+  setIsOpen: PropTypes.func,
+  isSearchable: PropTypes.bool,
 };
 
 export default Select;

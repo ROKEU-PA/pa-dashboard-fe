@@ -1,3 +1,4 @@
+import { FileText, X } from "lucide-react";
 import React, { useState } from "react";
 import ReactDOM from "react-dom";
 
@@ -7,6 +8,7 @@ function Modal({
   title,
   children,
   width = "auto",
+  minWidth = "40vw",
   maxWidth = "90%",
 }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -47,14 +49,14 @@ function Modal({
           backgroundColor: "#fff",
           borderRadius: "8px",
           padding: "24px",
-          minWidth: "40vw",
+          minWidth: minWidth,
           maxWidth: maxWidth,
           width: width,
           boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
           position: "relative",
         }}
       >
-        <button
+        {/* <button
           onClick={onClose}
           style={buttonStyle}
           onMouseEnter={() => setIsHovered(true)}
@@ -62,8 +64,8 @@ function Modal({
           aria-label="Close modal"
         >
           ×
-        </button>
-        {title && (
+        </button> */}
+        {/* {title && (
           <h2
             style={{
               marginTop: "0px",
@@ -72,12 +74,30 @@ function Modal({
           >
             {title}
           </h2>
-        )}
+        )} */}
+        {/* Area Header Modal */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+          <div className="flex items-center gap-3">
+            {/* Optional: Tambahin Icon di samping title biar makin cakep */}
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+              <FileText size={20} />
+            </div>
+            <h2 className="text-lg font-bold text-slate-800">{title}</h2>
+          </div>
+
+          {/* Tombol Close (X) */}
+          <button
+            onClick={onClose}
+            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
         <div style={{ marginTop: "2rem", width: "100%" }}>{children}</div>
       </div>
     </div>,
-    document.getElementById("modal-root")
+    document.getElementById("modal-root"),
   );
 }
 

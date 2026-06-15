@@ -2,13 +2,13 @@ export const columns = [
   { key: "spp_number", label: "No. SPP" },
   { key: "created_at", label: "Tanggal Pengiriman", sortable: true },
   { key: "jenis_spp", label: "Jenis SPP", sortable: true },
-  { key: "tahun", label: "Tahun", sortable: true },
-  { key: "document", label: "Dokumen SPP & Pendukung" },
-  { key: "revisi", label: "Revisi", hiddenInArsip: true},
+  // { key: "tahun", label: "Tahun", sortable: true },
+  { key: "document", label: "Dokumen SPP & Pendukung", hiddenInPengajuan: true},
   { key: "status", label: "Status", hiddenInArsip: true },
   { key: "kelengkapan", label: "Kelengkapan", hiddenInArsip: true },
-  { key: "catatan", label: "Catatan"},
-  { key: "action", label: "Action" },
+  { key: "revisi", label: "Revisi", hiddenInArsip: true},
+  // { key: "catatan", label: "Catatan"},
+  { key: "action", label: "Action", hiddenIfUser: true},
 ];
 
 export function getCurrentSatuanKerja(menuList, pathname) {
@@ -35,5 +35,5 @@ export function getCurrentSatuanKerja(menuList, pathname) {
 }
 
 export function isPengajuanPath(pathname) {
-  return pathname.includes('/pengajuan');
+  return pathname.includes('/satuan-kerja');
 }

@@ -42,7 +42,7 @@ function MenuPage() {
               currentPath.startsWith("/satuan-kerja")
             ) {
               const base = "/" + pathParts[0];
-              targetPath = `${base}/pengajuan/${satkerIdentifier}`;
+              targetPath = `${base}/${satkerIdentifier}`;
             }
             const isPic = userData?.role?.toLowerCase() === "pic";
 

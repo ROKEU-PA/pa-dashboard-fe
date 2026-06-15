@@ -6,13 +6,11 @@ import TablePagination from "@/components/TablePagination";
 import TableHeader from "@/components/TableHeader";
 import TableCell from "@/components/TableCell";
 import { TableBody } from "@/components/TableBody";
-import Title from "@/components/Title";
 import Paper from "@/components/Paper";
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
 import Input from "@/components/Input";
-import Breadcrumbs from "@/components/Breadcrumbs";
 import { Plus, Settings, Trash2, UserRoundSearch } from "lucide-react";
 import { cryptoEncrypter, validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
@@ -22,7 +20,6 @@ import { apiRequest } from "@/services/APIHelper";
 import { fetchHelperGET } from "@/services/FetchHelper";
 import MultiSelect from "@/components/MultiSelect";
 import { AppContext } from "@/contexts/AppContext";
-import User from "@/components/User";
 import moment from "moment";
 
 const columns = [
@@ -88,7 +85,7 @@ function UserManagementPage() {
         access: JSON.stringify(formData?.access_code),
         nama: formData?.name,
       };
-      console.log(payload);
+      // console.log(payload);
 
       const result = await apiRequest({
         url: "/user/register",

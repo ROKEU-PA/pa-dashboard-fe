@@ -45,7 +45,7 @@ const columnsTT = [
   { key: "status", label: "Status" },
 ];
 
-function TandaTerimaPage() {
+function MonitoringPage() {
   const { userData } = useContext(AppContext);
   const [dataTable, setDataTable] = useState([]);
   const [dataReceiptTable, setDataReceiptTable] = useState([]);
@@ -283,4 +283,4 @@ function TandaTerimaPage() {
   );
 }
 
-export default TandaTerimaPage;
+export default MonitoringPage;

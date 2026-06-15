@@ -6,13 +6,15 @@ import { labelsDummy, dataTable } from "./constants";
 import BarChart from "./BarChart";
 import { SquareKanban, Star } from "lucide-react";
 import { useBudgetExecution } from "@/hooks/useBudgetExecution";
+import { useFetchRealization } from "../Realisasi/hooks/useFetchRealization";
 
 function BudgetExecution() {
   const year = moment().format("YYYY");
-  const period = {
-    year: moment().subtract(1, "years").year(),
-    month: moment().subtract(30, "days").format("M"),
-  };
+  const [currentPeriod, setCurrentPeriod] = useState({
+    year: moment().year(),
+    month: moment().subtract(30, "days").format("MM"),
+  });
+  const [attempts, setAttempts] = useState(0);
 
   const {
     KemnakerRate,
@@ -22,19 +24,50 @@ function BudgetExecution() {
     mapColorTextByValue,
   } = useBudgetExecution();
 
+  const {
+    dataCard,
+  } = useFetchRealization(
+    "all",
+    "",
+    currentPeriod.month,
+    currentPeriod.year,
+  );
+
   const dataset = [
     { name: "Completed", value: 320 },
     { name: "In Progress", value: 180 },
     { name: "Blocked", value: 60 },
     { name: "Backlog", value: 140 },
   ];
-  const [values, setValues] = useState([
-    70.7, 33.39, 50.48, 9.41, 83.77, 33.1, 31.96, 29.94,
-  ]);
+
+  const [values, setValues] = useState([]);
+  const [labels, setLabels] = useState([]);
 
   useEffect(() => {
-    refetch(period);
-  }, [year]);
+    refetch(currentPeriod);
+  }, [currentPeriod]); 
+  
+  useEffect(() => {
+    if (!dataCard || dataCard.length === 0) {
+      if (attempts < 12) {
+        const prevDate = moment(
+          `${currentPeriod.year}-${currentPeriod.month}`,
+          "YYYY-MM"
+        ).subtract(1, "months");
+
+        setCurrentPeriod({
+          year: prevDate.year(),
+          month: prevDate.format("MM"),
+        });
+        
+        setAttempts((prev) => prev + 1);
+      }
+      return;
+    }
+
+    setValues(dataCard.map((item) => item.persen_realisasi));
+    setLabels(dataCard.map((item) => item.name));
+  }, [dataCard]);
 
   return (
     <div>
@@ -45,14 +78,14 @@ function BudgetExecution() {
               <span className="font-bold text-lg md:text-xl lg:text-2xl">
                 Nilai IKPA
               </span>
-              <span className="font-medium  text-xs md:text-sm opacity-90">
-                {moment(period?.month).format("MMM")} {period?.year}
+              <span className="font-medium  text-lg md:text-lg opacity-90">
+                {moment(currentPeriod?.month).format("MMM")} {currentPeriod?.year}
               </span>
             </div>
             <span className="text-4xl md:text-5xl lg:text-6xl font-bold my-4 z-10">
               {KemnakerRate?.nilaiIKPA ?? "-"}
             </span>
-            <span className="font-semibold text-sm md:text-baseleading-tight z-10">
+            <span className="font-semibold text-lg md:text-baseleading-tight z-10">
               Kementerian
               <br />
               Ketenagakerjaan
@@ -81,7 +114,7 @@ function BudgetExecution() {
             >
               <div className="mb-2">
                 <span
-                  className={` inline-block text-xs md:text-sm font-semibold px-2 py-1 rounded ${mapColorTextByValue(item?.value)} ${mapColorByValue(item?.value)}
+                  className={` inline-block text-lg md:text-lg font-semibold px-2 py-1 rounded ${mapColorTextByValue(item?.value)} ${mapColorByValue(item?.value)}
         `}
                 >
                   {item.title ?? "-"}
@@ -158,8 +191,8 @@ function BudgetExecution() {
               data={dataset}
               height="h-72 "
               // labels={eselons}
-              labels={labelsDummy}
-              values={values}
+              labels={[...labels].reverse()}
+              values={[...values].reverse()}
             />
           </div>
         </Card>

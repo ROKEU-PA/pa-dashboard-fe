@@ -15,8 +15,6 @@ import {
   MessageSquare,
   Network,
   Archive,
-  Axis3D,
-  Table,
   CircleDollarSign,
   Calendar,
   FileText,
@@ -27,6 +25,10 @@ import {
   BadgeCent,
   ArrowLeftRight,
   ArchiveRestore,
+  MonitorDot,
+  Award,
+  CirclePercent,
+  Files,
 } from "lucide-react";
 
 export const menuItems = [
@@ -84,18 +86,23 @@ export const menuItems = [
         icon: <TrendingUpDown strokeWidth={3} />,
         adminOnly: true,
       },
+      {
+        name: "Kalender",
+        path: "/kalender",
+        icon: <Calendar strokeWidth={3} />,
+      },
     ],
     icon: <HandCoins strokeWidth={3} />,
   },
   {
-    name: "E-SPP",
-    path: "/satuan-kerja/pengajuan",
-    icon: <FolderCheck strokeWidth={3} />,
+    name: "Monitoring",
+    path: "/monitoring",
+    icon: <MonitorDot strokeWidth={3} />,
   },
   {
-    name: "Tanda Terima SPP",
-    path: "/tanda-terima",
-    icon: <Table strokeWidth={3} />,
+    name: "E-SPP",
+    path: "/satuan-kerja",
+    icon: <FolderCheck strokeWidth={3} />,
   },
   {
     name: "E-Arsip",
@@ -103,8 +110,24 @@ export const menuItems = [
     icon: <Archive strokeWidth={3} />,
   },
   {
-    name: "LLAT",
-    path: "/llat",
+    name: "SP2D",
+    path: "/report/sp2d",
+    icon: <Files strokeWidth={3} />,
+  },
+  {
+    name: "IKPA",
+    path: "/report/ikpa",
+    icon: <Award strokeWidth={3} />,
+  },
+  
+  {
+    name: "Realisasi",
+    path: "/report/realisasi",
+    icon: <CirclePercent strokeWidth={3} />,
+  },
+  {
+    name: "Kalender",
+    path: "/kalender",
     icon: <Calendar strokeWidth={3} />,
   },    
   {

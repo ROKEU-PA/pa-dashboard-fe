@@ -20,8 +20,8 @@ export const COLORS = {
 };
 
 export const TEXT = {
-  PAGE_TITLE: "Selamat Datang di SiAKBAR",
-  PAGE_SUBTITLE: "Anggaran, Keuangan, dan Barang",
+  PAGE_TITLE: "Selamat Datang di E-SPP",
+  PAGE_SUBTITLE: "Biro Keuangan dan BMN",
   LOGO_ALT: "Kementerian Ketenagakerjaan Republik Indonesia",
   SATKER_LABEL: "Satuan Kerja",
   SATKER_PLACEHOLDER: "Masukkan kode satuan kerja",
