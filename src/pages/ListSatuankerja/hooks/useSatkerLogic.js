@@ -122,7 +122,7 @@ export function useSatkerLogic() {
         : filter.tahun;
       const status = isPengajuanPath(location.pathname) ? "arsip" : null;
       const query = buildQueryString({
-        biro_code: currentMenu?.code,
+        biro_code: currentMenu?.code ?? filter.satker,
         tahun: now,
         status: status,
         search_key: filter.searchKey,

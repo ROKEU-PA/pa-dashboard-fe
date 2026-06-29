@@ -301,12 +301,10 @@ export default function SatkerTable({
 
                   // 9. Kolom Action (Menyamping / Flex-Row)
                   if (col.key === "action") {
-                    const showEditButton = false;
-                      // sementara false perbaiki bug dulu
-                      // (isPengajuan &&
-                      //   role === "user" &&
-                      //   row.status !== "approved" &&
-                      //   row.status !== "sp2d")
+                    const showEditButton =
+                      role === "user" &&
+                      row.status !== "approved" &&
+                      row.status !== "sp2d";
                     const showPengujianButton =
                       isPengajuan &&
                       (role === "admin" || role === "pic") &&

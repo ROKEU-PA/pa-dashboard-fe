@@ -136,7 +136,6 @@ function Arsip() {
 
   const handleApplyFilter = (e) => {
     e.preventDefault();
-    console.log(filter);
     if (userData.role !== "user") {
       if (!filter.satker || !filter.tahun) {
         toast.error("Tahun dan Satuan Kerja wajib dipilih!");
@@ -151,7 +150,6 @@ function Arsip() {
     const selectedSatkerName = satkerOptions.find(
       (s) => s.value === filter.satker,
     )?.label;
-    console.log(selectedSatkerName);
     setFilter((prev) => ({ ...prev, satkerName: selectedSatkerName }));
     setIsFiltered(true);
     setIsFilterModalOpen(false);
@@ -481,7 +479,7 @@ function Arsip() {
             <Select
               label="Satuan Kerja (Biro)"
               name="satker"
-              value={filter.satker} // KEMBALIKAN KE SINI BRO!
+              value={filter.satker}
               onChange={(e) => handleFilterChange("satker", e.target.value)}
               options={satkerOptions}
               required
