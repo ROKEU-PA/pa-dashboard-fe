@@ -1,0 +1,102 @@
+/* Styling Khusus Text 404 */
+.text-404 {
+    font-size: clamp(8rem, 20vw, 16rem);
+    font-weight: 900;
+    color: #6CC7FF;
+    line-height: 1;
+    text-shadow: 
+      1px 1px 0 #4DA3FF, 
+      2px 2px 0 #4DA3FF, 
+      3px 3px 0 #4DA3FF, 
+      4px 4px 0 #4DA3FF, 
+      5px 5px 0 #4DA3FF, 
+      6px 6px 0 #4DA3FF, 
+      7px 7px 0 #4DA3FF, 
+      8px 8px 0 #4DA3FF,
+      15px 15px 30px rgba(0, 0, 0, 0.6);
+  }
+  
+  /* Animasi Hover Melayang */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  /* Animasi Background Blobs */
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+  
+  .animate-blob {
+    animation: blob 8s infinite;
+  }
+  
+  /* Animasi Nafas Karakter (Membesar mengecil halus) */
+  @keyframes breathe {
+    0%, 100% {
+      transform: scale(1) translateY(0);
+    }
+    50% {
+      transform: scale(1.02) translateY(-5px);
+    }
+  }
+  
+  .animate-breathe {
+    animation: breathe 4s ease-in-out infinite;
+  }
+  
+  /* Efek Lampu Konslet (Flicker) */
+  @keyframes flicker {
+    0%   { opacity: 1; }
+    20%  { opacity: 0.3; }
+    40%  { opacity: 1; }
+    60%  { opacity: 0.5; }
+    80%  { opacity: 0.2; }
+    100% { opacity: 1; }
+  }
+  
+  .animate-flicker {
+    animation: flicker 0.25s linear;
+  }
+  
+  /* Utility untuk delay animasi */
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+
+  /* Animasi Kabut (FOG) di sudut layar */
+  @keyframes fog {
+    0%, 100% {
+      transform: translateX(0) scale(1);
+    }
+    50% {
+      transform: translateX(3%) scale(1.05); /* Gerak geser pelan kayak asap */
+    }
+  }
+  
+  .animate-fog {
+    animation: fog 15s ease-in-out infinite; /* Durasinya 15 detik biar smooth banget */
+  }

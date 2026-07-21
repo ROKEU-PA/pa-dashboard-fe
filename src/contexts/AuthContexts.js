@@ -1,10 +1,7 @@
-// contexts/AuthContexts.jsx
-import axios from "axios";
 import { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
 
-// Helper functions
 const getStoredAuth = () => {
   try {
     const stored = sessionStorage.getItem("auth");
@@ -31,35 +28,50 @@ export const AuthProvider = ({ children }) => {
   }, [auth]);
 
   useEffect(() => {
+    const handleTokenRefreshed = (e) => {
+      setAuth((prev) => ({ ...prev, accessToken: e.detail }));
+    };
+
+    const handleForceLogout = () => {
+      setAuth({ accessToken: null, user: null });
+    };
+
+    window.addEventListener("onTokenRefreshed", handleTokenRefreshed);
+    window.addEventListener("forceLogout", handleForceLogout);
+
+    return () => {
+      window.removeEventListener("onTokenRefreshed", handleTokenRefreshed);
+      window.removeEventListener("forceLogout", handleForceLogout);
+    };
+  }, []);
+
+  useEffect(() => {
     setIsInitializing(false);
   }, []);
 
-  const login = async (email, password) => {
+  const logout = async () => {
     try {
-      const res = await axios.post("/auth/login", { email, password });
+      if (auth.accessToken) {
+        const s = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${auth.accessToken}`
+          },
+          credentials: "include"
+        });
 
-      const authData = {
-        accessToken: res.data.accessToken,
-        user: res.data.user,
-      };
-
-      setAuth(authData);
-      return { success: true };
+      console.log(s);
+      }
     } catch (error) {
-      return {
-        success: false,
-        error: error.response?.data?.message || "Login failed",
-      };
+      console.error("Gagal lapor logout ke backend:", error);
+    } finally {
+      setAuth({ accessToken: null, user: null });
     }
-  };
-
-  const logout = () => {
-    setAuth({ accessToken: null, user: null });
   };
 
   return (
     <AuthContext.Provider
-      value={{ auth, setAuth, isInitializing, login, logout }}
+      value={{ auth, setAuth, isInitializing, logout }}
     >
       {children}
     </AuthContext.Provider>

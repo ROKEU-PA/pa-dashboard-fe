@@ -28,9 +28,11 @@ const User = ({
   const [passwordForm, setPasswordForm] = useState({
     new_password: "",
   });
-  const { setAuth } = useAuth();
+  const { setAuth, logout } = useAuth();
 
   const dropdownRef = useRef(null);
+
+  const handleLogout = () => logout();
 
   const getRoleIcon = (roleName) => {
     const lowerRole = roleName?.toLowerCase();
@@ -124,14 +126,6 @@ const User = ({
     }
   };
 
-  const logout = () => {
-    setAuth({
-      accessToken: null,
-      user: null,
-    });
-    navigate("./");
-  };
-
   return (
     <div className={`${className}  relative`} ref={dropdownRef}>
       <div
@@ -162,7 +156,7 @@ const User = ({
       {open && (
         <div className="flex flex-col gap-6 px-4 absolute right-0 mt-1 w-fit bg-white shadow-lg rounded-md p-4 z-50">
           <div
-            onClick={() => logout()}
+            onClick={() => handleLogout()}
             className="cursor-pointer flex gap-4 text-red-600 hover:bg-red-100 p-3 rounded"
           >
             <Power />

@@ -7,13 +7,10 @@ import { menuItems } from "./constants";
 
 function Sidebar() {
   const { userData } = useContext(AppContext);
-  const { logout } = useAuth();
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
   const location = useLocation();
-
-  const handleLogout = () => logout();
 
   const getFilteredMenuItems = () => {
     if (role === "super_admin") return menuItems;

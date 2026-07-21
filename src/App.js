@@ -40,6 +40,7 @@ import MonitoringPage from "./pages/Monitoring";
 import PerformanceIndicator from "./pages/PerformanceIndicator";
 import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
 import ShowForAll from "./pages/ShowForAll";
+import NotFoundPage from "./pages/NotFound";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -159,12 +160,14 @@ function App() {
             </PrivateRoute>
           }
         />
+        {/* Dinonaktifkan akan dimigrasikan ke domain baru
         <Route
           path="/tata-usaha/pengambilan-persediaan"
           element={<InventoryTaking />}
         />
         <Route path="/inventaris-kantor/admin" element={<InventoryTakingA />} />
-        <Route path="/master-data-tu" element={<AdminMasterDataTU />} />
+        <Route path="/master-data-tu" element={<AdminMasterDataTU />} /> */}
+        
         {listMenu.map((data) => (
           <Route
             key={data?.id}
@@ -177,7 +180,7 @@ function App() {
               </PrivateRoute>
             }
           />
-        ))} */}
+        ))}
         <Route
           path="/satuan-kerja"
           element={
@@ -429,6 +432,7 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </>
   );
