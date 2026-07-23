@@ -30,8 +30,9 @@ export const useLogin = () => {
         const payload = {
           kode_biro: Number(formData.satker),
           password: encryptedPassword,
+          captcha: formData.captcha || "",
         };
-
+        
         const response = await fetchHelper(
           `${process.env.REACT_APP_API_BASE_URL}/auth/loginV2`,
           "POST",
@@ -60,11 +61,14 @@ export const useLogin = () => {
         console.error("Login error:", error);
 
         let errorMsg = error.message || TEXT.ERROR_GENERIC;
+        let statusCode = 400;
 
         if (errorMsg.includes("Unauthorized") || errorMsg.includes("salah")) {
           errorMsg = "Biro Code atau Password salah.";
-        } else if (errorMsg.includes("Terlalu banyak percobaan")) {
+          statusCode = 401;
+        } else if (errorMsg.includes("Terlalu banyak percobaan") || errorMsg.includes("Too Many Attempts")) {
           errorMsg = error.message;
+          statusCode = 429;
         }
 
         setErrorMessage(errorMsg);
