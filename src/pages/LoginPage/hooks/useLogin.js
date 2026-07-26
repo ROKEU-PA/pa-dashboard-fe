@@ -58,23 +58,18 @@ export const useLogin = () => {
 
         return { success: true };
       } catch (error) {
-        console.error("Login error:", error);
-
         let errorMsg = error.message || TEXT.ERROR_GENERIC;
-        let statusCode = 400;
+        
+        let statusCode = error.status || 500; 
 
         if (errorMsg.includes("Unauthorized") || errorMsg.includes("salah")) {
           errorMsg = "Biro Code atau Password salah.";
-          statusCode = 401;
-        } else if (errorMsg.includes("Terlalu banyak percobaan") || errorMsg.includes("Too Many Attempts")) {
-          errorMsg = error.message;
-          statusCode = 429;
         }
 
         setErrorMessage(errorMsg);
         toast.error(errorMsg);
 
-        return { success: false, error: errorMsg };
+        return { success: false, status: statusCode, error: errorMsg };
       } finally {
         setIsLoading(false);
       }

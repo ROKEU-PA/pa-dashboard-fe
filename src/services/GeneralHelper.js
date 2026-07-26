@@ -4,54 +4,72 @@ export const requiredValidator =
     !val ? `${fieldName} wajib diisi` : "";
 
 export const validationSchema = {
-  name: (val) => (val.length >= 3 ? "" : "Minimal 3 karakter"),
-  numberspp: (val) => {
-    if (val.length !== 5) return "Harus terdiri dari 5 angka";
+  name: (val) => {
+    if (!val) return "Wajib diisi";
+    if (val.length > 15) return "Maksimal 15 huruf";
+    if (!/^[a-zA-Z\s]+$/.test(val)) return "Hanya boleh huruf";
     return "";
   },
 
-  onlyNumber: (val) => (/^\d+$/.test(val) ? "" : "Hanya boleh angka"),
+  numberspp: (val) => {
+    if (!val) return "Wajib diisi";
+    if (val.length > 5) return "Maksimal 5 angka";
+    if (!/^\d+$/.test(val)) return "Hanya boleh angka";
+    return "";
+  },
+
+  onlyNumber: (val) => {
+    if (!val) return "Wajib diisi";
+    return /^\d+$/.test(val) ? "" : "Hanya boleh angka";
+  },
 
   tahun: (val) => {
-    if (!/^\d{4}$/.test(val)) return "Format tahun harus 4 digit";
+    if (!val) return "Wajib diisi";
+    if (!/^\d{4}$/.test(val)) return "Format tahun harus 4 digit angka";
+    
     const year = parseInt(val, 10);
     const currentYear = new Date().getFullYear();
-    if (year < 1900 || year > currentYear + 10) return "Tahun tidak valid";
+    
+    if (year > currentYear) return `Tahun maksimal ${currentYear}`;
     return "";
   },
 
   password: (val) => {
+    if (!val) return "Wajib diisi";
     if (val.length < 8) return "Minimal 8 karakter";
     if (!/[A-Z]/.test(val)) return "Harus mengandung huruf besar";
     if (!/\d/.test(val)) return "Harus mengandung angka";
     return "";
   },
+
   filePdf: (file) => {
+    if (!file) return "File wajib diunggah";
     const allowed = ["pdf"];
     const ext = file.name.split(".").pop().toLowerCase();
     return allowed.includes(ext) ? "" : "File harus format PDF";
   },
 
   fileExcel: (file) => {
+    if (!file) return "File wajib diunggah";
     const allowed = ["xls", "xlsx"];
     const ext = file.name.split(".").pop().toLowerCase();
     return allowed.includes(ext) ? "" : "File harus format Excel (xls/xlsx)";
   },
 
   fileWord: (file) => {
+    if (!file) return "File wajib diunggah";
     const allowed = ["doc", "docx"];
     const ext = file.name.split(".").pop().toLowerCase();
     return allowed.includes(ext) ? "" : "File harus format Word (doc/docx)";
   },
+
   link: (val) => {
     if (!val) return "Link tidak boleh kosong";
-
     const pattern = /^https:\/\/[a-z0-9-]+(\.[a-z0-9-]+)+.*$/i;
     if (!pattern.test(val)) {
       return "Format link tidak valid, harus diawali https://";
     }
-
-    return null;
+    return "";
   },
 };
 

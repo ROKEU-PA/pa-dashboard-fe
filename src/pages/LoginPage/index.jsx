@@ -1,5 +1,5 @@
 // src/pages/LoginPage/index.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Button from "@/components/Button";
 import Input from "@/components/Input";
 import { useLogin } from "./hooks/useLogin";
@@ -23,54 +23,61 @@ const LoginPage = () => {
     [FORM_FIELDS.PASSWORD]: "",
   });
 
-  // State Keamanan BSSN (Rate Limit & Captcha)
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [captchaToken, setCaptchaToken] = useState("");
   const [lockoutTimer, setLockoutTimer] = useState(0);
 
-  // Efek untuk Hitung Mundur Lockout (Timer)
+  const recaptchaRef = useRef(null);
+
   useEffect(() => {
     let timer;
     if (lockoutTimer > 0) {
       timer = setInterval(() => {
-        setLockoutTimer((prev) => prev - 1);
+        setLockoutTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setFailedAttempts(0);
+            setCaptchaToken("");
+            if (recaptchaRef.current) {
+              recaptchaRef.current.reset();
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (lockoutTimer === 0 && failedAttempts >= 5) {
-      // Reset attempts kalau waktu lockout udah habis
-      setFailedAttempts(0);
-      setCaptchaToken("");
     }
-    return () => clearInterval(timer);
-  }, [lockoutTimer, failedAttempts]);
+    
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [lockoutTimer]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    // Cek jika sedang dilock
     if (lockoutTimer > 0) return;
 
-    // Cek jika butuh Captcha tapi belum diisi
     if (failedAttempts >= 3 && !captchaToken) {
       alert("Silakan selesaikan CAPTCHA terlebih dahulu!");
       return;
     }
 
-    // Panggil API Login
-    // Note: Pastikan handleLogin me-return response status atau error object
     const response = await handleLogin({ ...formData, captcha: captchaToken });
     
-    // Asumsi handleLogin mengembalikan { success: false, status: 429/401 }
-    // Lu harus sesuaikan dengan return dari hooks useLogin.js lu ya lurd.
     if (!response?.success) {
       const newFails = failedAttempts + 1;
       setFailedAttempts(newFails);
 
-      // Lockout jika API balikin status 429 atau gagal 5x dari frontend
-      if (response?.status === 429 || newFails >= 5) {
-        setLockoutTimer(15 * 60); // Set 15 menit (900 detik)
+      if (response?.status === 429) {
+        setLockoutTimer(15 * 60);
+      } else {
+        setCaptchaToken("");
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
       }
     } else {
-      // Reset kalau sukses
       setFailedAttempts(0);
       setCaptchaToken("");
     }
@@ -159,7 +166,7 @@ const LoginPage = () => {
                   disabled={isLoading || lockoutTimer > 0}
                 />
               </div>
-              
+
               {failedAttempts >= 3 && (
                 <div className="mb-4 flex flex-col items-center justify-center w-full transition-all duration-500 ease-in-out animate-fadeIn">
                   <p className="text-xs text-red-500 mb-2 text-center font-medium">
@@ -168,6 +175,7 @@ const LoginPage = () => {
 
                   <div className="flex justify-center w-full min-h-[78px]">
                     <ReCAPTCHA
+                      ref={recaptchaRef}
                       sitekey={SITE_KEY}
                       onChange={(token) => setCaptchaToken(token)}
                       onExpired={() => setCaptchaToken("")}

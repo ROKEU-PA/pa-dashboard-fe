@@ -52,15 +52,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (auth.accessToken) {
-        const s = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`, {
+        await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${auth.accessToken}`
           },
           credentials: "include"
         });
-
-      console.log(s);
       }
     } catch (error) {
       console.error("Gagal lapor logout ke backend:", error);

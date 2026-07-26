@@ -50,7 +50,10 @@ export async function fetchHelper(url, method, body, customOptions = {}) {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || "Request failed");
+      const error = new Error(errorData.message || "Request failed");
+      error.status = response.status; 
+      
+      throw error;
     }
 
     const result = await response.json();

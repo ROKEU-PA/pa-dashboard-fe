@@ -53,6 +53,7 @@ export function useSatkerLogic() {
   const [questions, setQuestions] = useState([]);
   const [verifications, setVerifications] = useState([]);
   const [jenisFile, setJenisFile] = useState("file");
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     no_spp: "",
     tahun: "",
@@ -511,7 +512,7 @@ export function useSatkerLogic() {
       });
       fetchTable();
     } catch (err) {
-      console.error(err);
+      console.log(err)
       toast.error("Gagal menyimpan data. Silakan coba lagi.");
     }
   };
@@ -573,6 +574,7 @@ export function useSatkerLogic() {
     types,
     questions,
     verifications,
+    errorMessage,
 
     // States
     filter,
@@ -599,7 +601,8 @@ export function useSatkerLogic() {
     setIsOpenModal,
     setIsOpenPDF,
     setVariantModal,
-    setPDFtoOpen, // Tambahan expose untuk mengubah PDF
+    setPDFtoOpen,
+    setErrorMessage,
 
     // Handlers
     handleSortChange,

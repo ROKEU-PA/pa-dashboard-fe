@@ -280,6 +280,9 @@ function ListSatuanKerjaPage() {
                   required={letiantModal === "Add"}
                   value={formData?.document}
                 />
+                <p className="text-xs text-slate-500 font-medium italic ml-1">
+                  * Maksimal 1,5 GB untuk jenis GUP & PTUP. Di luar jenis tersebut maksimal 200 MB.
+                </p>
               </div>
             )}
 
