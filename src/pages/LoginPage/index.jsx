@@ -162,7 +162,7 @@ const LoginPage = () => {
                   value={formData[FORM_FIELDS.PASSWORD]}
                   onChange={handleInputChange}
                   placeholder={TEXT.PASSWORD_PLACEHOLDER}
-                  autoComplete="current-password"
+                  // autoComplete="current-password"
                   disabled={isLoading || lockoutTimer > 0}
                 />
               </div>
