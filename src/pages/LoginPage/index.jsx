@@ -493,7 +493,7 @@ const LoginPage = () => {
                 </span>
               </div>
               <strong className="block mt-[12px] text-[25px] md:text-[clamp(25px,2.2vw,36px)] font-[850] tracking-[-0.03em]">
-                {percentageSPP} %
+                {percentageSPP.toFixed(2)} %
               </strong>
               <div
                 className="w-full h-[7px] mt-[13px] overflow-hidden rounded-full bg-white/15"
