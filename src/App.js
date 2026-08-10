@@ -174,7 +174,7 @@ function App() {
             path={`${data?.path}`}
             element={
               <PrivateRoute>
-                <AppLayout isAdmin={isAdmin}>
+                <AppLayout isAdmin={isAdmin} title={'E-SPP'} userName={userData?.name}>
                   <ListSatuanKerjaPage />
                 </AppLayout>
               </PrivateRoute>
@@ -185,7 +185,7 @@ function App() {
           path="/satuan-kerja"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title={"Satuan Kerja"}>
+              <AppLayout isAdmin={isAdmin} title={"Satuan Kerja"} userName={userData?.name}>
                 <MenuPage />
               </AppLayout>
             </PrivateRoute>
@@ -202,7 +202,7 @@ function App() {
             })()}
             element={
               <PrivateRoute>
-                <AppLayout isAdmin={isAdmin} title={`E-SPP`}>
+                <AppLayout isAdmin={isAdmin} title={`E-SPP`} userName={userData?.name}>
                   <ListSatuanKerjaPage />
                 </AppLayout>
               </PrivateRoute>
@@ -214,7 +214,7 @@ function App() {
           path="/pengajuan/pengujian/:id"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="E-SPP">
+              <AppLayout isAdmin={isAdmin} title="E-SPP" userName={userData?.name}>
                 <PengajuanReviewPage />
               </AppLayout>
             </PrivateRoute>
@@ -225,7 +225,7 @@ function App() {
           path="/pengajuan/detail/:id"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="E-SPP">
+              <AppLayout isAdmin={isAdmin} title="E-SPP" userName={userData?.name}>
                 <PengajuanReviewPage />
               </AppLayout>
             </PrivateRoute>
@@ -236,7 +236,7 @@ function App() {
           path="/e-arsip"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="E-Arsip">
+              <AppLayout isAdmin={isAdmin} title="E-Arsip" userName={userData?.name}>
                 <ArchivePage />
               </AppLayout>
             </PrivateRoute>
@@ -301,7 +301,7 @@ function App() {
           path="/ikpa"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
+              <AppLayout isAdmin={isAdmin} title="Indikator Keuangan Pelaksanaan Anggaran" userName={userData?.name}>
                 <IkpaPage />
               </AppLayout>
             </PrivateRoute>
@@ -311,7 +311,7 @@ function App() {
           path="/realisasi"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Pelaksanaan Anggaran">
+              <AppLayout isAdmin={isAdmin} title="Realisasi Anggaran" userName={userData?.name}> 
                 <RealisasiPage />
               </AppLayout>
             </PrivateRoute>
@@ -322,7 +322,7 @@ function App() {
           path="/kalender"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Kalender Pelaksanaan Anggaran">
+              <AppLayout isAdmin={isAdmin} title="Kalender" userName={userData?.name}>
                 <CalendarPage />
               </AppLayout>
             </PrivateRoute>
@@ -332,7 +332,7 @@ function App() {
           path="/monitoring"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP">
+              <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP" userName={userData?.name}>
                 <MonitoringPage />
               </AppLayout>
             </PrivateRoute>
@@ -342,7 +342,7 @@ function App() {
           path="/report/sp2d"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="SP2D">
+              <AppLayout isAdmin={isAdmin} title="SP2D" userName={userData?.name}>
                 <ShowForAll />
               </AppLayout>
             </PrivateRoute>
@@ -352,7 +352,7 @@ function App() {
           path="/report/ikpa"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Indikator Kinerja Pelaksanaan Anggaran">
+              <AppLayout isAdmin={isAdmin} title="IKPA" userName={userData?.name}>
                 <ShowForAll />
               </AppLayout>
             </PrivateRoute>
@@ -362,7 +362,7 @@ function App() {
           path="/report/realisasi"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin} title="Realisasi Pelaksanaan Anggaran">
+              <AppLayout isAdmin={isAdmin} title="Realisasi Pelaksanaan Anggaran" userName={userData?.name}>
                 <ShowForAll />
               </AppLayout>
             </PrivateRoute>

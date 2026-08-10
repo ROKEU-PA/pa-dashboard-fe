@@ -2,38 +2,25 @@ import React from "react";
 
 function TableCell({
   children,
-  align = [],
+  align = "left",
   component = "td",
-  scope,
-  sx = {},
-  style = {},
-  index = null,
   className = "",
   colspan = "1",
   rowspan = "1",
   ...props
 }) {
   const Component = component;
+  
+  // Ubah prop align jadi class Tailwind
   const textAlign =
-    align === "right" ? "right" : align === "center" ? "center" : "left";
-
-  const defaultStyle = {
-    ...style,
-    padding: "10px 16px",
-    textAlign,
-    fontWeight: component === "th" ? 600 : 400,
-    // borderBottom: "1px solid #e0e0e0",
-    ...sx,
-  };
+    align === "right" ? "text-right" : align === "center" ? "text-center" : "text-left";
 
   return (
     <Component
-      style={defaultStyle}
       colSpan={colspan}
       rowSpan={rowspan}
-      scope={scope}
+      className={`px-4 py-3.5 align-middle transition-colors ${textAlign} ${className}`}
       {...props}
-      className={`${className} ${index ? ((index + 1) % 2 !== 0 ? "bg-white" : "bg-[#EBF8FF]") : ""}`}
     >
       {children}
     </Component>

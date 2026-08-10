@@ -1,6 +1,11 @@
-export function TableBody({ children, style = {}, ...props }) {
+import React from "react";
+
+export function TableBody({ children, className = "", ...props }) {
   return (
-    <tbody style={style} {...props}>
+    <tbody 
+      className={`divide-y divide-slate-100 dark:divide-white/5 ${className}`} 
+      {...props}
+    >
       {children}
     </tbody>
   );

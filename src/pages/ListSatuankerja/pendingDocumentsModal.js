@@ -37,7 +37,7 @@ export default function PendingDocumentsModal({ open, onClose, code }) {
       open={open}
       onClose={onClose}
       title="Daftar Dokumen Belum Lengkap"
-      maxWidth={900}
+      maxWidth={700}
       actions={
         <button
           onClick={onClose}

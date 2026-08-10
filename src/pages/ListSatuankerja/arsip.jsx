@@ -5,7 +5,7 @@ import TablePagination from "@/components/TablePagination";
 import TableHeader from "@/components/TableHeader";
 import TableCell from "@/components/TableCell";
 import { TableBody } from "@/components/TableBody";
-import Paper from "@/components/Paper";
+// Paper udah gak kita pakai, ganti div murni Tailwind biar support Dark Mode
 import Button from "@/components/Button";
 import Modal from "@/components/Modal";
 import Select from "@/components/Select";
@@ -20,11 +20,11 @@ import {
   Edit2,
   Folder,
   Link2,
+  Calendar,
 } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import { validationSchema } from "@/services/GeneralHelper";
 import { toast } from "react-toastify";
-import DatePickerInput from "@/components/DatePickerInput";
 import CustomPDFViewer from "@/components/PDFViewer";
 import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
@@ -51,7 +51,7 @@ function Arsip() {
     handleSubmit,
   } = useSatkerLogic();
 
-  // 2. STATE LOKAL UNTUK UI
+  // STATE LOKAL UNTUK UI
   const [isFiltered, setIsFiltered] = useState(false);
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
@@ -72,7 +72,6 @@ function Arsip() {
     if (userData?.role === "user") {
       const code =
         userData.biro_code || (userData.access_code && userData.access_code);
-      // Cuma balikin array kalau kodenya valid
       if (code) {
         return [
           {
@@ -173,9 +172,6 @@ function Arsip() {
 
   const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
 
-  // =======================================================================
-  // EFFECTS
-  // =======================================================================
   useEffect(() => {
     if (isFiltered) fetchTable();
   }, [
@@ -197,17 +193,12 @@ function Arsip() {
   }, []);
 
   useEffect(() => {
-    // 1. Pastiin userData beneran udah keload dari Context
     if (userData && userData.role === "user") {
-      // 2. Tangkep kodenya (antisipasi kalau biro_code null, lari ke access_code array)
       const userBiroCode =
         userData.biro_code || (userData.access_code && userData.access_code);
       const userBiroName = userData.name || "Biro Anda";
 
-      // 3. Kalau dapet kodenya, dan filter masih kosong ATAU beda, paksa set!
       if (userBiroCode && filter.satker !== userBiroCode) {
-        console.log("🔥 AUTO SET SATKER TEMBUS BOS!", userBiroCode); // <-- Pantau di console!
-
         setFilter((prev) => ({
           ...prev,
           satker: userBiroCode,
@@ -218,80 +209,83 @@ function Arsip() {
   }, [userData, filter.satker, setFilter]);
 
   return (
-    <div className="w-full h-full bg-slate-50/50 rounded-xl overflow-hidden flex flex-col">
+    <div className="w-full h-full bg-slate-50/50 dark:bg-transparent rounded-xl overflow-hidden flex flex-col transition-colors">
+      
       {/* STATE 1: EMPTY STATE */}
       {!isFiltered ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white rounded-xl shadow-sm border border-slate-200 min-h-[60vh]">
-          <div className="w-24 h-24 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mb-6">
+        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#111C30]/80 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] backdrop-blur-md border border-slate-100 dark:border-white/10 min-h-[60vh] transition-colors">
+          <div className="w-24 h-24 bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-full flex items-center justify-center mb-6">
             <FileSearch size={48} strokeWidth={1.5} />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
             Data Arsip Belum Ditampilkan
           </h2>
-          <p className="text-slate-500 max-w-md mb-8">
+          <p className="text-slate-500 dark:text-slate-400 max-w-md mb-8">
             Silakan pilih Tahun dan Satuan Kerja (Biro) terlebih dahulu untuk
             mulai melihat, mencari, atau mengelola dokumen arsip.
           </p>
           <Button
             onClick={() => setIsFilterModalOpen(true)}
-            className="px-8 py-3 text-base shadow-md hover:shadow-lg transition-all"
-            icon={<Filter size={20} />}
+            className="px-8 h-[42px] shadow-lg shadow-blue-500/30 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl font-bold transition-all"
+            icon={<Filter size={18} strokeWidth={2.5} />}
           >
             Pilih Kriteria Arsip
           </Button>
         </div>
       ) : (
         /* STATE 2: TABLE DATA */
-        <Paper
-          elevation={3}
-          className="p-4 md:p-6 rounded-xl flex flex-col gap-6 shadow-md border border-gray-100 bg-white"
-        >
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+        <div className="flex flex-col gap-6">
+          
+          {/* HEADER FILTER & SEARCH */}
+          <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 p-5 transition-colors flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            
             <div className="flex flex-col">
-              <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Menampilkan Data:
               </span>
-              <span className="text-lg font-bold text-slate-800">
+              <span className="text-lg font-black text-slate-800 dark:text-white">
                 {filter.satkerName}{" "}
-                <span className="text-blue-600 font-black px-2">|</span>{" "}
+                <span className="text-blue-500 font-black px-1.5 opacity-50">|</span>{" "}
                 {filter.tahun}
               </span>
             </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-3 w-full lg:w-auto">
-              <div className="relative">
+            <div className="flex flex-wrap items-center justify-start lg:justify-end gap-3 w-full lg:w-auto">
+              <div className="relative group w-full sm:w-auto">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"
                 />
                 <input
                   type="text"
                   placeholder="Cari No SPP..."
-                  className="pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none w-full sm:w-[200px]"
+                  className="w-full sm:w-[200px] pl-10 pr-4 py-2.5 h-[38px] bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl text-sm font-semibold text-slate-700 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
                   value={filter.searchKey}
                   onChange={(e) =>
                     handleFilterChange("searchKey", e.target.value)
                   }
                 />
               </div>
+              
               <Button
-                letiant="secondary"
+                variant="custom"
                 onClick={() => setIsFilterModalOpen(true)}
-                className="shadow-sm bg-white"
-                icon={<Filter size={18} />}
+                className="w-full sm:w-fit px-4 h-[38px] bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 text-slate-600 dark:text-white border border-slate-200 dark:border-white/10 rounded-xl transition-colors font-bold flex items-center justify-center gap-2"
+                icon={<Filter size={16} strokeWidth={2.5} />}
               >
                 Ubah Filter
               </Button>
+              
               {userData.role !== "user" && (
                 <Button
+                  variant="custom"
                   onClick={() => {
                     setIsOpenModal(true);
                     setFormData((prev) => ({ ...prev, tahun: filter.tahun }));
                     setVariantModal("Add");
                   }}
-                  className="shadow-sm"
-                  letiant="danger"
-                  icon={<Plus size={18} />}
+                  className="w-full sm:w-fit px-4 h-[38px] shadow-md shadow-blue-500/30 active:scale-95 transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                  icon={<Plus size={16} strokeWidth={2.5} />}
                 >
                   Tambah Arsip
                 </Button>
@@ -299,8 +293,9 @@ function Arsip() {
             </div>
           </div>
 
-          <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm scrollbar-thin scrollbar-thumb-gray-300">
-            <Table sx={{ minWidth: 650 }} aria-label="interactive data table">
+          {/* TABLE CONTAINER */}
+          <div className="w-full overflow-x-auto rounded-[20px] bg-white dark:bg-[#111C30]/80 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 transition-colors duration-300 table-scroll">
+            <Table aria-label="interactive data table">
               <TableHeader>
                 <TableRow>
                   {columns
@@ -313,12 +308,15 @@ function Arsip() {
                         onClick={() =>
                           col.sortable && handleSortChange(col.key)
                         }
-                        style={{ cursor: col.sortable ? "pointer" : "default" }}
+                        className={`py-4 px-4 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap transition-colors ${
+                          col.sortable ? "cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 select-none group" : "cursor-default"
+                        }`}
                       >
                         {col.sortable ? (
                           <TableSortLabel
                             active={sortBy === col.key}
                             direction={sortDir}
+                            className="group-hover:text-blue-500 dark:group-hover:text-blue-400"
                           >
                             {col.label}
                           </TableSortLabel>
@@ -333,26 +331,26 @@ function Arsip() {
                 {dataTable.map((row, index) => (
                   <TableRow
                     key={index}
-                    className="transition-all duration-200 hover:bg-blue-50/80 group border-b border-gray-100 last:border-none"
+                    className="transition-colors duration-200 hover:bg-slate-50/80 dark:hover:bg-white/5 border-b border-slate-100 dark:border-white/10 last:border-none group"
                   >
                     {columns
                       .filter((col) => !col.hiddenInArsip && !col.hiddenIfUser)
                       .map((col) => {
                         if (col.key == "spp_number")
                           return (
-                            <TableCell key={col.key} align="center">
+                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-gray-200 whitespace-nowrap">
                               {row?.["no_spp"]}
                             </TableCell>
                           );
                         if (col.key === "created_at")
                           return (
-                            <TableCell key={col.key} align="center">
+                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
                               {moment(row?.[col.key]).format("YYYY/MM/DD")}
                             </TableCell>
                           );
                         if (col.key === "revisi")
                           return (
-                            <TableCell key={col.key} align="center">
+                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
                               Revisi ke-{row?.[col.key]}
                             </TableCell>
                           );
@@ -375,13 +373,9 @@ function Arsip() {
                                   setPDFtoOpen(docObj?.url);
                                 }
                               }}
-                              style={{
-                                color: themeColors.primary.light,
-                                cursor:
-                                  typeof docObj?.url === "string"
-                                    ? "pointer"
-                                    : "default",
-                              }}
+                              className={`py-3.5 px-4 text-xs sm:text-sm font-bold whitespace-nowrap ${
+                                typeof docObj?.url === "string" ? "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer" : "text-slate-400 dark:text-slate-600"
+                              }`}
                             >
                               {typeof docObj?.url === "string"
                                 ? `Lihat File`
@@ -389,8 +383,6 @@ function Arsip() {
                             </TableCell>
                           );
                         }
-
-                        // if (col.key === "jml_hal") return <TableCell key={col.key} align="center">{row.jml_hal || "-"}</TableCell>;
 
                         const role = userData?.role;
                         const isAdminRole = [
@@ -404,20 +396,19 @@ function Arsip() {
                             <TableCell
                               key={col.key}
                               align="center"
-                              className="flex flex-col gap-2 min-w-[120px]"
+                              className="py-3.5 px-4"
                             >
                               <div className="flex flex-row justify-center items-center gap-2">
                                 <button
                                   title="Edit"
-                                  className="p-2 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors border border-blue-200"
+                                  className="p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-blue-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                                   onClick={() => {
-                                    // Panggil openEditModal dari Hook lu!
                                     openEditModal(row);
                                     setIsOpenModal(true);
                                     setVariantModal("Edit");
                                   }}
                                 >
-                                  <Edit2 size={16} />
+                                  <Edit2 size={16} strokeWidth={2.5} />
                                 </button>
                               </div>
                             </TableCell>
@@ -425,7 +416,7 @@ function Arsip() {
                         }
 
                         return (
-                          <TableCell key={col.key} align="center">
+                          <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
                             {row[col.key] ?? "-"}
                           </TableCell>
                         );
@@ -434,21 +425,25 @@ function Arsip() {
                 ))}
               </TableBody>
             </Table>
+            
+            {/* Pagination Container disesuaikan */}
+            <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/30 dark:bg-[#0D1627]/30">
+              <TablePagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(value) => {
+                  setRowsPerPage(value);
+                  setPage(0);
+                }}
+              />
+            </div>
           </div>
-          <TablePagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(value) => {
-              setRowsPerPage(value);
-              setPage(0);
-            }}
-          />
-        </Paper>
+        </div>
       )}
 
-      {/* MODAL FILTER DATA */}
+      {/* MODAL FILTER DATA (UDAH DI-UPGRADE NATIVE DATE!) */}
       <Modal
         open={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
@@ -458,7 +453,7 @@ function Arsip() {
         minWidth="0px"
       >
         <form onSubmit={handleApplyFilter} className="flex flex-col gap-4 p-2">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Select
               label="Tahun"
               name="tahun"
@@ -487,47 +482,48 @@ function Arsip() {
               isSearchable={userData?.role !== "user"}
             />
           </div>
-          <div className="flex flex-col gap-1 mt-1">
-            <label className="text-[12px] text-slate-500 font-semibold px-1">
-              Jenis Tanggal{" "}
-              <span className="bg-red-400 text-white text-[9px] px-1.5 py-0.5 rounded ml-1 font-bold tracking-wider">
+          
+          <div className="flex flex-col gap-1.5 mt-2">
+            <label className="text-[11px] text-slate-500 dark:text-slate-400 font-bold px-1 uppercase tracking-wider">
+              Tanggal{" "}
+              <span className="bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-300 text-[9px] px-1.5 py-0.5 rounded ml-1 font-bold tracking-wider">
                 OPSIONAL
               </span>
             </label>
-            <div className="flex items-center gap-2 w-full [&_.react-datepicker-wrapper]:w-full">
-              <DatePickerInput
-                label=""
-                placeholderText="Tanggal Awal"
-                selected={filter.startDate}
-                onChange={(date) => handleFilterChange("startDate", date)}
-                selectsStart
-                startDate={filter.startDate}
-                endDate={filter.endDate}
+            
+            {/* DATE PICKER NATIVE MURNI (ANTI NGE-BUG) */}
+            <div className="flex items-center bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl h-[42px] px-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all group overflow-hidden">
+              <Calendar className="text-slate-400 group-focus-within:text-blue-500 transition-colors shrink-0 mr-2" size={16} strokeWidth={2.5} />
+              
+              <input
+                type="date"
+                className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"
+                value={filter.startDate || ""}
+                onChange={(e) => handleFilterChange("startDate", e.target.value)}
               />
-              <span className="font-bold text-slate-400 text-xs">S.D</span>
-              <DatePickerInput
-                label=""
-                placeholderText="Tanggal Akhir"
-                selected={filter.endDate}
-                onChange={(date) => handleFilterChange("endDate", date)}
-                selectsEnd
-                startDate={filter.startDate}
-                endDate={filter.endDate}
-                minDate={filter.startDate}
+              
+              <span className="text-slate-300 dark:text-slate-600 mx-2 font-bold">-</span>
+              
+              <input
+                type="date"
+                className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"
+                value={filter.endDate || ""}
+                onChange={(e) => handleFilterChange("endDate", e.target.value)}
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3 mt-4 border-t border-slate-100 pt-5">
+
+          <div className="grid grid-cols-2 gap-3 mt-6 border-t border-slate-100 dark:border-white/5 pt-5">
             <button
               type="button"
               onClick={handleResetFilter}
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm rounded-lg transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-sm rounded-xl transition-colors"
             >
               <X size={16} strokeWidth={2.5} /> HAPUS ISIAN
             </button>
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-[#7D8CEA] hover:bg-[#6A78D1] text-white font-bold text-sm rounded-lg transition-colors shadow-sm"
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-blue-500/30 active:scale-95"
             >
               <Check size={16} strokeWidth={2.5} /> KIRIM
             </button>
@@ -545,7 +541,6 @@ function Arsip() {
         }}
         title={variantModal === "Add" ? "Form Pengarsipan" : "Form Edit"}
       >
-        {/* PANGGIL handleSubmit DARI HOOK LU DI SINI */}
         <form onSubmit={handleSubmit} className="flex flex-col w-full relative">
           <div className="flex flex-col gap-5 p-5 max-h-[65vh] overflow-y-auto">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
@@ -625,7 +620,7 @@ function Arsip() {
             />
 
             {jenisFile === "link" && (
-              <div className="p-5 bg-blue-50/50 border border-blue-100 rounded-xl flex flex-col gap-4">
+              <div className="p-5 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl flex flex-col gap-4 transition-colors">
                 <Input
                   label="Link Dokumen"
                   name="link"
@@ -663,8 +658,8 @@ function Arsip() {
             {userData &&
               variantModal === "Edit" &&
               userData?.role !== "user" && (
-                <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-5 mt-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                <div className="p-5 bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl flex flex-col gap-5 mt-2 transition-colors">
+                  <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Dokumen Pendukung Tambahan
                   </span>
                   <FileInput
@@ -685,10 +680,11 @@ function Arsip() {
               )}
           </div>
 
-          <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex justify-end rounded-b-xl">
+          <div className="px-5 py-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0D1627] flex justify-end rounded-b-[20px] transition-colors">
             <Button
+              variant="custom"
               type="submit"
-              className="w-full md:w-auto px-8 py-2.5 bg-[#308BFD] hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md shadow-blue-500/30 transition-all"
+              className="w-full md:w-auto px-8 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-xl shadow-md shadow-blue-500/30 active:scale-95 transition-all"
             >
               {variantModal === "Add" ? "Kirim Pengajuan" : "Simpan Perubahan"}
             </Button>
@@ -716,31 +712,31 @@ function Arsip() {
             <CustomPDFViewer pdfSource={pdfToOpen} />
           </div>
         ) : (
-          <div className="bg-white border border-blue-100 rounded-2xl p-8 shadow-xl shadow-blue-200/50 flex flex-col items-center text-center max-w-sm w-full mx-4">
-            <div className="relative text-[#308BFD] mb-2">
+          <div className="bg-white dark:bg-[#0A111E] border border-blue-100 dark:border-blue-500/20 rounded-2xl p-8 shadow-xl shadow-blue-200/50 dark:shadow-none flex flex-col items-center text-center max-w-sm w-full mx-auto my-4 transition-colors">
+            <div className="relative text-blue-500 mb-2">
               {fileExtension === "gdrive" ? (
                 <Link2 size={84} strokeWidth={1.5} />
               ) : (
                 <Folder size={84} strokeWidth={1.5} />
               )}
 
-              <span className="absolute bottom-1 right-0 bg-[#308BFD] text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
+              <span className="absolute bottom-1 right-0 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
                 {fileExtension === "gdrive" ? "G-DRIVE" : "ZIP/RAR"}
               </span>
             </div>
 
-            <p className="mt-4 text-slate-600 font-medium">
+            <p className="mt-4 text-slate-700 dark:text-white font-bold">
               File SPP ber-format{" "}
               {fileExtension === "gdrive" ? "Link" : "Arsip"}
             </p>
 
-            <p className="text-xs text-slate-400 mt-1 mb-6">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">
               Silakan {fileExtension === "gdrive" ? "buka" : "download"} untuk
               melihat isi file.
             </p>
 
             <button
-              className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-[#59C6FF] to-[#308BFD] hover:from-[#49bbf5] hover:to-[#257be0] text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all"
               onClick={() => {
                 if (fileExtension === "gdrive") {
                   window.open(pdfToOpen, "_blank", "noopener,noreferrer");
@@ -754,7 +750,6 @@ function Arsip() {
                 }
               }}
             >
-              {/* 4. Teks tombolnya otomatis nyesuain */}
               {fileExtension === "gdrive" ? "Buka Link" : "Download File"}
             </button>
           </div>

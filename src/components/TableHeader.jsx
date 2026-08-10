@@ -1,9 +1,10 @@
 import React from "react";
 
-function TableHeader({ children, className }) {
+function TableHeader({ children, className = "" }) {
   return (
-    // Menggabungkan warna biru default dengan className tambahan dari luar
-    <thead className={`bg-gradient-to-b from-[#59C7FF] to-[#2F8AFD] text-white ${className}`}>
+    <thead 
+      className={`bg-slate-50/80 dark:bg-[#0D1627]/80 border-b border-slate-200 dark:border-white/10 ${className}`}
+    >
       {children}
     </thead>
   );

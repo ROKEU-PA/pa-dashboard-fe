@@ -95,8 +95,12 @@ function ListSatuanKerjaPage() {
   const fileExtension = getFileExtension(pdfToOpen);
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden flex flex-col">
-      <Paper elevation={0} className="rounded-xl flex flex-col bg-white">
+    <div className="w-full bg-white dark:!bg-transparent dark:border-none rounded-xl shadow-lg dark:shadow-none border border-gray-100 overflow-hidden flex flex-col">
+      
+      <Paper 
+        elevation={0} 
+        className="rounded-xl flex flex-col bg-white dark:!bg-transparent"
+      >
         {/* --- SECTION 1: FILTER --- */}
         <FilterSection
           location={location}
@@ -107,30 +111,28 @@ function ListSatuanKerjaPage() {
         />
 
         {/* --- SECTION 2: TABLE --- */}
-        <div className="p-4 md:p-6">
-          <SatkerTable
-            columns={columns}
-            dataTable={dataTable}
-            location={location}
-            userData={userData}
-            handleSortChange={handleSortChange}
-            sortBy={sortBy}
-            sortDir={sortDir}
-            openEditModal={openEditModal}
-          />
+        <SatkerTable
+          columns={columns}
+          dataTable={dataTable}
+          location={location}
+          userData={userData}
+          handleSortChange={handleSortChange}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          openEditModal={openEditModal}
+        />
 
-          <div className="mt-4">
-            <TablePagination
-              page={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(value) => {
-                setRowsPerPage(value);
-                setPage(0);
-              }}
-            />
-          </div>
+        <div className="mt-4">
+          <TablePagination
+            page={page}
+            totalPages={totalPages}
+            onPageChange={setPage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(value) => {
+              setRowsPerPage(value);
+              setPage(0);
+            }}
+          />
         </div>
       </Paper>
 

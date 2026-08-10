@@ -2,7 +2,11 @@
 
 export const ASSETS = {
   LOGO: "/logo-kemnaker.webp",
+  LOGO_ONLY: "/logo-kemnaker-decoration.webp",
+  LOGO_DARK: "/kemnaker-logo-darker.webp",
+  LOGO_LIGHT: "/kemnaker-logo-light.webp",
   BUILDING_IMAGE: "/login-image-hd.webp",
+  BUILDING_IMAGE_2: "/future-loginpageblur.webp",
 };
 
 export const ROUTES = {

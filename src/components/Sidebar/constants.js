@@ -97,38 +97,38 @@ export const menuItems = [
   {
     name: "Monitoring",
     path: "/monitoring",
-    icon: <MonitorDot strokeWidth={3} />,
+    icon: <MonitorDot strokeWidth={1.5} />,
   },
   {
     name: "E-SPP",
     path: "/satuan-kerja",
-    icon: <FolderCheck strokeWidth={3} />,
+    icon: <FolderCheck strokeWidth={1.5} />,
   },
   {
     name: "E-Arsip",
     path: "/e-arsip",
-    icon: <Archive strokeWidth={3} />,
+    icon: <Archive strokeWidth={1.5} />,
   },
   {
     name: "SP2D",
     path: "/report/sp2d",
-    icon: <Files strokeWidth={3} />,
+    icon: <Files strokeWidth={1.5} />,
   },
   {
     name: "IKPA",
     path: "/report/ikpa",
-    icon: <Award strokeWidth={3} />,
+    icon: <Award strokeWidth={1.5} />,
   },
   
   {
     name: "Realisasi",
     path: "/report/realisasi",
-    icon: <CirclePercent strokeWidth={3} />,
+    icon: <CirclePercent strokeWidth={1.5} />,
   },
   {
     name: "Kalender",
     path: "/kalender",
-    icon: <Calendar strokeWidth={3} />,
+    icon: <Calendar strokeWidth={1.5} />,
   },    
   {
     name: "Barang Milik Negara",

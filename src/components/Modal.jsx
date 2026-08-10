@@ -1,5 +1,5 @@
 import { FileText, X } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 
 function Modal({
@@ -11,93 +11,67 @@ function Modal({
   minWidth = "40vw",
   maxWidth = "90%",
 }) {
-  const [isHovered, setIsHovered] = useState(false);
+  // Jurus UX: Kunci scroll halaman belakang pas modal lagi kebuka
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
+
   if (!open) return null;
 
   const stopPropagation = (e) => e.stopPropagation();
 
-  const buttonStyle = {
-    position: "absolute",
-    top: "12px",
-    right: "12px",
-    border: "none",
-    background: "transparent",
-    fontSize: "30px",
-    cursor: "pointer",
-    color: isHovered ? "#3f51b5" : "#000", // example hover effect
-  };
-
   return ReactDOM.createPortal(
+    // BACKDROP (Latar Belakang Gelap)
     <div
       onClick={onClose}
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        backgroundColor: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 999,
-      }}
+      className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-900/40 dark:bg-slate-900/60 backdrop-blur-sm transition-all duration-300 p-4"
     >
+      {/* MODAL CONTAINER */}
       <div
         onClick={stopPropagation}
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "8px",
-          padding: "24px",
-          minWidth: minWidth,
-          maxWidth: maxWidth,
-          width: width,
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          position: "relative",
-        }}
+        style={{ width, minWidth, maxWidth }}
+        className="bg-white dark:bg-[#111C30] rounded-[20px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_10px_40px_rgba(0,0,0,0.4)] border border-slate-100 dark:border-white/10 flex flex-col max-h-[90vh] transform transition-all"
       >
-        {/* <button
-          onClick={onClose}
-          style={buttonStyle}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-          aria-label="Close modal"
-        >
-          ×
-        </button> */}
-        {/* {title && (
-          <h2
-            style={{
-              marginTop: "0px",
-              marginBottom: "2rem",
-            }}
-          >
-            {title}
-          </h2>
-        )} */}
-        {/* Area Header Modal */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        
+        {/* ================= HEADER MODAL ================= */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/10 shrink-0 transition-colors">
           <div className="flex items-center gap-3">
-            {/* Optional: Tambahin Icon di samping title biar makin cakep */}
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-              <FileText size={20} />
+            <div className="p-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl transition-colors">
+              <FileText size={20} strokeWidth={2.5} />
             </div>
-            <h2 className="text-lg font-bold text-slate-800">{title}</h2>
+            {title && (
+              <h2 className="text-lg font-black text-slate-800 dark:text-white transition-colors">
+                {title}
+              </h2>
+            )}
           </div>
 
           {/* Tombol Close (X) */}
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+            className="p-2 text-slate-400 dark:text-slate-500 hover:text-rose-500 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-xl transition-all active:scale-95"
           >
-            <X size={20} />
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div style={{ marginTop: "2rem", width: "100%" }}>{children}</div>
+        {/* ================= KONTEN MODAL ================= */}
+        {/* overflow-y-auto biar kalau isinya panjang (kayak form) bisa di-scroll tanpa ngerusak modal */}
+        <div className="w-full flex-1 overflow-y-auto custom-scrollbar">
+          {children}
+        </div>
+        
       </div>
     </div>,
-    document.getElementById("modal-root"),
+    // Fallback ke document.body kalau misal id 'modal-root' gak ada di index.html lu
+    document.getElementById("modal-root") || document.body
   );
 }
 

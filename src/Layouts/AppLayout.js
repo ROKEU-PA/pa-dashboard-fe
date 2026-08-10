@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext  } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar";
@@ -12,21 +12,22 @@ function AppLayout({ children, isAdmin, title, userName }) {
   useEffect(() => {
     setSidebarOpen(false);
   }, [location.pathname]);
+
   return (
-    <div className="flex h-screen  overflow-hidden">
+    <div className="h-screen w-full overflow-hidden flex md:grid md:grid-cols-[270px_1fr] bg-[#f5f7fa] dark:bg-[#0f1724]">
+      
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-20 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-20 md:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-30 w-64 bg-gray-100 transform transition-transform duration-300
+          fixed inset-y-0 left-0 z-30 w-[270px] transform transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          md:translate-x-0 md:static md:flex
+          md:relative md:translate-x-0 md:block
         `}
       >
         <Sidebar isAdmin={isAdmin} onNavigate={() => setSidebarOpen(false)} />
@@ -35,16 +36,21 @@ function AppLayout({ children, isAdmin, title, userName }) {
       {!sidebarOpen && (
         <button
           onClick={() => setSidebarOpen(true)}
-          className="fixed top-1 left-3 z-[60] md:hidden p-2.5 bg-[#59C7FF] rounded-xl shadow-md border border-gray-100 text-[#616484] animate-in fade-in duration-300"
+          className="fixed top-3 left-4 z-[60] md:hidden p-2 bg-[#082b67] rounded-lg shadow-lg text-white border border-white/10 animate-in fade-in duration-300"
+          aria-label="Buka Menu"
         >
-          ☰
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
         </button>
       )}
 
-      <main className="flex-1 overflow-auto transition-all duration-300">
+      {/* 3. MAIN CONTENT */}
+      <main className="flex-1 w-full h-screen overflow-y-auto transition-all duration-300 relative">
         <Navbar menuName={title} user={userName} role={userData?.role} />
-        <div className="p-2 md:p-4 sm:px-5 lg:px-6">{children}</div>
+        <div className="p-4 md:p-6 lg:p-8">{children}</div>
       </main>
+      
     </div>
   );
 }

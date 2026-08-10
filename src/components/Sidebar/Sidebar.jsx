@@ -16,15 +16,24 @@ function Sidebar() {
     if (role === "super_admin") return menuItems;
 
     if (role === "user" || role === "pic") {
-      const allowedMenus = ["E-SPP", "E-Arsip", "Monitoring", "IKPA", "SP2D", "Realisasi", "Kalender"];
-      return menuItems.filter(item => allowedMenus.includes(item.name));
-    }   
+      const allowedMenus = [
+        "E-SPP",
+        "E-Arsip",
+        "Monitoring",
+        "IKPA",
+        "SP2D",
+        "Realisasi",
+        "Kalender",
+      ];
+      return menuItems.filter((item) => allowedMenus.includes(item.name));
+    }
 
     if (role === "admin") {
       return menuItems
         .filter(
           (item) =>
-            item.name === "Pelaksanaan Anggaran" || item.name === "Management" && item.name !== "Inventaris Kantor",
+            item.name === "Pelaksanaan Anggaran" ||
+            (item.name === "Management" && item.name !== "Inventaris Kantor")
         )
         .map((item) => ({
           ...item,
@@ -32,16 +41,26 @@ function Sidebar() {
             [
               "Pengajuan SPP",
               "Arsip SPM",
-              "Monitoring E-SPP",
+              "Monitoring",
               "User Manage",
               "Kalender",
-            ].includes(child.name),
+            ].includes(child.name)
           ),
         }));
     }
 
     if (role === "guest") {
-      const excludedMenus = ["Management", "Inventaris Kantor", "Pengambilan Persediaan","E-SPP", "E-Arsip", "Monitoring", "IKPA", "Realisasi", "Kalender"];
+      const excludedMenus = [
+        "Management",
+        "Inventaris Kantor",
+        "Pengambilan Persediaan",
+        "E-SPP",
+        "E-Arsip",
+        "Monitoring",
+        "IKPA",
+        "Realisasi",
+        "Kalender",
+      ];
       return menuItems
         .filter((item) => !excludedMenus.includes(item.name))
         .map((item) => {
@@ -50,8 +69,8 @@ function Sidebar() {
               ...item,
               children: item.children?.filter((child) =>
                 ["Dashboard", "IKPA", "Realisasi", "Kalender"].includes(
-                  child.name,
-                ),
+                  child.name
+                )
               ),
             };
           }
@@ -60,11 +79,9 @@ function Sidebar() {
     }
 
     if (!role) {
-    const pathname = location.pathname;
+      const pathname = location.pathname;
       if (pathname.includes("/inventaris-kantor")) {
-        return menuItems.filter(
-          (item) => item.name === "Inventaris Kantor"
-        );
+        return menuItems.filter((item) => item.name === "Inventaris Kantor");
       }
       if (pathname.includes("/tata-usaha")) {
         return menuItems.filter(
@@ -72,8 +89,8 @@ function Sidebar() {
         );
       }
       return [];
-        }
-    };
+    }
+  };
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
@@ -95,7 +112,7 @@ function Sidebar() {
     const currentPath = location.pathname;
 
     const matchedMenu = getFilteredMenuItems().find((item) =>
-      item.children?.some((child) => currentPath.startsWith(child.path)),
+      item.children?.some((child) => currentPath.startsWith(child.path))
     );
 
     if (matchedMenu) {
@@ -106,74 +123,54 @@ function Sidebar() {
   }, [location.pathname]);
 
   return (
-    <div
-      style={{
-        width: "260px",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        color: "#fff",
-        overflow: "hidden",
-      }}
-      className="bg-gradient-to-b from-[#59C7FF] to-[#2F8AFD]"
-    >
-      <div
-        style={{
-          padding: "1rem",
-          flex: 1,
-          overflowY: "auto",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-        }}
-        className="sidebar-scroll"
-      >
+    <div className="w-[270px] h-screen flex flex-col fixed top-0 left-0 bg-gradient-to-b from-[#082b67] to-[#061d49] text-[#dcecff] z-20 overflow-hidden transition-all duration-250">
+      
+      {/* Scrollable Area */}
+      <div className="p-4 flex-1 overflow-y-auto sidebar-scroll relative z-10">
+        
+        {/* Logo */}
         <img
           src="/rokeu_logo_white.webp"
           alt="logo"
           width="150"
-          className="mt-5 mb-10 ml-5"
+          className="mt-5 mb-10 ml-7"
         />
-      
-        <nav style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+
+        <nav className="flex flex-col w-full gap-1.5">
           {getFilteredMenuItems().map((item, index) => {
             if (item.children) {
+              const isParentActive =
+                openDropdown === item.name ||
+                item.children.some((child) =>
+                  location.pathname.startsWith(child.path)
+                );
+
               return (
-                <div key={index} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                  {/* Parent dropdown */}
+                <div key={index} className="flex flex-col w-full">
+                  {/* Parent Dropdown */}
                   <div
-                    className={`dropdown-parent${
-                      openDropdown === item.name ? " open" : ""
-                    }`}
                     onClick={() => navigate(item?.path)}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "10px 16px",
-                      cursor: "pointer",
-                      margin: "0 auto 5px auto",
-                      borderRadius: "8px",
-                      width: "85%",
-                      boxSizing: "border-box",
-                    }}
+                    className={`relative flex justify-between items-center gap-13 px-3.5 py-2.5 h-[43px] rounded-[11px] text-md font-medium mx-auto w-full cursor-pointer transition-all duration-200 group ${
+                      isParentActive
+                        ? "bg-gradient-to-r from-[#1565C0]/80 to-[#42A5F5]/25 text-white"
+                        : "text-[#cfe2f7] bg-transparent hover:bg-[#42A5F5]/15 hover:translate-x-[3px]"
+                    }`}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                      }}
-                    >
+                    {/* Active Indicator (Garis Biru Muda Melayang) */}
+                    {isParentActive && (
+                      <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-[#53c7ff]"></div>
+                    )}
+                    
+                    <div className="flex items-center gap-3">
                       {item.icon}
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </div>
-                    <div onClick={(e) => {
+                    <div
+                      onClick={(e) => {
                         e.stopPropagation();
                         toggleDropdown(item);
-                    }}>
+                      }}
+                    >
                       {openDropdown === item.name ? (
                         <ChevronUp size={16} />
                       ) : (
@@ -184,31 +181,22 @@ function Sidebar() {
 
                   {/* Submenu */}
                   {openDropdown === item.name && (
-                    <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", marginTop: "2px" }}>
+                    <div className="w-full flex flex-col items-center mt-1 mb-2 gap-1 animate-[fadeIn_0.3s_ease]">
                       {item.children.map((subItem) => (
                         <NavLink
                           to={subItem.path}
                           end
                           key={subItem.path}
                           className={({ isActive }) =>
-                            `sidebar-link${isActive ? " active" : ""}`
+                            `relative flex justify-start items-center gap-3 py-2 pl-11 pr-4 h-[38px] text-[13px] rounded-[11px] w-[80%] mx-auto transition-all duration-200 ${
+                              isActive
+                                ? "text-white bg-[#42A5F5]/20 font-semibold"
+                                : "text-[#cfe2f7] hover:bg-[#42A5F5]/15 hover:translate-x-[3px]"
+                            }`
                           }
-                          style={{
-                            display: "flex",
-                            justifyContent: "flex-start",
-                            alignItems: "center",
-                            gap: "12px",
-                            padding: "8px 16px",
-                            textDecoration: "none",
-                            fontSize: "0.9rem",
-                            borderRadius: "8px",
-                            width: "80%",
-                            margin: "0 auto 4px auto",
-                            boxSizing: "border-box",
-                          }}
                         >
                           {subItem.icon}
-                          {subItem.name}
+                          <span className="truncate">{subItem.name}</span>
                         </NavLink>
                       ))}
                     </div>
@@ -216,58 +204,49 @@ function Sidebar() {
                 </div>
               );
             } else {
+              {/* Menu Tanpa Anak (Single Link) */}
               return (
                 <NavLink
                   to={item.path}
                   end
                   key={item.path}
                   className={({ isActive }) =>
-                    `sidebar-link${isActive ? " active" : ""}`
+                    `relative flex justify-start items-center gap-3 px-3.5 py-2.5 h-[43px] rounded-[11px] text-md font-medium mx-auto w-full transition-all duration-200 group ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#1565C0]/80 to-[#42A5F5]/25 text-white"
+                        : "text-[#cfe2f7] bg-transparent hover:bg-[#42A5F5]/15 hover:translate-x-[3px]"
+                    }`
                   }
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-start",
-                    alignItems: "center",
-                    gap: "12px",
-                    padding: "10px 16px",
-                    textDecoration: "none",
-                    borderRadius: "8px",
-                    margin: "0 auto 5px auto",
-                    width: "85%",
-                    boxSizing: "border-box",
-                  }}
                 >
-                  {item.icon}
-                  {item.name}
+                  {({ isActive }) => (
+                    <>
+                      {/* Active Indicator (Garis Biru Muda Melayang) */}
+                      {isActive && (
+                        <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-[#53c7ff]"></div>
+                      )}
+                      {item.icon}
+                      <span className="truncate">{item.name}</span>
+                    </>
+                  )}
                 </NavLink>
               );
             }
           })}
         </nav>
       </div>
-      <div
-        style={{
-          padding: "1rem",
-          marginBottom: "0.7rem",
-          textAlign: "center",
-        }}
-      >
-        <span
-          style={{
-            position: "relative",
-            gap: "8px",
-            zIndex: 10,
-            color: "#fff",
-            fontSize: "12px",
-          }}
-        >
+
+      {/* Footer / Copyright */}
+      <div className="p-4 mb-2 text-center relative z-10">
+        <span className="text-[#dcecff] text-xs tracking-wide">
           © Rokeu BMN 2026, Version 2.0
         </span>
       </div>
+
+      {/* Gambar Dekorasi di Pojok Kanan Bawah */}
       <img
-        src={"/logo-kemnaker-decoration.webp"}
-        alt={"logo-decoration"}
-        className={`absolute z-0 right-[-3rem] rotate-[168.75deg] bottom-[-4.5rem]`}
+        src="/logo-kemnaker-decoration.webp"
+        alt="logo-decoration"
+        className="absolute z-0 right-[-3rem] bottom-[-4.5rem] rotate-[168.75deg] opacity-10 pointer-events-none select-none"
         loading="eager"
         width={200}
       />

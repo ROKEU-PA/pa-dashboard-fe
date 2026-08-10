@@ -54,7 +54,9 @@ body {
   background: #f5f7fa;
   margin: 0;
   color: #2e3b4e;
-  font-family: "Funnel Display", sans-serif;
+  /* font-family: "Funnel Display", sans-serif; */
+  /* font-family: "Segoe UI", Arial, sans-serif; */
+  font-family: Google Sans Flex, Google Sans, Helvetica Neue, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

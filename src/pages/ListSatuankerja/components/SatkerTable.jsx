@@ -37,27 +37,28 @@ export default function SatkerTable({
   const isPengajuan = isPengajuanPath(location.pathname);
   const role = userData?.role;
   const navigate = useNavigate();
+
   const renderRevisiBadge = (revisiCount, statusDokumen) => {
     if (!revisiCount || revisiCount === 0) {
-      return <span className="text-slate-300 font-medium">—</span>;
+      return <span className="text-slate-300 dark:text-slate-600 font-medium">—</span>;
     }
     const isNeedsFix = statusDokumen !== "approved" && statusDokumen !== "sp2d";
 
     return (
       <div
         className={`
-      inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border shadow-sm transition-all duration-300
-      ${
-        isNeedsFix
-          ? "bg-rose-50 text-rose-600 border-rose-200 animate-pulse"
-          : "bg-slate-50 text-slate-500 border-slate-200" // Warna dibikin lebih kalem (slate)
-      }
-    `}
+          inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold border shadow-sm transition-all duration-300
+          ${
+            isNeedsFix
+              ? "bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20 animate-pulse"
+              : "bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10"
+          }
+        `}
       >
         {isNeedsFix ? (
           <BellRing size={12} className="animate-bounce" />
         ) : (
-          <Check size={12} className="text-emerald-500" /> // Biar manis, centangnya gw kasih ijo dikit
+          <Check size={12} className="text-emerald-500 dark:text-emerald-400" />
         )}
         <span>{revisiCount}x Revisi</span>
       </div>
@@ -70,30 +71,28 @@ export default function SatkerTable({
       typeof kelengkapanStr !== "string" ||
       !kelengkapanStr.includes("/")
     ) {
-      return <span className="text-slate-400 text-xs font-medium">-</span>;
+      return <span className="text-slate-400 dark:text-slate-600 text-xs font-medium">-</span>;
     }
 
     const [checkedStr, totalStr] = kelengkapanStr.split("/");
-
-    // Ubah jadi angka (Integer) biar bisa divalidasi dengan bener
     const checkedCount = parseInt(checkedStr, 10);
     const totalCount = parseInt(totalStr, 10);
 
-    // Logika Status
     const isComplete = checkedCount === totalCount && totalCount > 0;
     const isZero = checkedCount === 0;
+
     return (
       <div
         className={`
-      inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border
-      ${
-        isComplete
-          ? "bg-emerald-50 text-emerald-600 border-emerald-200" // Hijau (Lengkap)
-          : isZero
-            ? "bg-slate-50 text-slate-500 border-slate-200" // Abu-abu (Kosong)
-            : "bg-amber-50 text-amber-600 border-amber-200"
-      } // Kuning (Sebagian)
-    `}
+          inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold border
+          ${
+            isComplete
+              ? "bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20"
+              : isZero
+                ? "bg-slate-50 dark:bg-white/5 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-white/10"
+                : "bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-500/20"
+          }
+        `}
       >
         {isComplete ? (
           <CheckCircle2 size={14} />
@@ -102,22 +101,21 @@ export default function SatkerTable({
         ) : (
           <AlertCircle size={14} />
         )}
-        {/* Tampilkan langsung string asli dari database lu */}
         <span>{kelengkapanStr}</span>
       </div>
     );
   };
 
   return (
-    <div className="w-full overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
-      <Table
-        sx={{ minWidth: 650, borderCollapse: "collapse" }}
-        aria-label="interactive data table"
-      >
+    // Wadah Luar: Sama persis kayak FilterSection biar lebarnya rata dan estetik
+    <div className="w-full mt-4 overflow-x-auto rounded-[20px] bg-white dark:bg-[#111C30]/80 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 transition-colors duration-300 table-scroll">
+      
+      {/* Table Utama tanpa sx inline style */}
+      <Table aria-label="interactive data table">
+        
         {/* HEADER */}
-        <TableHeader
-          sx={{ backgroundColor: "#F8FAFC", borderBottom: "1px solid #E2E8F0" }}
-        >
+        {/* TableHeader udah diatur di komponen bawaan, kita cuma butuh manggil aja */}
+        <TableHeader>
           <TableRow>
             {columns
               .filter(
@@ -132,20 +130,16 @@ export default function SatkerTable({
                   key={col.key}
                   align="center"
                   onClick={() => col.sortable && handleSortChange(col.key)}
-                  sx={{
-                    color: "#FFFFFF",
-                    fontWeight: 600,
-                    fontSize: "0.75rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.05em",
-                    padding: "16px 12px",
-                    cursor: col.sortable ? "pointer" : "default",
-                  }}
+                  // Styling Header Full Tailwind
+                  className={`py-4 px-4 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap transition-colors ${
+                    col.sortable ? "cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 select-none group" : "cursor-default"
+                  }`}
                 >
                   {col.sortable ? (
                     <TableSortLabel
                       active={sortBy === col.key}
                       direction={sortDir}
+                      className="group-hover:text-blue-500 dark:group-hover:text-blue-400"
                     >
                       {col.label}
                     </TableSortLabel>
@@ -162,7 +156,8 @@ export default function SatkerTable({
           {dataTable.map((row, index) => (
             <TableRow
               key={index}
-              className="transition-all duration-200 hover:bg-blue-50/50 border-b border-gray-100 last:border-none"
+              // Styling Baris Hover
+              className="transition-colors duration-200 hover:bg-slate-50/80 dark:hover:bg-white/5 border-b border-slate-100 dark:border-white/10 last:border-none group"
             >
               {columns
                 .filter(
@@ -176,11 +171,7 @@ export default function SatkerTable({
                   // 1. Kolom No. SPP
                   if (col.key === "spp_number") {
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px", fontSize: "0.875rem" }}
-                      >
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-gray-200 whitespace-nowrap">
                         {row?.no_spp ?? "-"}
                       </TableCell>
                     );
@@ -189,14 +180,8 @@ export default function SatkerTable({
                   // 2. Kolom Tanggal Pengiriman
                   if (col.key === "created_at") {
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px", fontSize: "0.875rem" }}
-                      >
-                        {row?.[col.key]
-                          ? moment(row[col.key]).format("YYYY/MM/DD")
-                          : "-"}
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
+                        {row?.[col.key] ? moment(row[col.key]).format("YYYY/MM/DD") : "-"}
                       </TableCell>
                     );
                   }
@@ -204,159 +189,68 @@ export default function SatkerTable({
                   // 4. Kolom Status
                   if (col.key === "status") {
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px" }}
-                      >
-                        <div
-                          className={`${statusColorClass(row?.[col.key])} rounded-lg p-1 inline-block`}
-                        >
-                          <span
-                            className={`px-2 py-1 rounded text-sm whitespace-nowrap ${statusColorText(row?.[col.key])}`}
-                          >
-                            {statusLabel(row?.[col.key])}
-                          </span>
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4 whitespace-nowrap">
+                        <div className={`inline-flex items-center justify-center px-3 py-1 text-[10px] sm:text-xs font-bold rounded-full border shadow-sm transition-all ${statusColorClass(row?.[col.key])} ${statusColorText(row?.[col.key])} dark:bg-opacity-20 dark:border-opacity-30`}>
+                          {statusLabel(row?.[col.key])}
                         </div>
                       </TableCell>
                     );
                   }
 
-                  // 5. Kolom Catatan
-                  // if (col.key === "catatan") {
-                  //   const feedback = row?.feedback;
-                  //   return (
-                  //     <TableCell key={col.key} align="center" sx={{ padding: "12px 16px", fontSize: "0.875rem" }}>
-                  //       {feedback === "null" || feedback == null ? (
-                  //         "-"
-                  //       ) : feedback.length > 25 ? (
-                  //         <span className="px-2 py-1 rounded text-white text-xs font-medium bg-yellow-500 whitespace-nowrap">
-                  //           ...Catatan di Detail
-                  //         </span>
-                  //       ) : (
-                  //         feedback
-                  //       )}
-                  //     </TableCell>
-                  //   );
-                  // }
-
                   // 6. Kolom Kelengkapan
                   if (col.key === "kelengkapan") {
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px", fontSize: "0.875rem" }}
-                      >
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4 whitespace-nowrap">
                         {renderKelengkapanBadge(row?.total_kelengkapan)}
                       </TableCell>
                     );
                   }
 
+                  // Kolom Revisi
                   if (col.key === "revisi") {
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px", fontSize: "0.875rem" }}
-                      >
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4 whitespace-nowrap">
                         {renderRevisiBadge(row?.revisi, row?.status)}
                       </TableCell>
                     );
                   }
 
-                  // 7. Kolom Dokumen (Mencegah Error Object)
-                  // if (col.key === "document" || col.key === "document_spm" || col.key === "document_sp2d") {
-                  //   const docObject = row[col.key];
-                  //   let labelText = "Klik untuk lihat";
-
-                  //   if (col.key === "document") labelText = `Lihat SPP ${row.no_spp || ""}`;
-                  //   if (col.key === "document_spm") labelText = `Lihat SPM ${row.no_spp || ""}`;
-                  //   if (col.key === "document_sp2d") labelText = `Lihat SP2D ${row.no_spp || ""}`;
-
-                  //   return (
-                  //     <TableCell key={col.key} align="center" sx={{ padding: "12px 16px", fontSize: "0.875rem" }}>
-                  //       {docObject && typeof docObject.url === "string" ? (
-                  //         <span
-                  //           onClick={() => openPDFModal(docObject.url)}
-                  //           className="text-blue-500 hover:text-blue-700 underline cursor-pointer font-medium whitespace-nowrap"
-                  //         >
-                  //           {labelText}
-                  //         </span>
-                  //       ) : (
-                  //         <span className="text-gray-400">-</span>
-                  //       )}
-                  //     </TableCell>
-                  //   );
-                  // }
-
-                  // 8. Kolom Jumlah Halaman
-                  // if (col.key === "jml_hal") {
-                  //   return (
-                  //     <TableCell key={col.key} align="center" sx={{ padding: "12px 16px", fontSize: "0.875rem" }}>
-                  //       {row.jml_hal ?? "-"}
-                  //     </TableCell>
-                  //   );
-                  // }
-
                   // 9. Kolom Action (Menyamping / Flex-Row)
                   if (col.key === "action") {
-                    const showEditButton =
-                      role === "user" &&
-                      row.status !== "approved" &&
-                      row.status !== "sp2d";
-                    const showPengujianButton =
-                      isPengajuan &&
-                      (role === "admin" || role === "pic") &&
-                      row.status !== "sp2d";
+                    const showEditButton = role === "user" && row.status !== "approved" && row.status !== "sp2d";
+                    const showPengujianButton = isPengajuan && (role === "admin" || role === "pic") && row.status !== "sp2d";
                     const showDetailButton = true;
 
                     return (
-                      <TableCell
-                        key={col.key}
-                        align="center"
-                        sx={{ padding: "12px 16px" }}
-                      >
-                        <div className="flex flex-row justify-center items-center gap-2">
+                      <TableCell key={col.key} align="center" className="py-3.5 px-4">
+                        <div className="flex flex-row justify-center items-center gap-2.5">
                           {showEditButton && (
                             <button
                               title="Edit"
-                              className="p-2 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition-colors border border-blue-200"
+                              className="p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-blue-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5"
                               onClick={() => openEditModal(row)}
                             >
-                              <Edit2 size={16} />
+                              <Edit2 size={16} strokeWidth={2.5} />
                             </button>
                           )}
 
                           {showPengujianButton && (
                             <button
-                              title={
-                                row.status === "approved"
-                                  ? "Ubah Status"
-                                  : "Pengujian"
-                              }
-                              className="p-2 rounded-md bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white transition-colors border border-orange-200"
-                              onClick={() =>
-                                navigate(`/pengajuan/pengujian/${row.no_spp}`, {
-                                  state: { row },
-                                })
-                              }
+                              title={row.status === "approved" ? "Ubah Status" : "Pengujian"}
+                              className="p-2 rounded-xl bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-500 hover:text-white dark:hover:bg-orange-500 dark:hover:text-white transition-all duration-200 border border-orange-200 dark:border-orange-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                              onClick={() => navigate(`/pengajuan/pengujian/${row.no_spp}`, { state: { row } })}
                             >
-                              <FileCheck size={16} />
+                              <FileCheck size={16} strokeWidth={2.5} />
                             </button>
                           )}
 
                           {showDetailButton && (
                             <button
                               title="Detail"
-                              className="p-2 rounded-md bg-lime-50 text-lime-600 hover:bg-lime-500 hover:text-white transition-colors border border-lime-200"
-                              onClick={() =>
-                                navigate(`/pengajuan/detail/${row.no_spp}`, {
-                                  state: { row },
-                                })
-                              }
+                              className="p-2 rounded-xl bg-lime-50 dark:bg-lime-500/10 text-lime-600 dark:text-lime-400 hover:bg-lime-500 hover:text-white dark:hover:bg-lime-500 dark:hover:text-white transition-all duration-200 border border-lime-200 dark:border-lime-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5"
+                              onClick={() => navigate(`/pengajuan/detail/${row.no_spp}`, { state: { row } })}
                             >
-                              <Eye size={16} />
+                              <Eye size={16} strokeWidth={2.5} />
                             </button>
                           )}
                         </div>
@@ -366,14 +260,8 @@ export default function SatkerTable({
 
                   // 10. Default Fallback untuk kolom lainnya
                   return (
-                    <TableCell
-                      key={col.key}
-                      align="center"
-                      sx={{ padding: "12px 16px", fontSize: "0.875rem" }}
-                    >
-                      {typeof row[col.key] === "object" && row[col.key] !== null
-                        ? "-"
-                        : (row[col.key] ?? "-")}
+                    <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
+                      {typeof row[col.key] === "object" && row[col.key] !== null ? "-" : (row[col.key] ?? "-")}
                     </TableCell>
                   );
                 })}

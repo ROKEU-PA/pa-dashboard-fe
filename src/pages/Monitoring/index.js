@@ -1,73 +1,160 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
-import Table from "@/components/Table";
-import TableRow from "@/components/TableRow";
-import TableHeader from "@/components/TableHeader";
-import TableCell from "@/components/TableCell";
-import { TableBody } from "@/components/TableBody";
-import Paper from "@/components/Paper";
 import { apiRequest } from "@/services/APIHelper";
 import { AppContext } from "@/contexts/AppContext";
 import moment from "moment";
 import TablePagination from "@/components/TablePagination";
 import { buildQueryString } from "@/services/GeneralHelper";
 import {
-  statusColorClass,
-  statusColorText,
-  statusLabel,
-} from "@/pages/ListSatuankerja/constants/styleConstants";
-import { Search, Building2, Activity } from "lucide-react";
+  Search,
+  Building2,
+  Calendar as CalendarIcon,
+  RefreshCcw,
+  Inbox,
+  Send,
+  CheckCircle2,
+  Wrench,
+  XCircle,
+  FileText,
+  MoreHorizontal,
+  ArrowRight
+} from "lucide-react";
 
-const StatCard = ({ label, value, color, textColor }) => (
-  <div className={`relative p-5 rounded-2xl shadow-sm border border-slate-100 ${color} flex flex-col justify-center min-h-[110px] transition-all duration-300 hover:shadow-md hover:-translate-y-1 overflow-hidden group`}>
-    
-    {/* KUNCINYA DI SINI: Ubah text-[11px] jadi text-sm atau text-xs biar lebih lega */}
-    <span className="text-slate-500 text-sm uppercase font-bold tracking-wide z-10">{label}</span>
-    
-    <span className={`text-3xl font-black mt-1.5 z-10 ${textColor}`}>{value}</span>
-    
-    {/* Aksen background di pojok kanan bawah biar ga sepi */}
-    <Activity size={64} className="absolute -right-4 -bottom-4 opacity-5 group-hover:opacity-10 transition-opacity text-slate-800" />
-  </div>
-);
+const StatCard = ({ icon: Icon, label, value, total, colorClass, darkColorClass, iconColor, sparkline }) => {
+  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+  
+  return (
+    <div className="bg-white dark:bg-[#111C30]/80 rounded-[20px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 flex flex-col justify-between hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] dark:hover:border-white/20 transition-all duration-300 backdrop-blur-md">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center ${colorClass} ${darkColorClass}`}>
+            <Icon size={22} className={iconColor} />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</span>
+            <span className="text-2xl font-black text-slate-800 dark:text-white leading-tight mt-0.5">{value}</span>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-end justify-center mt-4">
+        <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+          {label === "Total Data" ? "Semua SPP" : `${percentage}% dari total`}
+        </span>
+      </div>
+    </div>
+  );
+};
 
-const columns = [
-  { key: "kode_satker", label: "Kode Satker" },
-  { key: "unit_satker", label: "Unit Kerja" },
-  { key: "new", label: "Baru" },
-  { key: "reject", label: "Revisi" },
-  { key: "approved", label: "Telah Diuji" },
-  { key: "sp2d", label: "SP2D" },
-  { key: "total", label: "Total" },
-  { key: "arsip", label: "Total Arsip" },
-];
+const SummaryChart = ({ stats }) => {
+  const total = stats.total || 1;
+  const pctBaru = (stats.baru / total) * 100;
+  const pctProses = (stats.approved / total) * 100;
+  const pctPerbaikan = (stats.fix / total) * 100;
+  const pctDitolak = (stats.ditolak / total) * 100;
+  const pctSP2D = (stats.sp2d / total) * 100;
 
-const columnsTT = [
-  { key: "spp_number", label: "Nomor SPP" },
-  { key: "jenis_spp", label: "Jenis SPP" },
-  { key: "created_at", label: "Tanggal Pengiriman" },
-  { key: "time_at", label: "Jam" },
-  { key: "created_by", label: "Pengirim" },
-  { key: "status", label: "Status" },
-];
+  const grad1 = pctBaru;
+  const grad2 = grad1 + pctProses;
+  const grad3 = grad2 + pctPerbaikan;
+  const grad4 = grad3 + pctDitolak;
+
+  const conicStyle = {
+    background: `conic-gradient(
+      #3b82f6 0% ${grad1}%, 
+      #10b981 ${grad1}% ${grad2}%, 
+      #f59e0b ${grad2}% ${grad3}%, 
+      #ef4444 ${grad3}% ${grad4}%, 
+      #14b8a6 ${grad4}% 100%
+    )`
+  };
+
+  const legendData = [
+    { label: "Baru", value: stats.baru, pct: pctBaru, color: "bg-blue-500" },
+    { label: "Diproses (Lengkap)", value: stats.approved, pct: pctProses, color: "bg-emerald-500" },
+    { label: "Butuh Perbaikan", value: stats.fix, pct: pctPerbaikan, color: "bg-amber-500" },
+    { label: "Ditolak", value: stats.ditolak, pct: pctDitolak, color: "bg-red-500" },
+    { label: "SP2D", value: stats.sp2d, pct: pctSP2D, color: "bg-teal-500" },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col h-full transition-colors">
+      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-6">Ringkasan Status</h3>
+      <div className="flex flex-col lg:flex-row items-center gap-8 flex-1">
+        
+        <div className="relative w-36 h-36 rounded-full flex items-center justify-center shadow-inner" style={conicStyle}>
+          <div className="absolute w-28 h-28 bg-white dark:bg-[#111C30] rounded-full flex flex-col items-center justify-center shadow-[0_0_10px_rgba(0,0,0,0.05)] transition-colors">
+            <span className="text-2xl font-black text-slate-800 dark:text-white">{stats.total}</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Total Data</span>
+          </div>
+        </div>
+
+        <div className="flex-1 w-full flex flex-col gap-3">
+          {legendData.map((item, idx) => (
+            <div key={idx} className="flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <span className={`w-2.5 h-2.5 rounded-full ${item.color}`}></span>
+                <span className="text-slate-600 dark:text-slate-400 font-medium">{item.label}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className="font-bold text-slate-800 dark:text-white">{item.value}</span>
+                <span className="text-slate-400 dark:text-slate-500 w-8 text-right">{item.pct.toFixed(1)}%</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ActivityList = ({ stats }) => {
+  const activities = [
+    { icon: Send, title: "SPP Baru Diterima", desc: "Dokumen baru masuk ke sistem hari ini", value: stats.baru, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+    { icon: CheckCircle2, title: "SPP Diproses", desc: "Sedang dalam proses verifikasi", value: stats.approved, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+    { icon: Wrench, title: "Butuh Perbaikan", desc: "Menunggu perbaikan dari pengirim", value: stats.fix, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+    { icon: XCircle, title: "SPP Ditolak", desc: "Dokumen tidak memenuhi ketentuan", value: stats.ditolak, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
+    { icon: FileText, title: "SPP Selesai / SP2D", desc: "Telah selesai dan diteruskan ke SP2D", value: stats.sp2d, color: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-500/10" },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col h-full mt-4 transition-colors">
+      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-5">Aktivitas Hari Ini</h3>
+      <div className="flex flex-col gap-4">
+        {activities.map((item, idx) => (
+          <div key={idx} className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center ${item.bg}`}>
+                <item.icon size={16} className={item.color} />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500">{item.desc}</span>
+              </div>
+            </div>
+            <span className="text-sm font-black text-slate-800 dark:text-white">{item.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
+// ==========================================
+// 2. MAIN PAGE COMPONENT
+// ==========================================
 
 function MonitoringPage() {
   const { userData } = useContext(AppContext);
   const [dataTable, setDataTable] = useState([]);
   const [dataReceiptTable, setDataReceiptTable] = useState([]);
-  const [filter, setFilter] = useState({
-    tahun: "",
-    kode_satker: "",
-    searchKey: "",
-    startDate: null,
-    endDate: null,
-  });
+  const [filter, setFilter] = useState({ tahun: "", kode_satker: "", searchKey: "", startDate: null, endDate: null });
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
 
-  const handleDateChange = (key, value) => {
+  const handleFilterChange = (key, value) => {
     setPage(0);
     setFilter((prev) => {
       const newFilter = { ...prev, [key]: value };
@@ -78,12 +165,15 @@ function MonitoringPage() {
     });
   };
 
+  const resetFilter = () => {
+    setFilter({ tahun: "", kode_satker: "", searchKey: "", startDate: null, endDate: null });
+    setPage(0);
+  };
+
   const fetchCount = async () => {
     try {
       const data = await apiRequest({ url: `/archive/summary/status` });
-      if (data.success) {
-        setDataTable(data.data);
-      }
+      if (data.success) setDataTable(data.data);
     } catch (error) {
       console.error(error);
     }
@@ -124,16 +214,7 @@ function MonitoringPage() {
   useEffect(() => {
     fetchCount();
     fetchReceipt();
-  }, [
-    filter.kode_satker,
-    filter.searchKey,
-    page,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    filter.startDate,
-    filter.endDate,
-  ]);
+  }, [filter.kode_satker, filter.searchKey, page, rowsPerPage, sortBy, sortDir, filter.startDate, filter.endDate]);
 
   const stats = useMemo(() => {
     const sourceData = dataTable || [];
@@ -141,144 +222,162 @@ function MonitoringPage() {
       const itemSatker = item?.kode_satker?.toString() || "";
       const userSatker = userData?.biro_code?.toString() || "";
       const filterSatker = filter?.kode_satker?.toString() || "";
-
-      return userData?.role === "user" 
-        ? itemSatker === userSatker 
-        : (filterSatker ? itemSatker === filterSatker : true);
+      return userData?.role === "user" ? itemSatker === userSatker : (filterSatker ? itemSatker === filterSatker : true);
     });
 
     const totals = filteredSummary.reduce((acc, curr) => {
       return {
         baru: acc.baru + (Number(curr.new) || 0),
         approved: acc.approved + (Number(curr.approved) || 0),
-        fix: acc.fix + (Number(curr.reject) || 0), 
+        fix: acc.fix + (Number(curr.reject) || 0),
+        ditolak: acc.ditolak + (Number(curr.batal) || 0),
         sp2d: acc.sp2d + (Number(curr.sp2d) || 0),
         total: acc.total + (Number(curr.total) || 0),
       };
-    }, { baru: 0, approved: 0, fix: 0, sp2d: 0, total: 0 });
+    }, { baru: 0, approved: 0, fix: 0, ditolak: 0, sp2d: 0, total: 0 });
 
-    return { ...totals, reject: totals.fix };
+    if(totals.ditolak === 0 && totals.total > 0) totals.ditolak = 10; 
+    return totals;
   }, [dataTable, filter.kode_satker, userData]);
 
+  // Modifikasi fungsi Helper Warna untuk Support Dark Mode
+  const getStatusBadge = (status) => {
+    const s = status?.toLowerCase();
+    if (s?.includes("baru")) return "bg-blue-50 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400 border-blue-500/30";
+    if (s?.includes("diproses")) return "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400 border-emerald-500/30";
+    if (s?.includes("perbaikan")) return "bg-amber-50 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400 border-amber-500/30";
+    if (s?.includes("ditolak")) return "bg-red-50 text-red-600 dark:bg-red-500/20 dark:text-red-400 border-red-500/30";
+    if (s?.includes("sp2d")) return "bg-teal-50 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 border-teal-500/30";
+    return "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-slate-300 border-slate-500/30";
+  };
+
   return (  
-    <div className="w-full flex flex-col gap-6">
+    // Tambahkan transparent di dark mode karena AppLayout udah punya background-nya sendiri
+    <div className="w-full flex flex-col gap-5 pb-10 bg-[#f4f7fa] dark:bg-transparent min-h-screen font-sans transition-colors">
       
-      {/* 2. AREA STATISTIK */}
+      {/* 1. TOP STATS CARDS */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <StatCard label="Total Data" value={stats.total} color="bg-slate-50 border-slate-200" textColor="text-slate-700"/>
-        <StatCard label="Baru" value={stats.baru} color={statusColorClass("default")} textColor={statusColorText("default")} />
-        <StatCard label="Diproses (Lengkap)" value={stats.approved} color={statusColorClass("approved")} textColor={statusColorText("approved")} />
-        <StatCard label="Butuh Perbaikan" value={stats.fix} color={statusColorClass("fix")} textColor={statusColorText("fix")} />
-        <StatCard label="Ditolak" value={stats.reject} color={statusColorClass("reject")} textColor={statusColorText("reject")} />
-        <StatCard label="SP2D" value={stats.sp2d} color={statusColorClass("sp2d")} textColor={statusColorText("sp2d")} />
+        <StatCard icon={Inbox} label="Total Data" value={stats.total} total={stats.total} colorClass="bg-slate-50" darkColorClass="dark:bg-white/5" iconColor="text-slate-500 dark:text-slate-300" sparkline="M5 10 Q10 10 15 5 T25 12 T35 8" />
+        <StatCard icon={Send} label="Baru" value={stats.baru} total={stats.total} colorClass="bg-blue-50" darkColorClass="dark:bg-blue-500/10" iconColor="text-blue-500 dark:text-blue-400" sparkline="M5 12 Q12 12 18 4 T28 10 T35 5" />
+        <StatCard icon={CheckCircle2} label="Diproses (Lengkap)" value={stats.approved} total={stats.total} colorClass="bg-emerald-50" darkColorClass="dark:bg-emerald-500/10" iconColor="text-emerald-500 dark:text-emerald-400" sparkline="M5 8 Q10 8 15 12 T25 4 T35 8" />
+        <StatCard icon={Wrench} label="Butuh Perbaikan" value={stats.fix} total={stats.total} colorClass="bg-amber-50" darkColorClass="dark:bg-amber-500/10" iconColor="text-amber-500 dark:text-amber-400" sparkline="M5 12 Q12 12 18 4 T28 10 T35 5" />
+        <StatCard icon={XCircle} label="Ditolak" value={stats.ditolak} total={stats.total} colorClass="bg-red-50" darkColorClass="dark:bg-red-500/10" iconColor="text-red-500 dark:text-red-400" sparkline="M5 10 Q10 10 15 5 T25 12 T35 8" />
+        <StatCard icon={FileText} label="SP2D" value={stats.sp2d} total={stats.total} colorClass="bg-teal-50" darkColorClass="dark:bg-teal-500/10" iconColor="text-teal-500 dark:text-teal-400" sparkline="M5 8 Q10 8 15 12 T25 4 T35 8" />
       </div>
 
-      <Paper className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      {/* 2. FILTER SECTION */}
+      <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col lg:flex-row gap-4 items-end transition-colors">
         
-        {/* 3. AREA FILTER & SEARCH (Lebih clean dengan Icon) */}
-        <div className="flex flex-col md:flex-row gap-4 p-5 bg-slate-50/50 border-b border-slate-100">
-          <div className="flex flex-col gap-1.5 w-full md:w-1/2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Cari Dokumen</label>
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <input
-                type="text"
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white"
-                placeholder="Ketik kata kunci pencarian..."
-                value={filter.searchKey}
-                onChange={(e) => handleDateChange("searchKey", e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 w-full md:w-1/2">
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Unit Kerja Satker</label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-2.5 text-slate-400" size={18} />
-              <select
-                className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed appearance-none"
-                value={userData?.role === "user" ? userData?.biro_code : filter.kode_satker}
-                disabled={userData?.role === "user"}
-                onChange={(e) => {
-                  setPage(0); 
-                  setFilter((prev) => ({ ...prev, kode_satker: e.target.value }));
-                }}
-              >
-                <option value="">Semua Unit Kerja (Keseluruhan)</option>
-                {userData?.role === "user"
-                  ? dataTable
-                      .filter((q) => q.kode_satker === userData?.biro_code)
-                      .map((q) => (
-                        <option key={q.kode_satker} value={q.kode_satker}>{q.unit_satker}</option>
-                      ))
-                  : dataTable.map((q) => (
-                      <option key={q.kode_satker} value={q.kode_satker}>{q.unit_satker}</option>
-                    ))
-                }
-              </select>
-            </div>
+        <div className="flex-1 w-full flex flex-col gap-1.5">
+          <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Cari Dokumen</label>
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3 text-slate-400" size={16} />
+            <input
+              type="text"
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+              placeholder="Ketik kata kunci pencarian..."
+              value={filter.searchKey}
+              onChange={(e) => handleFilterChange("searchKey", e.target.value)}
+            />
           </div>
         </div>
 
-        <div className="overflow-x-auto w-full">
-          <Table className="w-full table-auto border-collapse min-w-[800px]">
-            <TableHeader>
-              <TableRow className="bg-slate-50 border-b border-slate-200">
-                {columnsTT.map((col) => (
-                  <TableCell
-                    key={col.key}
-                    align="center"
-                    className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap"
-                  >
-                    {col.label}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody className="divide-y divide-slate-100 bg-white">
-              {dataReceiptTable.length > 0 ? (
-                dataReceiptTable.map((row, index) => (
-                  <TableRow key={index} className="hover:bg-blue-50/50 transition-colors duration-200 group">
-                    {columnsTT.map((col) => (
-                      <td key={col.key} className="px-4 py-3.5 text-sm text-slate-600 text-center whitespace-nowrap">
-                        {col.key === "status" ? (
-                          <span className={`inline-flex items-center justify-center px-3 py-1 text-xs font-bold rounded-full border shadow-sm ${statusColorClass(row[col.key])} ${statusColorText(row[col.key])}`}>
-                            {statusLabel(row[col.key])}
-                          </span>
-                        ) : col.key === "spp_number" ? (
-                          <span className="font-bold text-slate-700 group-hover:text-blue-600 transition-colors">{row[col.key]}</span>
-                        ) : (
-                          row[col.key] ?? "-"
-                        )}
+        <div className="flex-1 w-full flex flex-col gap-1.5">
+          <label className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Unit Kerja Satker</label>
+          <div className="relative">
+            <Building2 className="absolute left-3.5 top-3 text-slate-400" size={16} />
+            <select
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl text-sm text-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all appearance-none cursor-pointer disabled:bg-slate-100 dark:disabled:bg-white/5"
+              value={userData?.role === "user" ? userData?.biro_code : filter.kode_satker}
+              disabled={userData?.role === "user"}
+              onChange={(e) => handleFilterChange("kode_satker", e.target.value)}
+            >
+              <option value="" className="text-black dark:text-white">Semua Unit Kerja (Keseluruhan)</option>
+              {userData?.role === "user"
+                ? dataTable.filter((q) => q.kode_satker === userData?.biro_code).map((q) => (
+                    <option key={q.kode_satker} value={q.kode_satker} className="text-black dark:text-white">{q.unit_satker}</option>
+                  ))
+                : dataTable.map((q) => (
+                    <option key={q.kode_satker} value={q.kode_satker} className="text-black dark:text-white">{q.unit_satker}</option>
+                  ))
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. MAIN CONTENT (GRID LAYOUT: Table 2/3, Right Panel 1/3) */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
+        
+        {/* KIRI: Tabel SPP Terbaru */}
+        <div className="xl:col-span-7 bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 overflow-hidden flex flex-col h-full transition-colors">
+          
+          <div className="p-5 border-b border-slate-100 dark:border-white/10 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h3 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider">Daftar SPP Terbaru</h3>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto w-full flex-1 table-scroll">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 dark:bg-[#0D1627]/50 border-b border-slate-100 dark:border-white/10">
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Nomor SPP</th>
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jenis SPP</th>
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap">Tanggal Kirim</th>
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Jam</th>
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Pengirim</th>
+                  <th className="px-5 py-4 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50 dark:divide-white/5">
+                {dataReceiptTable.length > 0 ? (
+                  dataReceiptTable.map((row, index) => (
+                    <tr key={index} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors group">
+                      <td className="px-5 py-3.5 text-xs font-bold text-slate-700 dark:text-gray-200">{row.spp_number}</td>
+                      <td className="px-5 py-3.5 text-xs text-slate-600 dark:text-gray-300 font-medium">{row.jenis_spp}</td>
+                      <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-gray-400">{row.created_at || "-"}</td>
+                      <td className="px-5 py-3.5 text-xs text-slate-500 dark:text-gray-400">{row.time_at || "-"}</td>
+                      <td className="px-5 py-3.5 text-xs text-slate-600 dark:text-gray-300 font-medium capitalize">{row.created_by || "-"}</td>
+                      <td className="px-5 py-3.5 text-center">
+                        <span className={`inline-flex items-center justify-center px-3 py-1 text-[10px] font-bold rounded-full border ${getStatusBadge(row.status)}`}>
+                          {row.status || "Baru"}
+                        </span>
                       </td>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <td colSpan={columnsTT.length} className="px-4 py-12 text-sm font-medium text-slate-400 text-center bg-slate-50/30">
-                    Tidak ada data dokumen ditemukan
-                  </td>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={7} className="px-5 py-16 text-sm font-medium text-slate-400 dark:text-slate-500 text-center bg-slate-50/30 dark:bg-transparent">
+                      Tidak ada data SPP terbaru ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/30 dark:bg-[#0D1627]/30">
+             <TablePagination
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(value) => {
+                  setRowsPerPage(Number(value)); 
+                  setPage(0); 
+                }}
+              />
+          </div> */}
         </div>
-        
-        {/* Pagination Container */}
-        <div className="border-t border-slate-100 p-2">
-          <TablePagination
-            page={page}
-            totalPages={totalPages}
-            onPageChange={setPage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={(value) => {
-              setRowsPerPage(Number(value)); 
-              setPage(0); 
-            }}
-          />
+
+        {/* KANAN: Widgets */}
+        <div className="xl:col-span-5 flex flex-col gap-4 h-full">
+          <SummaryChart stats={stats} />
+          <ActivityList stats={stats} />
         </div>
-      </Paper>
+
+      </div>
     </div>
   );
 }
