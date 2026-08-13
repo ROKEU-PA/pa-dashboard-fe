@@ -41,6 +41,7 @@ import PerformanceIndicator from "./pages/PerformanceIndicator";
 import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
 import ShowForAll from "./pages/ShowForAll";
 import NotFoundPage from "./pages/NotFound";
+import IkpaV2Page from "./pages/IkpaV2";
 // import "@/PDFWorkerSetup";
 
 function App() {
@@ -353,7 +354,7 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="IKPA" userName={userData?.name}>
-                <ShowForAll />
+                <IkpaV2Page />
               </AppLayout>
             </PrivateRoute>
           }

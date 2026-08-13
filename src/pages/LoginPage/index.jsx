@@ -30,7 +30,8 @@ const LoginPage = () => {
   const [lockoutTimer, setLockoutTimer] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
   const [countSPP, setCountSPP] = useState({});
-  const [percentageSPP, setPercentageSPP] = useState(0);
+  const [countOnline, setCountOnline] = useState(0);
+  const [percentageSPP, setPercentageSPP] = useState(0.00);
 
   const fetchCount = async () => {
     try {
@@ -49,7 +50,31 @@ const LoginPage = () => {
 
       if (data && data.success) {
         setCountSPP(data.data);
-        setPercentageSPP((data.data?.progress / data.data?.total) * 100);
+        if (data.data?.total > 0) {
+          setPercentageSPP((data.data?.progress / data.data?.total) * 100);
+        }
+      }
+    } catch (error) {
+      console.error("Gagal ambil stats:", error);
+    }
+  };
+
+  const fetchOnline = async () => {
+    try {
+      const response = await fetch(
+        process.env.REACT_APP_API_BASE_URL + "/external/user/online",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        },
+      );
+      
+      const data = await response.json();
+      if (data && data.success) {
+        setCountOnline(data.total);
       }
     } catch (error) {
       console.error("Gagal ambil stats:", error);
@@ -58,6 +83,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     fetchCount();
+    fetchOnline();
   }, []);
 
   const recaptchaRef = useRef(null);
@@ -527,7 +553,7 @@ const LoginPage = () => {
                 </span>
               </div>
               <strong className="block mt-[12px] text-[25px] md:text-[clamp(25px,2.2vw,36px)] font-[850] tracking-[-0.03em]">
-                7
+                {countOnline}
               </strong>
               <span className="block mt-1 text-[#9bcdf2] text-[11px]">
                 Pengguna aktif saat ini

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { LogOut, Moon, Sun } from "lucide-react"; // Import Moon & Sun
+import { LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContexts";
 
 function Navbar({ menuName, user, role }) {
@@ -68,7 +68,7 @@ function Navbar({ menuName, user, role }) {
           )}
           {menuName == "E-SPP" && (
             <p className="text-[#718096] dark:text-gray-400 text-[13px] md:text-[14px] mt-1 m-0">
-              Elektronik Surat Perimintaan Pembayaran
+              Elektronik Surat Permintaan Pembayaran
             </p>
           )}
         </div>

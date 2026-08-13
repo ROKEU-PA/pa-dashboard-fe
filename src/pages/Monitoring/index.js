@@ -19,6 +19,10 @@ import {
   ArrowRight
 } from "lucide-react";
 
+// ==========================================
+// 1. COMPONENTS
+// ==========================================
+
 const StatCard = ({ icon: Icon, label, value, total, colorClass, darkColorClass, iconColor, sparkline }) => {
   const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
   
@@ -77,7 +81,7 @@ const SummaryChart = ({ stats }) => {
 
   return (
     <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col h-full transition-colors">
-      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-6">Ringkasan Status</h3>
+      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-6">Ringkasan Status Hari Ini</h3>
       <div className="flex flex-col lg:flex-row items-center gap-8 flex-1">
         
         <div className="relative w-36 h-36 rounded-full flex items-center justify-center shadow-inner" style={conicStyle}>
@@ -106,33 +110,43 @@ const SummaryChart = ({ stats }) => {
   );
 };
 
-const ActivityList = ({ stats }) => {
-  const activities = [
-    { icon: Send, title: "SPP Baru Diterima", desc: "Dokumen baru masuk ke sistem hari ini", value: stats.baru, color: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
-    { icon: CheckCircle2, title: "SPP Diproses", desc: "Sedang dalam proses verifikasi", value: stats.approved, color: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-    { icon: Wrench, title: "Butuh Perbaikan", desc: "Menunggu perbaikan dari pengirim", value: stats.fix, color: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
-    { icon: XCircle, title: "SPP Ditolak", desc: "Dokumen tidak memenuhi ketentuan", value: stats.ditolak, color: "text-red-500", bg: "bg-red-50 dark:bg-red-500/10" },
-    { icon: FileText, title: "SPP Selesai / SP2D", desc: "Telah selesai dan diteruskan ke SP2D", value: stats.sp2d, color: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-500/10" },
-  ];
-
+const SppTypeMonthList = ({ statsArray }) => {
   return (
     <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col h-full mt-4 transition-colors">
-      <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-5">Aktivitas Hari Ini</h3>
-      <div className="flex flex-col gap-4">
-        {activities.map((item, idx) => (
-          <div key={idx} className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className={`w-9 h-9 rounded-full flex items-center justify-center ${item.bg}`}>
-                <item.icon size={16} className={item.color} />
+      <div className="flex items-center justify-between mb-5">
+        <h3 className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          Jenis SPP Bulan Ini
+        </h3>
+        <span className="text-[10px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-500/10 px-2 py-0.5 rounded-full">
+          {moment().format("MMMM YYYY")}
+        </span>
+      </div>
+      
+      {/* Tambahin overflow-y-auto biar kalau lebih dari 5 bisa di-scroll cakep */}
+      <div className="flex flex-col gap-4 overflow-y-auto max-h-[300px] custom-scrollbar pr-1">
+        {statsArray.length > 0 ? (
+          statsArray.map((item, idx) => (
+            <div key={idx} className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${item.bg}`}>
+                  <FileText size={16} className={item.color} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 line-clamp-1" title={item.title}>
+                    {item.title}
+                  </span>
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500">Total SPP diajukan</span>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500">{item.desc}</span>
-              </div>
+              <span className="text-sm font-black text-slate-800 dark:text-white shrink-0 ml-2">{item.value}</span>
             </div>
-            <span className="text-sm font-black text-slate-800 dark:text-white">{item.value}</span>
+          ))
+        ) : (
+          <div className="flex flex-col items-center justify-center py-8 text-slate-400 dark:text-slate-500">
+            <Inbox size={32} className="mb-2 opacity-50" />
+            <span className="text-xs font-medium">Belum ada SPP bulan ini.</span>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
@@ -146,6 +160,7 @@ const ActivityList = ({ stats }) => {
 function MonitoringPage() {
   const { userData } = useContext(AppContext);
   const [dataTable, setDataTable] = useState([]);
+  const [dataTableNow, setDataNowTable] = useState([]);
   const [dataReceiptTable, setDataReceiptTable] = useState([]);
   const [filter, setFilter] = useState({ tahun: "", kode_satker: "", searchKey: "", startDate: null, endDate: null });
   const [sortBy, setSortBy] = useState("created_at");
@@ -153,6 +168,7 @@ function MonitoringPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
+  const [sppTypesBulanIni, setSppTypesBulanIni] = useState([]);
 
   const handleFilterChange = (key, value) => {
     setPage(0);
@@ -165,15 +181,13 @@ function MonitoringPage() {
     });
   };
 
-  const resetFilter = () => {
-    setFilter({ tahun: "", kode_satker: "", searchKey: "", startDate: null, endDate: null });
-    setPage(0);
-  };
-
   const fetchCount = async () => {
     try {
       const data = await apiRequest({ url: `/archive/summary/status` });
-      if (data.success) setDataTable(data.data);
+      if (data.success && data.data) {
+        setDataTable(data.data.all);
+        setDataNowTable(data.data.now);
+      }
     } catch (error) {
       console.error(error);
     }
@@ -211,14 +225,67 @@ function MonitoringPage() {
     }
   };
 
+  const fetchSppTypesThisMonth = async () => {
+    try {
+      const isUser = userData?.role === "user";
+      
+      // Paksa start_date awal bulan dan end_date akhir bulan
+      const startOfMonth = moment().startOf('month').format("YYYY-MM-DD");
+      const endOfMonth = moment().endOf('month').format("YYYY-MM-DD");
+
+      const query = buildQueryString({
+        biro_code: isUser ? userData?.biro_code : filter.kode_satker,
+        page: 1,
+        per_page: 1000, // Tembak gede sekalian biar semua data bulan ini ketarik buat direkap
+        start_date: startOfMonth,
+        end_date: endOfMonth,
+      });
+      
+      const data = await apiRequest({ url: `/archive/summary/receipt?${query}` });
+      
+      if (data.success && data.data?.data) {
+        const records = data.data.data;
+        
+        // Grouping & Counting data per 'jenis_spp'
+        const grouped = records.reduce((acc, curr) => {
+          const type = curr.jenis_spp || "Tidak Diketahui";
+          acc[type] = (acc[type] || 0) + 1;
+          return acc;
+        }, {});
+
+        // Palet warna biar tampilannya warna-warni cakep
+        const colors = [
+          { text: "text-blue-500", bg: "bg-blue-50 dark:bg-blue-500/10" },
+          { text: "text-emerald-500", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+          { text: "text-amber-500", bg: "bg-amber-50 dark:bg-amber-500/10" },
+          { text: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-500/10" },
+          { text: "text-rose-500", bg: "bg-rose-50 dark:bg-rose-500/10" },
+          { text: "text-teal-500", bg: "bg-teal-50 dark:bg-teal-500/10" },
+        ];
+
+        // Ubah Object hasil grouping jadi Array, dan urutin dari yang terbanyak
+        const statsArray = Object.keys(grouped).map((key, index) => ({
+          title: key,
+          value: grouped[key],
+          color: colors[index % colors.length].text,
+          bg: colors[index % colors.length].bg
+        })).sort((a, b) => b.value - a.value);
+
+        setSppTypesBulanIni(statsArray);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchCount();
     fetchReceipt();
+    fetchSppTypesThisMonth();
   }, [filter.kode_satker, filter.searchKey, page, rowsPerPage, sortBy, sortDir, filter.startDate, filter.endDate]);
 
   const stats = useMemo(() => {
-    const sourceData = dataTable || [];
-    const filteredSummary = sourceData.filter(item => {
+    const filteredSummary = (dataTable || []).filter(item => {
       const itemSatker = item?.kode_satker?.toString() || "";
       const userSatker = userData?.biro_code?.toString() || "";
       const filterSatker = filter?.kode_satker?.toString() || "";
@@ -229,16 +296,37 @@ function MonitoringPage() {
       return {
         baru: acc.baru + (Number(curr.new) || 0),
         approved: acc.approved + (Number(curr.approved) || 0),
-        fix: acc.fix + (Number(curr.reject) || 0),
-        ditolak: acc.ditolak + (Number(curr.batal) || 0),
+        fix: acc.fix + (Number(curr.fix) || 0), // Catatan: curr.reject ini nama key API lu, sesuaikan
+        ditolak: acc.ditolak + (Number(curr.reject) || 0),
         sp2d: acc.sp2d + (Number(curr.sp2d) || 0),
         total: acc.total + (Number(curr.total) || 0),
       };
     }, { baru: 0, approved: 0, fix: 0, ditolak: 0, sp2d: 0, total: 0 });
-
-    if(totals.ditolak === 0 && totals.total > 0) totals.ditolak = 10; 
+    
     return totals;
   }, [dataTable, filter.kode_satker, userData]);
+
+  const statsNow = useMemo(() => {
+    const filteredSummary = (dataTableNow || []).filter(item => {
+      const itemSatker = item?.kode_satker?.toString() || "";
+      const userSatker = userData?.biro_code?.toString() || "";
+      const filterSatker = filter?.kode_satker?.toString() || "";
+      return userData?.role === "user" ? itemSatker === userSatker : (filterSatker ? itemSatker === filterSatker : true);
+    });
+    
+    const totals = filteredSummary.reduce((acc, curr) => {
+      return {
+        baru: acc.baru + (Number(curr.new) || 0),
+        approved: acc.approved + (Number(curr.approved) || 0),
+        fix: acc.fix + (Number(curr.fix) || 0), // Catatan: curr.reject ini nama key API lu, sesuaikan
+        ditolak: acc.ditolak + (Number(curr.reject) || 0),
+        sp2d: acc.sp2d + (Number(curr.sp2d) || 0),
+        total: acc.total + (Number(curr.total) || 0),
+      };
+    }, { baru: 0, approved: 0, fix: 0, ditolak: 0, sp2d: 0, total: 0 });
+    
+    return totals;
+  }, [dataTableNow, filter.kode_satker, userData]);
 
   // Modifikasi fungsi Helper Warna untuk Support Dark Mode
   const getStatusBadge = (status) => {
@@ -306,7 +394,7 @@ function MonitoringPage() {
         </div>
       </div>
 
-      {/* 3. MAIN CONTENT (GRID LAYOUT: Table 2/3, Right Panel 1/3) */}
+      {/* 3. MAIN CONTENT (GRID LAYOUT: Table 7/12, Right Panel 5/12) */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
         
         {/* KIRI: Tabel SPP Terbaru */}
@@ -373,8 +461,8 @@ function MonitoringPage() {
 
         {/* KANAN: Widgets */}
         <div className="xl:col-span-5 flex flex-col gap-4 h-full">
-          <SummaryChart stats={stats} />
-          <ActivityList stats={stats} />
+          <SummaryChart stats={statsNow} />
+          <SppTypeMonthList statsArray={sppTypesBulanIni} />
         </div>
 
       </div>
