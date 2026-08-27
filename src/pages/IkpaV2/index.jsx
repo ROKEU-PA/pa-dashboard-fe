@@ -247,7 +247,7 @@ export default function IkpaV2Page() {
           </div>
 
           {/* 7 INDIKATOR PROGRESS (8 Kolom) */}
-          <div className="xl:col-span-8 bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col h-full transition-colors">
+          <div className="xl:col-span-8 bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] border border-slate-100 dark:border-white/10 flex flex-col max-h-[60vh] 2xl:max-h-[calc(100vh-380px)] transition-colors">
             <h2 className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wider mb-5">
               Nilai per Indikator IKPA
             </h2>

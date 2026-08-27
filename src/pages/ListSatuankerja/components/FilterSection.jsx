@@ -2,6 +2,7 @@ import React from "react";
 import Button from "@/components/Button";
 import { Book, Plus, Search, Calendar, RefreshCcw } from "lucide-react";
 import { isPengajuanPath } from "@/pages/ListSatuankerja/satkerHooks";
+import { FaFilePdf } from "react-icons/fa";
 
 export default function FilterSection({
   location,
@@ -9,6 +10,7 @@ export default function FilterSection({
   filter,
   handleDateChange,
   openAddModal,
+  openMergeModal,
 }) {
   const handleResetFilter = () => {
     handleDateChange("searchKey", "");
@@ -19,43 +21,57 @@ export default function FilterSection({
 
   return (
     // PENGATURAN WRAPPER: Pakai flex-wrap biar aman di zoom 100%
-    <div className="flex flex-wrap xl:flex-nowrap justify-between items-end gap-4 p-5 bg-white dark:bg-[#111C30]/80 backdrop-blur-md border border-slate-100 dark:border-white/10 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-colors duration-300">
-      
+    <div className="flex flex-wrap xl:flex-nowrap justify-between items-start gap-4 p-5 bg-white dark:bg-[#111C30]/80 backdrop-blur-md border border-slate-100 dark:border-white/10 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-colors duration-300">
       {/* ================= KIRI: TOMBOL TAMBAH ================= */}
       <div className="flex flex-col gap-1.5 shrink-0">
-        <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">Spacer</label>
-        
-        {userData && (!isPengajuanPath(location.pathname) ? (
-          <Button
-            onClick={openAddModal}
-            // TINGGI DIKUNCI DI h-[38px]
-            className="w-fit whitespace-nowrap px-4 h-[38px] shadow-md shadow-blue-500/30 active:scale-95 transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 border-0"
-            icon={<Plus size={16} strokeWidth={2.5} />}
-          >
-            Tambah Arsip
-          </Button>
-        ) : (
-          userData?.role === "user" && (
+        <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">
+          Spacer
+        </label>
+
+        {userData &&
+          (!isPengajuanPath(location.pathname) ? (
             <Button
               onClick={openAddModal}
               // TINGGI DIKUNCI DI h-[38px]
               className="w-fit whitespace-nowrap px-4 h-[38px] shadow-md shadow-blue-500/30 active:scale-95 transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 border-0"
               icon={<Plus size={16} strokeWidth={2.5} />}
             >
-              Tambah Pengajuan
+              Tambah Arsip
             </Button>
-          )
-        ))}
+          ) : (
+            userData?.role === "user" && (
+              <Button
+                onClick={openAddModal}
+                // TINGGI DIKUNCI DI h-[38px]
+                className="w-fit whitespace-nowrap px-4 h-[38px] shadow-md shadow-blue-500/30 active:scale-95 transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 border-0"
+                icon={<Plus size={16} strokeWidth={2.5} />}
+              >
+                Tambah Pengajuan
+              </Button>
+            )
+          ))}
+        <Button
+          onClick={openMergeModal}
+          className="w-fit whitespace-nowrap px-4 h-[38px] bg-red-500 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20 rounded-xl transition-colors text-sm font-bold flex items-center justify-center gap-2 mt-1"
+          icon={<FaFilePdf size={16} strokeWidth={2.5} />}
+        >
+          Gabungkan PDF
+        </Button>
       </div>
 
       {/* ================= KANAN: GROUP FILTER ================= */}
       {/* flex-wrap di sini bikin elemen yang gak muat otomatis turun rapi ke bawah */}
-      <div className="flex flex-wrap items-end justify-start xl:justify-end gap-3.5 w-full xl:w-auto">
-        
+      <div className="flex flex-wrap items-start justify-start xl:justify-end gap-3.5 w-full xl:w-auto">
         {/* 1. Tombol PMK */}
         <div className="flex flex-col gap-1.5 shrink-0">
-          <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">Spacer</label>
-          <a href="https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view" target="_blank" rel="noopener noreferrer">
+          <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">
+            Spacer
+          </label>
+          <a
+            href="https://drive.google.com/file/d/1N9xY5qyOoqafGK-H6K02kXAboUpLaX4A/view"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button
               // TINGGI DIKUNCI DI h-[38px]
               className="w-fit whitespace-nowrap px-4 h-[38px] bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20 rounded-xl transition-colors text-sm font-bold flex items-center justify-center gap-2"
@@ -72,7 +88,10 @@ export default function FilterSection({
             Pencarian Dokumen
           </label>
           <div className="relative group">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#18324f]/50 dark:text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors" />
+            <Search
+              size={16}
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#18324f]/50 dark:text-slate-400 group-focus-within:text-blue-600 dark:group-focus-within:text-blue-400 transition-colors"
+            />
             <input
               type="text"
               placeholder="Cari data..."
@@ -87,7 +106,9 @@ export default function FilterSection({
         {/* 3. Input Tahun (Jika bukan pengajuan) */}
         {!isPengajuanPath(location.pathname) && (
           <div className="flex flex-col gap-1.5 shrink-0">
-            <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">Spacer</label>
+            <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">
+              Spacer
+            </label>
             <input
               type="text"
               placeholder="Tahun"
@@ -106,8 +127,12 @@ export default function FilterSection({
           </label>
           {/* TINGGI DIKUNCI DI h-[38px] */}
           <div className="flex items-center bg-[#f5f8fc] dark:bg-[#0A111E] border border-[#e2e8f0] dark:border-white/10 rounded-xl h-[38px] px-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all group overflow-hidden w-full sm:w-auto">
-            <Calendar className="text-[#18324f] dark:text-blue-400 shrink-0 mr-1.5" size={16} strokeWidth={2.5} />
-            
+            <Calendar
+              className="text-[#18324f] dark:text-blue-400 shrink-0 mr-1.5"
+              size={16}
+              strokeWidth={2.5}
+            />
+
             <input
               type="date"
               min="2026-01-01"
@@ -116,9 +141,11 @@ export default function FilterSection({
               value={filter.startDate || ""}
               onChange={(e) => handleDateChange("startDate", e.target.value)}
             />
-            
-            <span className="text-[#18324f]/50 dark:text-slate-500 mx-1.5 font-bold">-</span>
-            
+
+            <span className="text-[#18324f]/50 dark:text-slate-500 mx-1.5 font-bold">
+              -
+            </span>
+
             <input
               type="date"
               min="2026-01-01"
@@ -132,7 +159,9 @@ export default function FilterSection({
 
         {/* 5. Tombol Reset */}
         <div className="flex flex-col gap-1.5 shrink-0">
-          <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">Spacer</label>
+          <label className="text-[10px] font-bold opacity-0 select-none pointer-events-none">
+            Spacer
+          </label>
           <button
             onClick={handleResetFilter}
             // TINGGI DIKUNCI DI h-[38px]
@@ -142,7 +171,6 @@ export default function FilterSection({
             <RefreshCcw size={16} strokeWidth={2.5} />
           </button>
         </div>
-
       </div>
     </div>
   );

@@ -45,7 +45,7 @@ function DashboardManagementPage() {
       });
     } catch (err) {
       console.error(err);
-      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+      toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
     }
   };
 

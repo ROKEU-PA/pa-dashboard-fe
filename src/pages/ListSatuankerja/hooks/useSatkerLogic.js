@@ -11,6 +11,7 @@ import {
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
+import axios from "axios";
 
 export function useSatkerLogic() {
   const { listMenu, userData } = useContext(AppContext);
@@ -47,6 +48,7 @@ export function useSatkerLogic() {
   const [letiantModal, setVariantModal] = useState("");
   const [pdfToOpen, setPDFtoOpen] = useState("");
   const [showModal, setShowModal] = useState("true");
+  const [isOpenMergeModal, setIsOpenMergeModal] = useState(false);
 
   // Form & Input States
   const [types, setTypes] = useState([]);
@@ -71,6 +73,8 @@ export function useSatkerLogic() {
     link: "",
     jml_hal: 0,
   });
+  const [archiveFile, setArchiveFile] = useState("");
+  const [isLoadingMerge, setIsLoadingMerge] = useState("");
 
   // ==========================================
   // 2. HANDLERS (Perubahan Input & Filter)
@@ -191,7 +195,10 @@ export function useSatkerLogic() {
       payload.append("dokumen", formDataToSubmit.dokumen[0]);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", formDataToSubmit.jml_hal);
-      payload.append("feedback", formDataToSubmit.catatan ?? formDataToSubmit.feedback);
+      payload.append(
+        "feedback",
+        formDataToSubmit.catatan ?? formDataToSubmit.feedback,
+      );
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
       }
@@ -226,7 +233,7 @@ export function useSatkerLogic() {
                 isLoading: false,
                 autoClose: 3000,
               });
-              resolve(xhr.response); 
+              resolve(xhr.response);
             } else {
               toast.update(toastId, {
                 render: "Upload gagal. Silakan coba lagi.",
@@ -278,14 +285,28 @@ export function useSatkerLogic() {
         formDataToEdit.link || "",
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
-      
-      payload.append("kode_biro", currentMenu?.code ?? formDataToEdit.kode_biro);
+
+      payload.append(
+        "kode_biro",
+        currentMenu?.code ?? formDataToEdit.kode_biro,
+      );
       payload.append("no_spp", formDataToEdit.no_spp);
-      payload.append("feedback", formDataToEdit.catatan ?? formDataToEdit.feedback);
+      payload.append(
+        "feedback",
+        formDataToEdit.catatan ?? formDataToEdit.feedback,
+      );
       payload.append("status", formDataToEdit.status);
       payload.append("questions", JSON.stringify(formDataToEdit.kelengkapan));
-      payload.append("verifications", JSON.stringify(formDataToEdit.verifikasi));
-      payload.append("jenis_spp", /[A-Z]/.test(formDataToEdit.type) ? formDataToEdit.type_id : formDataToEdit.type);
+      payload.append(
+        "verifications",
+        JSON.stringify(formDataToEdit.verifikasi),
+      );
+      payload.append(
+        "jenis_spp",
+        /[A-Z]/.test(formDataToEdit.type)
+          ? formDataToEdit.type_id
+          : formDataToEdit.type,
+      );
       payload.append("tahun", formDataToEdit.tahun);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", formDataToEdit.jml_hal);
@@ -299,13 +320,25 @@ export function useSatkerLogic() {
         formDataToEdit.dokumen_spm instanceof FileList ||
         formDataToEdit.dokumen_sp2d instanceof FileList;
 
-      if (formDataToEdit.dokumen instanceof File || formDataToEdit.dokumen instanceof FileList) {
-        payload.append("dokumen", formDataToEdit.dokumen[0] || formDataToEdit.document[0]);
+      if (
+        formDataToEdit.dokumen instanceof File ||
+        formDataToEdit.dokumen instanceof FileList
+      ) {
+        payload.append(
+          "dokumen",
+          formDataToEdit.dokumen[0] || formDataToEdit.document[0],
+        );
       }
-      if (formDataToEdit.dokumen_spm instanceof File || formDataToEdit.dokumen_spm instanceof FileList) {
+      if (
+        formDataToEdit.dokumen_spm instanceof File ||
+        formDataToEdit.dokumen_spm instanceof FileList
+      ) {
         payload.append("dokumen_spm", formDataToEdit.dokumen_spm[0]);
       }
-      if (formDataToEdit.dokumen_sp2d instanceof File || formDataToEdit.dokumen_sp2d instanceof FileList) {
+      if (
+        formDataToEdit.dokumen_sp2d instanceof File ||
+        formDataToEdit.dokumen_sp2d instanceof FileList
+      ) {
         payload.append("dokumen_sp2d", formDataToEdit.dokumen_sp2d[0]);
       }
 
@@ -342,7 +375,7 @@ export function useSatkerLogic() {
                 isLoading: false,
                 autoClose: 3000,
               });
-              resolve(xhr.response); 
+              resolve(xhr.response);
             } else {
               toast.update(toastId, {
                 render: "Upload gagal. Silakan coba lagi.",
@@ -392,15 +425,19 @@ export function useSatkerLogic() {
     const strictStatuses = ["approved", "sp2d"];
 
     if (strictStatuses.includes(dataToCheck.status)) {
-      const kelengkapanChecked = dataToCheck.kelengkapan.map((item) => item.value);
-      const verifikasiChecked = dataToCheck.verifikasi.map((item) => item.value);
+      const kelengkapanChecked = dataToCheck.kelengkapan.map(
+        (item) => item.value,
+      );
+      const verifikasiChecked = dataToCheck.verifikasi.map(
+        (item) => item.value,
+      );
 
       const allKelengkapanChecked = (questions || []).every((q) =>
-        kelengkapanChecked.includes(q.id_question)
+        kelengkapanChecked.includes(q.id_question),
       );
 
       const allVerifikasiChecked = (verifications || []).every((v) =>
-        verifikasiChecked.includes(v.id_question)
+        verifikasiChecked.includes(v.id_question),
       );
 
       return allKelengkapanChecked && allVerifikasiChecked;
@@ -471,6 +508,18 @@ export function useSatkerLogic() {
           return;
         }
 
+        const isArchive =
+          fileName.endsWith(".zip") || fileName.endsWith(".rar");
+        const sizeInBytes = file[0].size;
+        const sizeInMB = sizeInBytes / (1024 * 1024);
+
+        if (isArchive && sizeInMB < 50) {
+          toast.error(
+            "Jika ukuran file di bawah 50MB, mohon unggah langsung dalam format PDF (jangan di-ZIP/RAR). Bisa gunakan fitur Gabungkan PDF dibawah tombol tambah pengajuan",
+          );
+          return;
+        }
+
         const maxSize =
           formData.type_id === "ptup" ||
           formData.type_id === "gup" ||
@@ -512,8 +561,8 @@ export function useSatkerLogic() {
       });
       fetchTable();
     } catch (err) {
-      console.log(err)
-      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+      console.log(err);
+      toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
     }
   };
 
@@ -524,6 +573,10 @@ export function useSatkerLogic() {
     setIsOpenModal(true);
     setVariantModal("Add");
     setFormData((prev) => ({ ...prev, tahun: moment().year() }));
+  };
+
+  const openMergeModal = () => {
+    setIsOpenMergeModal(true);
   };
 
   const openEditModal = (row) => {
@@ -541,6 +594,152 @@ export function useSatkerLogic() {
     if (typeof url === "string") {
       setIsOpenPDF(true);
       setPDFtoOpen(url);
+    }
+  };
+
+  const handleMergeSubmit = async (e) => {
+    e.preventDefault();
+    if (!archiveFile) return;
+
+    setIsLoadingMerge(true);
+
+    const formData = new FormData();
+    formData.append("archive_file", archiveFile);
+
+    const defaultToken = JSON.parse(
+      sessionStorage.getItem("auth"),
+    )?.accessToken;
+
+    try {
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        const toastId = toast.info("Mengunggah & memproses file...", {
+          progress: 0,
+          autoClose: false,
+          closeButton: false,
+          isLoading: true,
+        });
+
+        // 🔥 WAJIB: Set response ke blob biar nerima file PDF
+        xhr.responseType = "blob";
+
+        // --- TRACKING PROGRESS UPLOAD ---
+        xhr.upload.onprogress = function (event) {
+          if (event.lengthComputable) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+
+            // Trik: Mentokin di 99% saat upload selesai, karena server butuh waktu buat nge-merge PDF
+            const displayPercent = percent === 100 ? 99 : percent;
+
+            toast.update(toastId, {
+              render: `Memproses file... (${displayPercent}%)`,
+              progress: percent / 100,
+            });
+          }
+        };
+
+        // --- KETIKA RESPONSE DARI SERVER KEMBALI ---
+        xhr.onload = function () {
+          if (xhr.status === 200 || xhr.status === 201) {
+            toast.update(toastId, {
+              render: "Berhasil digabungkan & diunduh!",
+              type: "success",
+              isLoading: false,
+              autoClose: 3000,
+            });
+
+            // 1. Ambil file Blob dari server
+            const blob = xhr.response;
+            const url = window.URL.createObjectURL(blob);
+
+            // 2. Bikin link gaib buat trigger auto-download
+            const link = document.createElement("a");
+            link.href = url;
+
+            // 3. Tangkap nama file dari header Nginx/Backend (Content-Disposition)
+            const contentDisposition = xhr.getResponseHeader(
+              "Content-Disposition",
+            );
+            let fileName = "arsip_gabungan.pdf";
+            if (contentDisposition) {
+              const fileNameMatch =
+                contentDisposition.match(/filename="?([^"]+)"?/);
+              if (fileNameMatch && fileNameMatch.length === 2) {
+                fileName = fileNameMatch[1];
+              }
+            }
+
+            // 4. Eksekusi Download & Bersihkan Memori
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
+
+            resolve(xhr.response);
+          } else {
+            // JIKA ERROR (Misal 422 Penamaan Salah atau 500)
+            const errorBlob = xhr.response;
+
+            // Karena responseType "blob", kita harus baca JSON error pakai FileReader
+            if (errorBlob instanceof Blob) {
+              const reader = new FileReader();
+              reader.onload = function () {
+                try {
+                  const errData = JSON.parse(reader.result);
+                  toast.update(toastId, {
+                    render:
+                      errData.message ||
+                      "Upload gagal. Format file mungkin salah.",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 5000, // Agak lama biar user sempat baca
+                  });
+                } catch (e) {
+                  toast.update(toastId, {
+                    render: "Gagal memproses file. Silakan coba lagi.",
+                    type: "error",
+                    isLoading: false,
+                    autoClose: 3000,
+                  });
+                }
+              };
+              reader.readAsText(errorBlob); // Ubah blob jadi text json
+            } else {
+              toast.update(toastId, {
+                render: "Upload gagal. Silakan coba lagi.",
+                type: "error",
+                isLoading: false,
+                autoClose: 3000,
+              });
+            }
+            reject(new Error("Upload gagal"));
+          }
+        };
+
+        xhr.onerror = function () {
+          toast.update(toastId, {
+            render: "Terjadi kesalahan jaringan.",
+            type: "error",
+            isLoading: false,
+            autoClose: 3000,
+          });
+          reject(new Error("Network error"));
+        };
+
+        // 🔥 GANTI URL INI SESUAI ENDPOINT MERGE PDF LU
+        xhr.open("POST", `${process.env.REACT_APP_API_BASE_URL}/archive/pdf/merge`);
+        xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
+        xhr.send(formData);
+      });
+
+      // Kalau sukses, tutup modal dan bersihkan form
+      setIsOpenMergeModal(false);
+      setArchiveFile(null);
+    } catch (error) {
+      console.error("Proses merge dihentikan:", error);
+    } finally {
+      setIsLoadingMerge(false);
     }
   };
 
@@ -603,6 +802,8 @@ export function useSatkerLogic() {
     setVariantModal,
     setPDFtoOpen,
     setErrorMessage,
+    setArchiveFile,
+    isLoadingMerge,
 
     // Handlers
     handleSortChange,
@@ -610,6 +811,7 @@ export function useSatkerLogic() {
     handleChange,
     handleSubmit,
     checklistIsValid,
+    handleMergeSubmit,
 
     // Action Openers
     openAddModal,
@@ -617,10 +819,13 @@ export function useSatkerLogic() {
     openPDFModal,
     setShowModal,
     showModal,
+    isOpenMergeModal,
+    setIsOpenMergeModal,
+    openMergeModal,
 
     // API Calls (Di-export untuk dipakai di Halaman Review)
     fetchType,
     editData,
-    fetchTable
+    fetchTable,
   };
 }

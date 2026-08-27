@@ -37,6 +37,7 @@ function ListSatuanKerjaPage() {
     setRowsPerPage,
     openAddModal,
     openEditModal,
+    openMergeModal,
     // Modal states
     isOpenModal,
     setIsOpenModal,
@@ -50,6 +51,8 @@ function ListSatuanKerjaPage() {
     setShowModal,
     letiantModal,
     setVariantModal,
+    isOpenMergeModal,
+    setIsOpenMergeModal,
     // Form & Data states
     formData,
     setFormData,
@@ -62,6 +65,9 @@ function ListSatuanKerjaPage() {
     handleChange,
     handleSubmit,
     currentMenu,
+    handleMergeSubmit,
+    setArchiveFile,
+    isLoadingMerge,
   } = useSatkerLogic();
 
   const [selectOpen, setSelectOpen] = useState(false);
@@ -96,9 +102,8 @@ function ListSatuanKerjaPage() {
 
   return (
     <div className="w-full bg-white dark:!bg-transparent dark:border-none rounded-xl shadow-lg dark:shadow-none border border-gray-100 overflow-hidden flex flex-col">
-      
-      <Paper 
-        elevation={0} 
+      <Paper
+        elevation={0}
         className="rounded-xl flex flex-col bg-white dark:!bg-transparent"
       >
         {/* --- SECTION 1: FILTER --- */}
@@ -108,6 +113,7 @@ function ListSatuanKerjaPage() {
           filter={filter}
           handleDateChange={handleDateChange}
           openAddModal={openAddModal}
+          openMergeModal={openMergeModal}
         />
 
         {/* --- SECTION 2: TABLE --- */}
@@ -283,7 +289,8 @@ function ListSatuanKerjaPage() {
                   value={formData?.document}
                 />
                 <p className="text-xs text-slate-500 font-medium italic ml-1">
-                  * Maksimal 1,5 GB untuk jenis GUP & PTUP. Di luar jenis tersebut maksimal 200 MB.
+                  * Maksimal 1,5 GB untuk jenis GUP & PTUP. Di luar jenis
+                  tersebut maksimal 200 MB.
                 </p>
               </div>
             )}
@@ -615,6 +622,73 @@ function ListSatuanKerjaPage() {
             />
           </form>
         </div>
+      </Modal>
+
+      <Modal
+        open={isOpenMergeModal}
+        onClose={() => {
+          setIsOpenMergeModal(false);
+          setArchiveFile(null); // Reset state file saat modal ditutup
+        }}
+        title="Form Ekstrak & Gabung PDF"
+      >
+        <form
+          onSubmit={handleMergeSubmit}
+          className="flex flex-col w-full relative"
+        >
+          {/* BODY FORM (Scrollable) */}
+          <div className="flex flex-col gap-5 p-5 max-h-[65vh] overflow-y-auto">
+            {/* Banner Informasi / Panduan Penamaan */}
+            <div className="p-4 bg-blue-50/50 border border-blue-200 rounded-xl flex flex-col gap-2">
+              <span className="text-sm font-bold text-blue-800">
+                📌 Panduan Isi File ZIP/RAR
+              </span>
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Agar urutan halaman PDF tepat, <strong>wajib</strong> beri
+                awalan angka pada nama file PDF di dalam kompresi Anda.
+                <br />
+                <span className="inline-block mt-1 font-medium bg-white px-2 py-1 rounded border border-blue-100">
+                  Contoh: 1_Surat.pdf, 2_Lampiran.pdf, 3-Nota.pdf
+                </span>
+              </p>
+            </div>
+
+            {/* Input Upload ZIP/RAR */}
+            <div className="mt-1">
+              <FileInput
+                accept=".zip,.rar,application/zip,application/x-rar-compressed"
+                label="Unggah File (ZIP/RAR)"
+                name="archive_file"
+                // Asumsi onChange di komponen FileInput melempar (event) atau (name, file)
+                // Sesuaikan dengan cara kerja FileInput Anda
+                onChange={(e) => setArchiveFile(e.target.files[0])}
+                required={true}
+              />
+              <p className="text-xs text-slate-500 font-medium italic ml-1 mt-1.5">
+                * Maksimal ukuran file kompresi 50 MB.
+              </p>
+            </div>
+          </div>
+
+          {/* FOOTER FORM (Action Button) */}
+          <div className="px-5 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3 rounded-b-xl">
+            <Button
+              type="submit"
+              disabled={isLoadingMerge}
+              className="w-full md:w-auto px-8 py-2.5 bg-[#308BFD] hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md shadow-blue-500/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoadingMerge ? (
+                <>
+                  {/* Bisa tambahkan icon spinner loading di sini jika ada */}
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  Memproses...
+                </>
+              ) : (
+                "Proses & Download"
+              )}
+            </Button>
+          </div>
+        </form>
       </Modal>
 
       <PendingDocumentsModal

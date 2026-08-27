@@ -44,10 +44,24 @@ import NotFoundPage from "./pages/NotFound";
 import IkpaV2Page from "./pages/IkpaV2";
 // import "@/PDFWorkerSetup";
 
+const GlobalLoading = () => (
+  <div className="flex items-center justify-center min-h-screen bg-[#0D1627]">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+  </div>
+);
+
 function App() {
   const { isAdmin, listMenu, userData } = useContext(AppContext);
   const { auth, isInitializing } = useAuth();
   const isAuthenticated = !!auth?.accessToken;
+
+  if (isInitializing) {
+    return <GlobalLoading />;
+  }
+
+  if (auth?.accessToken && (!userData || !listMenu)) {
+    return <GlobalLoading />;
+  }
 
   return (
     <>
