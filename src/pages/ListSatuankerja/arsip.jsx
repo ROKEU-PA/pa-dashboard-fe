@@ -210,7 +210,6 @@ function Arsip() {
 
   return (
     <div className="w-full h-full bg-slate-50/50 dark:bg-transparent rounded-xl overflow-hidden flex flex-col transition-colors">
-      
       {/* STATE 1: EMPTY STATE */}
       {!isFiltered ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#111C30]/80 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] backdrop-blur-md border border-slate-100 dark:border-white/10 min-h-[60vh] transition-colors">
@@ -235,17 +234,17 @@ function Arsip() {
       ) : (
         /* STATE 2: TABLE DATA */
         <div className="flex flex-col gap-6">
-          
           {/* HEADER FILTER & SEARCH */}
           <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 p-5 transition-colors flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-            
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Menampilkan Data:
               </span>
               <span className="text-lg font-black text-slate-800 dark:text-white">
                 {filter.satkerName}{" "}
-                <span className="text-blue-500 font-black px-1.5 opacity-50">|</span>{" "}
+                <span className="text-blue-500 font-black px-1.5 opacity-50">
+                  |
+                </span>{" "}
                 {filter.tahun}
               </span>
             </div>
@@ -266,7 +265,7 @@ function Arsip() {
                   }
                 />
               </div>
-              
+
               <Button
                 variant="custom"
                 onClick={() => setIsFilterModalOpen(true)}
@@ -275,7 +274,7 @@ function Arsip() {
               >
                 Ubah Filter
               </Button>
-              
+
               {userData.role !== "user" && (
                 <Button
                   variant="custom"
@@ -309,7 +308,9 @@ function Arsip() {
                           col.sortable && handleSortChange(col.key)
                         }
                         className={`py-4 px-4 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap transition-colors ${
-                          col.sortable ? "cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 select-none group" : "cursor-default"
+                          col.sortable
+                            ? "cursor-pointer hover:text-blue-500 dark:hover:text-blue-400 select-none group"
+                            : "cursor-default"
                         }`}
                       >
                         {col.sortable ? (
@@ -338,19 +339,31 @@ function Arsip() {
                       .map((col) => {
                         if (col.key == "spp_number")
                           return (
-                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-gray-200 whitespace-nowrap">
+                            <TableCell
+                              key={col.key}
+                              align="center"
+                              className="py-3.5 px-4 text-xs sm:text-sm font-bold text-slate-700 dark:text-gray-200 whitespace-nowrap"
+                            >
                               {row?.["no_spp"]}
                             </TableCell>
                           );
                         if (col.key === "created_at")
                           return (
-                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
+                            <TableCell
+                              key={col.key}
+                              align="center"
+                              className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap"
+                            >
                               {moment(row?.[col.key]).format("YYYY/MM/DD")}
                             </TableCell>
                           );
                         if (col.key === "revisi")
                           return (
-                            <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
+                            <TableCell
+                              key={col.key}
+                              align="center"
+                              className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap"
+                            >
                               Revisi ke-{row?.[col.key]}
                             </TableCell>
                           );
@@ -374,7 +387,9 @@ function Arsip() {
                                 }
                               }}
                               className={`py-3.5 px-4 text-xs sm:text-sm font-bold whitespace-nowrap ${
-                                typeof docObj?.url === "string" ? "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer" : "text-slate-400 dark:text-slate-600"
+                                typeof docObj?.url === "string"
+                                  ? "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                                  : "text-slate-400 dark:text-slate-600"
                               }`}
                             >
                               {typeof docObj?.url === "string"
@@ -416,7 +431,11 @@ function Arsip() {
                         }
 
                         return (
-                          <TableCell key={col.key} align="center" className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap">
+                          <TableCell
+                            key={col.key}
+                            align="center"
+                            className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap"
+                          >
                             {row[col.key] ?? "-"}
                           </TableCell>
                         );
@@ -425,7 +444,7 @@ function Arsip() {
                 ))}
               </TableBody>
             </Table>
-            
+
             {/* Pagination Container disesuaikan */}
             <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/30 dark:bg-[#0D1627]/30">
               <TablePagination
@@ -482,7 +501,7 @@ function Arsip() {
               isSearchable={userData?.role !== "user"}
             />
           </div>
-          
+
           <div className="flex flex-col gap-1.5 mt-2">
             <label className="text-[11px] text-slate-500 dark:text-slate-400 font-bold px-1 uppercase tracking-wider">
               Tanggal{" "}
@@ -490,20 +509,28 @@ function Arsip() {
                 OPSIONAL
               </span>
             </label>
-            
+
             {/* DATE PICKER NATIVE MURNI (ANTI NGE-BUG) */}
             <div className="flex items-center bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl h-[42px] px-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all group overflow-hidden">
-              <Calendar className="text-slate-400 group-focus-within:text-blue-500 transition-colors shrink-0 mr-2" size={16} strokeWidth={2.5} />
-              
+              <Calendar
+                className="text-slate-400 group-focus-within:text-blue-500 transition-colors shrink-0 mr-2"
+                size={16}
+                strokeWidth={2.5}
+              />
+
               <input
                 type="date"
                 className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"
                 value={filter.startDate || ""}
-                onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange("startDate", e.target.value)
+                }
               />
-              
-              <span className="text-slate-300 dark:text-slate-600 mx-2 font-bold">-</span>
-              
+
+              <span className="text-slate-300 dark:text-slate-600 mx-2 font-bold">
+                -
+              </span>
+
               <input
                 type="date"
                 className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"

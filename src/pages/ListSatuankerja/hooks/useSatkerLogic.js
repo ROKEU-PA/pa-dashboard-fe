@@ -1,17 +1,15 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { toast } from "react-toastify";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
 import { buildQueryString } from "@/services/GeneralHelper";
-// Import konstanta dan helper yang sudah Anda miliki
 import {
   columns,
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
-import axios from "axios";
 
 export function useSatkerLogic() {
   const { listMenu, userData } = useContext(AppContext);
@@ -424,26 +422,38 @@ export function useSatkerLogic() {
   const checklistIsValid = (dataToCheck = formData) => {
     const strictStatuses = ["approved", "sp2d"];
 
+    const kelengkapanChecked = dataToCheck.kelengkapan.map((item) => item.value);
+    const verifikasiChecked = dataToCheck.verifikasi.map((item) => item.value);
+
+    const allKelengkapanChecked = (questions || []).every((q) =>
+      kelengkapanChecked.includes(q.id_question),
+    );
+    const allVerifikasiChecked = (verifications || []).every((v) =>
+      verifikasiChecked.includes(v.id_question),
+    );
+
+    const isAllChecked = allKelengkapanChecked && allVerifikasiChecked;
+    const hasQuestions = (questions?.length > 0) || (verifications?.length > 0);
+
     if (strictStatuses.includes(dataToCheck.status)) {
-      const kelengkapanChecked = dataToCheck.kelengkapan.map(
-        (item) => item.value,
-      );
-      const verifikasiChecked = dataToCheck.verifikasi.map(
-        (item) => item.value,
-      );
-
-      const allKelengkapanChecked = (questions || []).every((q) =>
-        kelengkapanChecked.includes(q.id_question),
-      );
-
-      const allVerifikasiChecked = (verifications || []).every((v) =>
-        verifikasiChecked.includes(v.id_question),
-      );
-
-      return allKelengkapanChecked && allVerifikasiChecked;
+      if (!isAllChecked) {
+        return { 
+          valid: false, 
+          message: "Semua Kelengkapan & Verifikasi harus dicentang untuk status ini." 
+        };
+      }
     }
 
-    return true;
+    if (isAllChecked && hasQuestions) {
+      if (!strictStatuses.includes(dataToCheck.status)) {
+        return { 
+          valid: false, 
+          message: "Karena semua persyaratan terpenuhi, status wajib diubah menjadi 'Diproses (Lengkap)'." 
+        };
+      }
+    }
+
+    return { valid: true };
   };
 
   // HANYA UNTUK MODAL ADD/EDIT
@@ -743,26 +753,6 @@ export function useSatkerLogic() {
     }
   };
 
-  // ==========================================
-  // 5. LIFECYCLE (Effects)
-  // ==========================================
-  useEffect(() => {
-    fetchTable();
-    fetchType();
-    setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
-  }, [
-    filter.tahun,
-    filter.searchKey,
-    page + 1,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    filter.startDate,
-    filter.endDate,
-    listMenu,
-    location.pathname,
-  ]);
-
   return {
     // Data & Context
     userData,
@@ -774,6 +764,7 @@ export function useSatkerLogic() {
     questions,
     verifications,
     errorMessage,
+    listMenu,
 
     // States
     filter,
@@ -803,6 +794,7 @@ export function useSatkerLogic() {
     setPDFtoOpen,
     setErrorMessage,
     setArchiveFile,
+    setCurrentMenu,
     isLoadingMerge,
 
     // Handlers

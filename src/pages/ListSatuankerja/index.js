@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Paper from "@/components/Paper";
 import TablePagination from "@/components/TablePagination";
 import Modal from "@/components/Modal";
@@ -16,12 +16,15 @@ import FilterSection from "./components/FilterSection";
 import SatkerTable from "./components/SatkerTable";
 import { useSatkerLogic } from "./hooks/useSatkerLogic";
 
-import { isPengajuanPath } from "./satkerHooks";
+import { isPengajuanPath, getCurrentSatuanKerja } from "./satkerHooks";
 import { validationSchema } from "@/services/GeneralHelper";
 
 function ListSatuanKerjaPage() {
   const {
+    fetchTable, 
+    setCurrentMenu,
     location,
+    listMenu,
     userData,
     filter,
     dataTable,
@@ -67,7 +70,7 @@ function ListSatuanKerjaPage() {
     currentMenu,
     handleMergeSubmit,
     setArchiveFile,
-    isLoadingMerge,
+    isLoadingMerge
   } = useSatkerLogic();
 
   const [selectOpen, setSelectOpen] = useState(false);
@@ -99,6 +102,22 @@ function ListSatuanKerjaPage() {
   };
 
   const fileExtension = getFileExtension(pdfToOpen);
+
+  useEffect(() => {
+    fetchTable();
+    setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+  }, [
+    filter.tahun,
+    filter.searchKey,
+    page,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    filter.startDate,
+    filter.endDate,
+    listMenu,
+    location.pathname,
+  ]);
 
   return (
     <div className="w-full bg-white dark:!bg-transparent dark:border-none rounded-xl shadow-lg dark:shadow-none border border-gray-100 overflow-hidden flex flex-col">

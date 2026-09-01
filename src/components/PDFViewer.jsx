@@ -5,46 +5,81 @@ import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
-const CustomPDFViewer = ({ pdfSource, frameless = false }) => {
+const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
   const [url, setUrl] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
   
-  // Inisialisasi plugin bawaan (yang ada toolbar-nya)
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   useEffect(() => {
     if (!pdfSource) return;
 
-    // Jika string (URL)
-    if (typeof pdfSource === "string") {
-      setUrl(pdfSource);
-    }
-    // Jika blob
-    else if (pdfSource instanceof Blob) {
-      const objectUrl = URL.createObjectURL(pdfSource);
-      setUrl(objectUrl);
+    let objectUrl = null;
+    let isMounted = true;
 
-      return () => URL.revokeObjectURL(objectUrl);
-    }
+    const loadPdfAsBlob = async () => {
+      try {
+        if (typeof pdfSource === "string") {
+          setIsFetching(true);
+          // Tarik file 1x secara utuh
+          const response = await fetch(pdfSource);
+          if (!response.ok) throw new Error("Gagal mengambil PDF");
+          
+          const blob = await response.blob();
+          
+          if (isMounted) {
+            objectUrl = URL.createObjectURL(blob);
+            setUrl(objectUrl);
+          }
+        } else if (pdfSource instanceof Blob) {
+          objectUrl = URL.createObjectURL(pdfSource);
+          setUrl(objectUrl);
+        }
+      } catch (error) {
+        console.error("Error loading PDF Blob:", error);
+        if (isMounted) setUrl(pdfSource);
+      } finally {
+        if (isMounted) setIsFetching(false);
+      }
+    };
+
+    loadPdfAsBlob();
+
+    return () => {
+      isMounted = false;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
   }, [pdfSource]);
 
-  if (!url) return <div>Loading…</div>;
+  if (isFetching || !url) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3">
+        <span className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></span>
+        <span className="text-sm font-bold text-slate-500 animate-pulse">Menyiapkan Dokumen...</span>
+      </div>
+    );
+  }
 
   return (
     <div
       style={{
         width: "100%",
-        // Kalau frameless, biarin height ngikutin parent biar ga kepotong scroll-nya
         height: frameless ? "100%" : "100vh", 
-        overflow: "auto", // Ganti hidden jadi auto biar halamannya tetep bisa di-scroll ke bawah
+        overflow: "auto",
       }}
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
         <Viewer 
           fileUrl={url} 
-          // KUNCINYA DI SINI BOS:
-          // Kalau frameless true -> plugin kosongin (toolbar hilang, sisa kertas PDF doang)
-          // Kalau frameless false -> pake layout plugin (muncul toolbar lengkap)
-          plugins={frameless ? [] : [defaultLayoutPluginInstance]} 
+          plugins={frameless ? [] : [defaultLayoutPluginInstance]}
+
+          onPageChange={(e) => {
+            if (e.currentPage === e.doc.numPages - 1) {
+              if (onReachBottom) onReachBottom(); // Trigger fungsi kalau mentok bawah
+            }
+          }}
         />
       </Worker>
     </div>
