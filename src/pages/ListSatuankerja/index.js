@@ -71,7 +71,7 @@ function ListSatuanKerjaPage() {
     currentMenu,
     handleMergeSubmit,
     setArchiveFile,
-    isLoadingMerge
+    isLoadingMerge,
   } = useSatkerLogic();
 
   const [selectOpen, setSelectOpen] = useState(false);
@@ -312,6 +312,9 @@ function ListSatuanKerjaPage() {
                 <p className="text-xs text-slate-500 font-medium italic ml-1">
                   * Maksimal 1,5 GB untuk jenis GUP & PTUP. Di luar jenis
                   tersebut maksimal 200 MB.
+                </p>
+                <p className="text-xs text-red-500 font-medium italic ml-1">
+                  * Untuk file dibawah 50 MB Wajib berformat PDF.
                 </p>
               </div>
             )}
