@@ -567,7 +567,7 @@ export function useSatkerLogic() {
         catatan: "",
         verifikasi: [],
         link: "",
-        jml_hal: "",
+        jml_hal: 0,
       });
       fetchTable();
     } catch (err) {

@@ -6,7 +6,8 @@ import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 
 const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
-  const [url, setUrl] = useState(null);
+  // 1. Ubah state dari url menjadi pdfData
+  const [pdfData, setPdfData] = useState(null);
   const [isFetching, setIsFetching] = useState(false);
   
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
@@ -14,46 +15,44 @@ const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
   useEffect(() => {
     if (!pdfSource) return;
 
-    let objectUrl = null;
     let isMounted = true;
 
-    const loadPdfAsBlob = async () => {
+    const loadPdfAsArrayBuffer = async () => {
       try {
         if (typeof pdfSource === "string") {
           setIsFetching(true);
-          // Tarik file 1x secara utuh
           const response = await fetch(pdfSource);
           if (!response.ok) throw new Error("Gagal mengambil PDF");
           
-          const blob = await response.blob();
+          // 🔥 KUNCI UTAMA: Jadikan ArrayBuffer, bukan Blob!
+          const arrayBuffer = await response.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
           
-          if (isMounted) {
-            objectUrl = URL.createObjectURL(blob);
-            setUrl(objectUrl);
-          }
+          if (isMounted) setPdfData(uint8Array);
+          
         } else if (pdfSource instanceof Blob) {
-          objectUrl = URL.createObjectURL(pdfSource);
-          setUrl(objectUrl);
+          // Jika pdfSource sudah berupa file blob dari upload lokal
+          const arrayBuffer = await pdfSource.arrayBuffer();
+          if (isMounted) setPdfData(new Uint8Array(arrayBuffer));
         }
       } catch (error) {
-        console.error("Error loading PDF Blob:", error);
-        if (isMounted) setUrl(pdfSource);
+        console.error("Error loading PDF Data:", error);
+        // Fallback jika fetch gagal (misal kena CORS ketat)
+        if (isMounted) setPdfData(pdfSource);
       } finally {
         if (isMounted) setIsFetching(false);
       }
     };
 
-    loadPdfAsBlob();
+    loadPdfAsArrayBuffer();
 
+    // Cleanup memori React native
     return () => {
       isMounted = false;
-      if (objectUrl) {
-        URL.revokeObjectURL(objectUrl);
-      }
     };
   }, [pdfSource]);
 
-  if (isFetching || !url) {
+  if (isFetching || !pdfData) {
     return (
       <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3">
         <span className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></span>
@@ -72,12 +71,11 @@ const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
     >
       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
         <Viewer 
-          fileUrl={url} 
-          plugins={frameless ? [] : [defaultLayoutPluginInstance]}
-
+          fileUrl={pdfData} 
+          plugins={frameless ? [] : [defaultLayoutPluginInstance]} 
           onPageChange={(e) => {
-            if (e.currentPage === e.doc.numPages - 1) {
-              if (onReachBottom) onReachBottom(); // Trigger fungsi kalau mentok bawah
+            if (e.currentPage === e.doc.numPages - 1 && onReachBottom) {
+              onReachBottom();
             }
           }}
         />
