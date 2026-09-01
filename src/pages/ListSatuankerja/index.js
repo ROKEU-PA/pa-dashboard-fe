@@ -21,7 +21,8 @@ import { validationSchema } from "@/services/GeneralHelper";
 
 function ListSatuanKerjaPage() {
   const {
-    fetchTable, 
+    fetchTable,
+    fetchType,
     setCurrentMenu,
     location,
     listMenu,
@@ -105,6 +106,7 @@ function ListSatuanKerjaPage() {
 
   useEffect(() => {
     fetchTable();
+    fetchType();
     setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
   }, [
     filter.tahun,
