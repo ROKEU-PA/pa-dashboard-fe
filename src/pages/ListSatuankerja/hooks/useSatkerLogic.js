@@ -192,7 +192,7 @@ export function useSatkerLogic() {
       payload.append("tahun", formDataToSubmit.tahun);
       payload.append("dokumen", formDataToSubmit.dokumen[0]);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formDataToSubmit.jml_hal);
+      payload.append("jml_hal", formDataToSubmit.jml_hal ?? 0);
       payload.append(
         "feedback",
         formDataToSubmit.catatan ?? formDataToSubmit.feedback,
