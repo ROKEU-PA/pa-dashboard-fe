@@ -715,11 +715,13 @@ function ListSatuanKerjaPage() {
         </form>
       </Modal>
 
-      <PendingDocumentsModal
-        open={showModal}
-        onClose={() => setShowModal(false)}
-        code={currentMenu?.code}
-      />
+      {(userData.role === "user" || userData.role === "pic") && (
+        <PendingDocumentsModal
+          open={showModal}
+          onClose={() => setShowModal(false)}
+          code={currentMenu?.code}
+        />
+      )}
     </div>
   );
 }

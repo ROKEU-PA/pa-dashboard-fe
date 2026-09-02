@@ -307,7 +307,7 @@ export function useSatkerLogic() {
       );
       payload.append("tahun", formDataToEdit.tahun);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formDataToEdit.jml_hal);
+      payload.append("jml_hal", formDataToEdit.jml_hal ?? 0);
       payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =

@@ -3,6 +3,7 @@ const ROLES = {
   ADMIN: "admin",
   USER: "user",
   PIC: "pic",
+  BEND: "bend",
   GUEST: "guest",
 };
 
@@ -39,6 +40,16 @@ const ROLE_ROUTES = {
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/kalender",
+  ],
+
+  [ROLES.BEND]: [
+    "/dashboard/pelaksanaan-anggaran",
+    "/pelaksanaan-anggaran",
+    "/satuan-kerja",
+    "/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
     "/kalender",
@@ -104,12 +115,12 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   }
 
   if (normalizedPath.startsWith("/monitoring")) {
-    return userRole === ROLES.USER || userRole === ROLES.PIC;
+    return userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND;
   }
 
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+  if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND) {
     if (
       normalizedPath === "/satuan-kerja" || 
       normalizedPath.startsWith("/pengajuan") || 
@@ -124,7 +135,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   }
 
   if (hasRouteAccess(normalizedPath, allowedRoutes)) {
-    if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+    if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND) {
       return hasMenuAccess(normalizedPath, userData, menus);
     }
     return true;
@@ -142,6 +153,7 @@ export const getDefaultRedirectPath = (userRole) => {
       return "/dashboard-utama";
     case ROLES.USER:
     case ROLES.PIC:
+    case ROLES.BEND:
       return "/monitoring";
     default:
       return "/";

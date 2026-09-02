@@ -15,7 +15,7 @@ function Sidebar() {
   const getFilteredMenuItems = () => {
     if (role === "super_admin") return menuItems;
 
-    if (role === "user" || role === "pic") {
+    if (role === "user" || role === "pic" || role === "bend") {
       const allowedMenus = [
         "E-SPP",
         "E-Arsip",

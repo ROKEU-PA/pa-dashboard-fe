@@ -9,6 +9,7 @@ import {
   User as UserIcon,
   Power,
   ChevronDown,
+  UserSearch,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { AppContext } from "@/contexts/AppContext";
@@ -46,6 +47,9 @@ const User = ({
     if (lowerRole === "pic") {
       return <UserCheck size={20} className="text-blue-600" />;
     }
+    if (lowerRole === "bend") {
+      return <UserSearch size={20} className="text-blue-600" />;
+    }
     return <UserIcon size={20} className="text-slate-600" />;
   };
 
@@ -62,6 +66,9 @@ const User = ({
     if (lowerRole === "pic") {
       return "bg-blue-100";
     }
+    if (lowerRole === "bend") {
+      return "bg-yellow-100";
+    }
     return "bg-slate-100";
   };
 
@@ -77,6 +84,9 @@ const User = ({
     }
     if (lowerRole === "pic") {
       return "Person in Charge (PIC)";
+    }
+    if (lowerRole === "bend") {
+      return "Bendahara Pengeluaran Setjen";
     }
     if (lowerRole === "user") {
       return "User Satker";

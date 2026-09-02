@@ -275,7 +275,7 @@ function Arsip() {
                 Ubah Filter
               </Button>
 
-              {userData.role !== "user" && (
+              {userData.role === "pic" && (
                 <Button
                   variant="custom"
                   onClick={() => {

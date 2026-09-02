@@ -268,7 +268,6 @@ export default function CalendarPage() {
         {/* BAGIAN KANAN: PANEL CATATAN & FORM                     */}
         {/* ==================================================== */}
         <div className="w-full xl:w-1/3 flex flex-col gap-5">
-          {/* FORM TAMBAH CATATAN (HANYA MUNCUL JIKA ADMIN/PIC) */}
           {isAdminOrPic && (
             <div
               className={`p-5 rounded-2xl border transition-all duration-300 ${selectedDate ? "bg-blue-50 border-blue-200 shadow-md shadow-blue-100/50" : "bg-white border-slate-200 shadow-sm"}`}
