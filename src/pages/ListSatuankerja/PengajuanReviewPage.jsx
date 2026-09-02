@@ -143,7 +143,7 @@ function PengajuanReviewPage() {
       return;
     }
 
-    if (formData.status === "approved" && !isPdfRead) {
+    if (formData.status === "approved" && fileExtension === "pdf" && !isPdfRead) {
       toast.error("Anda wajib mengecek dokumen PDF sampai halaman terakhir sebelum menyetujui!");
       return;
     }

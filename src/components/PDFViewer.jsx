@@ -69,7 +69,7 @@ const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
         overflow: "auto",
       }}
     >
-      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+      <Worker workerUrl="/pdf.worker.min.js">
         <Viewer 
           fileUrl={pdfData} 
           plugins={frameless ? [] : [defaultLayoutPluginInstance]} 
