@@ -184,6 +184,7 @@ export function useSatkerLogic() {
         formDataToSubmit.link || "",
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
+      const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
 
       const payload = new FormData();
       payload.append("kode_biro", currentMenu?.code);
@@ -192,7 +193,7 @@ export function useSatkerLogic() {
       payload.append("tahun", formDataToSubmit.tahun);
       payload.append("dokumen", formDataToSubmit.dokumen[0]);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formDataToSubmit.jml_hal ?? 0);
+      payload.append("jml_hal", finalJmlHal);
       payload.append(
         "feedback",
         formDataToSubmit.catatan ?? formDataToSubmit.feedback,
@@ -283,6 +284,7 @@ export function useSatkerLogic() {
         formDataToEdit.link || "",
         "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
       ).toString();
+      const finalJmlHal = Number(formDataToEdit.jml_hal) || 0;
 
       payload.append(
         "kode_biro",
@@ -307,7 +309,7 @@ export function useSatkerLogic() {
       );
       payload.append("tahun", formDataToEdit.tahun);
       payload.append("link", encryptedLink);
-      payload.append("jml_hal", formDataToEdit.jml_hal ?? 0);
+      payload.append("jml_hal", finalJmlHal);
       payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =
