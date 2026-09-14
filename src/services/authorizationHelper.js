@@ -4,6 +4,8 @@ const ROLES = {
   USER: "user",
   PIC: "pic",
   BEND: "bend",
+  KABIRO: "kabiro",
+  TIM: "tim",
   GUEST: "guest",
 };
 
@@ -29,6 +31,7 @@ const ROLE_ROUTES = {
   [ROLES.USER]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
     "/satuan-kerja",
     "/pengajuan",
     "/e-arsip",                  
@@ -39,6 +42,7 @@ const ROLE_ROUTES = {
   [ROLES.PIC]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
     "/satuan-kerja",
     "/e-arsip",                  
     "/arsip",                    
@@ -48,6 +52,7 @@ const ROLE_ROUTES = {
   [ROLES.BEND]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
     "/satuan-kerja",
     "/pengajuan",
     "/e-arsip",                  
@@ -120,7 +125,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
 
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-  if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND) {
+  if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
     if (
       normalizedPath === "/satuan-kerja" || 
       normalizedPath.startsWith("/pengajuan") || 
@@ -128,14 +133,25 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
       normalizedPath.startsWith("/e-arsip/") ||
       normalizedPath.startsWith("/arsip/") ||
       normalizedPath.startsWith("/report/") ||
-      normalizedPath === "/kalender"
+      normalizedPath === "/kalender" ||
+      normalizedPath === "/proyeksi-rpd"
+    ) {
+      return true;
+    }
+  }
+
+  if (userRole === ROLES.TIM) {
+    if (
+      normalizedPath.startsWith("/report/") ||
+      normalizedPath === "/kalender" ||
+      normalizedPath === "/proyeksi-rpd"
     ) {
       return true;
     }
   }
 
   if (hasRouteAccess(normalizedPath, allowedRoutes)) {
-    if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND) {
+    if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
       return hasMenuAccess(normalizedPath, userData, menus);
     }
     return true;
@@ -154,7 +170,10 @@ export const getDefaultRedirectPath = (userRole) => {
     case ROLES.USER:
     case ROLES.PIC:
     case ROLES.BEND:
+    case ROLES.KABIRO:
       return "/monitoring";
+    case ROLES.TIM:
+      return "/proyeksi-rpd"
     default:
       return "/";
   }

@@ -806,7 +806,6 @@ export function useSatkerLogic() {
           reject(new Error("Network error"));
         };
 
-        // 🔥 GANTI URL INI SESUAI ENDPOINT MERGE PDF LU
         xhr.open(
           "POST",
           `${process.env.REACT_APP_API_BASE_URL}/archive/pdf/merge`,
@@ -883,7 +882,6 @@ export function useSatkerLogic() {
 
   const kategoriOptions = getKategoriOptions(selectedTypeName, categories);
 
-  console.log(selectedTypeName.includes('tukin'))
   const statusPegawai = [
     "gaji",
     "tukin",

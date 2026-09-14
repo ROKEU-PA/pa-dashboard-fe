@@ -1,5 +1,4 @@
 import {
-  Building,
   Layers,
   UserRoundCog,
   AlignEndHorizontal,
@@ -28,7 +27,7 @@ import {
   MonitorDot,
   Award,
   CirclePercent,
-  Files,
+  ChartCandlestick,
 } from "lucide-react";
 
 export const menuItems = [
@@ -110,16 +109,15 @@ export const menuItems = [
     icon: <Archive strokeWidth={1.5} />,
   },
   {
-    name: "SP2D",
-    path: "/report/sp2d",
-    icon: <Files strokeWidth={1.5} />,
+    name: "Proyeksi RPD",
+    path: "/proyeksi-rpd",
+    icon: <ChartCandlestick strokeWidth={1.5} />,
   },
   {
     name: "IKPA",
     path: "/report/ikpa",
     icon: <Award strokeWidth={1.5} />,
   },
-  
   {
     name: "Realisasi",
     path: "/report/realisasi",
@@ -187,13 +185,18 @@ export const menuItems = [
     icon: <ArchiveRestore  strokeWidth={3} />,
   },
   {
-    name: "Management",
-    icon: <Settings strokeWidth={3} />,
+    name: "Manajemen",
+    icon: <Settings strokeWidth={1.5} />,
     children: [
       {
-        name: "User Manage",
-        path: "/user-management",
-        icon: <UserRoundCog strokeWidth={3} />,
+        name: "Akun Pengguna",
+        path: "/management/account",
+        icon: <UserRoundCog strokeWidth={1.5} />,
+      },
+      {
+        name: "Pagu Tim",
+        path: "/management/teams/pagu",
+        icon: <DollarSign strokeWidth={1.5} />,
       },
       {
         name: "Dashboard Manage",

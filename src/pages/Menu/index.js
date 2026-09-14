@@ -14,7 +14,8 @@ import {
   Megaphone, 
   GraduationCap,
   ArrowRight,
-  Lock
+  Lock,
+  University
 } from "lucide-react";
 
 function MenuPage() {
@@ -49,6 +50,7 @@ function MenuPage() {
       case "2162": return <Handshake {...iconProps} />;
       case "2163": return <Megaphone {...iconProps} />;
       case "450990": return <GraduationCap {...iconProps} />;
+      case "352632": return <University {...iconProps} />;
       default: return <Building2 {...iconProps} />;
     }
   };

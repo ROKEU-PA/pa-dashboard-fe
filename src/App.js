@@ -8,7 +8,7 @@ import { ToastContainer } from "react-toastify";
 import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import "react-datepicker/dist/react-datepicker.css";
-import UserManagementPage from "./pages/UserManagement";
+import UserManagementPage from "./pages/Management/UserManagement";
 import MenuPage from "./pages/Menu";
 import { AppContext } from "./contexts/AppContext";
 import PrivateRoute from "./components/PrivateRoute";
@@ -42,6 +42,9 @@ import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
 import ShowForAll from "./pages/ShowForAll";
 import NotFoundPage from "./pages/NotFound";
 import IkpaV2Page from "./pages/IkpaV2";
+import RPDPage from "./pages/RPD";
+import RealizationPage from "./pages/Realization";
+import TeamsPaguManagementPage from "./pages/Management/TeamsPaguManagement";
 // import "@/PDFWorkerSetup";
 
 const GlobalLoading = () => (
@@ -259,11 +262,32 @@ function App() {
         />
 
         <Route
-          path="/user-management"
+          path="/proyeksi-rpd"
           element={
             <PrivateRoute>
-              <AppLayout isAdmin={isAdmin}>
+              <AppLayout isAdmin={isAdmin} title="Proyeksi RPD" userName={userData?.name}>
+                <RPDPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/management/account"
+          element={
+            <PrivateRoute>
+              <AppLayout title="Manajemen E-SPP" isAdmin={isAdmin}>
                 <UserManagementPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/management/teams/pagu"
+          element={
+            <PrivateRoute>
+              <AppLayout title="Manajemen E-SPP" isAdmin={isAdmin}>
+                <TeamsPaguManagementPage />
               </AppLayout>
             </PrivateRoute>
           }
@@ -378,7 +402,7 @@ function App() {
           element={
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Realisasi Pelaksanaan Anggaran" userName={userData?.name}>
-                <ShowForAll />
+                <RealizationPage />
               </AppLayout>
             </PrivateRoute>
           }

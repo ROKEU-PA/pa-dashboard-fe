@@ -198,6 +198,27 @@ export function formatCurrency(amount) {
   );
 }
 
+export function formatM(amount) {
+  const milyar = amount / 1_000_000_000;
+  
+  return (
+    "Rp. " +
+    new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(milyar) +
+    " M"
+  );
+}
+
+export function capitalizeWords(str) {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export function formatNumber(amount) {
   return new Intl.NumberFormat("id-ID", {
     minimumFractionDigits: 0,

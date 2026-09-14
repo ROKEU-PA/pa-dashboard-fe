@@ -16,6 +16,7 @@ function Input({
   className = "", // Ditambahin biar gampang nge-custom dari luar
   validate = () => "",
   required = false,
+  ...rest
 }) {
   const [isFocused, setFocused] = useState(false);
   const [localError, setLocalError] = useState("");
@@ -53,7 +54,6 @@ function Input({
 
   return (
     <div className={`relative flex flex-col w-full mt-1 ${className}`}>
-      
       {/* ================= FLOATING LABEL ================= */}
       {label && (
         <label
@@ -65,8 +65,8 @@ function Input({
             isError
               ? "text-red-500 dark:text-red-400"
               : isFocused
-              ? "text-blue-500 dark:text-blue-400"
-              : "text-slate-500 dark:text-slate-400 dark:text-white"
+                ? "text-blue-500 dark:text-blue-400"
+                : "text-slate-500 dark:text-slate-400 dark:text-white"
           }`}
         >
           {label} {required && <span className="text-red-500">*</span>}
@@ -76,6 +76,7 @@ function Input({
       {/* ================= INPUT FIELD ================= */}
       <div className="relative w-full">
         <input
+          {...rest}
           type={inputType}
           name={name}
           value={value}
@@ -91,8 +92,8 @@ function Input({
             disabled
               ? "bg-slate-50 dark:bg-white/5 cursor-not-allowed opacity-60 border border-slate-200 dark:border-white/10"
               : isError
-              ? "border border-red-500 focus:ring-2 focus:ring-red-500/20"
-              : "border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                ? "border border-red-500 focus:ring-2 focus:ring-red-500/20"
+                : "border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
           }`}
         />
 
