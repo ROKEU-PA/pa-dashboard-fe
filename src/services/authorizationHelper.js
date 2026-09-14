@@ -31,12 +31,13 @@ const ROLE_ROUTES = {
   [ROLES.USER]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
-    "/proyeksi-rpd",
     "/satuan-kerja",
     "/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
     "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
   ],
 
   [ROLES.PIC]: [
@@ -47,6 +48,8 @@ const ROLE_ROUTES = {
     "/e-arsip",                  
     "/arsip",                    
     "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
   ],
 
   [ROLES.BEND]: [
@@ -57,6 +60,28 @@ const ROLE_ROUTES = {
     "/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
+  ],
+
+  [ROLES.KABIRO]: [
+    "/dashboard/pelaksanaan-anggaran",
+    "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
+    "/satuan-kerja",
+    "/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
+  ],
+
+  [ROLES.TIM]: [
+    "/proyeksi-rpd",
+    "/report/ikpa",
+    "/report/realisasi",                 
     "/kalender",
   ],
 };
@@ -120,12 +145,26 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   }
 
   if (normalizedPath.startsWith("/monitoring")) {
-    return userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND;
+    return userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO;
   }
 
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-  if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
+  if (userRole === ROLES.USER) {
+    if (
+      normalizedPath === "/satuan-kerja" || 
+      normalizedPath.startsWith("/pengajuan") || 
+      normalizedPath === "/e-arsip" ||
+      normalizedPath.startsWith("/e-arsip/") ||
+      normalizedPath.startsWith("/arsip/") ||
+      normalizedPath.startsWith("/report/") ||
+      normalizedPath === "/kalender"
+    ) {
+      return true;
+    }
+  }
+
+   if (userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
     if (
       normalizedPath === "/satuan-kerja" || 
       normalizedPath.startsWith("/pengajuan") || 
