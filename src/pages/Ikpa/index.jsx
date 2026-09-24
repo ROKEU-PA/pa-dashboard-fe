@@ -26,7 +26,7 @@ function IkpaPage() {
     searchKey: "",
     eselonKey: "all",
     year: moment().year(),
-    month: moment().format("MMMM"),
+    month: "",
   });
 
   const [formData, setFormData] = useState({
@@ -96,7 +96,7 @@ function IkpaPage() {
       refetch();
     } catch (err) {
       console.error(err);
-      toast.error("Gagal menyimpan data. Silakan coba lagi.");
+      toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
     }
   };
 

@@ -30,15 +30,14 @@ export const useLogin = () => {
         const payload = {
           kode_biro: Number(formData.satker),
           password: encryptedPassword,
+          captcha: formData.captcha || "",
         };
-
+        
         const response = await fetchHelper(
-          `${process.env.REACT_APP_API_BASE_URL}/auth/login`,
+          `${process.env.REACT_APP_API_BASE_URL}/auth/loginV2`,
           "POST",
           payload,
-          {
-            credentials: "include", // IMPORTANT (refresh token cookie)
-          }
+          { credentials: "include" }                            
         );
 
         if (!response?.success) {
@@ -46,30 +45,31 @@ export const useLogin = () => {
         }
 
         const accessToken = response?.data?.access_token;
-        const user = response?.data?.user || null;
-
+        
         setAuth({
           accessToken,
-          user,
+          user: null, 
         });
 
-        await LoadUser();
+        await LoadUser(); 
 
         toast.success("Login berhasil!");
         navigate(ROUTES.DASHBOARD);
 
         return { success: true };
       } catch (error) {
-        console.error("Login error:", error);
+        let errorMsg = error.message || TEXT.ERROR_GENERIC;
+        
+        let statusCode = error.status || 500; 
 
-        const errorMsg = error.message?.includes("Unauthorized")
-          ? TEXT.ERROR_UNAUTHORIZED
-          : error.message || TEXT.ERROR_GENERIC;
+        if (errorMsg.includes("Unauthorized") || errorMsg.includes("salah")) {
+          errorMsg = "Biro Code atau Password salah.";
+        }
 
         setErrorMessage(errorMsg);
         toast.error(errorMsg);
 
-        return { success: false, error: errorMsg };
+        return { success: false, status: statusCode, error: errorMsg };
       } finally {
         setIsLoading(false);
       }

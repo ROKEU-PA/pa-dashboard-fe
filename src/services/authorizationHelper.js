@@ -3,6 +3,9 @@ const ROLES = {
   ADMIN: "admin",
   USER: "user",
   PIC: "pic",
+  BEND: "bend",
+  KABIRO: "kabiro",
+  TIM: "tim",
   GUEST: "guest",
 };
 
@@ -14,7 +17,6 @@ const ROLE_ROUTES = {
   
   [ROLES.GUEST]: [
     "/dashboard-utama",
-    "/dashboard-utama",
     "/pelaksanaan-anggaran",
     "/dashboard",
     "/ptuk",
@@ -22,7 +24,7 @@ const ROLE_ROUTES = {
     "/realisasi",
     "/tata-usaha",
     "/barang-milik-negara",
-    "/llat",
+    "/kalender",
     "/akuntansi-pelaporan"
   ],
 
@@ -30,20 +32,57 @@ const ROLE_ROUTES = {
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
     "/satuan-kerja",
-    "/satuan-kerja/pengajuan",
+    "/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
-    "/llat",
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
   ],
 
   [ROLES.PIC]: [
     "/dashboard/pelaksanaan-anggaran",
     "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
     "/satuan-kerja",
-    "/satuan-kerja/pengajuan",
     "/e-arsip",                  
     "/arsip",                    
-    "/llat",
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
+  ],
+
+  [ROLES.BEND]: [
+    "/dashboard/pelaksanaan-anggaran",
+    "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
+    "/satuan-kerja",
+    "/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
+  ],
+
+  [ROLES.KABIRO]: [
+    "/dashboard/pelaksanaan-anggaran",
+    "/pelaksanaan-anggaran",
+    "/proyeksi-rpd",
+    "/satuan-kerja",
+    "/pengajuan",
+    "/e-arsip",                  
+    "/arsip",                    
+    "/kalender",
+    "/report/ikpa",
+    "/report/realisasi",  
+  ],
+
+  [ROLES.TIM]: [
+    "/proyeksi-rpd",
+    "/report/ikpa",
+    "/report/realisasi",                 
+    "/kalender",
   ],
 };
 
@@ -66,23 +105,9 @@ const matchesRoute = (pathname, route) => {
   return false;
 };
 
-const getCleanedPathForMenuMatch = (pathname) => {
-  if (pathname.startsWith("/satuan-kerja/pengajuan/")) {
-    const parts = pathname.split("/").filter(Boolean);
-    return `/satuan-kerja/${parts[parts.length - 1]}`;
-  }
-  if (pathname.startsWith("/arsip/")) {
-    const parts = pathname.split("/").filter(Boolean);
-    if (parts.length >= 3) {
-      return `/satuan-kerja/${parts[2]}`; 
-    }
-  }
-  return pathname;
-};
 
 const hasMenuAccess = (pathname, userData, menus) => {
-  const cleanedPath = getCleanedPathForMenuMatch(pathname);
-  const matchedMenu = menus.find((menu) => menu.path === cleanedPath);
+  const matchedMenu = menus.find((menu) => menu.path === pathname);
 
   if (!matchedMenu) return false;
 
@@ -107,12 +132,6 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
   const userRole = userData.role;
   const normalizedPath = normalizePath(pathname);
 
-  console.log("Authorization check:", {
-    pathname: normalizedPath,
-    role: userRole,
-    accessCodes: userData.access_code,
-  });
-
   if (PUBLIC_ROUTES.includes(normalizedPath)) {
     return true;
   }
@@ -125,26 +144,53 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     return userRole === ROLES.SUPER_ADMIN || userRole === ROLES.ADMIN;
   }
 
-  if (normalizedPath.startsWith("/tanda-terima")) {
-    return userRole === ROLES.USER || userRole === ROLES.PIC;
+  if (normalizedPath.startsWith("/monitoring")) {
+    return userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO;
   }
 
   const allowedRoutes = ROLE_ROUTES[userRole];
   if (allowedRoutes === "*") return true;
-  if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+  if (userRole === ROLES.USER) {
     if (
-      normalizedPath === "/satuan-kerja/pengajuan" || 
+      normalizedPath === "/satuan-kerja" || 
+      normalizedPath.startsWith("/pengajuan") || 
       normalizedPath === "/e-arsip" ||
-      normalizedPath.startsWith("/e-arsip/")||
-      normalizedPath === "/llat" ||             
-      normalizedPath.startsWith("/llat/")
+      normalizedPath.startsWith("/e-arsip/") ||
+      normalizedPath.startsWith("/arsip/") ||
+      normalizedPath.startsWith("/report/") ||
+      normalizedPath === "/kalender"
+    ) {
+      return true;
+    }
+  }
+
+   if (userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
+    if (
+      normalizedPath === "/satuan-kerja" || 
+      normalizedPath.startsWith("/pengajuan") || 
+      normalizedPath === "/e-arsip" ||
+      normalizedPath.startsWith("/e-arsip/") ||
+      normalizedPath.startsWith("/arsip/") ||
+      normalizedPath.startsWith("/report/") ||
+      normalizedPath === "/kalender" ||
+      normalizedPath === "/proyeksi-rpd"
+    ) {
+      return true;
+    }
+  }
+
+  if (userRole === ROLES.TIM) {
+    if (
+      normalizedPath.startsWith("/report/") ||
+      normalizedPath === "/kalender" ||
+      normalizedPath === "/proyeksi-rpd"
     ) {
       return true;
     }
   }
 
   if (hasRouteAccess(normalizedPath, allowedRoutes)) {
-    if (userRole === ROLES.USER || userRole === ROLES.PIC) {
+    if (userRole === ROLES.USER || userRole === ROLES.PIC || userRole === ROLES.BEND || userRole === ROLES.KABIRO) {
       return hasMenuAccess(normalizedPath, userData, menus);
     }
     return true;
@@ -162,7 +208,11 @@ export const getDefaultRedirectPath = (userRole) => {
       return "/dashboard-utama";
     case ROLES.USER:
     case ROLES.PIC:
-      return "/satuan-kerja/pengajuan";
+    case ROLES.BEND:
+    case ROLES.KABIRO:
+      return "/monitoring";
+    case ROLES.TIM:
+      return "/proyeksi-rpd"
     default:
       return "/";
   }
@@ -171,11 +221,11 @@ export const getDefaultRedirectPath = (userRole) => {
 export const getRedirectPathOnDenied = (pathname, userRole) => {
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     const parts = pathname.split("/").filter(Boolean);
-    if ((parts[0] === "satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
+    if ((parts[0] === "/satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
       return "/" + parts.slice(0, -1).join("/");
     }
 
-    return "/satuan-kerja/pengajuan";
+    return "/monitoring";
   }
 
   return getDefaultRedirectPath(userRole);

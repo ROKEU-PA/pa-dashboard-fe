@@ -1,5 +1,4 @@
 import {
-  Building,
   Layers,
   UserRoundCog,
   AlignEndHorizontal,
@@ -15,8 +14,6 @@ import {
   MessageSquare,
   Network,
   Archive,
-  Axis3D,
-  Table,
   CircleDollarSign,
   Calendar,
   FileText,
@@ -27,6 +24,10 @@ import {
   BadgeCent,
   ArrowLeftRight,
   ArchiveRestore,
+  MonitorDot,
+  Award,
+  CirclePercent,
+  ChartCandlestick,
 } from "lucide-react";
 
 export const menuItems = [
@@ -84,28 +85,48 @@ export const menuItems = [
         icon: <TrendingUpDown strokeWidth={3} />,
         adminOnly: true,
       },
+      {
+        name: "Kalender",
+        path: "/kalender",
+        icon: <Calendar strokeWidth={3} />,
+      },
     ],
     icon: <HandCoins strokeWidth={3} />,
   },
   {
-    name: "E-SPP",
-    path: "/satuan-kerja/pengajuan",
-    icon: <FolderCheck strokeWidth={3} />,
+    name: "Monitoring",
+    path: "/monitoring",
+    icon: <MonitorDot strokeWidth={1.5} />,
   },
   {
-    name: "Tanda Terima SPP",
-    path: "/tanda-terima",
-    icon: <Table strokeWidth={3} />,
+    name: "E-SPP",
+    path: "/satuan-kerja",
+    icon: <FolderCheck strokeWidth={1.5} />,
   },
   {
     name: "E-Arsip",
     path: "/e-arsip",
-    icon: <Archive strokeWidth={3} />,
+    icon: <Archive strokeWidth={1.5} />,
   },
   {
-    name: "LLAT",
-    path: "/llat",
-    icon: <Calendar strokeWidth={3} />,
+    name: "Proyeksi RPD",
+    path: "/proyeksi-rpd",
+    icon: <ChartCandlestick strokeWidth={1.5} />,
+  },
+  {
+    name: "IKPA",
+    path: "/report/ikpa",
+    icon: <Award strokeWidth={1.5} />,
+  },
+  {
+    name: "Realisasi",
+    path: "/report/realisasi",
+    icon: <CirclePercent strokeWidth={1.5} />,
+  },
+  {
+    name: "Kalender",
+    path: "/kalender",
+    icon: <Calendar strokeWidth={1.5} />,
   },    
   {
     name: "Barang Milik Negara",
@@ -164,13 +185,18 @@ export const menuItems = [
     icon: <ArchiveRestore  strokeWidth={3} />,
   },
   {
-    name: "Management",
-    icon: <Settings strokeWidth={3} />,
+    name: "Manajemen",
+    icon: <Settings strokeWidth={1.5} />,
     children: [
       {
-        name: "User Manage",
-        path: "/user-management",
-        icon: <UserRoundCog strokeWidth={3} />,
+        name: "Akun Pengguna",
+        path: "/management/account",
+        icon: <UserRoundCog strokeWidth={1.5} />,
+      },
+      {
+        name: "Pagu Tim",
+        path: "/management/teams/pagu",
+        icon: <DollarSign strokeWidth={1.5} />,
       },
       {
         name: "Dashboard Manage",

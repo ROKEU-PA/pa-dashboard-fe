@@ -1,109 +1,84 @@
-// Usage examples:
-// 1. Public file: <PDFViewer pdfSource="/sample.pdf" />
-// 2. External URL: <PDFViewer pdfSource="https://example.com/doc.pdf" />
-// 3. Blob: <PDFViewer pdfSource={pdfBlob} />
-
 import React, { useState, useEffect } from "react";
 import { Viewer, Worker } from "@react-pdf-viewer/core";
 import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
 
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import "@react-pdf-viewer/default-layout/lib/styles/index.css";
-import { fetchPDFAsBlob } from "@/pages/ListSatuankerja/satkerHooks";
-import { toast } from "react-toastify";
 
-// const CustomPDFViewer = ({ pdfSource }) => {
-//   const [processedUrl, setProcessedUrl] = useState("");
-//   const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
-//   useEffect(() => {
-//     const processUrl = (url) => {
-//       // Handle Google Drive URLs
-//       if (url.includes("drive.google.com")) {
-//         const fileId = url.match(/filed([^]+)/)?.[1];
-//         if (fileId) {
-//           return `https://drive.google.com/uc?export=download&id=${fileId}`;
-//         }
-//       }
-//       return url;
-//     };
-
-//     if (typeof pdfSource === "string") {
-//       setProcessedUrl(processUrl(pdfSource));
-//     } else if (pdfSource instanceof Blob) {
-//       const url = URL.createObjectURL(pdfSource);
-//       setProcessedUrl(url);
-//       return () => URL.revokeObjectURL(url);
-//     }
-//   }, [pdfSource]);
-
-//   useEffect(() => {
-//     const loadPDF = async () => {
-//       try {
-//         const blob = await fetchPDFAsBlob(pdfSource);
-//         const url = URL.createObjectURL(blob);
-//       } catch (err) {
-//         toast.error("Gagal memuat dokumen PDF");
-//       }
-//     };
-
-//     if (typeof pdfSource === "string" && pdfSource.includes("rokeubmn-pa.id")) {
-//       loadPDF();
-//     }
-//   }, [pdfSource]);
-
-//   if (!processedUrl) return <div>Loading PDF...</div>;
-
-//   return (
-//     <div style={{ width: "90%",
-//         maxWidth: "1200px",
-//         height: "80vh",
-//         margin: "0 auto", }}>
-//       <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-//         <Viewer
-//           fileUrl={processedUrl}
-//           plugins={[defaultLayoutPluginInstance]}
-//         />
-//       </Worker>
-//     </div>
-//   );
-// };
-
-// export default CustomPDFViewer;
-
-const CustomPDFViewer = ({ pdfSource }) => {
-  const [url, setUrl] = useState(null);
+const CustomPDFViewer = ({ pdfSource, frameless = false, onReachBottom }) => {
+  // 1. Ubah state dari url menjadi pdfData
+  const [pdfData, setPdfData] = useState(null);
+  const [isFetching, setIsFetching] = useState(false);
+  
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   useEffect(() => {
     if (!pdfSource) return;
 
-    // Jika string (URL)
-    if (typeof pdfSource === "string") {
-      setUrl(pdfSource);
-    }
+    let isMounted = true;
 
-    // Jika blob
-    else if (pdfSource instanceof Blob) {
-      const objectUrl = URL.createObjectURL(pdfSource);
-      setUrl(objectUrl);
+    const loadPdfAsArrayBuffer = async () => {
+      try {
+        if (typeof pdfSource === "string") {
+          setIsFetching(true);
+          const response = await fetch(pdfSource);
+          if (!response.ok) throw new Error("Gagal mengambil PDF");
+          
+          // 🔥 KUNCI UTAMA: Jadikan ArrayBuffer, bukan Blob!
+          const arrayBuffer = await response.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          
+          if (isMounted) setPdfData(uint8Array);
+          
+        } else if (pdfSource instanceof Blob) {
+          // Jika pdfSource sudah berupa file blob dari upload lokal
+          const arrayBuffer = await pdfSource.arrayBuffer();
+          if (isMounted) setPdfData(new Uint8Array(arrayBuffer));
+        }
+      } catch (error) {
+        console.error("Error loading PDF Data:", error);
+        // Fallback jika fetch gagal (misal kena CORS ketat)
+        if (isMounted) setPdfData(pdfSource);
+      } finally {
+        if (isMounted) setIsFetching(false);
+      }
+    };
 
-      return () => URL.revokeObjectURL(objectUrl);
-    }
+    loadPdfAsArrayBuffer();
+
+    // Cleanup memori React native
+    return () => {
+      isMounted = false;
+    };
   }, [pdfSource]);
 
-  if (!url) return <div>Loading…</div>;
+  if (isFetching || !pdfData) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full min-h-[300px] gap-3">
+        <span className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></span>
+        <span className="text-sm font-bold text-slate-500 animate-pulse">Menyiapkan Dokumen...</span>
+      </div>
+    );
+  }
 
   return (
     <div
       style={{
         width: "100%",
-        height: "100vh",
-        overflow: "hidden",
+        height: frameless ? "100%" : "100vh", 
+        overflow: "auto",
       }}
     >
-      <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
-        <Viewer fileUrl={url} plugins={[defaultLayoutPluginInstance]} />
+      <Worker workerUrl="/pdf.worker.min.js">
+        <Viewer 
+          fileUrl={pdfData} 
+          plugins={frameless ? [] : [defaultLayoutPluginInstance]} 
+          onPageChange={(e) => {
+            if (e.currentPage === e.doc.numPages - 1 && onReachBottom) {
+              onReachBottom();
+            }
+          }}
+        />
       </Worker>
     </div>
   );

@@ -43,7 +43,7 @@ function Administrator() {
   const activeToken = getSafeToken(); 
   
   if (!activeToken) return;
-  console.log("Fetching data untuk Tahun Gaji:", yearGaji, "Tahun Hadir:", yearHadir);
+  // console.log("Fetching data untuk Tahun Gaji:", yearGaji, "Tahun Hadir:", yearHadir);
   setLoading(true);
   
   try {

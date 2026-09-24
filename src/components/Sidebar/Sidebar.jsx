@@ -7,44 +7,92 @@ import { menuItems } from "./constants";
 
 function Sidebar() {
   const { userData } = useContext(AppContext);
-  const { logout } = useAuth();
   const navigate = useNavigate();
   const [openDropdown, setOpenDropdown] = useState(null);
   const role = userData?.role;
   const location = useLocation();
 
-  const handleLogout = () => logout();
-
   const getFilteredMenuItems = () => {
     if (role === "super_admin") return menuItems;
 
-    if (role === "user" || role === "pic") {
-      const allowedMenus = ["E-SPP", "E-Arsip", "Tanda Terima SPP", "LLAT"];
-      return menuItems.filter(item => allowedMenus.includes(item.name));
-    }   
+    if (role === "user") {
+      const allowedMenus = [
+        "E-SPP",
+        "E-Arsip",
+        "Monitoring",
+        "IKPA",
+        "SP2D",
+        "Realisasi",
+        "Kalender",
+      ];
+      return menuItems.filter((item) => allowedMenus.includes(item.name));
+    }
+
+    if (role === "pic" || role === "bend" || role === "kabiro") {
+      const allowedMenus = [
+        "E-SPP",
+        "E-Arsip",
+        "Monitoring",
+        "IKPA",
+        "SP2D",
+        "Realisasi",
+        "Kalender",
+        "Proyeksi RPD",
+      ];
+      return menuItems.filter((item) => allowedMenus.includes(item.name));
+    }
 
     if (role === "admin") {
-      return menuItems
-        .filter(
-          (item) =>
-            item.name === "Pelaksanaan Anggaran" || item.name === "Management" && item.name !== "Inventaris Kantor",
-        )
-        .map((item) => ({
-          ...item,
-          children: item.children?.filter((child) =>
-            [
-              "Pengajuan SPP",
-              "Arsip SPM",
-              "Tanda Terima SPP",
-              "User Manage",
-              "LLAT",
-            ].includes(child.name),
-          ),
-        }));
+      const allowedMenus = [
+        "IKPA",
+        "Realisasi",
+        "Proyeksi RPD",
+        "Kalender",
+        "SP2D",
+        "Manajemen",
+      ];
+
+      return (
+        menuItems
+          .filter((item) => allowedMenus.includes(item.name))
+          .map((item) => {
+            if (item.name === "Manajemen") {
+              return {
+                ...item,
+                children: item.children?.filter(
+                  (child) => child.name === "Akun Pengguna" || child.name === "Pagu Tim",
+                ),
+              };
+            }
+
+            return item;
+          })
+      );
+    }
+
+    if (role === "tim") {
+      const allowedMenus = [
+        "IKPA",
+        "Realisasi",
+        "Proyeksi RPD",
+        "Kalender",
+      ];
+
+      return menuItems.filter((item) => allowedMenus.includes(item.name));
     }
 
     if (role === "guest") {
-      const excludedMenus = ["Management", "Inventaris Kantor", "Pengambilan Persediaan","E-SPP", "E-Arsip", "Tanda Terima SPP"];
+      const excludedMenus = [
+        "Management",
+        "Inventaris Kantor",
+        "Pengambilan Persediaan",
+        "E-SPP",
+        "E-Arsip",
+        "Monitoring",
+        "IKPA",
+        "Realisasi",
+        "Kalender",
+      ];
       return menuItems
         .filter((item) => !excludedMenus.includes(item.name))
         .map((item) => {
@@ -52,7 +100,7 @@ function Sidebar() {
             return {
               ...item,
               children: item.children?.filter((child) =>
-                ["Dashboard", "IKPA", "Realisasi"].includes(
+                ["Dashboard", "IKPA", "Realisasi", "Kalender"].includes(
                   child.name,
                 ),
               ),
@@ -62,22 +110,19 @@ function Sidebar() {
         });
     }
 
-    console.log (role);
     if (!role) {
-    const pathname = location.pathname;
+      const pathname = location.pathname;
       if (pathname.includes("/inventaris-kantor")) {
-        return menuItems.filter(
-          (item) => item.name === "Inventaris Kantor"
-        );
+        return menuItems.filter((item) => item.name === "Inventaris Kantor");
       }
       if (pathname.includes("/tata-usaha")) {
         return menuItems.filter(
-          (item) => item.name === "Pengambilan Persediaan"
+          (item) => item.name === "Pengambilan Persediaan",
         );
       }
       return [];
-        }
-    };
+    }
+  };
 
   const toggleDropdown = (item) => {
     const isOpen = openDropdown === item.name;
@@ -110,98 +155,97 @@ function Sidebar() {
   }, [location.pathname]);
 
   return (
-    <div
-      style={{
-        width: "260px",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        color: "#fff",
-        overflow: "hidden",
-      }}
-      className="bg-gradient-to-b from-[#59C7FF] to-[#2F8AFD]"
-    >
-      <div
-        style={{
-          padding: "1rem",
-          flex: 1,
-          overflowY: "auto",
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          justifyItems: "center",
-        }}
-        className="sidebar-scroll"
-      >
+    <div className="w-[270px] h-screen flex flex-col fixed top-0 left-0 bg-gradient-to-b from-[#082b67] to-[#061d49] text-[#dcecff] z-20 overflow-hidden transition-all duration-250">
+      {/* Scrollable Area */}
+      <div className="p-4 flex-1 overflow-y-auto sidebar-scroll relative z-10 custom-scrollbar">
+        {/* Logo */}
         <img
           src="/rokeu_logo_white.webp"
           alt="logo"
           width="150"
-          className="mt-5 mb-10"
+          className="mt-5 mb-10 ml-7"
         />
-        <nav>
+
+        <nav className="flex flex-col w-full gap-1.5">
           {getFilteredMenuItems().map((item, index) => {
             if (item.children) {
+              const isParentActive =
+                openDropdown === item.name ||
+                item.children.some((child) =>
+                  location.pathname.startsWith(child.path),
+                );
+
               return (
-                <div key={index}>
-                  {/* Parent dropdown */}
+                <div key={index} className="flex flex-col w-full">
+                  {/* Parent Dropdown */}
                   <div
-                    className={`dropdown-parent${
-                      openDropdown === item.name ? " open" : ""
-                    }`}
                     onClick={() => navigate(item?.path)}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "10px",
-                      cursor: "pointer",
-                      marginBottom: "5px",
-                    }}
+                    className={`relative flex justify-between items-center gap-3 px-3.5 py-2.5 h-[43px] rounded-[11px] text-md font-medium mx-auto w-full cursor-pointer transition-all duration-200 group ${
+                      isParentActive
+                        ? "bg-gradient-to-r from-[#1565C0]/80 to-[#42A5F5]/25 text-white"
+                        : "text-[#cfe2f7] bg-transparent hover:bg-[#42A5F5]/15 hover:translate-x-[3px]"
+                    }`}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "8px",
-                      }}
-                    >
+                    {/* Active Indicator (Garis Biru Muda Melayang) */}
+                    {isParentActive && (
+                      <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-[#53c7ff]"></div>
+                    )}
+
+                    <div className="flex items-center gap-3">
                       {item.icon}
-                      <span>{item.name}</span>
+                      <span className="truncate">{item.name}</span>
                     </div>
-                    <div onClick={() => toggleDropdown(item)}>
-                      {openDropdown === item.name ? (
-                        <ChevronUp size={16} />
-                      ) : (
-                        <ChevronDown size={16} />
-                      )}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleDropdown(item);
+                      }}
+                      className={`transition-transform duration-300 ${openDropdown === item.name ? "rotate-180" : ""}`}
+                    >
+                      {/* Cukup pakai ChevronDown, animasinya dihandle oleh rotate-180 */}
+                      <ChevronDown
+                        size={16}
+                        className={
+                          isParentActive ? "text-white" : "text-[#7095bf]"
+                        }
+                      />
                     </div>
                   </div>
 
                   {/* Submenu */}
                   {openDropdown === item.name && (
-                    <div style={{ paddingLeft: "1rem", marginTop: "5px" }}>
+                    <div className="relative w-full flex flex-col mt-1 mb-2 gap-1 animate-[fadeIn_0.3s_ease]">
+                      {/* 🔥 Garis Hierarki (Tree Line) */}
+                      <div className="absolute left-[22px] top-1 bottom-1 w-[1.5px] bg-[#42A5F5]/20 rounded-full"></div>
+
                       {item.children.map((subItem) => (
                         <NavLink
                           to={subItem.path}
                           end
                           key={subItem.path}
                           className={({ isActive }) =>
-                            `sidebar-link${isActive ? " active" : ""}`
+                            `relative flex justify-start items-center gap-3 py-2 pl-[46px] pr-4 h-[40px] text-[14px] rounded-[11px] w-full transition-all duration-200 ${
+                              isActive
+                                ? "text-white bg-[#42A5F5]/15 font-semibold"
+                                : "text-[#a4c5e3] hover:text-white hover:bg-[#42A5F5]/10 hover:translate-x-[3px]"
+                            }`
                           }
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            padding: "6px 6px",
-                            textDecoration: "none",
-                            fontSize: "0.9rem",
-                          }}
                         >
-                          {subItem.icon}
-                          {subItem.name}
+                          {({ isActive }) => (
+                            <>
+                              {/* 🔥 Dot Indicator menimpa garis jika aktif */}
+                              {isActive && (
+                                <div className="absolute left-[19.5px] w-1.5 h-1.5 rounded-full bg-[#53c7ff] shadow-[0_0_8px_rgba(83,199,255,0.6)]"></div>
+                              )}
+
+                              <div
+                                className={`${isActive ? "text-[#53c7ff]" : "text-[#7095bf]"} transition-colors`}
+                              >
+                                {subItem.icon}
+                              </div>
+                              <span className="truncate">{subItem.name}</span>
+                            </>
+                          )}
                         </NavLink>
                       ))}
                     </div>
@@ -209,54 +253,51 @@ function Sidebar() {
                 </div>
               );
             } else {
+              {
+                /* Menu Tanpa Anak (Single Link) */
+              }
               return (
                 <NavLink
                   to={item.path}
                   end
                   key={item.path}
                   className={({ isActive }) =>
-                    `sidebar-link${isActive ? " active" : ""}`
+                    `relative flex justify-start items-center gap-3 px-3.5 py-2.5 h-[43px] rounded-[11px] text-md font-medium mx-auto w-full transition-all duration-200 group ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#1565C0]/80 to-[#42A5F5]/25 text-white"
+                        : "text-[#cfe2f7] bg-transparent hover:bg-[#42A5F5]/15 hover:translate-x-[3px]"
+                    }`
                   }
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "10px",
-                    textDecoration: "none",
-                    borderRadius: "5px",
-                  }}
                 >
-                  {item.icon}
-                  {item.name}
+                  {({ isActive }) => (
+                    <>
+                      {/* Active Indicator */}
+                      {isActive && (
+                        <div className="absolute -left-3.5 top-1/2 -translate-y-1/2 w-1 h-6 rounded-full bg-[#53c7ff]"></div>
+                      )}
+                      {item.icon}
+                      <span className="truncate">{item.name}</span>
+                    </>
+                  )}
                 </NavLink>
               );
             }
           })}
         </nav>
       </div>
-      <div
-        style={{
-          padding: "1rem",
-          marginBottom: "0.7rem",
-          textAlign: "center",
-        }}
-      >
-        <span
-          style={{
-            position: "relative",
-            gap: "8px",
-            zIndex: 10,
-            color: "#fff",
-            fontSize: "12px",
-          }}
-        >
+
+      {/* Footer / Copyright */}
+      <div className="p-4 mb-2 text-center relative z-10">
+        <span className="text-[#8baad1] text-[11px] font-medium tracking-wide">
           © Rokeu BMN 2026, Version 2.0
         </span>
       </div>
+
+      {/* Gambar Dekorasi di Pojok Kanan Bawah */}
       <img
-        src={"/logo-kemnaker-decoration.webp"}
-        alt={"logo-decoration"}
-        className={`absolute z-0 right-[-3rem] rotate-[168.75deg] bottom-[-4.5rem]`}
+        src="/logo-kemnaker-decoration.webp"
+        alt="logo-decoration"
+        className="absolute z-0 right-[-3rem] bottom-[-4.5rem] rotate-[168.75deg] opacity-10 pointer-events-none select-none"
         loading="eager"
         width={200}
       />

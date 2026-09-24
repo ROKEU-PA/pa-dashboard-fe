@@ -108,7 +108,7 @@ export const TableIKPA = ({ dataTable, loading }) => {
                       </TableCell>
                     </TableRow>
                   )}
-                  {group.parent && (
+                  {/* {group.parent && (
                     <TableRow
                       sx={{ backgroundColor: "#ffffff", fontWeight: "bold" }}
                     >
@@ -140,7 +140,7 @@ export const TableIKPA = ({ dataTable, loading }) => {
                         {""}
                       </TableCell>
                     </TableRow>
-                  )}
+                  )} */}
                   {group.children.map((row, idx) => (
                     <TableRow
                       key={idx}

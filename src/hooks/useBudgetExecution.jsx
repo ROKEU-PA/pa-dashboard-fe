@@ -10,12 +10,13 @@ export const useBudgetExecution = () => {
   const [filteredData, setFilteredData] = useState(null);
 
   function getIKPAColor(value) {
-    if (value >= 95) {
+    const num = Number(value)
+    if (num >= 95) {
       return "text-[#22c55e] bg-[#E4FAEC]";
-    } else if (value >= 89) {
+    } else if (num >= 89) {
       return "text-[#3b82f6] bg-[#DEEAFD]";
-    } else if (value >= 70) {
-      return "text-[#DAB802] bg-[#FFF9DD]";
+    } else if (num >= 70) {
+      return "text-[#000000] bg-[#ECFD2E]";
     } else {
       return "text-[#ef4444] bg-[#FCDCDC]";
     }
@@ -28,7 +29,6 @@ export const useBudgetExecution = () => {
           ? `/pa/ikpa/all?${buildQueryString(period)}`
           : `/pa/ikpa/all?year=${moment().subtract(1, "years").year()}&month=1`,
       });
-
       if (!period) {
         let result = data?.data.filter((q) => q.satker_code === null);
         if (data.success) {
@@ -40,7 +40,6 @@ export const useBudgetExecution = () => {
           .filter((q) => q.satker_code === null)
           .map((item, index) => {
             const constantItem = dataTable.data[index];
-
             return {
               eselon: constantItem?.eselon || item.name,
               revisiDipa: item.revisi_dipa,
@@ -52,6 +51,7 @@ export const useBudgetExecution = () => {
               capaianOutput: item.capaian_output,
               dispensasiSPM: item.dispensasi_spm,
               nilaiIKPA: item.nilai_ikpa,
+              prevNilaiIKPA: item.prevValue
             };
           });
 
@@ -67,6 +67,7 @@ export const useBudgetExecution = () => {
           .map((item) => ({
             title: item.eselon,
             value: item.nilaiIKPA,
+            prevValue: item.prevNilaiIKPA,
             color: mapColorByValue(item.nilaiIKPA),
           }));
         setFilteredData(mappedCards);
@@ -79,14 +80,21 @@ export const useBudgetExecution = () => {
   const mapColorByValue = (ikpa) => {
     if (ikpa >= 95) return "bg-green-bg"; // Sangat Baik
     if (ikpa >= 89) return "bg-blue-bg"; // Baik
-    if (ikpa >= 79) return "bg-orange-bg"; // Cukup
+    if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup
     return "bg-red-bg"; // Kurang
+  };
+
+  const mapColorByValueIndicator = (ikpa) => {
+    if (ikpa >= 95) return "bg-[#6FCE00]"; // Sangat Baik
+    if (ikpa >= 89) return "bg-[#2E70FD]"; // Baik
+    if (ikpa >= 70) return "bg-[#ECFD2E]"; // Cukup
+    return "bg-[#FF4155]"; // Kurang
   };
 
   const mapColorTextByValue = (ikpa) => {
     if (ikpa >= 95) return "text-green-text"; // Sangat Baik
     if (ikpa >= 89) return "text-blue-text"; // Baik
-    if (ikpa >= 79) return "text-orange-text"; // Cukup
+    if (ikpa >= 70) return "text-[#0000]-text"; // Cukup
     return "text-red-text"; // Kurang
   };
 
@@ -101,6 +109,7 @@ export const useBudgetExecution = () => {
     refetch: fetchEs1Data,
     getIKPAColor,
     mapColorByValue,
+    mapColorByValueIndicator,
     mapColorTextByValue,
   };
 };

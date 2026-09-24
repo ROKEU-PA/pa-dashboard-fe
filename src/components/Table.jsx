@@ -1,15 +1,11 @@
-function Table({ className, children, sx = {}, style = {}, ...props }) {
-  const defaultStyle = {
-    ...sx,
-    ...style,
-    width: "100%",
-    borderCollapse: "collapse",
-    minWidth: 650,
-    fontSize: 14,
-    color: "#424242",
-  };
+import React from "react";
+
+function Table({ className = "", children, ...props }) {
   return (
-    <table className={className} style={defaultStyle} {...props}>
+    <table 
+      className={`w-full border-collapse ${className}`} 
+      {...props}
+    >
       {children}
     </table>
   );

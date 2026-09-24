@@ -2,7 +2,11 @@
 
 export const ASSETS = {
   LOGO: "/logo-kemnaker.webp",
+  LOGO_ONLY: "/logo-kemnaker-decoration.webp",
+  LOGO_DARK: "/kemnaker-logo-darker.webp",
+  LOGO_LIGHT: "/kemnaker-logo-light.webp",
   BUILDING_IMAGE: "/login-image-hd.webp",
+  BUILDING_IMAGE_2: "/future-loginpageblur.webp",
 };
 
 export const ROUTES = {
@@ -20,8 +24,8 @@ export const COLORS = {
 };
 
 export const TEXT = {
-  PAGE_TITLE: "Selamat Datang di SiAKBAR",
-  PAGE_SUBTITLE: "Anggaran, Keuangan, dan Barang",
+  PAGE_TITLE: "Selamat Datang di E-SPP",
+  PAGE_SUBTITLE: "Biro Keuangan dan BMN",
   LOGO_ALT: "Kementerian Ketenagakerjaan Republik Indonesia",
   SATKER_LABEL: "Satuan Kerja",
   SATKER_PLACEHOLDER: "Masukkan kode satuan kerja",
