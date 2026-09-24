@@ -37,6 +37,7 @@ import InventoryTakingA from "./pages/InventoryTaking/admin";
 import AdminMasterDataTU from "./pages/MasterDataTU";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
 import MonitoringPage from "./pages/Monitoring";
+import ProfilPemagang from "./pages/ProfilPemagang";
 import PerformanceIndicator from "./pages/PerformanceIndicator";
 import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
 import ShowForAll from "./pages/ShowForAll";
@@ -373,6 +374,20 @@ function App() {
             <PrivateRoute>
               <AppLayout isAdmin={isAdmin} title="Monitoring E-SPP" userName={userData?.name}>
                 <MonitoringPage />
+              </AppLayout>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profil-pemagang"
+          element={
+            <PrivateRoute>
+              <AppLayout
+                isAdmin={isAdmin}
+                title="Profil Pemagang"
+                userName={userData?.name}
+              >
+                <ProfilPemagang />
               </AppLayout>
             </PrivateRoute>
           }
