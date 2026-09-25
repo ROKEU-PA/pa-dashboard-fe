@@ -35,7 +35,7 @@ const PrivateRoute = ({ children }) => {
       setAuthState({
         isChecking: false,
         isAllowed: false,
-        redirectTo: "/",
+        redirectTo: "/monitoring",
       });
       return;
     }
@@ -52,6 +52,7 @@ const PrivateRoute = ({ children }) => {
       { path: "/compilation" },
       { path: "/user-management" },
       { path: "/soon" },
+      { path: "/profil-pemagang" },
     ];
 
     const isAllowed = isAuthorizedRoute(

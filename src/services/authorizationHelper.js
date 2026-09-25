@@ -50,6 +50,7 @@ const ROLE_ROUTES = {
     "/kalender",
     "/report/ikpa",
     "/report/realisasi",  
+    "/profil-pemagang",
   ],
 
   [ROLES.BEND]: [
