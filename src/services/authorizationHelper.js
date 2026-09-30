@@ -220,9 +220,17 @@ export const getDefaultRedirectPath = (userRole) => {
 };
 
 export const getRedirectPathOnDenied = (pathname, userRole) => {
+  if (normalizePath(pathname) === "/profil-pemagang") {
+    return "/monitoring";
+  }
+
   if (userRole === ROLES.USER || userRole === ROLES.PIC) {
     const parts = pathname.split("/").filter(Boolean);
-    if ((parts[0] === "/satuan-kerja" || parts[0] === "arsip") && parts.length > 2) {
+
+    if (
+      (parts[0] === "/satuan-kerja" || parts[0] === "arsip") &&
+      parts.length > 2
+    ) {
       return "/" + parts.slice(0, -1).join("/");
     }
 

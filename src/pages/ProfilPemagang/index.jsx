@@ -1,32 +1,99 @@
-import React, { useState } from "react";
-import { Pencil, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+
+import { Pencil, Plus, Trash2 } from "lucide-react";
 
 import Table from "@/components/Table";
 import TableHeader from "@/components/TableHeader";
-import TableBody from "@/components/TableBody";
+import { TableBody } from "@/components/TableBody";
 import TableRow from "@/components/TableRow";
 import TableCell from "@/components/TableCell";
 import Modal from "@/components/Modal";
 import Input from "@/components/Input";
 import Button from "@/components/Button";
+import Dialog from "@/components/Dialog";
+
+import useProfilPemagang from "./hooks/useProfilPemagang.jsx";
 
 function ProfilPemagang() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+
+  const {
+    formData,
+    handleChange,
+    validateForm,
+    isErrorOpen,
+    handleCloseError,
+
+    dataPemagang,
+    fetchDataPemagang,
+    createDataPemagang,
+    updateDataPemagang,
+    deleteDataPemagang,
+  } = useProfilPemagang();
+
+  useEffect(() => {
+    fetchDataPemagang();
+  }, [fetchDataPemagang]);
 
   const handleOpenAdd = () => {
     setIsEditMode(false);
+    setSelectedId(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = () => {
+  const handleOpenEdit = (data) => {
     setIsEditMode(true);
+    setSelectedId(data.id);
     setIsModalOpen(true);
+  };
+
+  const handleOpenDelete = (id) => {
+    setSelectedId(id);
+    setIsDeleteOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setIsEditMode(false);
+    setSelectedId(null);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      if (isEditMode) {
+        await updateDataPemagang(selectedId, formData);
+      } else {
+        await createDataPemagang(formData);
+      }
+
+      await fetchDataPemagang();
+
+      handleCloseModal();
+    } catch (error) {
+      console.error("Gagal menyimpan data:", error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteDataPemagang(selectedId);
+
+      await fetchDataPemagang();
+
+      setIsDeleteOpen(false);
+      setSelectedId(null);
+    } catch (error) {
+      console.error("Gagal menghapus data:", error);
+    }
   };
 
   return (
@@ -62,11 +129,15 @@ function ProfilPemagang() {
               </TableCell>
 
               <TableCell component="th">
-                Kampus
+                Asal Kampus
               </TableCell>
 
               <TableCell component="th">
                 Posisi
+              </TableCell>
+
+              <TableCell component="th">
+                Nomor HP
               </TableCell>
 
               <TableCell component="th">
@@ -76,13 +147,57 @@ function ProfilPemagang() {
           </TableHeader>
 
           <TableBody>
-            <TableRow>
-              <TableCell colspan="4">
-                <div className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
-                  Belum ada data pemagang.
-                </div>
-              </TableCell>
-            </TableRow>
+            {dataPemagang.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>
+                  {item.name}
+                </TableCell>
+
+                <TableCell>
+                  {item.campus_origin}
+                </TableCell>
+
+                <TableCell>
+                  {item.position}
+                </TableCell>
+
+                <TableCell>
+                  {item.phone_number}
+                </TableCell>
+
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      icon={<Pencil size={16} />}
+                      onClick={() => handleOpenEdit(item)}
+                    >
+                      Edit
+                    </Button>
+
+                    <Button
+                      variant="danger"
+                      icon={<Trash2 size={16} />}
+                      onClick={() =>
+                        handleOpenDelete(item.id)
+                      }
+                    >
+                      Hapus
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+
+            {dataPemagang.length === 0 && (
+              <TableRow>
+                <TableCell colspan="5">
+                  <div className="py-6 text-center text-sm text-slate-500 dark:text-slate-400">
+                    Belum ada data pemagang.
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
@@ -97,23 +212,44 @@ function ProfilPemagang() {
             : "Tambah Data Pemagang"
         }
       >
-        <form className="p-6 space-y-5">
+        <form
+          className="p-6 space-y-5"
+          onSubmit={handleSubmit}
+        >
           <Input
             label="Nama"
-            name="nama"
+            name="name"
             placeholder="Masukkan nama"
+            value={formData.name}
+            onChange={handleChange}
+            required
           />
 
           <Input
-            label="Kampus"
-            name="kampus"
-            placeholder="Masukkan nama kampus"
+            label="Asal Kampus"
+            name="campus_origin"
+            placeholder="Masukkan asal kampus"
+            value={formData.campus_origin}
+            onChange={handleChange}
+            required
           />
 
           <Input
             label="Posisi"
-            name="posisi"
+            name="position"
             placeholder="Masukkan posisi"
+            value={formData.position}
+            onChange={handleChange}
+            required
+          />
+
+          <Input
+            label="Nomor HP"
+            name="phone_number"
+            placeholder="Masukkan nomor HP"
+            value={formData.phone_number}
+            onChange={handleChange}
+            required
           />
 
           <div className="flex justify-end gap-3 pt-2">
@@ -126,7 +262,7 @@ function ProfilPemagang() {
             </Button>
 
             <Button
-              type="button"
+              type="submit"
               variant="primary"
             >
               {isEditMode
@@ -136,6 +272,46 @@ function ProfilPemagang() {
           </div>
         </form>
       </Modal>
+
+      {/* ERROR ALERT */}
+      <Dialog
+        open={isErrorOpen}
+        onClose={handleCloseError}
+        title="Data Belum Lengkap"
+      >
+        <p>
+          Nama, Asal Kampus, Posisi, dan Nomor HP wajib diisi.
+        </p>
+      </Dialog>
+
+      {/* DELETE CONFIRMATION */}
+      <Dialog
+        open={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        title="Hapus Data Pemagang"
+      >
+        <p>
+          Apakah Anda yakin ingin menghapus data pemagang ini?
+        </p>
+
+        <div className="flex justify-end gap-3 mt-5">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsDeleteOpen(false)}
+          >
+            Batal
+          </Button>
+
+          <Button
+            type="button"
+            variant="danger"
+            onClick={handleDelete}
+          >
+            Hapus
+          </Button>
+        </div>
+      </Dialog>
     </div>
   );
 }
