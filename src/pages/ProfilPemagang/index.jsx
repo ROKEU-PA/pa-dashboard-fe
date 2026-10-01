@@ -25,8 +25,8 @@ function ProfilPemagang() {
     handleChange,
     validateForm,
     isErrorOpen,
+    errorMessage,
     handleCloseError,
-
     dataPemagang,
     fetchDataPemagang,
     createDataPemagang,
@@ -70,9 +70,9 @@ function ProfilPemagang() {
 
     try {
       if (isEditMode) {
-        await updateDataPemagang(selectedId, formData);
+        await updateDataPemagang(selectedId);
       } else {
-        await createDataPemagang(formData);
+        await createDataPemagang();
       }
 
       await fetchDataPemagang();
@@ -280,7 +280,8 @@ function ProfilPemagang() {
         title="Data Belum Lengkap"
       >
         <p>
-          Nama, Asal Kampus, Posisi, dan Nomor HP wajib diisi.
+          {errorMessage ||
+            "Nama, Asal Kampus, Posisi, dan Nomor HP wajib diisi."}
         </p>
       </Dialog>
 
