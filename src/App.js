@@ -36,6 +36,7 @@ import InventoryTaking from "./pages/InventoryTaking/index";
 import InventoryTakingA from "./pages/InventoryTaking/admin";
 import AdminMasterDataTU from "./pages/MasterDataTU";
 import ArchivePage from "./pages/ListSatuankerja/arsip";
+import TambahArsip from "@/pages/ListSatuankerja/TambahArsip";
 import MonitoringPage from "./pages/Monitoring";
 import PerformanceIndicator from "./pages/PerformanceIndicator";
 import PengajuanReviewPage from "./pages/ListSatuankerja/PengajuanReviewPage";
@@ -260,6 +261,17 @@ function App() {
             </PrivateRoute>
           }
         />
+      
+          <Route
+            path="/e-arsip/tambah"
+            element={
+              <PrivateRoute>
+                <AppLayout isAdmin={isAdmin} title="E-Arsip" userName={userData?.name}
+                  ><TambahArsip />
+                </AppLayout>
+              </PrivateRoute>
+            }
+          />
 
         <Route
           path="/proyeksi-rpd"

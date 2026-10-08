@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import Table from "@/components/Table";
 import TableRow from "@/components/TableRow";
 import TablePagination from "@/components/TablePagination";
@@ -21,6 +22,7 @@ import {
   Folder,
   Link2,
   Calendar,
+  ArrowLeft,
 } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import { validationSchema } from "@/services/GeneralHelper";
@@ -34,7 +36,10 @@ import { columns } from "@/pages/ListSatuankerja/satkerHooks";
 import { useSatkerLogic } from "./hooks/useSatkerLogic";
 
 function Arsip() {
+  const navigate = useNavigate();
+
   const { listMenu, userData } = useContext(AppContext);
+
   const {
     openEditModal,
     formData,
@@ -71,7 +76,9 @@ function Arsip() {
   const satkerOptions = useMemo(() => {
     if (userData?.role === "user") {
       const code =
-        userData.biro_code || (userData.access_code && userData.access_code);
+        userData.biro_code ||
+        (userData.access_code && userData.access_code);
+
       if (code) {
         return [
           {
@@ -80,6 +87,7 @@ function Arsip() {
           },
         ];
       }
+
       return [];
     }
 
@@ -95,13 +103,18 @@ function Arsip() {
     try {
       const parsedUrl = new URL(url);
       const hostname = parsedUrl.hostname.toLowerCase();
+
       if (
         hostname.includes("drive.google.com") ||
         hostname.includes("docs.google.com")
-      )
+      ) {
         return "gdrive";
+      }
+
       const parts = parsedUrl.pathname.split(".");
+
       if (parts.length > 1) return parts.pop().toLowerCase();
+
       return "";
     } catch {
       return "";
@@ -122,6 +135,7 @@ function Arsip() {
   const handleFilterChange = (key, value) => {
     setFilter((prev) => {
       const newFilter = { ...prev, [key]: value };
+
       if (
         key === "startDate" &&
         newFilter.endDate &&
@@ -129,31 +143,27 @@ function Arsip() {
       ) {
         newFilter.endDate = null;
       }
+
       return newFilter;
     });
   };
 
-  const handleApplyFilter = (e) => {
-    e.preventDefault();
-    if (userData.role !== "user") {
-      if (!filter.satker || !filter.tahun) {
-        toast.error("Tahun dan Satuan Kerja wajib dipilih!");
-        return;
-      }
-    } else {
-      if (!filter.tahun) {
-        toast.error("Tahun wajib dipilih!");
-        return;
-      }
-    }
-    const selectedSatkerName = satkerOptions.find(
-      (s) => s.value === filter.satker,
-    )?.label;
-    setFilter((prev) => ({ ...prev, satkerName: selectedSatkerName }));
-    setIsFiltered(true);
-    setIsFilterModalOpen(false);
-    setPage(0);
-  };
+const handleApplyFilter = (e) => {
+  e.preventDefault();
+
+  const selectedSatkerName = satkerOptions.find(
+    (s) => s.value === filter.satker
+  )?.label;
+
+  setFilter((prev) => ({
+    ...prev,
+    satkerName: selectedSatkerName,
+  }));
+
+  setIsFiltered(true);
+  setIsFilterModalOpen(false);
+  setPage(0);
+};
 
   const handleResetFilter = () => {
     const isRegularUser = userData?.role === "user";
@@ -161,16 +171,21 @@ function Arsip() {
     setFilter({
       tahun: moment().year().toString(),
       satker:
-        isRegularUser && satkerOptions.length > 0 ? satkerOptions.value : "",
+        isRegularUser && satkerOptions.length > 0
+          ? satkerOptions.value
+          : "",
       satkerName:
-        isRegularUser && satkerOptions.length > 0 ? satkerOptions.label : "",
+        isRegularUser && satkerOptions.length > 0
+          ? satkerOptions.label
+          : "",
       searchKey: "",
       startDate: null,
       endDate: null,
     });
   };
 
-  const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
+  const getAcceptedFileType = () =>
+    ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
 
   useEffect(() => {
     if (isFiltered) fetchTable();
@@ -189,14 +204,22 @@ function Arsip() {
 
   useEffect(() => {
     fetchType();
-    if (!isFiltered) setIsFilterModalOpen(true);
-  }, []);
+
+    if (!userData?.role || isFiltered) return;
+
+    // Role user tetap langsung mendapatkan filter modal
+    if (userData.role === "user") {
+      setIsFilterModalOpen(true);
+    }
+  }, [userData, isFiltered]);
 
   useEffect(() => {
-    if (userData && userData.role === "user") {
+    if (userData && userData?.role === "user") {
       const userBiroCode =
-        userData.biro_code || (userData.access_code && userData.access_code);
-      const userBiroName = userData.name || "Biro Anda";
+        userData.biro_code ||
+        (userData.access_code && userData.access_code);
+
+      const userBiroName = userData?.name || "Biro Anda";
 
       if (userBiroCode && filter.satker !== userBiroCode) {
         setFilter((prev) => ({
@@ -210,51 +233,223 @@ function Arsip() {
 
   return (
     <div className="w-full h-full bg-slate-50/50 dark:bg-transparent rounded-xl overflow-hidden flex flex-col transition-colors">
-      {/* STATE 1: EMPTY STATE */}
-      {!isFiltered ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#111C30]/80 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] backdrop-blur-md border border-slate-100 dark:border-white/10 min-h-[60vh] transition-colors">
-          <div className="w-24 h-24 bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-full flex items-center justify-center mb-6">
-            <FileSearch size={48} strokeWidth={1.5} />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-            Data Arsip Belum Ditampilkan
-          </h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-md mb-8">
-            Silakan pilih Tahun dan Satuan Kerja (Biro) terlebih dahulu untuk
-            mulai melihat, mencari, atau mengelola dokumen arsip.
-          </p>
-          <Button
-            onClick={() => setIsFilterModalOpen(true)}
-            className="px-8 h-[42px] shadow-lg shadow-blue-500/30 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl font-bold transition-all"
-            icon={<Filter size={18} strokeWidth={2.5} />}
-          >
-            Pilih Kriteria Arsip
-          </Button>
+
+ {/* STATE 1: EMPTY STATE */}
+{!isFiltered ? (
+  userData?.role === "admin" || userData?.role === "pic" ? (
+    <div className="relative flex-1 flex flex-col items-center justify-center p-8 md:p-12 text-center bg-white dark:bg-[#111C30]/80 rounded-[28px] shadow-[0_8px_40px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.2)] backdrop-blur-md border border-slate-100 dark:border-white/10 min-h-[70vh] overflow-hidden transition-colors">
+
+      {/* BACKGROUND DECORATION */}
+      <div className="absolute -top-32 -left-32 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+
+      {/* HEADER */}
+      <div className="relative z-10 flex flex-col items-center">
+
+        {/* ICON */}
+        <div className="w-24 h-24 rounded-[28px] bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-500/10 dark:to-indigo-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center mb-6 shadow-lg shadow-blue-500/10">
+          <FileSearch
+            size={46}
+            strokeWidth={1.7}
+            className="text-blue-600 dark:text-blue-400"
+          />
         </div>
+
+        {/* BADGE */}
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 mb-4">
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          <span className="text-xs font-bold tracking-wider text-blue-600 dark:text-blue-400">
+            E-Arsip
+          </span>
+        </div>
+
+        {/* TITLE */}
+        <h2 className="text-3xl md:text-4xl font-bold text-slate-800 dark:text-white mb-3">
+          Pilih Aksi E-Arsip
+        </h2>
+
+        {/* DESCRIPTION */}
+        <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed mb-10">
+          Pilih proses yang ingin dilakukan pada dokumen arsip.
+          <br className="hidden md:block" />
+          Kelola arsip yang tersimpan atau tambahkan dokumen baru.
+        </p>
+      </div>
+
+      {/* ACTION CARDS */}
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-6 w-full max-w-5xl">
+
+        {/* LIHAT TABEL ARSIP */}
+        <button
+          type="button"
+          onClick={() => setIsFilterModalOpen(true)}
+          className="group relative text-left min-h-[250px] p-7 md:p-8 rounded-[24px] border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-[#0A111E] hover:border-blue-500 dark:hover:border-blue-500 hover:shadow-[0_15px_40px_rgba(37,99,235,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+        >
+          {/* CARD DECORATION */}
+          <div className="absolute -top-16 -right-16 w-40 h-40 bg-blue-500/5 group-hover:bg-blue-500/10 rounded-full blur-2xl transition-all duration-300" />
+
+          <div className="relative flex flex-col h-full">
+
+            {/* ICON */}
+            <div className="w-16 h-16 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+              <FileSearch
+                size={31}
+                strokeWidth={1.8}
+              />
+            </div>
+
+            {/* CONTENT */}
+            <div className="mt-7">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                Lihat Tabel Arsip
+              </h3>
+
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 leading-6 max-w-sm">
+                Cari, filter, lihat, dan kelola data dokumen arsip
+                yang sudah tersimpan di dalam sistem.
+              </p>
+            </div>
+
+            {/* CARD FOOTER */}
+            <div className="mt-auto pt-7 flex items-center justify-between">
+
+              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                Lihat data arsip
+              </span>
+
+              <div className="w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all duration-300">
+                <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </button>
+
+        {/* TAMBAH ARSIP BARU */}
+        <button
+          type="button"
+          onClick={() => navigate("/e-arsip/tambah")}
+          className="group relative text-left min-h-[250px] p-7 md:p-8 rounded-[24px] border-2 border-slate-200 dark:border-white/10 bg-white dark:bg-[#0A111E] hover:border-emerald-500 dark:hover:border-emerald-500 hover:shadow-[0_15px_40px_rgba(16,185,129,0.12)] hover:-translate-y-1 transition-all duration-300 overflow-hidden"
+        >
+          {/* CARD DECORATION */}
+          <div className="absolute -top-16 -right-16 w-40 h-40 bg-emerald-500/5 group-hover:bg-emerald-500/10 rounded-full blur-2xl transition-all duration-300" />
+
+          <div className="relative flex flex-col h-full">
+
+            {/* ICON */}
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+              <Plus
+                size={31}
+                strokeWidth={2}
+              />
+            </div>
+
+            {/* CONTENT */}
+            <div className="mt-7">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">
+                Tambah Arsip Baru
+              </h3>
+
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 leading-6 max-w-sm">
+                Unggah dokumen arsip baru secara tunggal
+                maupun dalam jumlah banyak menggunakan Bulk Upload.
+              </p>
+            </div>
+
+            {/* CARD FOOTER */}
+            <div className="mt-auto pt-7 flex items-center justify-between">
+
+              <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                Mulai tambah arsip
+              </span>
+
+              <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300">
+                <span className="text-lg transition-transform duration-300 group-hover:translate-x-1">
+                  →
+                </span>
+              </div>
+
+            </div>
+          </div>
+        </button>
+
+      </div>
+
+      {/* FOOTER */}
+      <div className="relative z-10 mt-10 flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+        <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+        <span>Pilih salah satu opsi untuk melanjutkan.</span>
+      </div>
+
+    </div>
+  ) : (
+          
+          /* TAMPILAN USER TETAP SEPERTI SEBELUMNYA */
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-white dark:bg-[#111C30]/80 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] backdrop-blur-md border border-slate-100 dark:border-white/10 min-h-[60vh] transition-colors">
+
+            <div className="w-24 h-24 bg-blue-50 dark:bg-blue-500/10 text-blue-500 dark:text-blue-400 rounded-full flex items-center justify-center mb-6">
+              <FileSearch size={48} strokeWidth={1.5} />
+            </div>
+
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+              Data Arsip Belum Ditampilkan
+            </h2>
+
+            <p className="text-slate-500 dark:text-slate-400 max-w-md mb-8">
+              Silakan pilih Tahun dan Satuan Kerja (Biro) terlebih dahulu untuk
+              mulai melihat, mencari, atau mengelola dokumen arsip.
+            </p>
+
+            <Button
+              onClick={() => setIsFilterModalOpen(true)}
+              className="px-8 h-[42px] shadow-lg shadow-blue-500/30 active:scale-95 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl font-bold transition-all"
+              icon={
+                <Filter
+                  size={18}
+                  strokeWidth={2.5}
+                />
+              }
+            >
+              Pilih Kriteria Arsip
+            </Button>
+
+          </div>
+        )
       ) : (
+
         /* STATE 2: TABLE DATA */
         <div className="flex flex-col gap-6">
+
           {/* HEADER FILTER & SEARCH */}
           <div className="bg-white dark:bg-[#111C30]/80 backdrop-blur-md rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 p-5 transition-colors flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+
             <div className="flex flex-col">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Menampilkan Data:
               </span>
+
               <span className="text-lg font-black text-slate-800 dark:text-white">
                 {filter.satkerName}{" "}
+
                 <span className="text-blue-500 font-black px-1.5 opacity-50">
                   |
                 </span>{" "}
+
                 {filter.tahun}
               </span>
             </div>
 
             <div className="flex flex-wrap items-center justify-start lg:justify-end gap-3 w-full lg:w-auto">
+
+              {/* SEARCH */}
               <div className="relative group w-full sm:w-auto">
                 <Search
                   size={16}
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors"
                 />
+
                 <input
                   type="text"
                   placeholder="Cari No SPP..."
@@ -266,6 +461,7 @@ function Arsip() {
                 />
               </div>
 
+              {/* UBAH FILTER */}
               <Button
                 variant="custom"
                 onClick={() => setIsFilterModalOpen(true)}
@@ -275,12 +471,16 @@ function Arsip() {
                 Ubah Filter
               </Button>
 
-              {userData.role === "pic" && (
+              {/* TAMBAH ARSIP */}
+              {userData?.role === "pic" && (
                 <Button
                   variant="custom"
                   onClick={() => {
                     setIsOpenModal(true);
-                    setFormData((prev) => ({ ...prev, tahun: filter.tahun }));
+                    setFormData((prev) => ({
+                      ...prev,
+                      tahun: filter.tahun,
+                    }));
                     setVariantModal("Add");
                   }}
                   className="w-full sm:w-fit px-4 h-[38px] shadow-md shadow-blue-500/30 active:scale-95 transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2"
@@ -289,23 +489,47 @@ function Arsip() {
                   Tambah Arsip
                 </Button>
               )}
+
+              {/* KEMBALI KE PILIH AKSI */}
+              {(userData?.role === "admin" || userData?.role === "pic") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsFiltered(false);
+                    setIsFilterModalOpen(false);
+                  }}
+                  className="w-full sm:w-fit px-4 h-[38px] rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0A111E] text-slate-600 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft size={17} />
+                  Kembali ke Pilih Arsip
+                </button>
+              )}
+
             </div>
           </div>
 
           {/* TABLE CONTAINER */}
           <div className="w-full overflow-x-auto rounded-[20px] bg-white dark:bg-[#111C30]/80 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.2)] border border-slate-100 dark:border-white/10 transition-colors duration-300 table-scroll">
+
             <Table aria-label="interactive data table">
+
               <TableHeader>
                 <TableRow>
+
                   {columns
-                    .filter((col) => !col.hiddenInArsip && !col.hiddenIfUser)
+                    .filter(
+                      (col) =>
+                        !col.hiddenInArsip &&
+                        !col.hiddenIfUser
+                    )
                     .map((col) => (
                       <TableCell
                         key={col.key}
                         component="th"
                         align="center"
                         onClick={() =>
-                          col.sortable && handleSortChange(col.key)
+                          col.sortable &&
+                          handleSortChange(col.key)
                         }
                         className={`py-4 px-4 text-[10px] sm:text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider whitespace-nowrap transition-colors ${
                           col.sortable
@@ -326,17 +550,26 @@ function Arsip() {
                         )}
                       </TableCell>
                     ))}
+
                 </TableRow>
               </TableHeader>
+
               <TableBody>
+
                 {dataTable.map((row, index) => (
                   <TableRow
                     key={index}
                     className="transition-colors duration-200 hover:bg-slate-50/80 dark:hover:bg-white/5 border-b border-slate-100 dark:border-white/10 last:border-none group"
                   >
+
                     {columns
-                      .filter((col) => !col.hiddenInArsip && !col.hiddenIfUser)
+                      .filter(
+                        (col) =>
+                          !col.hiddenInArsip &&
+                          !col.hiddenIfUser
+                      )
                       .map((col) => {
+
                         if (col.key == "spp_number")
                           return (
                             <TableCell
@@ -347,6 +580,7 @@ function Arsip() {
                               {row?.["no_spp"]}
                             </TableCell>
                           );
+
                         if (col.key === "created_at")
                           return (
                             <TableCell
@@ -354,9 +588,12 @@ function Arsip() {
                               align="center"
                               className="py-3.5 px-4 text-xs sm:text-sm font-medium text-slate-600 dark:text-gray-300 whitespace-nowrap"
                             >
-                              {moment(row?.[col.key]).format("YYYY/MM/DD")}
+                              {moment(row?.[col.key]).format(
+                                "YYYY/MM/DD"
+                              )}
                             </TableCell>
                           );
+
                         if (col.key === "revisi")
                           return (
                             <TableCell
@@ -376,23 +613,31 @@ function Arsip() {
                           ].includes(col.key)
                         ) {
                           const docObj = row[col.key];
+
                           return (
                             <TableCell
                               key={col.key}
                               align="center"
                               onClick={() => {
-                                if (typeof docObj?.url === "string") {
+                                if (
+                                  typeof docObj?.url ===
+                                  "string"
+                                ) {
                                   setIsOpenPDF(true);
-                                  setPDFtoOpen(docObj?.url);
+                                  setPDFtoOpen(
+                                    docObj?.url
+                                  );
                                 }
                               }}
                               className={`py-3.5 px-4 text-xs sm:text-sm font-bold whitespace-nowrap ${
-                                typeof docObj?.url === "string"
+                                typeof docObj?.url ===
+                                "string"
                                   ? "text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
                                   : "text-slate-400 dark:text-slate-600"
                               }`}
                             >
-                              {typeof docObj?.url === "string"
+                              {typeof docObj?.url ===
+                              "string"
                                 ? `Lihat File`
                                 : "-"}
                             </TableCell>
@@ -400,13 +645,18 @@ function Arsip() {
                         }
 
                         const role = userData?.role;
+
                         const isAdminRole = [
                           "admin",
                           "pic",
                           "super_admin",
                           "superadmin",
                         ].includes(role);
-                        if (isAdminRole && col.key === "action") {
+
+                        if (
+                          isAdminRole &&
+                          col.key === "action"
+                        ) {
                           return (
                             <TableCell
                               key={col.key}
@@ -414,6 +664,7 @@ function Arsip() {
                               className="py-3.5 px-4"
                             >
                               <div className="flex flex-row justify-center items-center gap-2">
+
                                 <button
                                   title="Edit"
                                   className="p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white dark:hover:bg-blue-500 dark:hover:text-white transition-all duration-200 border border-blue-200 dark:border-blue-500/20 shadow-sm hover:shadow-md hover:-translate-y-0.5"
@@ -423,8 +674,12 @@ function Arsip() {
                                     setVariantModal("Edit");
                                   }}
                                 >
-                                  <Edit2 size={16} strokeWidth={2.5} />
+                                  <Edit2
+                                    size={16}
+                                    strokeWidth={2.5}
+                                  />
                                 </button>
+
                               </div>
                             </TableCell>
                           );
@@ -440,13 +695,16 @@ function Arsip() {
                           </TableCell>
                         );
                       })}
+
                   </TableRow>
                 ))}
+
               </TableBody>
             </Table>
 
             {/* Pagination Container disesuaikan */}
             <div className="p-4 border-t border-slate-100 dark:border-white/10 bg-slate-50/30 dark:bg-[#0D1627]/30">
+
               <TablePagination
                 page={page}
                 totalPages={totalPages}
@@ -457,8 +715,11 @@ function Arsip() {
                   setPage(0);
                 }}
               />
+
             </div>
+
           </div>
+
         </div>
       )}
 
@@ -471,13 +732,23 @@ function Arsip() {
         maxWidth="95vw"
         minWidth="0px"
       >
-        <form onSubmit={handleApplyFilter} className="flex flex-col gap-4 p-2">
+        <form
+          onSubmit={handleApplyFilter}
+          className="flex flex-col gap-4 p-2"
+        >
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
             <Select
               label="Tahun"
               name="tahun"
               value={filter.tahun}
-              onChange={(e) => handleFilterChange("tahun", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange(
+                  "tahun",
+                  e.target.value
+                )
+              }
               options={[
                 { label: "2026", value: "2026" },
                 { label: "2025", value: "2025" },
@@ -488,21 +759,27 @@ function Arsip() {
                 { label: "2020", value: "2020" },
                 { label: "2019", value: "2019" },
               ]}
-              required
             />
+
             <Select
               label="Satuan Kerja (Biro)"
               name="satker"
               value={filter.satker}
-              onChange={(e) => handleFilterChange("satker", e.target.value)}
+              onChange={(e) =>
+                handleFilterChange(
+                  "satker",
+                  e.target.value
+                )
+              }
               options={satkerOptions}
-              required
               disabled={userData?.role === "user"}
               isSearchable={userData?.role !== "user"}
             />
+
           </div>
 
           <div className="flex flex-col gap-1.5 mt-2">
+
             <label className="text-[11px] text-slate-500 dark:text-slate-400 font-bold px-1 uppercase tracking-wider">
               Tanggal{" "}
               <span className="bg-slate-200 dark:bg-white/10 text-slate-500 dark:text-slate-300 text-[9px] px-1.5 py-0.5 rounded ml-1 font-bold tracking-wider">
@@ -512,6 +789,7 @@ function Arsip() {
 
             {/* DATE PICKER NATIVE MURNI (ANTI NGE-BUG) */}
             <div className="flex items-center bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl h-[42px] px-3 focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all group overflow-hidden">
+
               <Calendar
                 className="text-slate-400 group-focus-within:text-blue-500 transition-colors shrink-0 mr-2"
                 size={16}
@@ -523,7 +801,10 @@ function Arsip() {
                 className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"
                 value={filter.startDate || ""}
                 onChange={(e) =>
-                  handleFilterChange("startDate", e.target.value)
+                  handleFilterChange(
+                    "startDate",
+                    e.target.value
+                  )
                 }
               />
 
@@ -535,26 +816,38 @@ function Arsip() {
                 type="date"
                 className="bg-transparent border-none focus:ring-0 outline-none text-sm font-semibold text-slate-700 dark:text-white cursor-pointer [color-scheme:light] dark:[color-scheme:dark] w-full p-0"
                 value={filter.endDate || ""}
-                onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                onChange={(e) =>
+                  handleFilterChange(
+                    "endDate",
+                    e.target.value
+                  )
+                }
               />
+
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3 mt-6 border-t border-slate-100 dark:border-white/5 pt-5">
+
             <button
               type="button"
               onClick={handleResetFilter}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-600 dark:text-slate-300 font-bold text-sm rounded-xl transition-colors"
             >
-              <X size={16} strokeWidth={2.5} /> HAPUS ISIAN
+              <X size={16} strokeWidth={2.5} />
+              HAPUS ISIAN
             </button>
+
             <button
               type="submit"
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-sm rounded-xl transition-all shadow-md shadow-blue-500/30 active:scale-95"
             >
-              <Check size={16} strokeWidth={2.5} /> KIRIM
+              <Check size={16} strokeWidth={2.5} />
+              KIRIM
             </button>
+
           </div>
+
         </form>
       </Modal>
 
@@ -566,11 +859,21 @@ function Arsip() {
           setVariantModal("");
           setFormData({});
         }}
-        title={variantModal === "Add" ? "Form Pengarsipan" : "Form Edit"}
+        title={
+          variantModal === "Add"
+            ? "Form Pengarsipan"
+            : "Form Edit"
+        }
       >
-        <form onSubmit={handleSubmit} className="flex flex-col w-full relative">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col w-full relative"
+        >
+
           <div className="flex flex-col gap-5 p-5 max-h-[65vh] overflow-y-auto">
+
             <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
+
               <div className="md:col-span-8">
                 <Input
                   label="No. SPP"
@@ -586,6 +889,7 @@ function Arsip() {
                   placeholder="Masukkan nomor SPP"
                 />
               </div>
+
               <div className="md:col-span-4">
                 <Input
                   label="Tahun"
@@ -597,13 +901,17 @@ function Arsip() {
                   placeholder="Masukkan tahun"
                 />
               </div>
+
             </div>
 
             <Select
               label="Jenis SPP"
               name="type"
               onChange={(e) =>
-                setFormData((prev) => ({ ...prev, type_id: e.target.value }))
+                setFormData((prev) => ({
+                  ...prev,
+                  type_id: e.target.value,
+                }))
               }
               value={formData?.type_id || ""}
               options={(types || []).map((q) => ({
@@ -634,10 +942,18 @@ function Arsip() {
               label="Jenis File"
               name="jenis_file"
               value={jenisFile}
-              onChange={(selected) => setJenisFile(selected.target.value)}
+              onChange={(selected) =>
+                setJenisFile(selected.target.value)
+              }
               options={[
-                { label: "File Upload (PDF/RAR)", value: "file" },
-                { label: "Link Google Drive", value: "link" },
+                {
+                  label: "File Upload (PDF/RAR)",
+                  value: "file",
+                },
+                {
+                  label: "Link Google Drive",
+                  value: "link",
+                },
               ]}
               isOpen={selectOpenJenis}
               setIsOpen={(open) => {
@@ -648,6 +964,7 @@ function Arsip() {
 
             {jenisFile === "link" && (
               <div className="p-5 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl flex flex-col gap-4 transition-colors">
+
                 <Input
                   label="Link Dokumen"
                   name="link"
@@ -657,6 +974,7 @@ function Arsip() {
                   required
                   placeholder="https://drive.google.com/..."
                 />
+
                 <Input
                   label="Jumlah Halaman"
                   name="jml_hal"
@@ -666,6 +984,7 @@ function Arsip() {
                   required
                   placeholder="Contoh: 15"
                 />
+
               </div>
             )}
 
@@ -686,9 +1005,11 @@ function Arsip() {
               variantModal === "Edit" &&
               userData?.role !== "user" && (
                 <div className="p-5 bg-slate-50 dark:bg-[#0A111E] border border-slate-200 dark:border-white/10 rounded-xl flex flex-col gap-5 mt-2 transition-colors">
+
                   <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     Dokumen Pendukung Tambahan
                   </span>
+
                   <FileInput
                     accept=".pdf"
                     label="Dokumen SPM"
@@ -696,6 +1017,7 @@ function Arsip() {
                     onChange={handleChange}
                     value={formData?.document_spm}
                   />
+
                   <FileInput
                     accept=".pdf"
                     label="Dokumen SP2D"
@@ -703,19 +1025,26 @@ function Arsip() {
                     onChange={handleChange}
                     value={formData?.document_sp2d}
                   />
+
                 </div>
               )}
+
           </div>
 
           <div className="px-5 py-4 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0D1627] flex justify-end rounded-b-[20px] transition-colors">
+
             <Button
               variant="custom"
               type="submit"
               className="w-full md:w-auto px-8 py-2.5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold rounded-xl shadow-md shadow-blue-500/30 active:scale-95 transition-all"
             >
-              {variantModal === "Add" ? "Kirim Pengajuan" : "Simpan Perubahan"}
+              {variantModal === "Add"
+                ? "Kirim Pengajuan"
+                : "Simpan Perubahan"}
             </Button>
+
           </div>
+
         </form>
       </Modal>
 
@@ -728,6 +1057,7 @@ function Arsip() {
         maxWidth="100vw"
         minWidth="0px"
       >
+
         {fileExtension === "pdf" ? (
           <div
             style={{
@@ -740,48 +1070,65 @@ function Arsip() {
           </div>
         ) : (
           <div className="bg-white dark:bg-[#0A111E] border border-blue-100 dark:border-blue-500/20 rounded-2xl p-8 shadow-xl shadow-blue-200/50 dark:shadow-none flex flex-col items-center text-center max-w-sm w-full mx-auto my-4 transition-colors">
+
             <div className="relative text-blue-500 mb-2">
+
               {fileExtension === "gdrive" ? (
-                <Link2 size={84} strokeWidth={1.5} />
+                <Link2
+                  size={84}
+                  strokeWidth={1.5}
+                />
               ) : (
-                <Folder size={84} strokeWidth={1.5} />
+                <Folder
+                  size={84}
+                  strokeWidth={1.5}
+                />
               )}
 
               <span className="absolute bottom-1 right-0 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm tracking-wider uppercase">
-                {fileExtension === "gdrive" ? "G-DRIVE" : "ZIP/RAR"}
+                {fileExtension === "gdrive"
+                  ? "G-DRIVE"
+                  : "ZIP/RAR"}
               </span>
+
             </div>
 
             <p className="mt-4 text-slate-700 dark:text-white font-bold">
               File SPP ber-format{" "}
-              {fileExtension === "gdrive" ? "Link" : "Arsip"}
+              {fileExtension === "gdrive"
+                ? "Link"
+                : "Arsip"}
             </p>
 
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-6">
-              Silakan {fileExtension === "gdrive" ? "buka" : "download"} untuk
-              melihat isi file.
+              Silakan{" "}
+              {fileExtension === "gdrive"
+                ? "buka"
+                : "download"}{" "}
+              untuk melihat isi file.
             </p>
 
             <button
-              className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-xl shadow-md hover:shadow-lg active:scale-95 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-colors shadow-md shadow-blue-500/20"
               onClick={() => {
-                if (fileExtension === "gdrive") {
-                  window.open(pdfToOpen, "_blank", "noopener,noreferrer");
-                } else {
-                  const link = document.createElement("a");
-                  link.href = pdfToOpen;
-                  link.download = "";
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
+                if (typeof pdfToOpen === "string") {
+                  window.open(
+                    pdfToOpen,
+                    "_blank",
+                    "noopener,noreferrer"
+                  );
                 }
               }}
             >
-              {fileExtension === "gdrive" ? "Buka Link" : "Download File"}
+              <Link2 size={16} />
+              Buka File
             </button>
+
           </div>
         )}
+
       </Modal>
+
     </div>
   );
 }
