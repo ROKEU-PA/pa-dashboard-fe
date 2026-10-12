@@ -516,13 +516,29 @@ function TambahArsip() {
                 {/* BUTTON */}
 
                 <div className="xl:col-span-2 flex justify-end gap-3 mt-1 pt-5 border-t border-slate-100 dark:border-[#263449]">
-                  <button
-                    type="button"
-                    onClick={() => navigate(-1)}
-                    className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#0b1220] text-sm font-semibold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1b2940] transition-all"
-                  >
-                    Batal
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      no_spp: "",
+                      satker: "",
+                      tahun: "",
+                      type_id: "",
+                      type: "",
+                      dokumen: null,
+                    }));
+
+                    setSingleFile(null);
+
+                    if (singleFileInputRef.current) {
+                      singleFileInputRef.current.value = "";
+                    }
+                  }}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-[#263449] bg-white dark:bg-[#0b1220] text-sm font-semibold text-slate-600 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-[#1b2940] transition-all"
+                >
+                  Batal
+                </button>
 
                   <button
                     type="submit"
