@@ -26,9 +26,7 @@ import {
 } from "lucide-react";
 import FileInput from "@/components/FileInput";
 import { validationSchema } from "@/services/GeneralHelper";
-import { toast } from "react-toastify";
 import CustomPDFViewer from "@/components/PDFViewer";
-import themeColors from "@/constants/color";
 import TableSortLabel from "@/components/TableSortLabel";
 import { AppContext } from "@/contexts/AppContext";
 import moment from "moment";
@@ -57,7 +55,14 @@ function Arsip() {
   } = useSatkerLogic();
 
   // STATE LOKAL UNTUK UI
-  const [isFiltered, setIsFiltered] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(() => {
+  try {
+    const saved = sessionStorage.getItem("eArsipPageState");
+    return saved ? Boolean(JSON.parse(saved).isFiltered) : false;
+  } catch {
+    return false;
+  }
+});
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
   const [variantModal, setVariantModal] = useState("");
@@ -67,11 +72,30 @@ function Arsip() {
   const [sortDir, setSortDir] = useState("desc");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages] = useState(1);
 
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectOpenJenis, setSelectOpenJenis] = useState(false);
   const [jenisFile, setJenisFile] = useState("file");
+
+const isStateRestored = React.useRef(false);
+
+// Simpan filter setelah state awal selesai dipulihkan
+  useEffect(() => {
+    if (!isStateRestored.current) {
+      isStateRestored.current = true;
+      return;
+    }
+
+    sessionStorage.setItem(
+      "eArsipPageState",
+      JSON.stringify({
+        isFiltered,
+        filter,
+      })
+    );
+  }, [isFiltered, filter]);
+
 
   const satkerOptions = useMemo(() => {
     if (userData?.role === "user") {
@@ -200,6 +224,7 @@ const handleApplyFilter = (e) => {
     rowsPerPage,
     sortBy,
     sortDir,
+    fetchTable,
   ]);
 
   useEffect(() => {
@@ -207,11 +232,10 @@ const handleApplyFilter = (e) => {
 
     if (!userData?.role || isFiltered) return;
 
-    // Role user tetap langsung mendapatkan filter modal
     if (userData.role === "user") {
       setIsFilterModalOpen(true);
     }
-  }, [userData, isFiltered]);
+  }, [userData, isFiltered, fetchType]);
 
   useEffect(() => {
     if (userData && userData?.role === "user") {
@@ -253,14 +277,6 @@ const handleApplyFilter = (e) => {
             strokeWidth={1.7}
             className="text-blue-600 dark:text-blue-400"
           />
-        </div>
-
-        {/* BADGE */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 mb-4">
-          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-          <span className="text-xs font-bold tracking-wider text-blue-600 dark:text-blue-400">
-            E-Arsip
-          </span>
         </div>
 
         {/* TITLE */}
@@ -495,9 +511,10 @@ const handleApplyFilter = (e) => {
                 <button
                   type="button"
                   onClick={() => {
-                    setIsFiltered(false);
-                    setIsFilterModalOpen(false);
-                  }}
+                setIsFiltered(false);
+                setIsFilterModalOpen(false);
+                sessionStorage.removeItem("eArsipPageState");
+              }}
                   className="w-full sm:w-fit px-4 h-[38px] rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0A111E] text-slate-600 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 text-sm font-semibold flex items-center justify-center gap-2"
                 >
                   <ArrowLeft size={17} />
@@ -570,7 +587,7 @@ const handleApplyFilter = (e) => {
                       )
                       .map((col) => {
 
-                        if (col.key == "spp_number")
+                        if (col.key === "spp_number")
                           return (
                             <TableCell
                               key={col.key}

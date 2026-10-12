@@ -4,7 +4,13 @@ import Sidebar from "../components/Sidebar/Sidebar";
 import Navbar from "@/components/Navbar";
 import { AppContext } from "@/contexts/AppContext";
 
-function AppLayout({ children, isAdmin, title, userName }) {
+function AppLayout({
+  children,
+  isAdmin,
+  title,
+  description,
+  userName,
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const { userData } = useContext(AppContext);
@@ -47,7 +53,12 @@ function AppLayout({ children, isAdmin, title, userName }) {
 
       {/* 3. MAIN CONTENT */}
       <main className="flex-1 w-full h-screen overflow-y-auto transition-all duration-300 relative">
-        <Navbar menuName={title} user={userName} role={userData?.role} />
+       <Navbar
+          menuName={title}
+          description={description}
+          user={userName}
+          role={userData?.role}
+        />
         <div className="p-4 md:p-6 lg:p-8">{children}</div>
       </main>
       

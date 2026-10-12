@@ -13,13 +13,9 @@ import {
   FolderOpen,
   CircleCheck,
   Clock3,
-  AlertCircle,
   RotateCcw,
   Trash2,
   Folder,
-  Clock,
-  Loader2,
-  XCircle,
 } from "lucide-react";
 
 import { useSatkerLogic } from "./hooks/useSatkerLogic";
@@ -43,10 +39,9 @@ function TambahArsip() {
     setVariantModal,
   } = useSatkerLogic();
 
-  useEffect(() => {
-    fetchType();
-    setVariantModal("Add");
-  }, []);
+    useEffect(() => {
+      fetchType();
+    }, [fetchType, setVariantModal]);
 
   const satkerOptions =
     userData?.role === "user"
@@ -169,9 +164,7 @@ function TambahArsip() {
       {/* =====================================================
           HEADER
       ===================================================== */}
-
       <div className="max-w-[1500px] mx-auto mb-6">
-
         <button
           type="button"
           onClick={() => navigate(-1)}
@@ -180,44 +173,19 @@ function TambahArsip() {
           <span className="flex items-center justify-center w-8 h-8 rounded-xl bg-white border border-slate-200 shadow-sm group-hover:border-blue-200 group-hover:bg-blue-50 transition-all">
             <ArrowLeft size={16} />
           </span>
-
           Kembali ke Pilih Arsip
         </button>
 
-        <div className="flex items-center justify-between gap-6">
-
-          <div>
-
-            <div className="flex items-center gap-2 mb-2">
-
-              <span className="w-1.5 h-5 rounded-full bg-blue-600" />
-
-              <span className="text-xs font-bold tracking-wider text-blue-600">
-                E-Arsip
-              </span>
-
-              <span className="text-slate-300">
-                /
-              </span>
-
-              <span className="text-xs font-medium text-slate-400">
-                Tambah Dokumen
-              </span>
-
-            </div>
-
-            <h1 className="text-2xl md:text-[28px] font-bold text-[#1e293b] tracking-tight">
-              Tambah Dokumen E-Arsip
-            </h1>
-
-            <p className="text-sm text-slate-500 mt-1.5">
-              Kelola dan tambahkan dokumen arsip dalam satu halaman.
-            </p>
-
-          </div>
-
+        <div className="flex items-center gap-2">
+          <span className="h-5 w-1.5 rounded-full bg-blue-600" />
+          <span className="text-xs font-bold tracking-wider text-blue-600">
+            E-Arsip
+          </span>
+          <span className="text-slate-300">/</span>
+          <span className="text-xs font-medium text-slate-400">
+            Tambah Dokumen
+          </span>
         </div>
-
       </div>
 
       {/* =====================================================
@@ -847,236 +815,6 @@ function TambahArsip() {
                   <p className="mt-4 text-[11px] text-slate-400">
                     PDF maksimal 50 MB per file
                   </p>
-
-                </div>
-
-              </div>
-
-              {/* =================================================
-                  PREVIEW TABLE
-              ================================================= */}
-
-              <div className="mt-6">
-
-                <div className="mb-3">
-
-                  <h3 className="text-sm font-bold text-slate-800">
-                    Preview Dokumen
-                  </h3>
-
-                  <p className="text-xs text-slate-400 mt-1">
-                    File yang dipilih akan muncul di tabel berikut.
-                  </p>
-
-                </div>
-
-                <div className="border border-slate-200 rounded-xl overflow-hidden bg-white">
-
-                  <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
-
-                    <table className="w-full min-w-[800px]">
-
-                      <thead className="bg-slate-50 border-b border-slate-200">
-
-                        <tr>
-
-                          <th className="px-5 py-3 text-left text-xs font-bold text-slate-500">
-                            No
-                          </th>
-
-                          <th className="px-5 py-3 text-left text-xs font-bold text-slate-500">
-                            Nama File
-                          </th>
-
-                          <th className="px-5 py-3 text-left text-xs font-bold text-slate-500">
-                            Ukuran
-                          </th>
-
-                          <th className="px-5 py-3 text-left text-xs font-bold text-slate-500">
-                            Status
-                          </th>
-
-                          <th className="px-5 py-3 text-center text-xs font-bold text-slate-500">
-                            Aksi
-                          </th>
-
-                        </tr>
-
-                      </thead>
-
-                      <tbody className="divide-y divide-slate-100">
-
-                        {bulkFiles.length === 0 ? (
-
-                          <tr>
-
-                            <td
-                              colSpan={5}
-                              className="px-5 py-10 text-center"
-                            >
-
-                              <p className="text-sm font-medium text-slate-500">
-                                Belum ada dokumen
-                              </p>
-
-                              <p className="text-xs text-slate-400 mt-1">
-                                Klik "Tambah File" untuk memasukkan dokumen.
-                              </p>
-
-                            </td>
-
-                          </tr>
-
-                        ) : (
-
-                          bulkFiles.map((item, index) => {
-
-                            const file =
-                              item.file || item;
-
-                            const status =
-                              item.status || "Pending";
-
-                            return (
-
-                              <tr
-                                key={`${file.name}-${index}`}
-                                className="hover:bg-slate-50 transition-colors"
-                              >
-
-                                {/* NO */}
-
-                                <td className="px-5 py-4 text-sm text-slate-500">
-                                  {index + 1}
-                                </td>
-
-                                {/* NAMA FILE */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="flex items-center gap-3">
-
-                                    <div className="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center">
-
-                                      <FileText
-                                        size={18}
-                                        className="text-red-500"
-                                      />
-
-                                    </div>
-
-                                    <div className="min-w-0">
-
-                                      <p
-                                        className="font-medium text-slate-700 truncate max-w-[350px]"
-                                        title={file.name}
-                                      >
-                                        {file.name}
-                                      </p>
-
-                                      <p className="text-xs text-slate-400">
-                                        PDF
-                                      </p>
-
-                                    </div>
-
-                                  </div>
-
-                                </td>
-
-                                {/* UKURAN */}
-
-                                <td className="px-5 py-4 text-sm text-slate-500">
-                                  {formatFileSize(file.size)}
-                                </td>
-
-                                {/* STATUS */}
-
-                                <td className="px-5 py-4">
-
-                                  {status === "Pending" && (
-
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
-                                      <Clock size={14} />
-                                      Pending
-                                    </span>
-
-                                  )}
-
-                                  {status === "Uploading" && (
-
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-600">
-
-                                      <Loader2
-                                        size={14}
-                                        className="animate-spin"
-                                      />
-
-                                      Uploading
-
-                                    </span>
-
-                                  )}
-
-                                  {status === "Success" && (
-
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-50 text-green-600">
-
-                                      <CheckCircle2 size={14} />
-
-                                      Success
-
-                                    </span>
-
-                                  )}
-
-                                  {(status === "Failed" ||
-                                    status === "Error") && (
-
-                                    <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-red-50 text-red-600">
-
-                                      <XCircle size={14} />
-
-                                      Failed
-
-                                    </span>
-
-                                  )}
-
-                                </td>
-
-                                {/* AKSI */}
-
-                                <td className="px-5 py-4 text-center">
-
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      removeBulkFile(
-                                        item.id
-                                      )
-                                    }
-                                    className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
-                                    title="Hapus file"
-                                  >
-                                    <Trash2 size={17} />
-                                  </button>
-
-                                </td>
-
-                              </tr>
-
-                            );
-
-                          })
-
-                        )}
-
-                      </tbody>
-
-                    </table>
-
-                  </div>
 
                 </div>
 
