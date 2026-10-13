@@ -227,15 +227,20 @@ const handleApplyFilter = (e) => {
     fetchTable,
   ]);
 
+
+  // Ambil tipe arsip tanpa bergantung pada perubahan filter.
   useEffect(() => {
     fetchType();
+  }, [fetchType]);
 
+  // Atur modal berdasarkan role dan status filter.
+  useEffect(() => {
     if (!userData?.role || isFiltered) return;
 
     if (userData.role === "user") {
       setIsFilterModalOpen(true);
     }
-  }, [userData, isFiltered, fetchType]);
+  }, [userData, isFiltered]);
 
   useEffect(() => {
     if (userData && userData?.role === "user") {

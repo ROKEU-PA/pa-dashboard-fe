@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { toast } from "react-toastify";
@@ -179,28 +179,40 @@ export function useSatkerLogic() {
     }
   };
 
-  const fetchType = async (id) => {
-    try {
-      if (id) {
-        const data = await apiRequest({ url: `/pa/spp/type?id=` + id });
-        const verif = await apiRequest({ url: `/pa/spp/type?id=verifikasi` });
-        if (data.success) {
-          setQuestions(data.data[0].questions);
-          setVerifications(verif.data[0].questions);
+
+    const fetchType = useCallback(async (id) => {
+      try {
+        if (id) {
+          const data = await apiRequest({
+            url: `/pa/spp/type?id=` + id,
+          });
+
+          const verif = await apiRequest({
+            url: `/pa/spp/type?id=verifikasi`,
+          });
+
+          if (data.success) {
+            setQuestions(data.data[0].questions);
+            setVerifications(verif.data[0].questions);
+          }
+        } else {
+          const data = await apiRequest({
+            url: `/pa/spp/type?id=`,
+          });
+
+          if (data.success) {
+            const filteredResult = data.data.filter(
+              (item) => item.type_id !== "verifikasi",
+            );
+
+            setTypes(filteredResult);
+          }
         }
-      } else {
-        const data = await apiRequest({ url: `/pa/spp/type?id=` });
-        if (data.success) {
-          const filteredResult = data.data.filter(
-            (item) => item.type_id !== "verifikasi",
-          );
-          setTypes(filteredResult);
-        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    }, []);
+
 
   const fetchCategories = async (id) => {
     try {
