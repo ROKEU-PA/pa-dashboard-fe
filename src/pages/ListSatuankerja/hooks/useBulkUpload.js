@@ -7,39 +7,27 @@ import {
 } from "lucide-react";
 
 export const useBulkUpload = () => {
-  // =========================================================
   // REF
-  // =========================================================
-
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
 
   // Mencegah upload dipanggil berulang secara bersamaan.
   const uploadLockRef = useRef(false);
 
-  // =========================================================
   // BULK STATE
-  // =========================================================
-
   const [bulkFiles, setBulkFiles] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  // =========================================================
   // CONFIG
-  // =========================================================
-
   // Maksimal 10 file dalam satu request.
   const BATCH_SIZE = 10;
 
   // Maksimal 50 MB per file.
   const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
-  // =========================================================
   // SUMMARY RESULT
-  // =========================================================
-
   const [uploadSummary, setUploadSummary] = useState({
     total: 0,
     success: 0,
@@ -49,10 +37,7 @@ export const useBulkUpload = () => {
     completed: false,
   });
 
-  // =========================================================
   // CREATE BATCHES
-  // =========================================================
-
   const createBatches = (files, batchSize) => {
     if (!Array.isArray(files) || batchSize <= 0) {
       return [];
@@ -67,10 +52,7 @@ export const useBulkUpload = () => {
     return batches;
   };
 
-  // =========================================================
   // CREATE BULK FILE ITEM
-  // =========================================================
-
   const createBulkFileItem = (
     file,
     status = "Pending",
@@ -94,10 +76,7 @@ export const useBulkUpload = () => {
     pagesDetected: null,
   });
 
-  // =========================================================
   // VALIDASI BULK FILE
-  // =========================================================
-
   const validateBulkFile = (file) => {
     if (!file || !file.name) {
       return {
@@ -133,10 +112,7 @@ export const useBulkUpload = () => {
     };
   };
 
-  // =========================================================
   // TAMBAH FILE BULK
-  // =========================================================
-
   const handleBulkFiles = (fileList) => {
     // Jangan menambah file ketika upload berlangsung.
     if (uploadLockRef.current) {
@@ -180,10 +156,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // INPUT BULK
-  // =========================================================
-
   const handleBulkInputChange = (event) => {
     handleBulkFiles(event.target.files);
 
@@ -191,10 +164,7 @@ export const useBulkUpload = () => {
     setIsAddMenuOpen(false);
   };
 
-  // =========================================================
   // INPUT FOLDER
-  // =========================================================
-
   const handleFolderInputChange = (event) => {
     if (uploadLockRef.current) {
       event.target.value = "";
@@ -246,10 +216,7 @@ export const useBulkUpload = () => {
     setIsAddMenuOpen(false);
   };
 
-  // =========================================================
   // DRAG & DROP
-  // =========================================================
-
   const handleDrop = (event) => {
     event.preventDefault();
 
@@ -274,10 +241,7 @@ export const useBulkUpload = () => {
     setIsDragging(false);
   };
 
-  // =========================================================
   // REMOVE FILE
-  // =========================================================
-
   const removeBulkFile = (id) => {
     if (uploadLockRef.current) {
       return;
@@ -292,10 +256,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // CLEAR FILE
-  // =========================================================
-
   const clearBulkFiles = () => {
     if (uploadLockRef.current) {
       return;
@@ -313,10 +274,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // FORMAT FILE SIZE
-  // =========================================================
-
   const formatFileSize = (bytes) => {
     if (!bytes) {
       return "0 KB";
@@ -331,10 +289,7 @@ export const useBulkUpload = () => {
     return `${Math.ceil(bytes / 1024)} KB`;
   };
 
-  // =========================================================
   // STATUS STYLE
-  // =========================================================
-
   const getStatusStyle = (status) => {
     switch (status) {
       case "Success":
@@ -368,10 +323,7 @@ export const useBulkUpload = () => {
     }
   };
 
-  // =========================================================
   // CALCULATE SUMMARY
-  // =========================================================
-
   const calculateSummary = (files) => {
     const total = files.length;
 
@@ -406,10 +358,7 @@ export const useBulkUpload = () => {
     };
   };
 
-  // =========================================================
   // ERROR MESSAGE
-  // =========================================================
-
   const getErrorMessage = (error) => {
     return (
       error?.response?.data?.message ||
@@ -419,10 +368,7 @@ export const useBulkUpload = () => {
     );
   };
 
-  // =========================================================
   // NORMALIZE FILE NAME
-  // =========================================================
-
   const normalizeFileName = (value) => {
     return String(value || "")
       .replace(/\\/g, "/")
@@ -432,10 +378,7 @@ export const useBulkUpload = () => {
       .toLowerCase();
   };
 
-  // =========================================================
   // CARI DETAIL FILE DARI RESPONSE BACKEND
-  // =========================================================
-
   const findFileDetail = (batchItem, details) => {
     if (!Array.isArray(details)) {
       return null;
@@ -462,10 +405,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // APPLY SUCCESS RESPONSE
-  // =========================================================
-
   const applySuccessResponse = (batch, result) => {
     const details = Array.isArray(result?.details)
       ? result.details
@@ -542,10 +482,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // APPLY FAILED RESPONSE
-  // =========================================================
-
   const applyFailedResponse = (batch, result) => {
     const message =
       result?.message ||
@@ -591,24 +528,20 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // BULK UPLOAD
-  // =========================================================
-
   const uploadBulkFiles = async () => {
-    // Kunci ref bekerja langsung tanpa menunggu render React.
-    // Ini mencegah pemanggilan upload bersamaan dari klik ganda.
+    // Mencegah upload berjalan bersamaan akibat klik ganda.
     if (uploadLockRef.current) {
-      console.warn(
-        "[Bulk Upload] Upload masih berjalan. Pemanggilan duplikat diabaikan."
-      );
       return;
     }
 
     const validFiles = bulkFiles.filter((item) => {
       const validation = validateBulkFile(item.file);
 
-      return item.status === "Pending" && validation.valid;
+      return (
+        item.status === "Pending" &&
+        validation.valid
+      );
     });
 
     if (!validFiles.length) {
@@ -622,10 +555,7 @@ export const useBulkUpload = () => {
     try {
       setIsUploading(true);
 
-      // -----------------------------------------
       // Pending -> Uploading
-      // -----------------------------------------
-
       const pendingIds = new Set(
         validFiles.map((item) => item.id)
       );
@@ -647,25 +577,13 @@ export const useBulkUpload = () => {
         return updated;
       });
 
-      // -----------------------------------------
-      // Buat batch maksimal 10 file
-      // -----------------------------------------
-
+      // Buat batch maksimal 10 file.
       const batches = createBatches(
         validFiles,
         BATCH_SIZE
       );
 
-      console.log("=================================");
-      console.log("TOTAL FILE:", validFiles.length);
-      console.log("BATCH SIZE:", BATCH_SIZE);
-      console.log("TOTAL BATCH:", batches.length);
-      console.log("=================================");
-
-      // -----------------------------------------
-      // Ambil token autentikasi
-      // -----------------------------------------
-
+      // Ambil token autentikasi.
       const auth = sessionStorage.getItem("auth");
 
       let accessToken = null;
@@ -681,10 +599,7 @@ export const useBulkUpload = () => {
         );
       }
 
-      // -----------------------------------------
-      // Base URL backend
-      // -----------------------------------------
-
+      // Base URL backend.
       const apiBaseUrl =
         process.env.REACT_APP_API_BASE_URL;
 
@@ -694,26 +609,12 @@ export const useBulkUpload = () => {
         );
       }
 
-      // -----------------------------------------
-      // Upload batch secara berurutan
-      // -----------------------------------------
-
+      // Upload batch secara berurutan.
+      // Setiap batch hanya mengirim satu request API.
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
 
-        console.log(
-          `Upload batch ${i + 1} dari ${batches.length}`
-        );
-
-        console.log(
-          "File:",
-          batch.map((item) => item.name)
-        );
-
-        // ---------------------------------------
-        // FormData
-        // ---------------------------------------
-
+        // FormData.
         const formData = new FormData();
 
         batch.forEach((item) => {
@@ -723,11 +624,6 @@ export const useBulkUpload = () => {
         try {
           // Jangan set Content-Type secara manual.
           // Browser/Axios akan mengatur multipart boundary.
-
-          console.log(
-            `[Bulk Upload] Mengirim request batch ${i + 1}.`
-          );
-
           const response = await axios.post(
             `${apiBaseUrl}/archive/bulk-upload`,
             formData,
@@ -744,13 +640,8 @@ export const useBulkUpload = () => {
 
           const result = response.data;
 
-          console.log(
-            `HASIL BATCH ${i + 1}:`,
-            result
-          );
-
           // HTTP 201 adalah status sukses HTTP.
-          // Pemetaan hasil file tetap mengikuti response backend.
+          // Hasil tiap file tetap mengikuti response backend.
           if (result?.success === true) {
             applySuccessResponse(batch, result);
           } else {
@@ -762,7 +653,8 @@ export const useBulkUpload = () => {
             batchError
           );
 
-          const errorMessage = getErrorMessage(batchError);
+          const errorMessage =
+            getErrorMessage(batchError);
 
           setBulkFiles((prev) => {
             const updated = prev.map((item) => {
@@ -788,10 +680,7 @@ export const useBulkUpload = () => {
           });
         }
 
-        // -----------------------------------------
-        // Update ringkasan setelah batch selesai
-        // -----------------------------------------
-
+        // Update ringkasan setelah batch selesai.
         setBulkFiles((prev) => {
           const summary = calculateSummary(prev);
 
@@ -801,10 +690,7 @@ export const useBulkUpload = () => {
         });
       }
 
-      // -----------------------------------------
       // FINAL SUMMARY
-      // -----------------------------------------
-
       setBulkFiles((prev) => {
         const summary = calculateSummary(prev);
 
@@ -812,10 +698,6 @@ export const useBulkUpload = () => {
 
         return prev;
       });
-
-      console.log("=================================");
-      console.log("SEMUA BATCH SELESAI");
-      console.log("=================================");
     } catch (error) {
       console.error("Bulk upload error:", error);
 
@@ -840,6 +722,7 @@ export const useBulkUpload = () => {
     } finally {
       // Pastikan lock selalu dilepas, termasuk ketika terjadi error.
       uploadLockRef.current = false;
+
       setIsUploading(false);
 
       setBulkFiles((prev) => {
@@ -852,10 +735,7 @@ export const useBulkUpload = () => {
     }
   };
 
-  // =========================================================
   // RETRY
-  // =========================================================
-
   const retryBulkFile = (fileItem) => {
     if (uploadLockRef.current) {
       return;
@@ -882,10 +762,7 @@ export const useBulkUpload = () => {
     });
   };
 
-  // =========================================================
   // STATISTICS
-  // =========================================================
-
   const totalFiles = bulkFiles.length;
 
   const successFiles = bulkFiles.filter(
@@ -913,10 +790,7 @@ export const useBulkUpload = () => {
         )
       : 0;
 
-  // =========================================================
   // RETURN
-  // =========================================================
-
   return {
     // REF
     fileInputRef,
