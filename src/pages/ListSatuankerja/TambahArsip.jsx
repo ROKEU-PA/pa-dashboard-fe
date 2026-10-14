@@ -232,37 +232,37 @@ function TambahArsip() {
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] p-5 text-slate-800 dark:bg-[#0f1724] dark:text-slate-100 md:p-6">
+  <div className="min-h-screen bg-[#f5f7fb] px-5 pb-5 pt-0 text-slate-800 dark:bg-[#0f1724] dark:text-slate-100 md:px-6 md:pb-6 md:pt-0"> 
       {/* HEADER */}
 
-      <div className="mx-auto mb-6 max-w-[1500px]">
+      <div className="mx-auto mb-4 max-w-[1500px]">
         <button
           type="button"
           onClick={() => navigate(-1)}
-          className="group mb-5 flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600 dark:text-slate-400"
+          className="group mb-3 flex items-center gap-2 text-base font-medium text-slate-600 transition-colors hover:text-blue-600 dark:text-slate-400"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-200 bg-white shadow-sm transition-all group-hover:border-blue-200 group-hover:bg-blue-50 dark:border-[#263449] dark:bg-[#111c2e] dark:group-hover:bg-[#1b2940]">
-            <ArrowLeft size={16} />
+            <ArrowLeft size={18} />
           </span>
 
           Kembali ke Pilih Arsip
         </button>
 
-        <div className="flex items-center gap-2">
-          <span className="h-5 w-1.5 rounded-full bg-blue-600" />
+    <div className="flex items-center gap-2">
+      <span className="h-5 w-1.5 rounded-full bg-blue-600" />
 
-          <span className="text-xs font-bold tracking-wider text-blue-600">
-            E-Arsip
-          </span>
+      <span className="text-sm font-bold tracking-wide text-blue-600">
+        E-Arsip
+      </span>
 
-          <span className="text-slate-300 dark:text-slate-600">
-            /
-          </span>
+      <span className="text-slate-300 dark:text-slate-600">
+        /
+      </span>
 
-          <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
-            Tambah Dokumen
-          </span>
-        </div>
+      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+        Tambah Dokumen
+      </span>
+    </div>
       </div>
 
       {/* MAIN */}
