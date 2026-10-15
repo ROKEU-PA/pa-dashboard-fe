@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import moment from "moment";
 import { toast } from "react-toastify";
@@ -25,12 +25,34 @@ export function useSatkerLogic() {
     getCurrentSatuanKerja(listMenu, location.pathname),
   );
 
-  const [filter, setFilter] = useState({
-    tahun: "",
-    searchKey: "",
-    startDate: null,
-    endDate: null,
+  
+  const [filter, setFilter] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem("eArsipPageState");
+      const savedFilter = saved ? JSON.parse(saved).filter : null;
+
+      return {
+        tahun: savedFilter?.tahun ?? "",
+        satker: savedFilter?.satker ?? "",
+        satkerName: savedFilter?.satkerName ?? "",
+        searchKey: savedFilter?.searchKey ?? "",
+        startDate: savedFilter?.startDate ?? null,
+        endDate: savedFilter?.endDate ?? null,
+      };
+    } catch (error) {
+      console.error("Gagal memulihkan filter:", error);
+
+      return {
+        tahun: "",
+        satker: "",
+        satkerName: "",
+        searchKey: "",
+        startDate: null,
+        endDate: null,
+      };
+    }
   });
+
 
   // Table & Pagination States
   const [dataTable, setDataTable] = useState([]);
@@ -157,28 +179,40 @@ export function useSatkerLogic() {
     }
   };
 
-  const fetchType = async (id) => {
-    try {
-      if (id) {
-        const data = await apiRequest({ url: `/pa/spp/type?id=` + id });
-        const verif = await apiRequest({ url: `/pa/spp/type?id=verifikasi` });
-        if (data.success) {
-          setQuestions(data.data[0].questions);
-          setVerifications(verif.data[0].questions);
+
+    const fetchType = useCallback(async (id) => {
+      try {
+        if (id) {
+          const data = await apiRequest({
+            url: `/pa/spp/type?id=` + id,
+          });
+
+          const verif = await apiRequest({
+            url: `/pa/spp/type?id=verifikasi`,
+          });
+
+          if (data.success) {
+            setQuestions(data.data[0].questions);
+            setVerifications(verif.data[0].questions);
+          }
+        } else {
+          const data = await apiRequest({
+            url: `/pa/spp/type?id=`,
+          });
+
+          if (data.success) {
+            const filteredResult = data.data.filter(
+              (item) => item.type_id !== "verifikasi",
+            );
+
+            setTypes(filteredResult);
+          }
         }
-      } else {
-        const data = await apiRequest({ url: `/pa/spp/type?id=` });
-        if (data.success) {
-          const filteredResult = data.data.filter(
-            (item) => item.type_id !== "verifikasi",
-          );
-          setTypes(filteredResult);
-        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    }, []);
+
 
   const fetchCategories = async (id) => {
     try {
@@ -308,7 +342,7 @@ export function useSatkerLogic() {
       const payload = new FormData();
       let CryptoJS = require("crypto-js");
       let encryptedLink =
-        formDataToEdit.link == null
+        formDataToEdit.link === null || formDataToEdit.link === undefined
           ? null
           : CryptoJS.AES.encrypt(
               formDataToEdit.link || "",
@@ -663,7 +697,7 @@ export function useSatkerLogic() {
     setFormData({
       ...row,
       type: row.jenis_spp,
-      link: jenisFile == "file" ? null : row.document?.path,
+      link: jenisFile === "file" ? null : row.document?.path,
       kategori_penerima: row.category || [],
     });
     setIsOpenModal(true);

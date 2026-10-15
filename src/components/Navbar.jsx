@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContexts";
 
-function Navbar({ menuName, user, role }) {
+function Navbar({ menuName, description, user, role }) {
   const [currentDate, setCurrentDate] = useState({ hari: "", tanggal: "" });
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -61,8 +61,13 @@ function Navbar({ menuName, user, role }) {
           <h1 className="font-bold text-[#18324f] dark:text-white text-2xl md:text-[28px] leading-tight tracking-tight m-0 transition-colors">
             {menuName || "Dashboard"}
           </h1>
-          {(user && menuName == "Monitoring E-SPP") ||
-            (menuName == "Proyeksi RPD" && (
+            {description && (
+              <p className="text-[#718096] dark:text-gray-400 text-[13px] md:text-[14px] mt-1 m-0">
+                {description}
+              </p>
+            )}
+          {(user && menuName === "Monitoring E-SPP") ||
+            (menuName === "Proyeksi RPD" && (
               <p className="text-[#718096] dark:text-gray-400 text-[13px] md:text-[14px] mt-1 m-0">
                 Selamat Datang,{" "}
                 <strong className="font-bold text-[#18324f] dark:text-blue-400">
@@ -70,12 +75,12 @@ function Navbar({ menuName, user, role }) {
                 </strong>
               </p>
             ))}
-          {menuName == "Satuan Kerja" && (
+          {menuName === "Satuan Kerja" && (
             <p className="text-[#718096] dark:text-gray-400 text-[13px] md:text-[14px] mt-1 m-0">
               Silahkan pilih satuan kerja anda
             </p>
           )}
-          {menuName == "E-SPP" && (
+          {menuName === "E-SPP" && (
             <p className="text-[#718096] dark:text-gray-400 text-[13px] md:text-[14px] mt-1 m-0">
               Elektronik Surat Permintaan Pembayaran
             </p>
