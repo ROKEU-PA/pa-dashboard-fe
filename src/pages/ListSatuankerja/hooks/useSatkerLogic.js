@@ -27,32 +27,12 @@ export function useSatkerLogic() {
     getCurrentSatuanKerja(listMenu, location.pathname),
   );
 
-  
-  const [filter, setFilter] = useState(() => {
-    try {
-      const saved = sessionStorage.getItem("eArsipPageState");
-      const savedFilter = saved ? JSON.parse(saved).filter : null;
-
-      return {
-        tahun: savedFilter?.tahun ?? "",
-        satker: savedFilter?.satker ?? "",
-        satkerName: savedFilter?.satkerName ?? "",
-        searchKey: savedFilter?.searchKey ?? "",
-        startDate: savedFilter?.startDate ?? null,
-        endDate: savedFilter?.endDate ?? null,
-      };
-    } catch (error) {
-      console.error("Gagal memulihkan filter:", error);
-
-      return {
-        tahun: "",
-        satker: "",
-        satkerName: "",
-        searchKey: "",
-        startDate: null,
-        endDate: null,
-      };
-    }
+  const [filter, setFilter] = useState({
+    tahun: "",
+    searchKey: "",
+    startDate: null,
+    endDate: null,
+    status: sessionStorage.getItem("espp_status_filter") || "",
   });
 
 
@@ -63,6 +43,15 @@ export function useSatkerLogic() {
   const [totalPages, setTotalPages] = useState(1);
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
+  const [jumlahDiprosesPIC, setJumlahDiprosesPIC] = useState(0);
+  const [jumlahPerluDiperbaiki, setJumlahPerluDiperbaiki] =
+    useState(0);
+  const [jumlahPerluDiperbaikiPAPIC, setJumlahPerluDiperbaikiPAPIC] =
+    useState(0);
+  const [canSubmitTest, setCanSubmitTest] = useState(null);
+  const [totalDiperbaikiRevGte1, setTotalDiperbaikiRevGte1] =
+    useState(0);
+  const [summaryNote, setSummaryNote] = useState("");
 
   // Modal States (Tinggal Add/Edit & PDF)
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -113,18 +102,49 @@ export function useSatkerLogic() {
     }
   };
 
-  const handleDateChange = (key, value) => {
-    setFilter((prev) => {
-      const newFilter = { ...prev, [key]: value };
-      if (
-        key === "startDate" &&
-        newFilter.endDate &&
-        value > newFilter.endDate
-      ) {
-        newFilter.endDate = null;
+    const handleDateChange = (key, value) => {
+      if (key === "status") {
+        sessionStorage.setItem("espp_status_filter", value);
+
+        setPage(0);
+        setFilter((prev) => ({
+          ...prev,
+          status: value,
+        }));
+
+        return;
       }
-      return newFilter;
-    });
+
+      setFilter((prev) => {
+        const newFilter = {
+          ...prev,
+          [key]: value,
+        };
+
+        if (
+          key === "startDate" &&
+          newFilter.endDate &&
+          value > newFilter.endDate
+        ) {
+          newFilter.endDate = "";
+        }
+
+        return newFilter;
+      });
+    };
+
+    const handleStatusChange = (value) => {
+      const status = value || "";
+
+      sessionStorage.setItem("espp_status_filter", status);
+
+      setPage(0);
+
+      setFilter((prev) => ({
+        ...prev,
+        status,
+      }));
+    setPage(0);
   };
 
   const handleChange = (e) => {
@@ -142,19 +162,86 @@ export function useSatkerLogic() {
     return file.size <= maxSizeBytes;
   };
 
+  const fetchPicSummary = async () => {
+    try {
+      const res = await apiRequest({
+        url: "/archive/pic-summary",
+        token: accessToken,
+      });
+
+      if (!res?.success || !res?.data) return;
+
+      const summary = res.data;
+
+      setJumlahDiprosesPIC(
+        Number(summary.total_diproses_) || 0
+      );
+
+      setCanSubmitTest(
+        summary.can_submit_test_ ?? null
+      );
+
+      setTotalDiperbaikiRevGte1(
+        Number(summary.total_diperbaiki_rev_gte1_) || 0
+      );
+
+     setSummaryNote(summary.note || "");
+    } catch (error) {
+      console.error("Gagal mengambil summary PIC:", error);
+    }
+  };
+
+  // TAMBAHAN BARU
+  const getRevision = (item) =>
+    Number(
+      item?.rev_ ??
+        item?.rev__ ??
+        item?.revisi_ ??
+        item?.revision_ ??
+        0
+    );
+
+  const getUpdater = (item) =>
+    String(
+      item?.update_by_ ??
+        item?.update_by ??
+        item?.updated_by_ ??
+        item?.updated_by ??
+        item?.diperbaiki_oleh_ ??
+        item?.diperbaiki_oleh ??
+        ""
+    )
+      .trim()
+      .toUpperCase();
+
   // ==========================================
   // 3. API CALLS
   // ==========================================
   const fetchTable = async () => {
     try {
-      const now = isPengajuanPath(location.pathname)
+      const isPengajuan = isPengajuanPath(location.pathname);
+
+      const tahun = isPengajuan
         ? new Date().getFullYear()
         : filter.tahun;
-      const status = isPengajuanPath(location.pathname) ? "arsip" : null;
+
+      const status = isPengajuan ? "arsip" : null;
+
+      const buildParams = (overrides = {}) =>
+        buildQueryString({
+          biro_code: currentMenu?.code ?? filter?.satker,
+          tahun,
+          status,
+          page: 1,
+          per_page: 100,
+          ...overrides,
+        });
+
       const query = buildQueryString({
-        biro_code: currentMenu?.code ?? filter.satker,
-        tahun: now,
-        status: status,
+        biro_code: currentMenu?.code ?? filter?.satker,
+        tahun,
+        status,
+        status_filter: filter.status || "",
         search_key: filter.searchKey,
         page: page + 1,
         per_page: rowsPerPage,
@@ -172,12 +259,147 @@ export function useSatkerLogic() {
         url: `/archive/list?${query}`,
         token: accessToken,
       });
-      if (data?.success) {
-        setTotalPages(data.data?.last_page);
-        setDataTable(data.data?.data);
+
+      if (!data?.success) return;
+
+      const rows = data?.data?.data || [];
+
+
+const normalizeStatus = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
+
+const selectedStatus = normalizeStatus(filter?.status);
+
+const filteredRows = !selectedStatus
+  ? rows
+  : rows.filter((item) => {
+      const itemStatus = normalizeStatus(item?.status);
+
+      if (selectedStatus === "diproses") {
+        return ["fix", "diproses"].includes(itemStatus);
       }
+
+      if (
+        selectedStatus === "diproseslengkap" ||
+        selectedStatus === "approved"
+      ) {
+        return ["approved", "diproseslengkap"].includes(itemStatus);
+      }
+
+      if (
+        selectedStatus === "butuhperbaikan" ||
+        selectedStatus === "perludiperbaiki"
+      ) {
+        return [
+          "fix",
+          "butuhperbaikan",
+          "perludiperbaiki",
+        ].includes(itemStatus);
+      }
+
+      return itemStatus === selectedStatus;
+    });
+
+    setDataTable(filteredRows);
+    setTotalPages(
+      Math.max(1, Math.ceil(filteredRows.length / rowsPerPage))
+    );
+
+      // Hitung jumlah dokumen perbaikan dari data yang tersedia.
+      const normalizeCountStatus = (value) =>
+        String(value ?? "")
+          .trim()
+          .toLowerCase()
+          .replace(/[\s_-]+/g, "");
+
+      setJumlahPerluDiperbaiki(
+        rows.filter((item) => {
+          const updateBy = String(
+            item?.update_by ?? ""
+          )
+            .trim()
+            .toUpperCase();
+
+          return (
+            normalizeCountStatus(item?.status) ===
+              "perludiperbaiki" &&
+            Number(item?.rev_) > 1 &&
+            updateBy !== "PA PIC"
+          );
+        }).length
+      );
+
+      setJumlahPerluDiperbaikiPAPIC(
+        rows.filter((item) => {
+          const updateBy = String(
+            item?.update_by ?? ""
+          )
+            .trim()
+            .toUpperCase();
+
+          return (
+            normalizeCountStatus(item?.status) ===
+              "perludiperbaiki" &&
+            updateBy === "PA PIC"
+          );
+        }).length
+      );
+
+      let allRows = [];
+      let currentPage = 1;
+      let lastPage = 1;
+
+      do {
+        const countQuery = buildParams({
+          page: currentPage,
+          per_page: 100,
+        });
+
+        const countData = await apiRequest({
+          url: `/archive/list?${countQuery}`,
+          token: accessToken,
+        });
+
+        if (!countData?.success) break;
+
+        allRows = allRows.concat(
+          countData?.data?.data || []
+        );
+
+        lastPage = Number(countData?.data?.last_page) || 1;
+        currentPage++;
+      } while (currentPage <= lastPage);
+
+      // Hitung SPP berstatus Diproses.
+      setJumlahDiprosesPIC(
+        allRows.filter(
+          (item) => normalizeStatus(item?.status_) === "diproses"
+        ).length
+      );
+
+      // Hitung SPP perlu diperbaiki, bukan oleh PA PIC.
+      setJumlahPerluDiperbaiki(
+        allRows.filter(
+          (item) =>
+            normalizeStatus(item?.status_) === "perludiperbaiki" &&
+            getRevision(item) > 1 &&
+            getUpdater(item) !== "PA PIC"
+        ).length
+      );
+
+      // Hitung SPP perlu diperbaiki oleh PA PIC.
+      setJumlahPerluDiperbaikiPAPIC(
+        allRows.filter(
+          (item) =>
+            normalizeStatus(item?.status_) === "perludiperbaiki" &&
+            getUpdater(item) === "PA PIC"
+        ).length
+      );
     } catch (error) {
-      console.error(error);
+      console.error("Gagal mengambil data SPP:", error);
     }
   };
 
@@ -667,7 +889,10 @@ export function useSatkerLogic() {
         status_pegawai: null,
         jml_hal: 0,
       });
-      fetchTable();
+      await Promise.all([
+      fetchTable(),
+      fetchPicSummary(),
+    ]);
     } catch (err) {
       console.log(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
@@ -947,6 +1172,13 @@ export function useSatkerLogic() {
     totalPages,
     sortBy,
     sortDir,
+    jumlahDiprosesPIC,
+    jumlahPerluDiperbaiki,
+    jumlahPerluDiperbaikiPAPIC,
+    canSubmitTest,
+    totalDiperbaikiRevGte1,
+    summaryNote,
+    fetchPicSummary,
     formData,
     jenisFile,
     pdfToOpen,
@@ -974,6 +1206,7 @@ export function useSatkerLogic() {
     // Handlers
     handleSortChange,
     handleDateChange,
+    handleStatusChange,
     handleChange,
     handleSubmit,
     checklistIsValid,

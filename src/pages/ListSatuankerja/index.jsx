@@ -10,111 +10,248 @@ import Button from "@/components/Button";
 import CustomPDFViewer from "@/components/PDFViewer";
 import PendingDocumentsModal from "./pendingDocumentsModal";
 import ChecklistComponent from "./components/ChecklistComponent";
-import { Folder } from "lucide-react";
+import { apiRequest } from "@/services/APIHelper";
+import { CalendarDays, Folder, Clock } from "lucide-react";
 
 import FilterSection from "./components/FilterSection";
 import SatkerTable from "./components/SatkerTable";
+
 import { useSatkerLogic } from "./hooks/useSatkerLogic";
 
 import { isPengajuanPath, getCurrentSatuanKerja } from "./satkerHooks";
 import { validationSchema } from "@/services/GeneralHelper";
 
 function ListSatuanKerjaPage() {
-  const {
-    fetchTable,
-    fetchType,
-    fetchCategories,
-    setCurrentMenu,
-    kategoriOptions,
-    statusPegawai,
-    location,
-    listMenu,
-    userData,
-    filter,
-    dataTable,
-    columns,
-    page,
-    totalPages,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    handleDateChange,
-    handleSortChange,
-    setPage,
-    setRowsPerPage,
-    openAddModal,
-    openEditModal,
-    openMergeModal,
-    // Modal states
-    isOpenModal,
-    setIsOpenModal,
-    isOpenPDF,
-    setIsOpenPDF,
-    showModal,
-    setShowModal,
-    letiantModal,
-    setVariantModal,
-    isOpenMergeModal,
-    setIsOpenMergeModal,
-    // Form & Data states
-    formData,
-    setFormData,
-    jenisFile,
-    setJenisFile,
-    pdfToOpen,
-    types,
-    handleChange,
-    handleSubmit,
-    currentMenu,
-    handleMergeSubmit,
-    setArchiveFile,
-    isLoadingMerge,
+const {
+  fetchTable,
+  fetchType,
+  fetchCategories,
+  setCurrentMenu,
+  kategoriOptions,
+  statusPegawai,
+  location,
+  listMenu,
+  userData,
+  filter,
+  dataTable,
+  columns,
+  page,
+  totalPages,
+  rowsPerPage,
+  sortBy,
+  sortDir,
+  handleDateChange,
+  handleStatusChange,
+  handleSortChange,
+  setPage,
+  setRowsPerPage,
+  openAddModal,
+  openEditModal,
+  openMergeModal,
+
+  // Modal states
+  isOpenModal,
+  setIsOpenModal,
+  isOpenPDF,
+  setIsOpenPDF,
+  showModal,
+  setShowModal,
+  variantModal,
+  setVariantModal,
+  isOpenMergeModal,
+  setIsOpenMergeModal,
+
+  // Form & Data states
+  formData,
+  setFormData,
+  jenisFile,
+  setJenisFile,
+  pdfToOpen,
+  types,
+  handleChange,
+  handleSubmit,
+  currentMenu,
+  handleMergeSubmit,
+  setArchiveFile,
+  isLoadingMerge,
+
+    // Jumlah SPP untuk pembatasan tombol
+    jumlahDiprosesPIC,
+    jumlahPerluDiperbaiki,
+    jumlahPerluDiperbaikiPAPIC,
+    fetchPicSummary,
   } = useSatkerLogic();
+
 
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectOpenJenis, setSelectOpenJenis] = useState(false);
   const [selectOpenStatus, setSelectOpenStatus] = useState(false);
+  const [upcomingEvents, setUpcomingEvents] = useState([]);
+  const [showAllUpcomingEvents, setShowAllUpcomingEvents] = useState(false);
+  const [searchUpcoming, setSearchUpcoming] = useState("");
+  const [upcomingPage, setUpcomingPage] = useState(1);
 
-  const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
+  const upcomingPerPage = 8;
 
-  const getFileExtension = (url) => {
-    try {
-      const parsedUrl = new URL(url);
-      const hostname = parsedUrl.hostname.toLowerCase();
-      const pathname = parsedUrl.pathname;
-      if (
-        hostname.includes("drive.google.com") ||
-        hostname.includes("docs.google.com") ||
-        hostname.includes("drive.googleusercontent.com")
-      ) {
-        return "gdrive";
+  const filteredUpcomingEvents = upcomingEvents.filter((event) =>
+    (event.note || "").toLowerCase().includes(searchUpcoming.toLowerCase())
+  );
+
+  const totalUpcomingPages = Math.ceil(
+    filteredUpcomingEvents.length / upcomingPerPage
+  );
+
+  const paginatedUpcomingEvents = filteredUpcomingEvents.slice(
+    (upcomingPage - 1) * upcomingPerPage,
+    upcomingPage * upcomingPerPage
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchUpcomingEvents = async () => {
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const lastDay = new Date(today);
+        lastDay.setDate(today.getDate() + 6);
+
+        const getMonthKey = (date) =>
+          `${date.getFullYear()}-${String(
+            date.getMonth() + 1
+          ).padStart(2, "0")}`;
+
+        // Ambil bulan yang diperlukan, termasuk jika berganti bulan.
+        const months = [
+          ...new Set([
+            getMonthKey(today),
+            getMonthKey(lastDay),
+          ]),
+        ];
+
+        const responses = await Promise.all(
+          months.map((month) =>
+            apiRequest({
+              url: `/calendar?month=${month}`,
+            })
+          )
+        );
+
+        const allEvents = responses.flatMap((response) =>
+          response?.success && Array.isArray(response.data)
+            ? response.data
+            : []
+        );
+
+        const normalizedEvents = allEvents.map((event) => {
+          const date = event.date ?? event._date ?? event._Date ?? "";
+          const time = event.time ?? event._time ?? event.Time ?? "";
+          const note =
+            event.note ??
+            event._note ??
+            event._Note ??
+            event.title ??
+            event._title ??
+            event._Title ??
+            "";
+
+        return {
+          ...event,
+          id: String(event.id ?? event._id ?? `${date}-${note}`),
+          date,
+          time,
+          note,
+        };
+        });
+
+        const filteredEvents = normalizedEvents
+          .filter((event) => {
+            if (!event.date) return false;
+
+            const eventDate = new Date(`${event.date}T00:00:00`);
+
+            return (
+              !Number.isNaN(eventDate.getTime()) &&
+              eventDate >= today &&
+              eventDate <= lastDay
+            );
+          })
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        // Hindari menampilkan agenda yang sama dua kali.
+        const uniqueEvents = Array.from(
+          new Map(
+            filteredEvents.map((event) => [
+              `${event.date}-${event.note}`,
+              event,
+            ])
+          ).values()
+        );
+
+        if (isMounted) {
+          setUpcomingEvents(uniqueEvents);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil Upcoming Events:", error);
+
+        if (isMounted) {
+          setUpcomingEvents([]);
+        }
       }
-      const parts = pathname.split(".");
-      if (parts.length > 1) {
-        return parts.pop().toLowerCase();
+    };
+
+    fetchUpcomingEvents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+    const getAcceptedFileType = () => ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
+
+    const getFileExtension = (url) => {
+      try {
+        const parsedUrl = new URL(url);
+        const hostname = parsedUrl.hostname.toLowerCase();
+        const pathname = parsedUrl.pathname;
+        if (
+          hostname.includes("drive.google.com") ||
+          hostname.includes("docs.google.com") ||
+          hostname.includes("drive.googleusercontent.com")
+        ) {
+          return "gdrive";
+        }
+        const parts = pathname.split(".");
+        if (parts.length > 1) {
+          return parts.pop().toLowerCase();
+        }
+        return "";
+      } catch {
+        return "";
       }
-      return "";
-    } catch {
-      return "";
-    }
-  };
+    };
 
   const fileExtension = getFileExtension(pdfToOpen);
 
   useEffect(() => {
     fetchTable();
+    fetchPicSummary();
     fetchType();
     fetchCategories();
-    setCurrentMenu(getCurrentSatuanKerja(listMenu, location.pathname));
+    setCurrentMenu(
+      getCurrentSatuanKerja(listMenu, location.pathname)
+    );
   }, [
     filter.tahun,
     filter.searchKey,
+    filter.status,
+    filter.startDate,
+    filter.endDate,
     page,
     rowsPerPage,
     sortBy,
     sortDir,
-    filter.startDate,
-    filter.endDate,
     listMenu,
     location.pathname,
   ]);
@@ -134,20 +271,96 @@ function ListSatuanKerjaPage() {
   };
 
   return (
-    <div className="w-full bg-white dark:!bg-transparent dark:border-none rounded-xl shadow-lg dark:shadow-none border border-gray-100 overflow-hidden flex flex-col">
+   <div className="w-full flex flex-col gap-1">
+
+    {/* --- SECTION 1: UPCOMING EVENTS COMPACT --- */}
+    {upcomingEvents.length > 0 && (
+      <section className="w-full mb-2 rounded-xl border border-slate-100 bg-white px-3 py-2 shadow-sm dark:border-white/10 dark:bg-[#111C30]/80">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+              <CalendarDays size={18} />
+            </div>
+
+            <div>
+              <h2 className="text-sm font-extrabold text-slate-800 dark:text-white">
+                Upcoming Events
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Agenda 7 hari ke depan
+              </p>
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
+            {upcomingEvents.slice(0, 4).map((event) => {
+              const date = new Date(`${event.date}T00:00:00`);
+
+              return (
+                <div
+                  key={event.id}
+                  className="flex min-w-[155px] items-center gap-2 rounded-lg border border-slate-100 bg-slate-50/70 px-2 py-1.5 dark:border-white/10 dark:bg-white/[0.03]"
+                >
+                  <div className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-md bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                    <span className="text-[9px] font-bold uppercase">
+                      {date.toLocaleDateString("id-ID", { month: "short" })}
+                    </span>
+                    <span className="text-sm font-extrabold leading-4">
+                      {date.getDate()}
+                    </span>
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-bold text-slate-700 dark:text-slate-200">
+                      {event.note || "Agenda"}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                      {date.toLocaleDateString("id-ID", {
+                        weekday: "short",
+                      })}
+                      {event.time && ` • ${event.time.slice(0, 5)}`}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+            {upcomingEvents.length > 4 && (
+              <span className="shrink-0 rounded-lg bg-blue-50 px-2.5 py-2 text-xs font-bold text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                +{upcomingEvents.length - 4} lainnya
+              </span>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                setShowAllUpcomingEvents(true);
+                setUpcomingPage(1);
+                setSearchUpcoming("");
+              }}
+              className="shrink-0 rounded-lg border border-blue-200 px-3 py-2 text-xs font-bold text-blue-600 transition hover:bg-blue-50 dark:border-blue-500/30 dark:text-blue-400 dark:hover:bg-blue-500/10"
+            >
+              Lihat Semua
+            </button>
+          </div>
+        </section>
+      )}
+
       <Paper
         elevation={0}
-        className="rounded-xl flex flex-col bg-white dark:!bg-transparent"
+        className="rounded-xl flex flex-col bg-white dark:!bg-transparent border border-gray-100 shadow-lg overflow-hidden"
       >
-        {/* --- SECTION 1: FILTER --- */}
-        <FilterSection
-          location={location}
-          userData={userData}
-          filter={filter}
-          handleDateChange={handleDateChange}
-          openAddModal={openAddModal}
-          openMergeModal={openMergeModal}
-        />
+      <FilterSection
+        location={location}
+        userData={userData}
+        filter={filter}
+        handleDateChange={handleDateChange}
+        handleStatusChange={handleStatusChange} 
+        openAddModal={openAddModal}
+        openMergeModal={openMergeModal}
+        jumlahPerluDiperbaikiPAPIC={jumlahPerluDiperbaikiPAPIC}
+      />
 
         {/* --- SECTION 2: TABLE --- */}
         <SatkerTable
@@ -159,6 +372,9 @@ function ListSatuanKerjaPage() {
           sortBy={sortBy}
           sortDir={sortDir}
           openEditModal={openEditModal}
+          jumlahDiprosesPIC={jumlahDiprosesPIC}
+          jumlahPerluDiperbaiki={jumlahPerluDiperbaiki}
+          jumlahPerluDiperbaikiPAPIC={jumlahPerluDiperbaikiPAPIC}
         />
 
         <div className="mt-4">
@@ -173,7 +389,115 @@ function ListSatuanKerjaPage() {
             }}
           />
         </div>
-      </Paper>
+        </Paper>
+
+      {/* MODAL SEMUA UPCOMING EVENTS */}
+      <Modal
+        open={showAllUpcomingEvents}
+        onClose={() => setShowAllUpcomingEvents(false)}
+        title="Semua Upcoming Events"
+        width="900px"
+        maxWidth="95vw"
+      >
+        <div className="flex flex-col gap-4 p-4">
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              {filteredUpcomingEvents.length} agenda dalam 7 hari ke depan
+            </p>
+
+            <input
+              type="text"
+              value={searchUpcoming}
+              onChange={(e) => {
+                setSearchUpcoming(e.target.value);
+                setUpcomingPage(1);
+              }}
+              placeholder="Cari nama agenda..."
+              className="mt-3 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-blue-400 dark:border-white/10 dark:bg-[#111C30] dark:text-white"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {paginatedUpcomingEvents.map((event) => {
+              const date = new Date(`${event.date}T00:00:00`);
+
+              return (
+                <div
+                  key={event.id}
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 dark:border-white/10"
+                >
+                  <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                    <span className="text-[10px] font-bold uppercase">
+                      {date.toLocaleDateString("id-ID", { month: "short" })}
+                    </span>
+                    <span className="text-lg font-extrabold leading-5">
+                      {date.getDate()}
+                    </span>
+                  </div>
+
+            <div className="min-w-0">
+              <p className="break-words text-sm font-bold text-slate-800 dark:text-white">
+                {event.note || "Agenda"}
+              </p>
+
+              <div className="text-xs text-slate-500 dark:text-slate-400">
+                <p>
+                  {date.toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })}
+                </p>
+
+                {event.time && (
+                  <p className="mt-1 flex items-center gap-1 text-xs text-blue-600">
+                    <Clock size={14} />
+                    {String(event.time).slice(0, 5)}
+                  </p>
+                )}
+              </div>
+            </div>
+            </div>
+            );
+            })}
+
+            {paginatedUpcomingEvents.length === 0 && (
+              <p className="col-span-full py-8 text-center text-sm text-slate-500">
+                Agenda tidak ditemukan.
+              </p>
+            )}
+          </div>
+
+          {totalUpcomingPages > 1 && (
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3 dark:border-white/10">
+              <span className="text-xs text-slate-500">
+                Halaman {upcomingPage} dari {totalUpcomingPages}
+              </span>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  disabled={upcomingPage === 1}
+                  onClick={() => setUpcomingPage((page) => page - 1)}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold disabled:opacity-40 dark:border-white/10"
+                >
+                  Sebelumnya
+                </button>
+
+                <button
+                  type="button"
+                  disabled={upcomingPage === totalUpcomingPages}
+                  onClick={() => setUpcomingPage((page) => page + 1)}
+                  className="rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold disabled:opacity-40 dark:border-white/10"
+                >
+                  Berikutnya
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
 
       {/* 1. MODAL ADD / EDIT */}
       <Modal
@@ -195,7 +519,7 @@ function ListSatuanKerjaPage() {
         }}
         title={
           isPengajuanPath(location.pathname)
-            ? letiantModal === "Add"
+            ? variantModal === "Add"
               ? "Form Pengajuan"
               : "Form Edit"
             : "Form Pengarsipan"
@@ -338,7 +662,7 @@ function ListSatuanKerjaPage() {
             )}
 
             {/* Baris 3: Nama Pengirim (Kondisional) */}
-            {isPengajuanPath(location.pathname) && letiantModal === "Add" && (
+            {isPengajuanPath(location.pathname) && variantModal === "Add" && (
               <Input
                 label="Nama Pengirim"
                 name="uploaded_by"
@@ -351,7 +675,7 @@ function ListSatuanKerjaPage() {
             )}
 
             {/* Baris 4: Jenis File (Kondisional) */}
-            {!isPengajuanPath(location.pathname) && letiantModal === "Add" && (
+            {!isPengajuanPath(location.pathname) && variantModal === "Add" && (
               <Select
                 label="Jenis File"
                 name="jenis_file"
@@ -401,7 +725,7 @@ function ListSatuanKerjaPage() {
                   label="Dokumen SPP"
                   name="dokumen"
                   onChange={handleChange}
-                  required={letiantModal === "Add"}
+                  required={variantModal === "Add"}
                   value={formData?.document}
                 />
                 <p className="text-xs text-slate-500  dark:text-white font-medium italic ml-1">
@@ -417,7 +741,7 @@ function ListSatuanKerjaPage() {
             {/* Area Khusus Admin/PIC (SPM & SP2D) */}
             {userData &&
               !isPengajuanPath(location.pathname) &&
-              letiantModal === "Edit" &&
+              variantModal === "Edit" &&
               userData?.role !== "user" && (
                 <div className="p-5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-5 mt-2">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
@@ -459,7 +783,7 @@ function ListSatuanKerjaPage() {
               // Jika Button Anda mendukung className, ini akan membuatnya tampil beda
               className="w-full md:w-auto px-8 py-2.5 bg-[#308BFD] hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md shadow-blue-500/30 transition-all"
             >
-              {letiantModal === "Add" ? "Kirim Pengajuan" : "Simpan Perubahan"}
+              {variantModal === "Add" ? "Kirim Pengajuan" : "Simpan Perubahan"}
             </Button>
           </div>
         </form>
