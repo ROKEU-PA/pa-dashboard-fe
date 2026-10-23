@@ -51,7 +51,7 @@ export const AppProvider = ({ children }) => {
   const LoadUser = async () => {
     try {
       const userData = await fetchUser(token);
-      setUserData(userData.data);
+      setUserData(userData?.data);
     } catch (error) {
       console.error("Error loading menu:", error);
     }

@@ -1,3 +1,5 @@
+import CryptoJS from "crypto-js";
+
 export const requiredValidator =
   (fieldName = "Field ini") =>
   (val) =>
@@ -179,11 +181,11 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
 };
 
 export const cryptoEncrypter = (string) => {
+  let ENCRYPTION_KEY = import.meta.env.REACT_APP_ENCRYPTION_KEY;
   if (!string || string === "" || string === undefined) return null;
-  let CryptoJS = require("crypto-js");
   let encryptedString = CryptoJS.AES.encrypt(
     string,
-    "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk"
+    ENCRYPTION_KEY
   ).toString();
   return encryptedString;
 };

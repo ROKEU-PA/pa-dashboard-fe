@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { AppContext } from "@/contexts/AppContext";
 import { apiRequest } from "@/services/APIHelper";
 import { buildQueryString } from "@/services/GeneralHelper";
+import CryptoJS from "crypto-js";
 import {
   columns,
   getCurrentSatuanKerja,
@@ -12,6 +13,7 @@ import {
 } from "@/pages/ListSatuankerja/satkerHooks";
 
 export function useSatkerLogic() {
+  let ENCRYPTION_KEY = import.meta.env.REACT_APP_ENCRYPTION_KEY;
   const { listMenu, userData } = useContext(AppContext);
   const location = useLocation();
 
@@ -234,10 +236,9 @@ export function useSatkerLogic() {
 
   const submitData = async (formDataToSubmit) => {
     try {
-      let CryptoJS = require("crypto-js");
       let encryptedLink = CryptoJS.AES.encrypt(
         formDataToSubmit.link || "",
-        "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
+        ENCRYPTION_KEY,
       ).toString();
       const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
 
@@ -315,7 +316,7 @@ export function useSatkerLogic() {
           };
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/archive/create`,
+            `${import.meta.env.REACT_APP_API_BASE_URL}/archive/create`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
@@ -340,13 +341,12 @@ export function useSatkerLogic() {
   const editData = async (formDataToEdit) => {
     try {
       const payload = new FormData();
-      let CryptoJS = require("crypto-js");
       let encryptedLink =
         formDataToEdit.link === null || formDataToEdit.link === undefined
           ? null
           : CryptoJS.AES.encrypt(
               formDataToEdit.link || "",
-              "YzDWFXF8LmfUMdOn0RtZ0rYC90zF5wpoz87oCk",
+              ENCRYPTION_KEY,
             ).toString();
       const finalJmlHal = Number(formDataToEdit.jml_hal) || 0;
 
@@ -472,7 +472,7 @@ export function useSatkerLogic() {
 
           xhr.open(
             "POST",
-            `${process.env.REACT_APP_API_BASE_URL}/archive/edit/${formDataToEdit?.id}`,
+            `${import.meta.env.REACT_APP_API_BASE_URL}/archive/edit/${formDataToEdit?.id}`,
           );
           xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
           xhr.send(payload);
@@ -842,7 +842,7 @@ export function useSatkerLogic() {
 
         xhr.open(
           "POST",
-          `${process.env.REACT_APP_API_BASE_URL}/archive/pdf/merge`,
+          `${import.meta.env.REACT_APP_API_BASE_URL}/archive/pdf/merge`,
         );
         xhr.setRequestHeader("Authorization", `Bearer ${defaultToken}`);
         xhr.send(formData);

@@ -175,13 +175,6 @@ function App() {
             </PrivateRoute>
           }
         />
-        {/* Dinonaktifkan akan dimigrasikan ke domain baru
-        <Route
-          path="/tata-usaha/pengambilan-persediaan"
-          element={<InventoryTaking />}
-        />
-        <Route path="/inventaris-kantor/admin" element={<InventoryTakingA />} />
-        <Route path="/master-data-tu" element={<AdminMasterDataTU />} /> */}
         
         {listMenu.map((data) => (
           <Route

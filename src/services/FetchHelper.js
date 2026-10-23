@@ -7,7 +7,7 @@ const refreshAccessToken = async () => {
 
   refreshPromise = (async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/refresh`, {
+      const response = await fetch(`${import.meta.env.REACT_APP_API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
