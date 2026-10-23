@@ -162,11 +162,6 @@ code {
   margin: 0 auto;
 }
 
-.react-pdf__Page__textContent,
-.react-pdf__Page__annotations {
-  display: none;
-}
-
 th .sort-icon {
   opacity: 0;
   transition: opacity 0.2s;
