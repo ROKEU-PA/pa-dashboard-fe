@@ -24,3 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.before-audit-fix.json
 package.before-audit-fix.json
+/public/pdfjs/
