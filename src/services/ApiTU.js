@@ -1,4 +1,4 @@
-// const BASE_URL = process.env.REACT_APP_API_TU;
+// const BASE_URL = import.meta.env.REACT_APP_API_TU;
 
 // export const apiTU = async ({ 
 //   url, 
@@ -38,7 +38,7 @@
 //   }
 // };
 // Pastikan BASE_URL terdefinisi, kasih fallback biar gak undefined
-const BASE_URL = process.env.REACT_APP_API_TU || "";
+const BASE_URL = import.meta.env.REACT_APP_API_TU || "";
 
 export const apiTU = async ({ 
   url, 

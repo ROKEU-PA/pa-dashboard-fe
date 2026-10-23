@@ -12,7 +12,7 @@ export async function apiRequest({
 
   if (!accessToken) return;
 
-  const path = process.env.REACT_APP_API_BASE_URL + url;
+  const path = import.meta.env.REACT_APP_API_BASE_URL + url;
   const { body } = options;
 
   if (!path || typeof path !== "string") {

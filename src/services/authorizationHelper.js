@@ -196,7 +196,7 @@ export const isAuthorizedRoute = (pathname, userData, menus = []) => {
     return true;
   }
 
-  console.warn("Access denied:", { pathname: normalizedPath, role: userRole });
+  // console.warn("Access denied:", { pathname: normalizedPath, role: userRole });
   return false;
 };
 

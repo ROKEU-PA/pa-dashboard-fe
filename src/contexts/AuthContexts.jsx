@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (auth.accessToken) {
-        await fetch(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`, {
+        await fetch(`${import.meta.env.REACT_APP_API_BASE_URL}/auth/logout`, {
           method: "POST",
           headers: {
             "Authorization": `Bearer ${auth.accessToken}`

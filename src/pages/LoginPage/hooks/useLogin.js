@@ -34,7 +34,7 @@ export const useLogin = () => {
         };
         
         const response = await fetchHelper(
-          `${process.env.REACT_APP_API_BASE_URL}/auth/loginV2`,
+          `${import.meta.env.REACT_APP_API_BASE_URL}/auth/loginV2`,
           "POST",
           payload,
           { credentials: "include" }                            

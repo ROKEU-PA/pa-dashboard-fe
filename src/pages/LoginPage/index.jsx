@@ -1,21 +1,17 @@
 // src/pages/LoginPage/index.jsx
 import React, { useState, useEffect, useRef } from "react";
-import Button from "@/components/Button";
-import Input from "@/components/Input";
+
 import { useLogin } from "./hooks/useLogin";
 import { useMediaQuery } from "./hooks/useMediaQuery";
 import { useFormValidation } from "./hooks/useFormValidation";
 import { ASSETS, TEXT, FORM_FIELDS, BREAKPOINTS } from "./constants";
-import { styles } from "./styles";
-import "index.css";
-import { validationSchema } from "@/services/GeneralHelper";
+import "@/index.css";
 import ReCAPTCHA from "react-google-recaptcha";
 import AnimationBackground from "./AnimatedBackground";
-import { apiRequest } from "@/services/APIHelper";
 
 const LoginPage = () => {
   // Custom hooks
-  let SITE_KEY = process.env.REACT_APP_SITE_KEY;
+  let SITE_KEY = import.meta.env.REACT_APP_SITE_KEY;
   const { isLoading, errorMessage, handleLogin, clearError } = useLogin();
   const isDesktop = useMediaQuery(BREAKPOINTS.MOBILE);
 
@@ -36,7 +32,7 @@ const LoginPage = () => {
   const fetchCount = async () => {
     try {
       const response = await fetch(
-        process.env.REACT_APP_API_BASE_URL + "/external/stats?now=1",
+        import.meta.env.REACT_APP_API_BASE_URL + "/external/stats?now=1",
         {
           method: "GET",
           headers: {
@@ -62,7 +58,7 @@ const LoginPage = () => {
   const fetchOnline = async () => {
     try {
       const response = await fetch(
-        process.env.REACT_APP_API_BASE_URL + "/external/user/online",
+        import.meta.env.REACT_APP_API_BASE_URL + "/external/user/online",
         {
           method: "GET",
           headers: {
