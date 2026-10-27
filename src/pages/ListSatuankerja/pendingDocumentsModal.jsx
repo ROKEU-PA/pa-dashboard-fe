@@ -1,16 +1,14 @@
-
-import {
+import React, {
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
-
 import { apiRequest } from "@/services/APIHelper";
 import Dialog from "@/components/Dialog";
 import { AppContext } from "@/contexts/AppContext";
-
 import {
   AlertCircle,
   FileWarning,
@@ -22,9 +20,10 @@ import {
 } from "lucide-react";
 
 const PAGE_SIZE = 5;
+const MAX_PENDING = 10;
 
 /* =========================================================
-   HELPER
+   HELPERS
 ========================================================= */
 
 const firstDefined = (obj, keys, fallback = undefined) => {
@@ -47,112 +46,125 @@ const normalizeStatus = (value) =>
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[\s_-]+/g, "");
+    .replace(/[\s\\\_-]+/g, "");
 
-/*
- * Berdasarkan respons API yang kamu kirim:
- * status "fix" = SPP yang perlu diperbaiki.
- */
 const getStatus = (doc) =>
   normalizeStatus(
-    firstDefined(doc, [
-      "status",
-      "status_spp",
-      "nama_status",
-      "_status_",
-      "status_",
-    ], "")
+    firstDefined(
+      doc,
+      ["status", "status_spp", "nama_status"],
+      ""
+    )
   );
 
-const isDiproses = (doc) =>
-  getStatus(doc) === "diproses";
-
-const isPerluDiperbaiki = (doc) =>
+const isFix = (doc) =>
   [
     "fix",
     "perludiperbaiki",
     "perluperbaikan",
-    "perbaikidiperlukan",
     "perbaikan",
+  ].includes(getStatus(doc));
+
+const isApproved = (doc) =>
+  [
+    "approved",
+    "diproses",
+    "diproseslengkap",
   ].includes(getStatus(doc));
 
 const getRevision = (doc) =>
   Number(
     firstDefined(
       doc,
-      ["rev", "revisi", "revision", "_rev_"],
+      ["rev", "revisi", "revision"],
       0
     )
   ) || 0;
 
-const getUpdater = (doc) => {
-  const updater =
-    doc?.updated_by?.name ??
-    doc?.updated_by ??
-    doc?.update_by ??
-    doc?.diperbaiki_oleh ??
-    "";
+const getUpdaterValue = (doc) =>
+  firstDefined(
+    doc,
+    [
+      "update_by",
+      "updated_by",
+      "diperbaiki_oleh",
+      "updated_by_name",
+      "update_by_name",
+    ],
+    ""
+  );
 
-  return String(updater).trim().toUpperCase();
+const getUpdater = (doc) => {
+  const value = getUpdaterValue(doc);
+
+  const name =
+    value && typeof value === "object"
+      ? value.name ??
+        value._name_ ??
+        value._full_name_ ??
+        value._username_ ??
+        ""
+      : value;
+
+  return String(name ?? "").trim().toUpperCase();
 };
 
-const getUpdaterLabel = (doc) =>
-  doc?.updated_by?.name ??
-  doc?.updated_by ??
-  doc?.update_by ??
-  doc?.diperbaiki_oleh ??
-  "-";
+const getUpdaterLabel = (doc) => {
+  const value = getUpdaterValue(doc);
 
-const getStatusLabel = (doc) => {
-  if (getStatus(doc) === "fix") {
-    return "Perlu Diperbaiki";
+  if (value && typeof value === "object") {
+    return (
+      value.name ??
+      value._name_ ??
+      value.full_name ??
+      value._full_name_ ??
+      value.username ??
+      value._username_ ??
+      "-"
+    );
   }
 
-  return firstDefined(
-    doc,
-    ["status", "status_spp", "nama_status"],
-    "-"
-  );
+  return value || "-";
 };
 
 const getField = (doc, keys, fallback = "-") =>
   firstDefined(doc, keys, fallback);
 
-/*
- * Respons list yang kamu kirim memiliki bentuk:
- * {
- *   success: true,
- *   data: {
- *     current_page: 1,
- *     data: [...]
- *   }
- * }
- */
-const getDocumentList = (response) => {
-  const candidates = [
-    response?.data?.data,
-    response?.data?.items,
-    response?.data?.documents,
-    response?.data,
-    response?._data_?.data,
-    response?._data_?.items,
-    response?._data_,
-  ];
-
-  return candidates.find(Array.isArray) ?? [];
-};
-
 const getSummaryData = (response) => {
-  const data = response?.data ?? response?._data_ ?? {};
-
+  const data = response?.data ?? response?._data ?? {};
   return data?.data ?? data;
 };
 
-/*
- * Mengambil token login.
- * Sesuaikan nama penyimpanan bila project kamu menggunakan
- * key atau mekanisme autentikasi yang berbeda.
- */
+const getSummaryList = (summary, keys) => {
+  const list = firstDefined(summary, keys, []);
+
+  if (Array.isArray(list)) {
+    return list;
+  }
+
+  if (Array.isArray(list?.data)) {
+    return list.data;
+  }
+
+  if (Array.isArray(list?.data?.data)) {
+    return list.data.data;
+  }
+
+  return [];
+};
+
+const getSummaryTotal = (
+  summary,
+  keys,
+  fallback = 0
+) => {
+  const value = Number(
+    firstDefined(summary, keys, fallback)
+  );
+
+  return Number.isFinite(value) ? value : fallback;
+};
+
 const getAccessToken = () => {
   try {
     const auth = JSON.parse(
@@ -175,6 +187,30 @@ const getAccessToken = () => {
   }
 };
 
+const formatDate = (value) => {
+  if (!value || value === "-") return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const checkResponse = (response, message) => {
+  if (response?.success === false) {
+    throw new Error(
+      response?.message || message
+    );
+  }
+};
+
 /* =========================================================
    COMPONENT
 ========================================================= */
@@ -187,7 +223,6 @@ export default function PendingDocumentsModal({
 }) {
   const { userData } = useContext(AppContext);
 
-  const [docs, setDocs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -196,28 +231,54 @@ export default function PendingDocumentsModal({
 
   const [picSummary, setPicSummary] = useState({
     totalDiproses: 0,
-    totalDiperbaikiRevGte1: 0,
-    canSubmitTest: null,
+    totalFix: 0,
+    totalFixBackend: 0,
+    listDiproses: [],
+    listFix: [],
+    canSubmitApprove: null,
+    canSubmitFix: null,
     note: "",
   });
 
   const [userSummary, setUserSummary] = useState({
     totalPerluDiperbaiki: 0,
+    listPerluDiperbaiki: [],
     canAddSubmission: null,
     note: "",
   });
 
-  /* =======================================================
+  const lastRequestKey = useRef("");
+  const callbackRef = useRef(onSummaryChange);
+  const activeTabRef = useRef(activeTab);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    callbackRef.current = onSummaryChange;
+  }, [onSummaryChange]);
+
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  /* =========================================================
      ROLE
-  ======================================================= */
+  ========================================================= */
 
   const role = String(
     firstDefined(
       userData,
-      ["role", "_role_", "role_name", "_role_name_"],
+      ["role", "role_name", "rolename"],
       firstDefined(
         userData?.user,
-        ["role", "_role_"],
+        ["role", "role_name", "rolename"],
         ""
       )
     )
@@ -225,240 +286,429 @@ export default function PendingDocumentsModal({
     .trim()
     .toLowerCase();
 
-  const isPic = ["pic", "admin"].includes(role);
+  const isPic = [
+    "pic",
+    "admin",
+    "pa pic",
+  ].includes(role);
 
-  /* =======================================================
-     FETCH DATA
-  ======================================================= */
+  /* =========================================================
+     FETCH SUMMARY
+  ========================================================= */
 
-  const fetchData = useCallback(async () => {
-    if (!open) return;
+  const fetchData = useCallback(
+    async (force = false) => {
+      if (!open) return;
 
-    setLoading(true);
-    setErrorMessage("");
-
-    try {
-      const token = getAccessToken();
-
-      if (!token) {
-        throw new Error(
-          "Token login tidak ditemukan. Silakan login kembali."
-        );
-      }
-
-      if (code === undefined || code === null || code === "") {
-        throw new Error(
-          "Kode biro tidak ditemukan pada modal."
-        );
-      }
-
-      /*
-       * 1. Ambil data dokumen dari endpoint list.
-       *
-       * Berdasarkan request yang terlihat di Network:
-       * /archive/list?biro_code=...&tahun=...&status=arsip...
-       *
-       * Status arsip digunakan sebagai filter daftar arsip.
-       * Status fix/diproses difilter di frontend di bawah.
-       */
-      const params = new URLSearchParams({
-        biro_code: String(code),
-        status: "arsip",
-        page: "1",
-        per_page: "100",
-      });
-
-      const listResponse = await apiRequest({
-        url: `/archive/list?${params.toString()}`,
-        token,
-      });
-
-      console.log(
-        "[PendingDocumentsModal] List response:",
-        listResponse
-      );
+      const requestKey = `${code ?? ""}-${
+        isPic ? "PIC" : "USER"
+      }`;
 
       if (
-        listResponse?.success === false ||
-        listResponse?._success_ === false
+        !force &&
+        lastRequestKey.current === requestKey
       ) {
-        throw new Error(
-          listResponse?.message ||
-            listResponse?._message_ ||
-            "Gagal mengambil daftar SPP."
+        return;
+      }
+
+      lastRequestKey.current = requestKey;
+
+      setLoading(true);
+      setErrorMessage("");
+
+      try {
+        const token = getAccessToken();
+
+        if (!token) {
+          throw new Error(
+            "Token login tidak ditemukan. Silakan login kembali."
+          );
+        }
+
+        // Kode biro dikirim sebagai parameter ke API.
+        const biroCode = String(code ?? "").trim();
+
+        if (!biroCode) {
+          throw new Error("Kode biro tidak ditemukan.");
+        }
+
+        const encodedBiroCode = encodeURIComponent(biroCode);
+
+        /* =====================================================
+           PIC
+        ===================================================== */
+
+        if (isPic) {
+          const [
+            approveResponse,
+            picResponse,
+          ] = await Promise.all([
+            apiRequest({
+              url: `/archive/approve-list?biro_code=${encodedBiroCode}`,
+              token,
+            }),
+
+            apiRequest({
+              url: `/archive/pic-summary?biro_code=${encodedBiroCode}`,
+              token,
+            }),
+          ]);
+
+          checkResponse(
+            approveResponse,
+            "Gagal mengambil daftar SPP approved."
+          );
+
+          checkResponse(
+            picResponse,
+            "Gagal mengambil daftar SPP yang perlu diperbaiki."
+          );
+
+          const approveSummary =
+            getSummaryData(approveResponse);
+
+          const summary =
+            getSummaryData(picResponse);
+
+          /* ================================================
+             PIC - APPROVED / DIPROSES
+          ================================================ */
+
+          const approvedKeys = [
+            "list_approved",
+            "list_approve",
+            "list_diproses",
+            "list_perlu_proses",
+            "list_process",
+          ];
+
+          // Ambil seluruh data Approved dari halaman pertama
+          const approvedList = firstDefined(
+            approveSummary,
+            approvedKeys,
+            {}
+          );
+
+          const rawDiproses = getSummaryList(
+            approveSummary,
+            approvedKeys
+          );
+
+          // Ambil informasi jumlah halaman dari Backend
+          const lastApprovedPage = Math.max(
+            1,
+            Number(approvedList?.last_page || 1)
+          );
+
+          // Ambil data halaman berikutnya jika tersedia
+          for (let page = 2; page <= lastApprovedPage; page++) {
+            const pageResponse = await apiRequest({
+              url: `/archive/approve-list?biro_code=${encodedBiroCode}&page=${page}`,
+              token,
+            });
+
+            checkResponse(
+              pageResponse,
+              `Gagal mengambil daftar SPP Approved halaman ${page}.`
+            );
+
+            const pageSummary = getSummaryData(pageResponse);
+
+            const pageData = getSummaryList(
+              pageSummary,
+              approvedKeys
+            );
+
+            rawDiproses.push(...pageData);
+          }
+
+          const filteredDiproses =
+            rawDiproses.filter(
+              (doc) =>
+                isApproved(doc) &&
+                getUpdater(doc) === "PA PIC"
+            );
+
+          const totalDiproses = getSummaryTotal(
+            approveSummary,
+            [
+              "total_approved",
+              "total_approve",
+              "total_diproses",
+              "total",
+            ],
+            filteredDiproses.length
+          );
+
+          /* ================================================
+             PIC - FIX / PERLU DIPERBAIKI
+          ================================================ */
+
+          const rawFix = getSummaryList(
+            summary,
+            [
+              "list_fix",
+              "list_fix_not_pic_rev_gt0",
+              "listfix_not_pic_revgt0",
+              "list_perlu_fix",
+              "list_perlu_fix_pic",
+              "list_diperbaiki",
+            ]
+          );
+
+          const filteredFix = rawFix.filter(
+            (doc) =>
+              isFix(doc) &&
+              getRevision(doc) > 0 &&
+              getUpdater(doc) !== "PA PIC"
+          );
+
+          const totalFixBackend = getSummaryTotal(
+            summary,
+            ["total_fix"],
+            filteredFix.length
+          );
+
+          const totalFix = totalFixBackend;
+
+          /* ================================================
+             ACTION BUTTONS PIC
+          ================================================ */
+
+          const actionButtons =
+            summary?.action_buttons ?? {};
+
+          const backendApprove =
+            typeof actionButtons.submit_approved === "boolean"
+              ? actionButtons.submit_approved
+              : typeof actionButtons.submit_approve === "boolean"
+                ? actionButtons.submit_approve
+                : true;
+
+          const backendFix =
+            typeof actionButtons.submit_fix === "boolean"
+              ? actionButtons.submit_fix
+              : true;
+
+          const canSubmitApprove = backendApprove;
+
+          const canSubmitFix =
+            backendFix &&
+            totalDiproses <= MAX_PENDING;
+
+          const nextSummary = {
+            totalDiproses,
+            totalFix,
+            totalFixBackend,
+            listDiproses: filteredDiproses,
+            listFix: filteredFix,
+            canSubmitApprove,
+            canSubmitFix,
+            note:
+              summary?.note ??
+              approveSummary?.note ??
+              "",
+          };
+
+          if (!mountedRef.current) return;
+
+          setPicSummary(nextSummary);
+
+          callbackRef.current?.({
+            jumlahDiprosesPIC: totalDiproses,
+
+            jumlahPerluDiperbaiki: totalFix,
+
+            totalDiperbaikiRevGte1: totalFix,
+
+            canSubmitApprove,
+            canSubmitFix,
+
+            canSubmitTest:
+              activeTabRef.current === "diproses"
+                ? canSubmitApprove
+                : canSubmitFix,
+
+            canAddSubmission: true,
+
+            activeTab: activeTabRef.current,
+
+            notePIC: nextSummary.note,
+          });
+        } else {
+        const response = await apiRequest({
+          url: `/archive/user-summary?biro_code=${encodedBiroCode}`,
+          token,
+        });
+
+        checkResponse(
+          response,
+          "Gagal mengambil summary SPP User."
         );
+
+        const summary = getSummaryData(response);
+
+        // Ambil data halaman pertama
+        let rawList = getSummaryList(summary, [
+          "list_perlu_difix",
+        ]);
+
+        // Ambil informasi pagination dari backend
+        const pagination = summary?.list_perlu_difix;
+        const lastPage = Number(pagination?.last_page || 1);
+
+        // Ambil seluruh halaman berikutnya
+        for (let page = 2; page <= lastPage; page++) {
+          const pageResponse = await apiRequest({
+            url: `/archive/user-summary?biro_code=${encodedBiroCode}&page=${page}`,
+            token,
+          });
+
+          checkResponse(
+            pageResponse,
+            `Gagal mengambil data SPP User halaman ${page}.`
+          );
+
+          const pageSummary = getSummaryData(pageResponse);
+
+          const pageList = getSummaryList(pageSummary, [
+            "list_perlu_difix",
+          ]);
+
+          rawList = [...rawList, ...pageList];
+        }
+
+        const filteredUser = rawList.filter(
+          (doc) =>
+            isFix(doc) &&
+            getRevision(doc) > 1 &&
+            getUpdater(doc) === "PA PIC"
+        );
+
+        const total = filteredUser.length;
+
+          const canAddSubmission =
+            typeof summary?.can_add_submission === "boolean"
+              ? summary.can_add_submission && total <= MAX_PENDING
+              : total <= MAX_PENDING;
+
+          const nextSummary = {
+            totalPerluDiperbaiki: total,
+            listPerluDiperbaiki: filteredUser,
+            canAddSubmission,
+            note: summary?.note ?? "",
+          };
+
+          if (!mountedRef.current) return;
+
+          setUserSummary(nextSummary);
+
+          callbackRef.current?.({
+            jumlahPerluDiperbaikiPAPIC: total,
+            jumlahPerluDiperbaikiUser: total,
+            canAddSubmission,
+            activeTab: activeTabRef.current,
+            noteUser: nextSummary.note,
+          });
+        }
+      } catch (error) {
+        console.error(
+          "[PendingDocumentsModal] Gagal mengambil summary:",
+          error
+        );
+
+        if (!mountedRef.current) return;
+
+        setErrorMessage(
+          error?.message ||
+            "Gagal memuat summary SPP."
+        );
+      } finally {
+        if (mountedRef.current) {
+          setLoading(false);
+        }
       }
+    },
+    [open, code, isPic]
+  );
 
-      const documents = getDocumentList(listResponse);
-
-      setDocs(documents);
-
-      console.log(
-        "[PendingDocumentsModal] Dokumen:",
-        documents.map((doc) => ({
-          no_spp: doc?.no_spp,
-          status: doc?.status,
-          rev: doc?.rev,
-          updated_by: doc?.updated_by,
-        }))
-      );
-
-      /*
-       * 2. Ambil summary berdasarkan role.
-       * Summary tidak digunakan sebagai isi tabel.
-       */
-      if (isPic) {
-        const summaryResponse = await apiRequest({
-          url: "/archive/pic-summary",
-          token,
-        });
-
-        const summary = getSummaryData(summaryResponse);
-
-        const nextSummary = {
-          totalDiproses: Number(
-            firstDefined(
-              summary,
-              ["total_diproses"],
-              documents.filter(isDiproses).length
-            )
-          ),
-          totalDiperbaikiRevGte1: Number(
-            firstDefined(
-              summary,
-              ["total_diperbaiki_rev_gte1"],
-              0
-            )
-          ),
-          canSubmitTest: firstDefined(
-            summary,
-            ["can_submit_test"],
-            null
-          ),
-          note: firstDefined(summary, ["note"], ""),
-        };
-
-        setPicSummary(nextSummary);
-
-        onSummaryChange?.({
-          jumlahDiprosesPIC: nextSummary.totalDiproses,
-          jumlahPerluDiperbaiki:
-            documents.filter(isPerluDiperbaiki).length,
-          totalDiperbaikiRevGte1:
-            nextSummary.totalDiperbaikiRevGte1,
-          canSubmitTest: nextSummary.canSubmitTest,
-          notePIC: nextSummary.note,
-        });
-      } else {
-        const summaryResponse = await apiRequest({
-          url: "/archive/user-summary",
-          token,
-        });
-
-        const summary = getSummaryData(summaryResponse);
-
-        const nextSummary = {
-          totalPerluDiperbaiki: Number(
-            firstDefined(
-              summary,
-              ["total_perlu_diperbaiki"],
-              0
-            )
-          ),
-          canAddSubmission: firstDefined(
-            summary,
-            ["can_add_submission"],
-            null
-          ),
-          note: firstDefined(summary, ["note"], ""),
-        };
-
-        setUserSummary(nextSummary);
-
-        onSummaryChange?.({
-          jumlahPerluDiperbaikiUser:
-            nextSummary.totalPerluDiperbaiki,
-          canAddSubmission: nextSummary.canAddSubmission,
-          noteUser: nextSummary.note,
-        });
-      }
-    } catch (error) {
-      console.error(
-        "[PendingDocumentsModal] Gagal memuat data:",
-        error
-      );
-
-      setDocs([]);
-      setErrorMessage(
-        error?.message || "Gagal memuat daftar SPP."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [open, code, isPic, onSummaryChange]);
+  /* =========================================================
+     EFFECT FETCH
+  ========================================================= */
 
   useEffect(() => {
-    if (open) {
-      fetchData();
+    if (!open) {
+      lastRequestKey.current = "";
+      return;
     }
+
+    fetchData();
   }, [open, fetchData]);
+
+  /* =========================================================
+     RESET PAGINATION
+  ========================================================= */
 
   useEffect(() => {
     setPage(1);
   }, [activeTab, open]);
 
-  /* =======================================================
-     FILTER DOKUMEN
-  ======================================================= */
+  /* =========================================================
+     ACTIVE DATA
+  ========================================================= */
 
-  const docsDiproses = useMemo(
-    () => docs.filter(isDiproses),
-    [docs]
-  );
+  const dataAktif = useMemo(() => {
+    if (!isPic) {
+      return userSummary.listPerluDiperbaiki;
+    }
 
-  /*
-   * PIC/Admin:
-   * Tampilkan semua dokumen dengan status "fix"
-   * atau status lain yang secara eksplisit berarti perbaikan.
-   *
-   * Tidak dibatasi oleh rev > 1.
-   */
-  const docsPerluDiperbaikiPIC = useMemo(
-    () => docs.filter(isPerluDiperbaiki),
-    [docs]
-  );
+    return activeTab === "diproses"
+      ? picSummary.listDiproses
+      : picSummary.listFix;
+  }, [
+    isPic,
+    activeTab,
+    picSummary,
+    userSummary,
+  ]);
 
-  /*
-   * User:
-   * Tampilkan dokumen perbaikan yang dikembalikan PA PIC.
-   * Struktur updated_by pada JSON adalah objek dengan field name.
-   */
-  const docsPerluDiperbaikiUser = useMemo(
-    () =>
-      docs.filter(
-        (doc) =>
-          isPerluDiperbaiki(doc) &&
-          getUpdater(doc) === "PA PIC"
-      ),
-    [docs]
-  );
+  const totalDiprosesPIC =
+    picSummary.totalDiproses;
 
-  const dataAktif = isPic
-    ? activeTab === "diproses"
-      ? docsDiproses
-      : docsPerluDiperbaikiPIC
-    : docsPerluDiperbaikiUser;
+  const totalDiperbaikiPIC =
+    picSummary.totalFix;
 
-  /* =======================================================
+  const totalDiperbaikiUser =
+    userSummary.totalPerluDiperbaiki;
+
+  /* =========================================================
+     BUTTON CONDITIONS
+  ========================================================= */
+
+  const pengujianApproveDisabled =
+    picSummary.canSubmitApprove === false;
+
+  const pengujianFixDisabled =
+    picSummary.canSubmitFix === false ||
+    totalDiprosesPIC > MAX_PENDING;
+
+  const tambahPengajuanDisabled =
+    userSummary.canAddSubmission === false ||
+    totalDiperbaikiUser > MAX_PENDING;
+
+  /* =========================================================
      PAGINATION
-  ======================================================= */
+  ========================================================= */
 
   const totalPages = Math.max(
     1,
     Math.ceil(dataAktif.length / PAGE_SIZE)
   );
 
-  const currentPage = Math.min(page, totalPages);
+  const currentPage = Math.min(
+    page,
+    totalPages
+  );
 
   const paginatedData = dataAktif.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -475,82 +725,95 @@ export default function PendingDocumentsModal({
     dataAktif.length
   );
 
+  /* =========================================================
+     CHANGE TAB
+  ========================================================= */
+
   const changeTab = (tab) => {
     setActiveTab(tab);
+
+    activeTabRef.current = tab;
+
     setPage(1);
+
+    if (isPic) {
+      const canSubmitTest =
+        tab === "diproses"
+          ? picSummary.canSubmitApprove
+          : picSummary.canSubmitFix;
+
+      callbackRef.current?.({
+        jumlahDiprosesPIC:
+          totalDiprosesPIC,
+
+        jumlahPerluDiperbaiki:
+          totalDiperbaikiPIC,
+
+        totalDiperbaikiRevGte1:
+          totalDiperbaikiPIC,
+
+        canSubmitApprove:
+          picSummary.canSubmitApprove,
+
+        canSubmitFix:
+          picSummary.canSubmitFix,
+
+        canSubmitTest:
+          canSubmitTest === true,
+
+        canAddSubmission: true,
+
+        activeTab: tab,
+
+        notePIC: picSummary.note,
+      });
+    }
   };
 
-  /* =======================================================
+  /* =========================================================
      TABLE HEADERS
-  ======================================================= */
+  ========================================================= */
 
   const headers =
     isPic && activeTab === "diproses"
       ? [
           "No",
           "No SPP",
-          "Jenis SPP",
-          "Tahun",
-          "Tanggal SPP",
-          "Tanggal Update",
           "Status",
+          "Tanggal Update",
         ]
       : isPic
         ? [
             "No",
             "No SPP",
-            "Jenis SPP",
-            "Tahun",
             "Revisi",
             "Diubah Oleh",
             "Tanggal Update",
-            "Status",
           ]
         : [
             "No",
             "No SPP",
-            "Jenis SPP",
-            "Tahun",
             "Revisi",
-            "Tanggal SPP",
             "Tanggal Update",
             "Diperbaiki Oleh",
-            "Status",
           ];
 
-  /* =======================================================
+  /* =========================================================
      TABLE ROWS
-  ======================================================= */
-
-  const renderStatus = (doc) => {
-    const status = getStatus(doc);
-
-    const color =
-      status === "diproses"
-        ? "bg-orange-100 text-orange-600"
-        : isPerluDiperbaiki(doc)
-          ? "bg-rose-100 text-rose-600"
-          : "bg-slate-100 text-slate-600";
-
-    return (
-      <span
-        className={`inline-flex whitespace-nowrap rounded-md px-2 py-1 text-[11px] font-bold ${color}`}
-      >
-        {getStatusLabel(doc)}
-      </span>
-    );
-  };
+  ========================================================= */
 
   const renderRows = () =>
     paginatedData.map((doc, index) => {
       const rowNumber =
         (currentPage - 1) * PAGE_SIZE + index + 1;
 
-      const rowKey = getField(
-        doc,
-        ["id", "no_spp"],
-        rowNumber
-      );
+      const rowKey =
+        getField(doc, ["id", "_id"], null) ??
+        `${getField(
+          doc,
+          ["spp_number", "no_spp"],
+          "spp"
+        )}-${rowNumber}`;
 
       return (
         <tr
@@ -562,89 +825,89 @@ export default function PendingDocumentsModal({
           </td>
 
           <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-slate-700">
-            {getField(doc, ["no_spp"])}
-          </td>
-
-          <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-            {getField(doc, ["jenis_spp", "type"])}
-          </td>
-
-          <td className="px-3 py-2 text-xs text-slate-600">
-            {getField(doc, ["tahun"])}
+            {getField(doc, [
+              "spp_number",
+              "no_spp",
+              "nomor_spp",
+            ])}
           </td>
 
           {isPic && activeTab === "diproses" ? (
             <>
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-                {getField(doc, [
-                  "tgl_spp",
-                  "archive_at",
-                  "created_at",
-                ])}
-              </td>
+              {/* STATUS */}
 
               <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-                {getField(doc, [
-                  "updated_at",
-                  "tgl_update",
-                  "archive_at",
-                ])}
+              {isApproved(doc)
+                ? "Diproses (Approved)"
+                : getField(
+                    doc,
+                    ["status", "status_spp"],
+                    "approved"
+                  )}
               </td>
 
-              <td className="px-3 py-2">
-                {renderStatus(doc)}
+              {/* TANGGAL UPDATE */}
+
+              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+                {formatDate(
+                  getField(
+                    doc,
+                    ["updated_at", "tgl_update"],
+                    "-"
+                  )
+                )}
               </td>
             </>
           ) : isPic ? (
             <>
-              <td className="px-3 py-2 text-center text-xs text-slate-600">
+              {/* REVISI */}
+
+              <td className="px-3 py-2 text-center text-xs font-semibold text-slate-700">
                 {getRevision(doc)}
               </td>
+
+              {/* DIUBAH OLEH */}
 
               <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                 {getUpdaterLabel(doc)}
               </td>
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-                {getField(doc, [
-                  "updated_at",
-                  "tgl_update",
-                  "archive_at",
-                ])}
-              </td>
+              {/* TANGGAL UPDATE */}
 
-              <td className="px-3 py-2">
-                {renderStatus(doc)}
+              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+                {formatDate(
+                  getField(
+                    doc,
+                    ["updated_at", "tgl_update"],
+                    "-"
+                  )
+                )}
               </td>
             </>
           ) : (
             <>
-              <td className="px-3 py-2 text-center text-xs text-slate-600">
+              {/* REVISI */}
+
+              <td className="px-3 py-2 text-center text-xs font-semibold text-slate-700">
                 {getRevision(doc)}
               </td>
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-                {getField(doc, [
-                  "tgl_spp",
-                  "archive_at",
-                  "created_at",
-                ])}
-              </td>
+              {/* TANGGAL UPDATE */}
 
               <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
-                {getField(doc, [
-                  "updated_at",
-                  "tgl_update",
-                  "archive_at",
-                ])}
+                {formatDate(
+                  getField(
+                    doc,
+                    ["updated_at", "tgl_update"],
+                    "-"
+                  )
+                )}
               </td>
+
+              {/* DIPERBAIKI OLEH */}
 
               <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                 {getUpdaterLabel(doc)}
-              </td>
-
-              <td className="px-3 py-2">
-                {renderStatus(doc)}
               </td>
             </>
           )}
@@ -654,17 +917,9 @@ export default function PendingDocumentsModal({
 
   if (!open) return null;
 
-  const pengujianDinonaktifkan =
-    picSummary.canSubmitTest === false ||
-    picSummary.totalDiproses > 10;
-
-  const tambahPengajuanDinonaktifkan =
-    userSummary.canAddSubmission === false ||
-    userSummary.totalPerluDiperbaiki > 10;
-
-  /* =======================================================
+  /* =========================================================
      RENDER
-  ======================================================= */
+  ========================================================= */
 
   return (
     <Dialog
@@ -688,6 +943,7 @@ export default function PendingDocumentsModal({
     >
       <div className="flex w-full flex-col gap-3">
         {/* INFORMASI */}
+
         <div
           className={`flex items-start gap-3 rounded-lg border px-3 py-2.5 ${
             isPic
@@ -710,42 +966,49 @@ export default function PendingDocumentsModal({
           <div className="flex flex-col gap-0.5">
             <span
               className={`text-xs font-bold ${
-                isPic ? "text-blue-700" : "text-orange-700"
+                isPic
+                  ? "text-blue-700"
+                  : "text-orange-700"
               }`}
             >
-              {isPic ? "TUGAS PEMERIKSAAN" : "PERHATIAN"}
+              {isPic
+                ? "TUGAS PEMERIKSAAN"
+                : "PERHATIAN"}
             </span>
 
             <span
               className={`text-xs leading-relaxed ${
-                isPic ? "text-blue-900" : "text-orange-900"
+                isPic
+                  ? "text-blue-900"
+                  : "text-orange-900"
               }`}
             >
               {isPic
-                ? "Periksa SPP yang sedang diproses dan SPP yang perlu diperbaiki oleh user."
-                : "Lengkapi atau perbaiki SPP yang dikembalikan oleh PA PIC sebelum melanjutkan pengajuan."}
+                ? "Periksa SPP yang sedang diproses dan SPP yang perlu diperbaiki."
+                : "Perbaiki SPP yang dikembalikan oleh PA PIC sebelum membuat pengajuan baru."}
             </span>
           </div>
         </div>
 
-        {/* TAB PIC / ADMIN */}
+        {/* TAB PIC */}
+
         {isPic && (
           <div className="grid grid-cols-2 gap-1.5">
-            <button
-              type="button"
-              onClick={() => changeTab("diproses")}
-              className={`flex items-center justify-center gap-2 rounded-md border px-2 py-2 text-xs font-bold transition-colors ${
-                activeTab === "diproses"
-                  ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
-                  : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
-              }`}
-            >
-              SPP Diproses
+          <button
+            type="button"
+            onClick={() => changeTab("diproses")}
+            className={`flex items-center justify-center gap-2 rounded-md border px-2 py-2 text-xs font-bold transition-colors ${
+              activeTab === "diproses"
+                ? "border-blue-500 bg-blue-50 text-blue-700 ring-1 ring-blue-500"
+                : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100"
+            }`}
+          >
+            SPP Diproses (Approved)
 
-              <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[11px] text-white">
-                {docsDiproses.length}
-              </span>
-            </button>
+            <span className="rounded-full bg-orange-500 px-2 py-0.5 text-[11px] text-white">
+              {totalDiprosesPIC}
+            </span>
+          </button>
 
             <button
               type="button"
@@ -759,13 +1022,14 @@ export default function PendingDocumentsModal({
               SPP Perlu Diperbaiki
 
               <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[11px] text-white">
-                {docsPerluDiperbaikiPIC.length}
+                {totalDiperbaikiPIC}
               </span>
             </button>
           </div>
         )}
 
-        {/* JUDUL */}
+        {/* JUDUL DAN TOTAL */}
+
         <div className="flex items-center justify-between gap-2 rounded-lg bg-sky-50 px-3 py-2">
           <h3 className="text-xs font-bold text-slate-800 sm:text-sm">
             {isPic
@@ -776,45 +1040,71 @@ export default function PendingDocumentsModal({
           </h3>
 
           <span className="shrink-0 rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-700">
-            {dataAktif.length} SPP
+            {isPic
+              ? activeTab === "diproses"
+                ? totalDiprosesPIC
+                : totalDiperbaikiPIC
+              : totalDiperbaikiUser}{" "}
+            SPP
           </span>
         </div>
 
-        {/* INFO DIPROSES */}
-        {isPic && activeTab === "diproses" && (
-          <div className="rounded-md border border-blue-100 bg-blue-50/70 px-3 py-2">
-            <p className="text-xs leading-relaxed text-blue-800">
-              Cocokkan data SPP dengan My Interest. Jika data
-              sesuai dan SPP selesai diproses, ubah statusnya
-              menjadi SP2D.
+        {/* CATATAN PIC */}
+
+        {isPic && (
+          <div
+            className={`rounded-md border px-3 py-2 ${
+              activeTab === "diproses"
+                ? "border-blue-100 bg-blue-50/70"
+                : totalDiprosesPIC > MAX_PENDING
+                  ? "border-rose-200 bg-rose-50"
+                  : "border-blue-100 bg-blue-50/70"
+            }`}
+          >
+            <p
+              className={`text-xs leading-relaxed ${
+                activeTab === "diproses"
+                  ? "text-blue-800"
+                  : totalDiprosesPIC > MAX_PENDING
+                    ? "text-rose-700"
+                    : "text-blue-800"
+              }`}
+            >
+              {activeTab === "diproses"
+                ? `Terdapat ${totalDiprosesPIC} SPP berstatus approved/diproses. Cocokkan dengan data My Interest dan ubah status SPP yang sudah selesai menjadi SP2D.`
+                : totalDiprosesPIC > MAX_PENDING
+                  ? `Jumlah SPP Approved/Diproses adalah ${totalDiprosesPIC} (lebih dari 10). Tombol Pengujian untuk SPP Fix dinonaktifkan. Selesaikan status Approved/Diproses terlebih dahulu.`
+                  : `Terdapat ${totalDiperbaikiPIC} SPP berstatus fix dengan revisi lebih dari 0 yang diperbaiki selain oleh PA PIC.`}
             </p>
-
-            {pengujianDinonaktifkan && (
-              <p className="mt-1.5 text-xs font-semibold text-rose-600">
-                {picSummary.note ||
-                  "Pengujian SPP dinonaktifkan. Periksa jumlah antrean SPP dan status dokumennya."}
-              </p>
-            )}
-
-            {!pengujianDinonaktifkan && picSummary.note && (
-              <p className="mt-1 text-xs text-blue-800">
-                {picSummary.note}
-              </p>
-            )}
           </div>
         )}
 
-        {/* INFO USER */}
-        {!isPic && tambahPengajuanDinonaktifkan && (
-          <div className="rounded-md border border-orange-200 bg-orange-50 px-3 py-2">
-            <p className="text-xs leading-relaxed text-orange-800">
-              {userSummary.note ||
-                "Perbaiki SPP yang dikembalikan sebelum menambahkan pengajuan baru."}
+        {/* CATATAN USER */}
+
+        {!isPic && (
+          <div
+            className={`rounded-md border px-3 py-2 ${
+              tambahPengajuanDisabled
+                ? "border-orange-200 bg-orange-50"
+                : "border-blue-100 bg-blue-50/70"
+            }`}
+          >
+            <p
+              className={`text-xs leading-relaxed ${
+                tambahPengajuanDisabled
+                  ? "text-orange-800"
+                  : "text-blue-800"
+              }`}
+            >
+              {tambahPengajuanDisabled
+                ? `Terdapat ${totalDiperbaikiUser} SPP berstatus fix yang perlu diperbaiki oleh PA PIC. Jumlahnya lebih dari 10. Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`
+                : `Terdapat ${totalDiperbaikiUser} SPP berstatus fix yang diperbaiki oleh PA PIC. Anda dapat membuat pengajuan baru.`}
             </p>
           </div>
         )}
 
         {/* ERROR */}
+
         {errorMessage && (
           <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 p-3">
             <AlertCircle
@@ -828,7 +1118,7 @@ export default function PendingDocumentsModal({
 
             <button
               type="button"
-              onClick={fetchData}
+              onClick={() => fetchData(true)}
               disabled={loading}
               className="inline-flex items-center gap-1 rounded-md border border-rose-200 bg-white px-2 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
             >
@@ -839,6 +1129,7 @@ export default function PendingDocumentsModal({
         )}
 
         {/* LOADING */}
+
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-3 py-10 text-slate-400">
             <Loader2
@@ -847,12 +1138,13 @@ export default function PendingDocumentsModal({
             />
 
             <span className="text-xs font-medium">
-              Memuat data dokumen...
+              Memuat summary dokumen...
             </span>
           </div>
         ) : dataAktif.length > 0 ? (
           <>
-            {/* TABEL */}
+            {/* TABLE */}
+
             <div className="w-full overflow-hidden rounded-lg border border-slate-200">
               <div className="max-h-[50vh] overflow-auto">
                 <table className="w-full min-w-max border-collapse text-left">
@@ -877,10 +1169,11 @@ export default function PendingDocumentsModal({
             </div>
 
             {/* PAGINATION */}
+
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
               <span className="text-xs text-slate-600">
                 Menampilkan {startData}–{endData} dari{" "}
-                {dataAktif.length} data
+                {dataAktif.length} baris
               </span>
 
               <div className="flex items-center gap-1">
@@ -888,7 +1181,9 @@ export default function PendingDocumentsModal({
                   type="button"
                   disabled={currentPage === 1}
                   onClick={() =>
-                    setPage((p) => Math.max(1, p - 1))
+                    setPage((p) =>
+                      Math.max(1, p - 1)
+                    )
                   }
                   className="rounded-md border border-slate-200 p-1.5 text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="Halaman sebelumnya"
@@ -932,6 +1227,7 @@ export default function PendingDocumentsModal({
           </>
         ) : (
           /* EMPTY STATE */
+
           <div className="flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-lg border border-slate-100 bg-slate-50 py-8">
             <FileWarning
               size={42}
@@ -941,19 +1237,19 @@ export default function PendingDocumentsModal({
             <span className="text-sm font-medium text-slate-700">
               {errorMessage
                 ? "Data belum dapat ditampilkan."
-                : "Tidak ada dokumen yang sesuai."}
+                : "Belum ada data SPP yang dapat ditampilkan."}
             </span>
 
             <span className="max-w-md px-4 text-center text-xs leading-relaxed text-slate-500">
-              {isPic && activeTab === "perbaikan"
-                ? 'Tab ini mencari dokumen dengan status API "fix" atau status lain yang berarti perlu diperbaiki.'
-                : "Periksa kembali status dokumen jika data seharusnya tersedia."}
+              {isPic
+                ? "Belum terdapat data SPP yang sesuai untuk ditampilkan. Silakan periksa kembali daftar pengajuan."
+                : "Belum terdapat data SPP yang perlu diperbaiki. Silakan periksa kembali daftar pengajuan."}
             </span>
 
             {!errorMessage && (
               <button
                 type="button"
-                onClick={fetchData}
+                onClick={() => fetchData(true)}
                 disabled={loading}
                 className="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50"
               >

@@ -24,27 +24,42 @@ import {
   statusLabel,
 } from "../constants/styleConstants";
 
-export default function SatkerTable({
-  columns,
-  dataTable,
-  location,
-  userData,
-  handleSortChange,
-  sortBy,
-  sortDir,
-  openEditModal,
-  jumlahDiprosesPIC = 0,
-  jumlahPerluDiperbaiki = 0,
-  jumlahPerluDiperbaikiPAPIC = 0,
-  onOpenPembatasanInfo,
-}) {
+    export default function SatkerTable({
+      // Props lama tetap dipertahankan
+      columns = [],
+      dataTable = [],
+      location,
+      userData,
+      handleSortChange,
+      sortBy,
+      sortDir,
+      openEditModal,
+
+      jumlahDiprosesPIC = 0,
+      jumlahPerluDiperbaiki = 0,
+      jumlahPerluDiperbaikiPAPIC = 0,
+
+      canSubmitTest,
+      canSubmitApprove,
+      canSubmitFix,
+      activeTab = "diproses",
+      canAddSubmission,
+
+      picSummaryNote = "",
+      userSummaryNote = "",
+      onOpenPembatasanInfo,
+    }) {
   const navigate = useNavigate();
-  const pathname = location?.pathname || window.location.pathname;
+
+  const pathname =
+    location?.pathname ||
+    (typeof window !== "undefined" ? window.location.pathname : "");
+
   const isPengajuan = isPengajuanPath(pathname);
 
   const role = String(
     userData?.role ||
-      userData?.rolename_ ||
+      userData?.rolename ||
       userData?.user?.role ||
       ""
   )
@@ -54,30 +69,77 @@ export default function SatkerTable({
   const isPIC = role.includes("pic") || role === "admin";
   const isUser = role === "user";
 
-  const jumlahDiproses = Number(jumlahDiprosesPIC || 0);
-  const jumlahRevisiPIC = Number(jumlahPerluDiperbaiki || 0);
-  const jumlahRevisiUser = Number(jumlahPerluDiperbaikiPAPIC || 0);
+  const jumlahDiproses = Math.max(
+    0,
+    Number(jumlahDiprosesPIC) || 0
+  );
 
-  // Batas tombol berlaku jika jumlahnya lebih dari 10.
-  const pengujianDisabled =
-    isPengajuan && isPIC && jumlahDiproses > 10;
+  const jumlahRevisiPIC = Math.max(
+    0,
+    Number(jumlahPerluDiperbaiki) || 0
+  );
 
-  const tambahPengajuanDisabled =
-    isPengajuan && isUser && jumlahRevisiUser > 10;
+  const jumlahRevisiUser = Math.max(
+    0,
+    Number(jumlahPerluDiperbaikiPAPIC) || 0
+  );
 
-  const pesanPembatasanPIC = {
-    judul: "Pengujian SPP Dinonaktifkan",
-    pesan: `Ada ${jumlahDiproses} SPP berstatus Diproses. Cocokkan data SPP dengan My Interest. Jika SPP sudah selesai diproses dan datanya sesuai, ubah status Diproses menjadi SP2D terlebih dahulu. Tombol Pengujian SPP dapat digunakan kembali setelah jumlah SPP berstatus Diproses tidak lebih dari 10.`,
-    jumlahDiproses,
-    jumlahRevisiPIC,
-  };
+  /*   * Jika API sudah mengirim boolean, gunakan nilai API.
+   * Jika belum, gunakan aturan fallback jumlah dokumen > 10.
+   */
+const isFixStatus = (status) => {
+  const value = String(status || "")
+    .trim()
+    .toLowerCase();
 
-  const pesanPembatasanUser = {
-    judul: "Tambah Pengajuan Dinonaktifkan",
-    pesan: `Ada ${jumlahRevisiUser} SPP berstatus Perlu Diperbaiki yang diperbarui oleh PA PIC. Silakan perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru. Tombol Tambah Pengajuan dapat digunakan kembali setelah jumlahnya tidak lebih dari 10.`,
-    jumlah: jumlahRevisiUser,
-  };
+  return (
+    value === "diproses (butuh perbaikan)" ||
+    value === "fix" ||
+    value.includes("butuh perbaikan") ||
+    value.includes("perlu diperbaiki")
+  );
+};
 
+const isDiprosesLengkapStatus = (status) => {
+  const value = String(status || "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    value === "approved" ||
+    value === "approve" ||
+    value.includes("diproses lengkap")
+  );
+};
+
+const tambahPengajuanTidakDiizinkan =
+  typeof canAddSubmission === "boolean"
+    ? !canAddSubmission
+    : jumlahRevisiUser > 10;
+
+const tambahPengajuanDisabled =
+  isPengajuan &&
+  isUser &&
+  tambahPengajuanTidakDiizinkan;
+
+const pesanPembatasanPIC = {
+  judul: "Pengujian SPP Dinonaktifkan",
+  pesan:
+    String(picSummaryNote || "").trim() ||
+    `Terdapat ${jumlahDiproses} SPP berstatus Diproses. Cocokkan data SPP dengan My Interest. Jika SPP sudah selesai diproses dan datanya sesuai, ubah status Diproses menjadi SP2D terlebih dahulu. Pengujian SPP dapat digunakan kembali setelah memenuhi ketentuan sistem.`,
+  jumlahDiproses,
+  jumlahRevisiPIC,
+};
+
+const pesanPembatasanUser = {
+  judul: "Tambah Pengajuan Dinonaktifkan",
+  pesan:
+    String(userSummaryNote || "").trim() ||
+    `Terdapat ${jumlahRevisiUser} SPP berstatus Perlu Diperbaiki yang diperbarui oleh PA PIC. Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`,
+  jumlah: jumlahRevisiUser,
+};
+
+  // Badge jumlah revisi per dokumen
   const renderRevisiBadge = (revisiCount, statusDokumen) => {
     const count = Number(revisiCount || 0);
 
@@ -123,6 +185,7 @@ export default function SatkerTable({
     );
   };
 
+  // Badge kelengkapan dokumen
   const renderKelengkapanBadge = (kelengkapanStr) => {
     if (
       !kelengkapanStr ||
@@ -170,6 +233,7 @@ export default function SatkerTable({
     );
   };
 
+  // Sembunyikan kolom sesuai halaman
   const visibleColumns = (columns || []).filter(
     (col) =>
       !(
@@ -178,21 +242,31 @@ export default function SatkerTable({
       )
   );
 
-  // Tooltip hanya berisi keterangan jika tombol dibatasi.
+  // Tooltip informasi pembatasan berwarna oranye
   const renderTooltip = (message) => (
     <div
       role="tooltip"
       className="
         pointer-events-none invisible absolute left-1/2 top-full
         z-50 mt-2 w-72 max-w-[calc(100vw-2rem)]
-        -translate-x-1/2 rounded-lg border border-gray-300
-        bg-gray-100 px-3 py-2 text-left text-xs font-medium
-        leading-relaxed text-gray-700 shadow-lg
+        -translate-x-1/2 rounded-xl
+        border border-orange-200
+        bg-orange-50 px-3 py-2
+        text-left text-xs font-medium
+        leading-relaxed text-orange-800
+        shadow-lg shadow-orange-200/40
         opacity-0 transition-all duration-150
         group-hover:visible group-hover:opacity-100
+        dark:border-orange-500/30
+        dark:bg-[#2b1b10]
+        dark:text-orange-300
       "
     >
-      {message}
+      <div className="mb-1 flex items-center gap-1.5 font-bold">
+        <AlertCircle size={14} />
+        Informasi Pembatasan
+      </div>
+      <p>{message}</p>
     </div>
   );
 
@@ -249,7 +323,12 @@ export default function SatkerTable({
           <TableBody>
             {(dataTable || []).map((row, index) => (
               <TableRow
-                key={row?.nospp_ ?? index}
+                key={
+                  row?.nospp ??
+                  row?.no_spp ??
+                  row?.id ??
+                  index
+                }
                 className="
                   group border-b border-slate-100
                   transition-colors duration-200
@@ -258,7 +337,15 @@ export default function SatkerTable({
                 "
               >
                 {visibleColumns.map((col) => {
+                  // Nomor SPP
                   if (col.key === "spp_number") {
+                    const nomorSPP =
+                      row?.nospp ??
+                      row?.no_spp ??
+                      row?.no_spp_ ??
+                      row?.nomor_spp ??
+                      row?.nomor_spp_;
+
                     return (
                       <TableCell
                         key={col.key}
@@ -269,11 +356,12 @@ export default function SatkerTable({
                           dark:text-gray-200 sm:text-sm
                         "
                       >
-                        {row?.nospp_ ?? "-"}
+                        {nomorSPP ?? "-"}
                       </TableCell>
                     );
                   }
 
+                  // Tanggal dibuat
                   if (col.key === "created_at") {
                     return (
                       <TableCell
@@ -292,6 +380,7 @@ export default function SatkerTable({
                     );
                   }
 
+                  // Status dokumen
                   if (col.key === "status") {
                     return (
                       <TableCell
@@ -316,6 +405,7 @@ export default function SatkerTable({
                     );
                   }
 
+                  // Kelengkapan
                   if (col.key === "kelengkapan") {
                     return (
                       <TableCell
@@ -324,12 +414,15 @@ export default function SatkerTable({
                         className="whitespace-nowrap px-4 py-3.5"
                       >
                         {renderKelengkapanBadge(
-                          row?.totalkelengkapan_
+                          row?.total_kelengkapan ??
+                            row?.totalkelengkapan_ ??
+                            row?._totalkelengkapan_
                         )}
                       </TableCell>
                     );
                   }
 
+                  // Revisi per dokumen
                   if (col.key === "revisi") {
                     return (
                       <TableCell
@@ -345,37 +438,43 @@ export default function SatkerTable({
                     );
                   }
 
+                  // Kolom aksi
                   if (col.key === "action") {
                     const normalizedStatus = String(
-                      row?.status || ""
+                      row?.status_ ?? row?.status ?? ""
                     )
                       .trim()
                       .toLowerCase();
 
+                    // Tombol Edit untuk User
                     const showEditButton =
-                      isUser &&
+                      (isUser || isPIC) &&
                       normalizedStatus !== "approved" &&
                       normalizedStatus !== "sp2d";
 
+                    // Tombol Pengujian untuk PIC
+                    // Kondisi tampil TIDAK bergantung pada pembatasan jumlah SPP.
                     const showPengujianButton =
                       isPengajuan &&
                       isPIC &&
                       normalizedStatus !== "sp2d";
 
-                    const showDocumentButton =
-                      showPengujianButton ||
-                      isUser ||
-                      role === "admin";
+                    const showDocumentButton = showPengujianButton;
 
+                    const rowStatus = row?.status_ ?? row?.status ?? "";
+
+
+                    const isFixRow = isFixStatus(rowStatus);
+
+                    // Hanya mengatur klik, bukan mengatur tampilan tombol.
                     const dokumenDisabled =
-                      (showPengujianButton && pengujianDisabled) ||
-                      (isUser && tambahPengajuanDisabled);
+                      showPengujianButton &&
+                      (
+                        (isFixRow && canSubmitFix === false) ||
+                        (isDiprosesLengkapStatus(rowStatus) && canSubmitApprove === false)
+                      );
 
-                    const pesanTooltip = pengujianDisabled
-                      ? pesanPembatasanPIC.pesan
-                      : tambahPengajuanDisabled
-                        ? pesanPembatasanUser.pesan
-                        : "";
+                    const dataPembatasan = pesanPembatasanPIC;
 
                     return (
                       <TableCell
@@ -404,58 +503,46 @@ export default function SatkerTable({
                             </button>
                           )}
 
-                          {showDocumentButton && (
-                            <div className="relative inline-flex group">
-                              <button
-                                type="button"
-                                title={
-                                  dokumenDisabled
-                                    ? undefined
-                                    : "Pengujian SPP"
-                                }
-                                aria-label={
-                                  dokumenDisabled
-                                    ? "Keterangan pembatasan"
-                                    : "Pengujian SPP"
-                                }
-                                aria-disabled={dokumenDisabled}
-                                className={`
-                                  rounded-xl border p-2
-                                  transition-all duration-200
-                                  ${
+                            {showDocumentButton && (
+                              <div className="relative inline-flex group">
+                                <button
+                                  type="button"
+                                  title={
                                     dokumenDisabled
-                                      ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
-                                      : "border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white"
+                                      ? "Pengujian tidak dapat dibuka"
+                                      : "Pengujian SPP"
                                   }
-                                `}
-                                onClick={() => {
-                                  if (dokumenDisabled) {
-                                    onOpenPembatasanInfo?.(
-                                      isPIC
-                                        ? pesanPembatasanPIC
-                                        : pesanPembatasanUser
-                                    );
-                                    return;
-                                  }
+                                  aria-disabled={dokumenDisabled}
+                                  className={`
+                                    rounded-xl border p-2 transition-all duration-200
+                                    ${
+                                      dokumenDisabled
+                                        ? "cursor-not-allowed border-orange-300 bg-orange-100 text-orange-500"
+                                        : "border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white"
+                                    }
+                                  `}
+                                  onClick={(event) => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
 
-                                  if (showPengujianButton && isPIC) {
-                                    navigate(
-                                      `/pengajuan/pengujian/${row?.nospp_}`,
-                                      { state: { row } }
-                                    );
-                                  }
-                                }}
-                              >
-                                <FileCheck
-                                  size={16}
-                                  strokeWidth={2.5}
-                                />
-                              </button>
+                                    // BLOKIR sebelum navigate dipanggil.
+                                    if (dokumenDisabled) {
+                                      onOpenPembatasanInfo?.(pesanPembatasanPIC);
+                                      return;
+                                    }
 
-                              {dokumenDisabled &&
-                                renderTooltip(pesanTooltip)}
-                            </div>
-                          )}
+                                    navigate(`/pengajuan/pengujian/${row.no_spp_}`, {
+                                      state: { row },
+                                    });
+                                  }}
+                                >
+                                  <FileCheck size={16} strokeWidth={2.5} />
+                                </button>
+
+                                {dokumenDisabled &&
+                                  renderTooltip(pesanPembatasanPIC.pesan)}
+                              </div>
+                            )}
 
                           <button
                             type="button"
@@ -472,7 +559,9 @@ export default function SatkerTable({
                             "
                             onClick={() =>
                               navigate(
-                                `/pengajuan/detail/${row?.nospp_}`,
+                                `/pengajuan/detail/${
+                                  row?.nospp ?? row?.no_spp
+                                }`,
                                 { state: { row } }
                               )
                             }
@@ -484,6 +573,7 @@ export default function SatkerTable({
                     );
                   }
 
+                  // Kolom lainnya
                   return (
                     <TableCell
                       key={col.key}

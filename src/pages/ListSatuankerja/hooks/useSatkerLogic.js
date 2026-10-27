@@ -52,13 +52,16 @@ export function useSatkerLogic() {
   const [totalDiperbaikiRevGte1, setTotalDiperbaikiRevGte1] =
     useState(0);
   const [summaryNote, setSummaryNote] = useState("");
+  // Summary khusus User
+  const [canAddSubmission, setCanAddSubmission] = useState(null);
+  const [userSummaryNote, setUserSummaryNote] = useState("");
 
   // Modal States (Tinggal Add/Edit & PDF)
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
   const [letiantModal, setVariantModal] = useState("");
   const [pdfToOpen, setPDFtoOpen] = useState("");
-  const [showModal, setShowModal] = useState("true");
+  const [showModal, setShowModal] = useState(false);
   const [isOpenMergeModal, setIsOpenMergeModal] = useState(false);
 
   // Form & Input States
@@ -174,18 +177,14 @@ export function useSatkerLogic() {
       const summary = res.data;
 
       setJumlahDiprosesPIC(
-        Number(summary.total_diproses_) || 0
-      );
-
-      setCanSubmitTest(
-        summary.can_submit_test_ ?? null
+        Number(summary.list_approve?.total) || 0
       );
 
       setTotalDiperbaikiRevGte1(
-        Number(summary.total_diperbaiki_rev_gte1_) || 0
+        Number(summary.total_fix) || 0
       );
 
-     setSummaryNote(summary.note || "");
+      setSummaryNote(summary.note || "");
     } catch (error) {
       console.error("Gagal mengambil summary PIC:", error);
     }
@@ -201,207 +200,141 @@ export function useSatkerLogic() {
         0
     );
 
-  const getUpdater = (item) =>
-    String(
-      item?.update_by_ ??
-        item?.update_by ??
-        item?.updated_by_ ??
+    const getUpdater = (item) => {
+      const updater =
         item?.updated_by ??
-        item?.diperbaiki_oleh_ ??
-        item?.diperbaiki_oleh ??
-        ""
-    )
-      .trim()
-      .toUpperCase();
+        item?.update_by ??
+        item?.updated_by__ ??
+        item?.updated_by_ ??
+        item?.update_by__ ??
+        item?.update_by_ ??
+        item?.diperbaiki_oleh__ ??
+        item?.diperbaiki_oleh_;
+
+      const updaterName =
+        typeof updater === "object" && updater !== null
+          ? updater.name
+          : updater;
+
+      return String(updaterName ?? "")
+        .trim()
+        .toUpperCase();
+    };
+
+      // Summary untuk User
+      const fetchUserSummary = async () => {
+        try {
+          const res = await apiRequest({
+            url: "/archive/user-summary",
+            token: accessToken,
+          });
+
+          if (!res?.success || !res?.data) return;
+
+          const summary = res.data;
+
+          setJumlahPerluDiperbaikiPAPIC(
+            Number(summary.total_fix_pic) || 0
+          );
+
+          setCanAddSubmission(
+            summary.can_add_submission ?? null
+          );
+
+          setUserSummaryNote(summary.note || "");
+        } catch (error) {
+          console.error("Gagal mengambil summary User:", error);
+        }
+      };
 
   // ==========================================
   // 3. API CALLS
   // ==========================================
-  const fetchTable = async () => {
-    try {
-      const isPengajuan = isPengajuanPath(location.pathname);
+    const fetchTable = async () => {
+      try {
+        const isPengajuan = isPengajuanPath(location.pathname);
 
-      const tahun = isPengajuan
-        ? new Date().getFullYear()
-        : filter.tahun;
+        const tahun = isPengajuan
+          ? new Date().getFullYear()
+          : filter.tahun;
 
-      const status = isPengajuan ? "arsip" : null;
+        const status = isPengajuan ? "arsip" : null;
 
-      const buildParams = (overrides = {}) =>
-        buildQueryString({
+        const query = buildQueryString({
           biro_code: currentMenu?.code ?? filter?.satker,
           tahun,
           status,
-          page: 1,
-          per_page: 100,
-          ...overrides,
+          status_filter: filter.status || "",
+          search_key: filter.searchKey,
+          page: page + 1,
+          per_page: rowsPerPage,
+          sort_by: sortBy,
+          sort_dir: sortDir,
+          start_date: filter.startDate
+            ? moment(filter.startDate).format("YYYY-MM-DD")
+            : "",
+          end_date: filter.endDate
+            ? moment(filter.endDate).format("YYYY-MM-DD")
+            : "",
         });
 
-      const query = buildQueryString({
-        biro_code: currentMenu?.code ?? filter?.satker,
-        tahun,
-        status,
-        status_filter: filter.status || "",
-        search_key: filter.searchKey,
-        page: page + 1,
-        per_page: rowsPerPage,
-        sort_by: sortBy,
-        sort_dir: sortDir,
-        start_date: filter.startDate
-          ? moment(filter.startDate).format("YYYY-MM-DD")
-          : "",
-        end_date: filter.endDate
-          ? moment(filter.endDate).format("YYYY-MM-DD")
-          : "",
-      });
-
-      const data = await apiRequest({
-        url: `/archive/list?${query}`,
-        token: accessToken,
-      });
-
-      if (!data?.success) return;
-
-      const rows = data?.data?.data || [];
-
-
-const normalizeStatus = (value) =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_-]+/g, "");
-
-const selectedStatus = normalizeStatus(filter?.status);
-
-const filteredRows = !selectedStatus
-  ? rows
-  : rows.filter((item) => {
-      const itemStatus = normalizeStatus(item?.status);
-
-      if (selectedStatus === "diproses") {
-        return ["fix", "diproses"].includes(itemStatus);
-      }
-
-      if (
-        selectedStatus === "diproseslengkap" ||
-        selectedStatus === "approved"
-      ) {
-        return ["approved", "diproseslengkap"].includes(itemStatus);
-      }
-
-      if (
-        selectedStatus === "butuhperbaikan" ||
-        selectedStatus === "perludiperbaiki"
-      ) {
-        return [
-          "fix",
-          "butuhperbaikan",
-          "perludiperbaiki",
-        ].includes(itemStatus);
-      }
-
-      return itemStatus === selectedStatus;
-    });
-
-    setDataTable(filteredRows);
-    setTotalPages(
-      Math.max(1, Math.ceil(filteredRows.length / rowsPerPage))
-    );
-
-      // Hitung jumlah dokumen perbaikan dari data yang tersedia.
-      const normalizeCountStatus = (value) =>
-        String(value ?? "")
-          .trim()
-          .toLowerCase()
-          .replace(/[\s_-]+/g, "");
-
-      setJumlahPerluDiperbaiki(
-        rows.filter((item) => {
-          const updateBy = String(
-            item?.update_by ?? ""
-          )
-            .trim()
-            .toUpperCase();
-
-          return (
-            normalizeCountStatus(item?.status) ===
-              "perludiperbaiki" &&
-            Number(item?.rev_) > 1 &&
-            updateBy !== "PA PIC"
-          );
-        }).length
-      );
-
-      setJumlahPerluDiperbaikiPAPIC(
-        rows.filter((item) => {
-          const updateBy = String(
-            item?.update_by ?? ""
-          )
-            .trim()
-            .toUpperCase();
-
-          return (
-            normalizeCountStatus(item?.status) ===
-              "perludiperbaiki" &&
-            updateBy === "PA PIC"
-          );
-        }).length
-      );
-
-      let allRows = [];
-      let currentPage = 1;
-      let lastPage = 1;
-
-      do {
-        const countQuery = buildParams({
-          page: currentPage,
-          per_page: 100,
-        });
-
-        const countData = await apiRequest({
-          url: `/archive/list?${countQuery}`,
+        const data = await apiRequest({
+          url: `/archive/list?${query}`,
           token: accessToken,
         });
 
-        if (!countData?.success) break;
+        if (!data?.success) return;
 
-        allRows = allRows.concat(
-          countData?.data?.data || []
+        const rows = data?.data?.data || [];
+        const totalData = Number(data?.data?.total ?? rows.length);
+
+        const normalizeStatus = (value) =>
+          String(value || "")
+            .trim()
+            .toLowerCase()
+            .replace(/[\s_-]+/g, "");
+
+        const selectedStatus = normalizeStatus(filter?.status);
+
+        const filteredRows = !selectedStatus
+          ? rows
+          : rows.filter((item) => {
+              const itemStatus = normalizeStatus(item?.status);
+
+              if (selectedStatus === "diproses") {
+                return ["fix", "diproses"].includes(itemStatus);
+              }
+
+              if (
+                selectedStatus === "diproseslengkap" ||
+                selectedStatus === "approved"
+              ) {
+                return ["approved", "diproseslengkap"].includes(itemStatus);
+              }
+
+              if (
+                selectedStatus === "butuhperbaikan" ||
+                selectedStatus === "perludiperbaiki"
+              ) {
+                return [
+                  "fix",
+                  "butuhperbaikan",
+                  "perludiperbaiki",
+                ].includes(itemStatus);
+              }
+
+              return itemStatus === selectedStatus;
+            });
+
+        setDataTable(filteredRows);
+
+        setTotalPages(
+          Math.max(1, Math.ceil(totalData / rowsPerPage))
         );
-
-        lastPage = Number(countData?.data?.last_page) || 1;
-        currentPage++;
-      } while (currentPage <= lastPage);
-
-      // Hitung SPP berstatus Diproses.
-      setJumlahDiprosesPIC(
-        allRows.filter(
-          (item) => normalizeStatus(item?.status_) === "diproses"
-        ).length
-      );
-
-      // Hitung SPP perlu diperbaiki, bukan oleh PA PIC.
-      setJumlahPerluDiperbaiki(
-        allRows.filter(
-          (item) =>
-            normalizeStatus(item?.status_) === "perludiperbaiki" &&
-            getRevision(item) > 1 &&
-            getUpdater(item) !== "PA PIC"
-        ).length
-      );
-
-      // Hitung SPP perlu diperbaiki oleh PA PIC.
-      setJumlahPerluDiperbaikiPAPIC(
-        allRows.filter(
-          (item) =>
-            normalizeStatus(item?.status_) === "perludiperbaiki" &&
-            getUpdater(item) === "PA PIC"
-        ).length
-      );
-    } catch (error) {
-      console.error("Gagal mengambil data SPP:", error);
-    }
-  };
+      } catch (error) {
+        console.error("Gagal mengambil data SPP:", error);
+      }
+    };
 
 
     const fetchType = useCallback(async (id) => {
@@ -456,36 +389,89 @@ const filteredRows = !selectedStatus
     }
   };
 
-  const submitData = async (formDataToSubmit) => {
-    try {
-      let encryptedLink = CryptoJS.AES.encrypt(
-        formDataToSubmit.link || "",
-        ENCRYPTION_KEY,
-      ).toString();
-      const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
+const submitData = async (formDataToSubmit) => {
+const payload = new FormData();
 
-      const payload = new FormData();
-      payload.append("kode_biro", currentMenu?.code);
-      payload.append("no_spp", formDataToSubmit.no_spp);
-      payload.append("jenis_spp", formDataToSubmit.type);
-      payload.append("employee_status", formDataToSubmit.status_pegawai ?? null);
-      if (formData.kategori_penerima && formData.kategori_penerima.length > 0) {
-        formData.kategori_penerima.forEach((cat) => {
+try {
+  let CryptoJS = require("crypto-js");
+
+  let encryptedLink = CryptoJS.AES.encrypt(
+    formDataToSubmit.link || "",
+    ENCRYPTION_KEY,
+  ).toString();
+
+const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
+
+const kodeBiro =
+  currentMenu?.code || formDataToSubmit?.kode_biro || "";
+
+const noSPP =
+  formDataToSubmit?.no_spp || formDataToSubmit?.nospp || "";
+
+const jenisSPP =
+  formDataToSubmit?.type_id ||
+  formDataToSubmit?.type ||
+  formDataToSubmit?.jenis_spp ||
+  "";
+
+const tahun = formDataToSubmit?.tahun || "";
+
+// Validasi field wajib
+if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
+  console.error("Data pengajuan tidak lengkap:", {
+    kode_biro: kodeBiro,
+    no_spp: noSPP,
+    jenis_spp: jenisSPP,
+    tahun,
+    currentMenu,
+    formDataToSubmit,
+  });
+
+  toast.error("Kode biro, No. SPP, Jenis SPP, dan Tahun wajib diisi.");
+  return;
+}
+
+      // Field wajib
+      payload.append("kode_biro", String(kodeBiro));
+      payload.append("no_spp", String(noSPP));
+      payload.append("jenis_spp", String(jenisSPP));
+      payload.append(
+        "employee_status",
+        formDataToSubmit?.status_pegawai ?? ""
+      );
+
+      // Kategori penerima
+      if (
+        formDataToSubmit?.kategori_penerima &&
+        formDataToSubmit.kategori_penerima.length > 0
+      ) {
+        formDataToSubmit.kategori_penerima.forEach((cat) => {
           payload.append("category[]", cat);
         });
       }
-      payload.append("tahun", formDataToSubmit.tahun);
-      payload.append("dokumen", formDataToSubmit.dokumen[0]);
+
+      payload.append("tahun", String(tahun));
+      payload.append("dokumen", formDataToSubmit?.dokumen?.[0]);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", finalJmlHal);
+
       payload.append(
         "feedback",
-        formDataToSubmit.catatan ?? formDataToSubmit.feedback,
+        formDataToSubmit?.catatan ?? formDataToSubmit?.feedback ?? ""
       );
+
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
       }
-      payload.append("uploaded_name", formDataToSubmit.uploaded_by);
+
+      const uploadedBy =
+        formDataToSubmit?.uploaded_by ||
+        userData?.name ||
+        "";
+
+      if (uploadedBy) {
+        payload.append("uploaded_by", uploadedBy);
+      }
 
       if (formDataToSubmit.dokumen !== null) {
         const defaultToken = JSON.parse(
@@ -758,27 +744,27 @@ const filteredRows = !selectedStatus
   };
 
   // HANYA UNTUK MODAL ADD/EDIT
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  console.log("HANDLE SUBMIT TERPANGGIL");
 
     let isAnyFile = formData?.dokumen || formData?.document;
-    formData.type = formData.type_id;
     try {
       if (
         letiantModal === "Add" &&
         isAnyFile &&
         isPengajuanPath(location.pathname)
       ) {
-        if (
-          !formData?.["no_spp"] ||
-          !formData.tahun ||
-          !formData.type ||
-          !formData.uploaded_by ||
-          !formData.dokumen
-        ) {
-          toast.error("Mohon lengkapi semua field yang diperlukan.");
-          return;
-        }
+      if (
+        !formData?.no_spp ||
+        !formData.tahun ||
+        !(formData.type_id || formData.type) ||
+        !formData.dokumen
+      ) {
+        toast.error("Mohon lengkapi semua field yang diperlukan.");
+        return;
+      }
       } else if (
         letiantModal === "Add" &&
         isAnyFile &&
@@ -793,12 +779,25 @@ const filteredRows = !selectedStatus
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
         }
-      } else if (letiantModal === "Edit") {
-        if (!formData?.["no_spp"] || !formData.tahun || !formData.type) {
-          toast.error("Mohon lengkapi semua field yang diperlukan.");
-          return;
+
+        } else if (letiantModal === "Edit") {
+          const noSPP = String(formData?.no_spp ?? formData?.nospp ?? "").trim();
+          const tahun = String(formData?.tahun ?? "").trim();
+          const jenisSPP = formData?.type_id || formData?.type || formData?.jenis_spp;
+
+          if (!noSPP || !tahun || !String(jenisSPP ?? "").trim()) {
+            console.log("Validasi Edit SPP:", {
+              no_spp: noSPP,
+              tahun,
+              type: formData?.type,
+              type_id: formData?.type_id,
+              jenis_spp: formData?.jenis_spp,
+            });
+
+            toast.error("No. SPP, Tahun, dan Jenis SPP wajib diisi.");
+            return;
+          }
         }
-      }
 
       const typeName =
         (types || [])
@@ -889,10 +888,7 @@ const filteredRows = !selectedStatus
         status_pegawai: null,
         jml_hal: 0,
       });
-      await Promise.all([
-      fetchTable(),
-      fetchPicSummary(),
-    ]);
+      await fetchTable();
     } catch (err) {
       console.log(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
@@ -1176,6 +1172,9 @@ const filteredRows = !selectedStatus
     jumlahPerluDiperbaiki,
     jumlahPerluDiperbaikiPAPIC,
     canSubmitTest,
+    canAddSubmission,
+    userSummaryNote,
+    fetchUserSummary,
     totalDiperbaikiRevGte1,
     summaryNote,
     fetchPicSummary,

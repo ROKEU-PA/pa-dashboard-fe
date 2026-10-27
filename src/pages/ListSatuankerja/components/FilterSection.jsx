@@ -8,6 +8,7 @@ import {
   Filter,
   ChevronDown,
   Book,
+  AlertCircle,
 } from "lucide-react";
 import { isPengajuanPath } from "@/pages/ListSatuankerja/satkerHooks";
 import { FaFilePdf } from "react-icons/fa";
@@ -39,7 +40,13 @@ export default function FilterSection({
   handleStatusChange,
   openAddModal,
   openMergeModal,
+
+  // Jumlah SPP yang perlu diperbaiki oleh PA PIC
   jumlahPerluDiperbaikiPAPIC = 0,
+
+  // Status izin dan catatan dari API user-summary
+  canAddSubmission,
+  userSummaryNote = "",
 }) {
   const [statusFocused, setStatusFocused] = useState(false);
 
@@ -48,6 +55,7 @@ export default function FilterSection({
   const role = String(
     userData?.role ||
       userData?.role_name ||
+      userData?.rolename ||
       userData?.user?.role ||
       ""
   )
@@ -61,30 +69,33 @@ export default function FilterSection({
     Number(jumlahPerluDiperbaikiPAPIC) || 0
   );
 
+  /*
+   * Jika API sudah memberikan boolean, gunakan keputusan API.
+   * Jika belum, gunakan aturan fallback jumlah dokumen > 10.
+   */
   const isTambahPengajuanDisabled =
     isPengajuan &&
     isUser &&
-    jumlahPerluDiperbaiki > 10;
+    (typeof canAddSubmission === "boolean"
+      ? !canAddSubmission
+      : jumlahPerluDiperbaiki > 10);
 
   const tooltipTambahPengajuan =
-    `Tambah Pengajuan dinonaktifkan karena terdapat ` +
-    `${jumlahPerluDiperbaiki} SPP yang perlu diperbaiki oleh PA PIC. ` +
-    `Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`;
+    String(userSummaryNote || "").trim() ||
+    `Tambah Pengajuan dinonaktifkan karena terdapat ${jumlahPerluDiperbaiki} SPP yang perlu diperbaiki oleh PA PIC. Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`;
 
   const currentStatus = filter?.status || "";
 
   const selectedStatus =
-    STATUS_OPTIONS.find(
-      (item) => item.value === currentStatus
-    )?.label || "Semua Status";
+    STATUS_OPTIONS.find((item) => item.value === currentStatus)?.label ||
+    "Semua Status";
 
-  // Perubahan pencarian.
+  // Pencarian dokumen
   const handleSearchChange = (value) => {
     handleDateChange("searchKey", value);
   };
 
-  // Perubahan status.
-  // Gunakan satu callback agar status tidak diperbarui dua kali.
+  // Perubahan status menggunakan satu callback
   const handleStatusSelect = (value) => {
     const nextStatus = value || "";
 
@@ -95,7 +106,7 @@ export default function FilterSection({
     }
   };
 
-  // Reset semua filter.
+  // Reset semua filter
   const handleResetFilter = () => {
     handleDateChange("searchKey", "");
     handleDateChange("tahun", "");
@@ -142,7 +153,7 @@ export default function FilterSection({
                   <Button
                     onClick={() => {
                       if (isTambahPengajuanDisabled) return;
-                      openAddModal();
+                      openAddModal?.();
                     }}
                     disabled={isTambahPengajuanDisabled}
                     className={`
@@ -155,9 +166,7 @@ export default function FilterSection({
                           : "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/30 hover:from-blue-700 hover:to-blue-600 active:scale-95"
                       }
                     `}
-                    icon={
-                      <Plus size={16} strokeWidth={2.5} />
-                    }
+                    icon={<Plus size={16} strokeWidth={2.5} />}
                   >
                     Tambah Pengajuan
                   </Button>
@@ -168,14 +177,29 @@ export default function FilterSection({
                       className="
                         pointer-events-none invisible absolute left-0
                         top-full z-50 mt-2 w-80 max-w-[85vw]
-                        rounded-lg border border-gray-600
-                        bg-gray-800 px-3 py-2 text-left text-xs
-                        font-medium leading-relaxed text-white
-                        opacity-0 shadow-lg transition-all duration-150
+                        rounded-xl border border-orange-200
+                        bg-orange-50 px-3 py-3 text-left
+                        text-xs font-medium leading-relaxed
+                        text-orange-800 shadow-lg
+                        shadow-orange-200/40
+                        opacity-0 transition-all duration-150
                         group-hover:visible group-hover:opacity-100
+                        dark:border-orange-500/30
+                        dark:bg-[#2b1b10]
+                        dark:text-orange-300
                       "
                     >
-                      {tooltipTambahPengajuan}
+                      <div className="mb-1.5 flex items-center gap-1.5 font-bold">
+                        <AlertCircle size={14} />
+                        Tambah Pengajuan Dinonaktifkan
+                      </div>
+
+                      <p>{tooltipTambahPengajuan}</p>
+
+                      <p className="mt-2 border-t border-orange-200 pt-2 text-[11px] dark:border-orange-500/20">
+                        SPP yang perlu diperbaiki:{" "}
+                        <strong>{jumlahPerluDiperbaiki}</strong>
+                      </p>
                     </div>
                   )}
                 </div>
@@ -261,9 +285,7 @@ export default function FilterSection({
               type="text"
               placeholder="Cari data..."
               value={filter?.searchKey || ""}
-              onChange={(e) =>
-                handleSearchChange(e.target.value)
-              }
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="
                 h-[38px] w-full rounded-xl border border-[#e2e8f0]
                 bg-[#f5f8fc] py-0 pl-9 pr-3 text-sm font-semibold
@@ -300,9 +322,7 @@ export default function FilterSection({
 
             <select
               value={currentStatus}
-              onChange={(e) =>
-                handleStatusSelect(e.target.value)
-              }
+              onChange={(e) => handleStatusSelect(e.target.value)}
               onFocus={() => setStatusFocused(true)}
               onBlur={() => setStatusFocused(false)}
               className={`
@@ -321,10 +341,7 @@ export default function FilterSection({
               <option value="">Semua Status</option>
 
               {STATUS_OPTIONS.map((item) => (
-                <option
-                  key={item.value}
-                  value={item.value}
-                >
+                <option key={item.value} value={item.value}>
                   {item.label}
                 </option>
               ))}
@@ -342,9 +359,7 @@ export default function FilterSection({
           </div>
 
           {currentStatus && (
-            <span className="sr-only">
-              {selectedStatus}
-            </span>
+            <span className="sr-only">{selectedStatus}</span>
           )}
         </div>
 
