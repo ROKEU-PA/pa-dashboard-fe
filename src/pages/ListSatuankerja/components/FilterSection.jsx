@@ -115,7 +115,7 @@ export default function FilterSection({
   return (
     <div
       className="
-        relative z-20 flex flex-wrap items-start justify-between gap-4
+        relative z-0 flex flex-wrap items-start justify-between gap-4
         overflow-visible
         rounded-[20px] border border-slate-100 bg-white p-5
         shadow-[0_4px_20px_rgba(0,0,0,0.03)]
