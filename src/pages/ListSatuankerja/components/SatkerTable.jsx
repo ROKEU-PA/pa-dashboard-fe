@@ -84,34 +84,6 @@ import {
     Number(jumlahPerluDiperbaikiPAPIC) || 0
   );
 
-  /*   * Jika API sudah mengirim boolean, gunakan nilai API.
-   * Jika belum, gunakan aturan fallback jumlah dokumen > 10.
-   */
-const isFixStatus = (status) => {
-  const value = String(status || "")
-    .trim()
-    .toLowerCase();
-
-  return (
-    value === "diproses (butuh perbaikan)" ||
-    value === "fix" ||
-    value.includes("butuh perbaikan") ||
-    value.includes("perlu diperbaiki")
-  );
-};
-
-const isDiprosesLengkapStatus = (status) => {
-  const value = String(status || "")
-    .trim()
-    .toLowerCase();
-
-  return (
-    value === "approved" ||
-    value === "approve" ||
-    value.includes("diproses lengkap")
-  );
-};
-
 const tambahPengajuanTidakDiizinkan =
   typeof canAddSubmission === "boolean"
     ? !canAddSubmission
@@ -133,57 +105,43 @@ const pesanPembatasanPIC = {
 
 const pesanPembatasanUser = {
   judul: "Tambah Pengajuan Dinonaktifkan",
-  pesan:
-    String(userSummaryNote || "").trim() ||
-    `Terdapat ${jumlahRevisiUser} SPP berstatus Perlu Diperbaiki yang diperbarui oleh PA PIC. Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`,
+  pesan: "Anda harus melakukan upload perbaikan SPP terlebih dahulu, agar dapat Tambah Pengajuan Baru.",
   jumlah: jumlahRevisiUser,
 };
 
-  // Badge jumlah revisi per dokumen
-  const renderRevisiBadge = (revisiCount, statusDokumen) => {
-    const count = Number(revisiCount || 0);
+ // Badge jumlah revisi per dokumen
+const renderRevisiBadge = (revisiCount, statusDokumen) => {
+  const count = Number(revisiCount || 0);
 
-    if (!count) {
-      return (
-        <span className="font-medium text-slate-300 dark:text-slate-600">
-          —
-        </span>
-      );
-    }
-
-    const normalizedStatus = String(statusDokumen || "")
-      .trim()
-      .toLowerCase();
-
-    const isNeedsFix =
-      normalizedStatus !== "approved" &&
-      normalizedStatus !== "sp2d";
-
+  if (!count) {
     return (
-      <div
-        className={`
-          inline-flex items-center gap-1.5 rounded-full
-          border px-2.5 py-1 text-[10px] font-bold
-          shadow-sm transition-all duration-300 sm:text-xs
-          ${
-            isNeedsFix
-              ? "animate-pulse border-rose-200 bg-rose-50 text-rose-600 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-400"
-              : "border-slate-200 bg-slate-50 text-slate-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-400"
-          }
-        `}
-      >
-        {isNeedsFix ? (
-          <BellRing size={12} className="animate-bounce" />
-        ) : (
-          <Check
-            size={12}
-            className="text-emerald-500 dark:text-emerald-400"
-          />
-        )}
-        <span>{count}x Revisi</span>
-      </div>
+      <span className="font-medium text-slate-300 dark:text-slate-600">
+        —
+      </span>
     );
-  };
+  }
+
+  return (
+    <div
+      className="
+        inline-flex items-center gap-1.5 rounded-full
+        border border-orange-200 bg-orange-50
+        px-2.5 py-1 text-[10px] font-bold
+        text-orange-600 shadow-sm
+        transition-all duration-300 sm:text-xs
+        dark:border-orange-500/20
+        dark:bg-orange-500/10 dark:text-orange-400
+      "
+    >
+      <BellRing
+        size={12}
+        className="text-orange-500 dark:text-orange-400"
+      />
+
+      <span>{count}x Revisi</span>
+    </div>
+  );
+};
 
   // Badge kelengkapan dokumen
   const renderKelengkapanBadge = (kelengkapanStr) => {
@@ -242,33 +200,37 @@ const pesanPembatasanUser = {
       )
   );
 
-  // Tooltip informasi pembatasan berwarna oranye
-  const renderTooltip = (message) => (
-    <div
-      role="tooltip"
-      className="
-        pointer-events-none invisible absolute left-1/2 top-full
-        z-50 mt-2 w-72 max-w-[calc(100vw-2rem)]
-        -translate-x-1/2 rounded-xl
-        border border-orange-200
-        bg-orange-50 px-3 py-2
-        text-left text-xs font-medium
-        leading-relaxed text-orange-800
-        shadow-lg shadow-orange-200/40
-        opacity-0 transition-all duration-150
-        group-hover:visible group-hover:opacity-100
-        dark:border-orange-500/30
-        dark:bg-[#2b1b10]
-        dark:text-orange-300
-      "
-    >
-      <div className="mb-1 flex items-center gap-1.5 font-bold">
-        <AlertCircle size={14} />
-        Informasi Pembatasan
-      </div>
-      <p>{message}</p>
+
+// Tooltip informasi pembatasan dengan tampilan abu-abu
+const renderTooltip = (message) => (
+  <div
+    role="tooltip"
+    className="
+      pointer-events-none invisible absolute
+      top-full left-1/2 z-[99999] mt-2
+      w-48 max-w-[calc(100vw-2rem)]
+      -translate-x-1/2
+      rounded-lg
+      border border-orange-200
+      bg-orange-50 px-2.5 py-2
+      text-left text-[10px]
+      leading-snug text-orange-900
+      shadow-md shadow-orange-900/10
+      opacity-0 transition-all duration-150
+      group-hover:visible group-hover:opacity-100
+      dark:border-orange-700
+      dark:bg-orange-950
+      dark:text-orange-100
+    "
+  >
+    <div className="mb-1 flex items-center gap-1 font-semibold text-orange-700 dark:text-orange-300">
+      <AlertCircle size={11} className="shrink-0" />
+      Informasi Pembatasan
     </div>
-  );
+
+    <p className="break-words">{message}</p>
+  </div>
+);
 
   return (
     <>
@@ -323,12 +285,15 @@ const pesanPembatasanUser = {
           <TableBody>
             {(dataTable || []).map((row, index) => (
               <TableRow
-                key={
-                  row?.nospp ??
-                  row?.no_spp ??
-                  row?.id ??
-                  index
-                }
+              key={
+                row?.id ??
+                row?.spp_number ??
+                row?._id_ ??
+                row?._spp_number_ ??
+                row?._nospp_ ??
+                row?._no_spp_ ??
+                index
+              }
                 className="
                   group border-b border-slate-100
                   transition-colors duration-200
@@ -339,12 +304,14 @@ const pesanPembatasanUser = {
                 {visibleColumns.map((col) => {
                   // Nomor SPP
                   if (col.key === "spp_number") {
-                    const nomorSPP =
-                      row?.nospp ??
-                      row?.no_spp ??
-                      row?.no_spp_ ??
-                      row?.nomor_spp ??
-                      row?.nomor_spp_;
+                  const nomorSPP =
+                    row?.spp_number ??
+                    row?._spp_number_ ??
+                    row?.nospp ??
+                    row?.no_spp ??
+                    row?._no_spp_ ??
+                    row?.nomor_spp ??
+                    row?._nomor_spp__;
 
                     return (
                       <TableCell
@@ -440,19 +407,24 @@ const pesanPembatasanUser = {
 
                   // Kolom aksi
                   if (col.key === "action") {
-                    const normalizedStatus = String(
-                      row?.status_ ?? row?.status ?? ""
-                    )
-                      .trim()
-                      .toLowerCase();
+                  const normalizedStatus = String(
+                    row?.status ??
+                    row?._status_ ??
+                    row?._status__ ??
+                    row?._status_spp_ ??
+                    row?._nama_status_ ??
+                    ""
+                  )
+                    .trim()
+                    .toLowerCase();
 
                     // Tombol Edit untuk User
                     const showEditButton =
-                      (isUser || isPIC) &&
-                      normalizedStatus !== "approved" &&
-                      normalizedStatus !== "sp2d";
+                      (isUser &&
+                        normalizedStatus !== "approved" &&
+                        normalizedStatus !== "sp2d") ||
+                      (isPIC && normalizedStatus === "approved");
 
-                    // Tombol Pengujian untuk PIC
                     // Kondisi tampil TIDAK bergantung pada pembatasan jumlah SPP.
                     const showPengujianButton =
                       isPengajuan &&
@@ -461,20 +433,34 @@ const pesanPembatasanUser = {
 
                     const showDocumentButton = showPengujianButton;
 
-                    const rowStatus = row?.status_ ?? row?.status ?? "";
+                // Normalisasi status untuk mendeteksi variasi penulisan.
+                const normalizedStatusKey = normalizedStatus.replace(/[\s_-]+/g, "");
 
+                // Status Diperbaiki selalu nonaktif.
+                const isFixRow = [
+                  "fix",
+                  "diperbaiki",
+                  "perludiperbaiki",
+                  "perluperbaikan",
+                  "perbaikan",
+                ].includes(normalizedStatusKey);
 
-                    const isFixRow = isFixStatus(rowStatus);
+                // Status Baru Ditambahkan.
+                const isNewRow = [
+                  "baru",
+                  "baruditambahkan",
+                  "new",
+                  "newlyadded",
+                ].includes(normalizedStatusKey);
 
-                    // Hanya mengatur klik, bukan mengatur tampilan tombol.
-                    const dokumenDisabled =
-                      showPengujianButton &&
-                      (
-                        (isFixRow && canSubmitFix === false) ||
-                        (isDiprosesLengkapStatus(rowStatus) && canSubmitApprove === false)
-                      );
+              const approveAllowed = canSubmitApprove === true;
 
-                    const dataPembatasan = pesanPembatasanPIC;
+              const isLengkapMoreThanTen = jumlahDiproses > 10;
+
+              const dokumenDisabled =
+                isPIC &&
+                isLengkapMoreThanTen &&
+                (isFixRow || isNewRow);
 
                     return (
                       <TableCell
@@ -483,7 +469,7 @@ const pesanPembatasanUser = {
                         className="px-4 py-3.5"
                       >
                         <div className="flex flex-row items-center justify-center gap-2.5">
-                          {showEditButton && (
+                          {showEditButton && !isPIC && (
                             <button
                               type="button"
                               title="Edit"
@@ -507,6 +493,7 @@ const pesanPembatasanUser = {
                               <div className="relative inline-flex group">
                                 <button
                                   type="button"
+                                  disabled={dokumenDisabled}
                                   title={
                                     dokumenDisabled
                                       ? "Pengujian tidak dapat dibuka"
@@ -517,7 +504,7 @@ const pesanPembatasanUser = {
                                     rounded-xl border p-2 transition-all duration-200
                                     ${
                                       dokumenDisabled
-                                        ? "cursor-not-allowed border-orange-300 bg-orange-100 text-orange-500"
+                                        ? "cursor-not-allowed border-gray-300 bg-gray-100 text-gray-400"
                                         : "border-orange-200 bg-orange-50 text-orange-600 hover:bg-orange-500 hover:text-white"
                                     }
                                   `}
@@ -531,9 +518,25 @@ const pesanPembatasanUser = {
                                       return;
                                     }
 
-                                    navigate(`/pengajuan/pengujian/${row.no_spp_}`, {
+                                  const noSPP = String(
+                                    row?.spp_number ??
+                                    row?.no_spp ??
+                                    row?.nospp ??
+                                    row?.nomor_spp ??
+                                    ""
+                                  ).trim();
+
+                                  if (!noSPP) {
+                                    console.error("Nomor SPP tidak ditemukan:", row);
+                                    return;
+                                  }
+
+                                  navigate(
+                                    `/pengajuan/pengujian/${encodeURIComponent(noSPP)}`,
+                                    {
                                       state: { row },
-                                    });
+                                    }
+                                  );
                                   }}
                                 >
                                   <FileCheck size={16} strokeWidth={2.5} />
@@ -559,9 +562,9 @@ const pesanPembatasanUser = {
                             "
                             onClick={() =>
                               navigate(
-                                `/pengajuan/detail/${
-                                  row?.nospp ?? row?.no_spp
-                                }`,
+                              `/pengajuan/detail/${
+                                row?.spp_number ?? row?.nospp ?? row?.no_spp
+                              }`,
                                 { state: { row } }
                               )
                             }

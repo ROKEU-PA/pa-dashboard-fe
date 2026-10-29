@@ -38,13 +38,10 @@ export default function FilterSection({
   filter,
   handleDateChange,
   handleStatusChange,
+  _openAddModal,
   openAddModal,
   openMergeModal,
-
-  // Jumlah SPP yang perlu diperbaiki oleh PA PIC
   jumlahPerluDiperbaikiPAPIC = 0,
-
-  // Status izin dan catatan dari API user-summary
   canAddSubmission,
   userSummaryNote = "",
 }) {
@@ -118,7 +115,8 @@ export default function FilterSection({
   return (
     <div
       className="
-        flex flex-wrap items-start justify-between gap-4
+        relative z-20 flex flex-wrap items-start justify-between gap-4
+        overflow-visible
         rounded-[20px] border border-slate-100 bg-white p-5
         shadow-[0_4px_20px_rgba(0,0,0,0.03)]
         backdrop-blur-md transition-colors duration-300
@@ -128,8 +126,8 @@ export default function FilterSection({
       "
     >
       {/* BAGIAN KIRI: TOMBOL */}
-      <div className="flex shrink-0 flex-col gap-2">
-        <div className="flex min-h-[38px] items-center">
+      <div className="relative z-30 flex shrink-0 flex-col gap-2 overflow-visible">
+        <div className="relative flex min-h-[38px] items-center overflow-visible">
           {userData &&
             (!isPengajuan ? (
               <Button
@@ -149,11 +147,11 @@ export default function FilterSection({
               </Button>
             ) : (
               isUser && (
-                <div className="group relative inline-flex">
+                <div className="group relative z-50 inline-flex overflow-visible">
                   <Button
                     onClick={() => {
                       if (isTambahPengajuanDisabled) return;
-                      openAddModal?.();
+                      _openAddModal?.();
                     }}
                     disabled={isTambahPengajuanDisabled}
                     className={`
@@ -175,37 +173,101 @@ export default function FilterSection({
                     <div
                       role="tooltip"
                       className="
-                        pointer-events-none invisible absolute left-0
-                        top-full z-50 mt-2 w-80 max-w-[85vw]
-                        rounded-xl border border-orange-200
-                        bg-orange-50 px-3 py-3 text-left
-                        text-xs font-medium leading-relaxed
-                        text-orange-800 shadow-lg
-                        shadow-orange-200/40
-                        opacity-0 transition-all duration-150
+                        pointer-events-none invisible absolute
+                        left-0 top-full z-[9999] mt-1.5
+                        w-44 max-w-[calc(100vw-2rem)]
+                        overflow-hidden rounded-md
+                        border border-orange-300
+                        bg-orange-50
+                        text-left text-[9px]
+                        text-orange-900
+                        shadow-sm
+                        opacity-0 translate-y-1
+                        transition-all duration-150
                         group-hover:visible group-hover:opacity-100
-                        dark:border-orange-500/30
-                        dark:bg-[#2b1b10]
-                        dark:text-orange-300
+                        group-hover:translate-y-0
+                        dark:border-orange-500/40
+                        dark:bg-orange-950
+                        dark:text-orange-100
                       "
                     >
-                      <div className="mb-1.5 flex items-center gap-1.5 font-bold">
-                        <AlertCircle size={14} />
-                        Tambah Pengajuan Dinonaktifkan
+                      <div
+                        className="
+                          flex items-center gap-1.5
+                          border-b border-orange-300
+                          bg-orange-100
+                          px-2 py-1.5
+                          dark:border-orange-500/40
+                          dark:bg-orange-900/60
+                        "
+                      >
+                        <div
+                          className="
+                            flex h-4 w-4 shrink-0 items-center justify-center
+                            rounded bg-orange-200
+                            text-orange-700
+                            dark:bg-orange-400/20 dark:text-orange-300
+                          "
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="11"
+                            height="11"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M12 9v4" />
+                            <path d="M12 17h.01" />
+                            <path d="M10.3 3.9 2.5 17.4a2 2 0 0 0 1.7 3h15.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+                          </svg>
+                        </div>
+
+                        <span className="font-semibold text-orange-800 dark:text-orange-200">
+                          Pengajuan Belum Tersedia
+                        </span>
                       </div>
 
-                      <p>{tooltipTambahPengajuan}</p>
+                      <div className="px-2 py-1.5">
+                        <p className="leading-snug text-orange-800 dark:text-orange-200">
+                          Upload perbaikan SPP terlebih dahulu agar dapat menambah pengajuan baru.
+                        </p>
 
-                      <p className="mt-2 border-t border-orange-200 pt-2 text-[11px] dark:border-orange-500/20">
-                        SPP yang perlu diperbaiki:{" "}
-                        <strong>{jumlahPerluDiperbaiki}</strong>
-                      </p>
+                        <div
+                          className="
+                            mt-1.5 flex items-center justify-between
+                            rounded border border-orange-300
+                            bg-orange-100 px-1.5 py-1
+                            dark:border-orange-500/40
+                            dark:bg-orange-900/40
+                          "
+                        >
+                          <span className="font-medium text-orange-800 dark:text-orange-200">
+                            SPP perlu diperbaiki
+                          </span>
+
+                          <span
+                            className="
+                              rounded bg-orange-200
+                              px-1.5 py-0.5
+                              font-bold text-orange-800
+                              dark:bg-orange-400/20
+                              dark:text-orange-300
+                            "
+                          >
+                            {jumlahPerluDiperbaiki}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   )}
-                </div>
-              )
-            ))}
-        </div>
+                  </div>
+                  )
+                  ))}
+                  </div>
 
         {/* TOMBOL GABUNG PDF */}
         <Button

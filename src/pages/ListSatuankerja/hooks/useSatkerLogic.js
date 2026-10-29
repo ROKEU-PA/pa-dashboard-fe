@@ -59,7 +59,7 @@ export function useSatkerLogic() {
   // Modal States (Tinggal Add/Edit & PDF)
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
-  const [letiantModal, setVariantModal] = useState("");
+  const [variantModal, setVariantModal] = useState("");
   const [pdfToOpen, setPDFtoOpen] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isOpenMergeModal, setIsOpenMergeModal] = useState(false);
@@ -591,7 +591,7 @@ if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
       payload.append("tahun", formDataToEdit.tahun);
       payload.append("link", encryptedLink);
       payload.append("jml_hal", finalJmlHal);
-      payload.append("is_edit", letiantModal === "Edit" ? "true" : "false");
+      payload.append("is_edit", variantModal === "Edit" ? "true" : "false");
 
       const hasFileUpload =
         formDataToEdit.dokumen instanceof File ||
@@ -752,7 +752,7 @@ const handleSubmit = async (e) => {
     let isAnyFile = formData?.dokumen || formData?.document;
     try {
       if (
-        letiantModal === "Add" &&
+        variantModal === "Add" &&
         isAnyFile &&
         isPengajuanPath(location.pathname)
       ) {
@@ -766,7 +766,7 @@ const handleSubmit = async (e) => {
         return;
       }
       } else if (
-        letiantModal === "Add" &&
+        variantModal === "Add" &&
         isAnyFile &&
         !isPengajuanPath(location.pathname)
       ) {
@@ -780,7 +780,7 @@ const handleSubmit = async (e) => {
           return;
         }
 
-        } else if (letiantModal === "Edit") {
+        } else if (variantModal === "Edit") {
           const noSPP = String(formData?.no_spp ?? formData?.nospp ?? "").trim();
           const tahun = String(formData?.tahun ?? "").trim();
           const jenisSPP = formData?.type_id || formData?.type || formData?.jenis_spp;
@@ -865,7 +865,7 @@ const handleSubmit = async (e) => {
         }
       }
 
-      if (letiantModal === "Add") {
+      if (variantModal === "Add") {
         await submitData(formData);
       } else {
         await editData(formData);
@@ -1185,7 +1185,7 @@ const handleSubmit = async (e) => {
     // Modal Flags
     isOpenModal,
     isOpenPDF,
-    letiantModal,
+    variantModal,
 
     // Setters
     setPage,

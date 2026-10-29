@@ -68,11 +68,6 @@ function ListSatuanKerjaPage() {
     handleMergeSubmit,
     setArchiveFile,
     isLoadingMerge,
-    jumlahDiprosesPIC,
-    jumlahPerluDiperbaiki,
-    jumlahPerluDiperbaikiPAPIC,
-    canAddSubmission,
-    userSummaryNote,
   } = useSatkerLogic();
 
   const role = String(
@@ -392,11 +387,9 @@ function ListSatuanKerjaPage() {
           filter={filter}
           handleDateChange={handleDateChange}
           handleStatusChange={handleStatusChange}
-          openAddModal={openAddModal}
+          _openAddModal={openAddModal}
           openMergeModal={openMergeModal}
-          jumlahPerluDiperbaikiPAPIC={
-            pendingSummary.jumlahPerluDiperbaikiPAPIC
-          }
+          jumlahPerluDiperbaikiPAPIC={pendingSummary.jumlahPerluDiperbaikiPAPIC}
           canAddSubmission={pendingSummary.canAddSubmission}
           userSummaryNote={pendingSummary.noteUser}
         />
@@ -721,7 +714,7 @@ function ListSatuanKerjaPage() {
             )}
 
             {/* Baris 3: Nama Pengirim (Kondisional) */}
-            {isPengajuanPath(location.pathname) && (
+            {isPengajuanPath(location.pathname) && variantModal === "Add" && (
               <Input
                 label="Nama Pengirim"
                 name="uploaded_by"
