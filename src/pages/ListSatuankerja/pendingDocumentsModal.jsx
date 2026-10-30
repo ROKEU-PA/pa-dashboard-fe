@@ -480,11 +480,6 @@ export default function PendingDocumentsModal({
             filteredDiproses.length
           );
 
-          console.log("TOTAL APPROVED BACKEND:", totalDiproses);
-          console.log("TOTAL DATA APPROVED FE:", filteredDiproses.length);
-          console.log("TOTAL HALAMAN APPROVED:", lastApprovedPage);
-
-
           /* ================================================
              PIC - FIX / PERLU DIPERBAIKI
           ================================================ */
@@ -881,7 +876,6 @@ export default function PendingDocumentsModal({
             "No SPP",
             "Revisi",
             "Tanggal Update",
-            "Diperbaiki Oleh",
           ];
 
   /* =========================================================
@@ -910,7 +904,7 @@ export default function PendingDocumentsModal({
             {rowNumber}
           </td>
 
-          <td className="whitespace-nowrap px-3 py-2 text-xs font-medium text-slate-700">
+          <td className="whitespace-nowrap px-3 py-2 text-center  text-xs font-medium text-slate-700">
             {getField(doc, [
               "spp_number",
               "no_spp",
@@ -922,7 +916,7 @@ export default function PendingDocumentsModal({
             <>
               {/* STATUS */}
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+              <td className="whitespace-nowrap px-3 py-2 text-center text-xs text-slate-600">
               {isApproved(doc)
                 ? "Diproses (Approved)"
                 : getField(
@@ -934,7 +928,7 @@ export default function PendingDocumentsModal({
 
               {/* TANGGAL UPDATE */}
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+              <td className="whitespace-nowrap px-3 py-2 text-center text-xs text-slate-600">
                 {formatDate(
                   getField(
                     doc,
@@ -960,7 +954,7 @@ export default function PendingDocumentsModal({
 
               {/* TANGGAL UPDATE */}
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+              <td className="whitespace-nowrap px-3 py-2 text-center  text-xs text-slate-600">
                 {formatDate(
                   getField(
                     doc,
@@ -980,7 +974,7 @@ export default function PendingDocumentsModal({
 
               {/* TANGGAL UPDATE */}
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+              <td className="whitespace-nowrap px-3 py-2 text-center text-xs text-slate-600">
                 {formatDate(
                   getField(
                     doc,
@@ -992,9 +986,9 @@ export default function PendingDocumentsModal({
 
               {/* DIPERBAIKI OLEH */}
 
-              <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
+              {/* <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-600">
                 {getUpdaterLabel(doc)}
-              </td>
+              </td> */}
             </>
           )}
         </tr>
@@ -1011,12 +1005,7 @@ export default function PendingDocumentsModal({
     <Dialog
       open={open}
       onClose={onClose}
-      title={
-        isPic
-          ? "Daftar SPP - PIC / Admin"
-          : "Daftar SPP - User"
-      }
-      maxWidth={isPic ? 1000 : 1100}
+      maxWidth={800}
       actions={
         <button
           type="button"
@@ -1058,7 +1047,7 @@ export default function PendingDocumentsModal({
               }`}
             >
               {isPic
-                ? "TUGAS PEMERIKSAAN"
+                ? "TUGAS PEMERIKSAAN ULANG"
                 : "PERHATIAN"}
             </span>
 
@@ -1070,8 +1059,8 @@ export default function PendingDocumentsModal({
               }`}
             >
               {isPic
-                ? "Periksa SPP yang sedang diproses dan SPP yang perlu diperbaiki."
-                : "Perbaiki SPP yang dikembalikan oleh PA PIC sebelum membuat pengajuan baru."}
+                ? "Periksa SPP yang diproses Lengkap dan SPP yang telah diperbaiki."
+                : "Perbaiki SPP yang butuh perbaikan, sebelum membuat pengajuan baru."}
             </span>
           </div>
         </div>
@@ -1122,7 +1111,7 @@ export default function PendingDocumentsModal({
             ? activeTab === "diproses"
               ? "Daftar SPP Berstatus Diproses (Lengkap)"
               : "Daftar SPP Telah Diperbaiki"
-            : "Daftar SPP Perlu Diperbaiki oleh PA PIC"}
+            : "Daftar SPP Perlu Diperbaiki"}
           </h3>
 
           <span className="shrink-0 rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-bold text-slate-700">
@@ -1160,7 +1149,7 @@ export default function PendingDocumentsModal({
                   ? `Terdapat ${totalDiprosesPIC} SPP Berstatus Diproses (Lengkap), Mohon cocokan dengan Data SP2D MyIntrest/SAKTI dan Ubah status SPP menjadi SP2D`
                 : totalDiprosesPIC > MAX_PENDING
                  ? `Terdapat ${totalDiperbaikiPIC} SPP Berstatus Telah Diperbaiki, Mohon periksa kembali SPP hasil Revisi`
-                  : `Terdapat ${totalDiperbaikiPIC} SPP berstatus fix dengan revisi lebih dari 0 yang diperbaiki selain oleh PA PIC.`}
+                  : `Terdapat ${totalDiperbaikiPIC} SPP Telah Perbaikan, Lakukan verifikasi ulang`}
             </p>
           </div>
         )}
@@ -1183,8 +1172,8 @@ export default function PendingDocumentsModal({
               }`}
             >
               {tambahPengajuanDisabled
-                ? `Terdapat ${totalDiperbaikiUser} SPP berstatus fix yang perlu diperbaiki oleh PA PIC. Jumlahnya lebih dari 10. Perbaiki SPP tersebut terlebih dahulu sebelum membuat pengajuan baru.`
-                : `Terdapat ${totalDiperbaikiUser} SPP berstatus fix yang diperbaiki oleh PA PIC. Anda dapat membuat pengajuan baru.`}
+                ? `Terdapat ${totalDiperbaikiUser} SPP Berstatus Diproses (Perlu Perbaikan), Mohon diperbaiki terlebih dahulu agar dapat membuat pengajuan baru.`
+                : `Terdapat ${totalDiperbaikiUser} SPP Berstatus Diproses (Perlu Perbaikan), Mohon diperbaiki terlebih dahulu sebelum pengajuan baru.`}
             </p>
           </div>
         )}
@@ -1239,7 +1228,7 @@ export default function PendingDocumentsModal({
                       {headers.map((header) => (
                         <th
                           key={header}
-                          className="whitespace-nowrap border-b border-slate-200 px-3 py-2.5 text-[10px] font-bold text-slate-600 sm:text-[11px]"
+                          className="whitespace-nowrap border-b border-slate-200 px-3 py-2.5 text-center text-[10px] font-bold text-slate-600 sm:text-[11px]"
                         >
                           {header}
                         </th>

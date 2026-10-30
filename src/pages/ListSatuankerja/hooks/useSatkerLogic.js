@@ -32,7 +32,7 @@ export function useSatkerLogic() {
     searchKey: "",
     startDate: null,
     endDate: null,
-    status: sessionStorage.getItem("espp_status_filter") || "",
+    status: null,
   });
 
 
@@ -107,7 +107,7 @@ export function useSatkerLogic() {
 
     const handleDateChange = (key, value) => {
       if (key === "status") {
-        sessionStorage.setItem("espp_status_filter", value);
+        // sessionStorage.setItem("espp_status_filter", value);
 
         setPage(0);
         setFilter((prev) => ({
@@ -139,7 +139,7 @@ export function useSatkerLogic() {
     const handleStatusChange = (value) => {
       const status = value || "";
 
-      sessionStorage.setItem("espp_status_filter", status);
+      // sessionStorage.setItem("espp_status_filter", status);
 
       setPage(0);
 
@@ -258,13 +258,12 @@ export function useSatkerLogic() {
           ? new Date().getFullYear()
           : filter.tahun;
 
-        const status = isPengajuan ? "arsip" : null;
+        const status = isPengajuan ? filter.status : "arsip";
 
         const query = buildQueryString({
           biro_code: currentMenu?.code ?? filter?.satker,
           tahun,
           status,
-          status_filter: filter.status || "",
           search_key: filter.searchKey,
           page: page + 1,
           per_page: rowsPerPage,

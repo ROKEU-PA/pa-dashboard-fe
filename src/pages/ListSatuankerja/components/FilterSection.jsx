@@ -15,15 +15,19 @@ import { FaFilePdf } from "react-icons/fa";
 
 const STATUS_OPTIONS = [
   {
-    value: "diproses",
+    value: "baru",
+    label: "Baru",
+  },
+  {
+    value: "fix",
     label: "Diproses (Butuh perbaikan)",
   },
   {
-    value: "diproses_lengkap",
+    value: "approved",
     label: "Diproses (Lengkap)",
   },
   {
-    value: "ditolak",
+    value: "reject",
     label: "Ditolak",
   },
   {
@@ -84,7 +88,7 @@ export default function FilterSection({
   const currentStatus = filter?.status || "";
 
   const selectedStatus =
-    STATUS_OPTIONS.find((item) => item.value === currentStatus)?.label ||
+    STATUS_OPTIONS.find((item) => item.value === currentStatus)?.value ||
     "Semua Status";
 
   // Pencarian dokumen
