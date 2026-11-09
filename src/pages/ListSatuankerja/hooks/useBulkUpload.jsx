@@ -2,20 +2,29 @@ import { useRef, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { CircleCheck, Clock3, AlertCircle } from "lucide-react";
-
 export const useBulkUpload = () => {
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
   const uploadLockRef = useRef(false);
+  const [bulkFiles, setBulkFilesState] = useState([]);
+  const bulkFilesRef = useRef([]);
+  const setBulkFiles = (updater) => {
+    setBulkFilesState((prev) => {
+      const updated =
+        typeof updater === "function"
+          ? updater(prev)
+          : updater;
 
-  const [bulkFiles, setBulkFiles] = useState([]);
+      bulkFilesRef.current = updated;
+
+      return updated;
+    });
+  };
   const [isDragging, setIsDragging] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
   const BATCH_SIZE = 10;
   const MAX_FILE_SIZE = 50 * 1024 * 1024;
-
   const [uploadSummary, setUploadSummary] = useState({
     total: 0,
     success: 0,
@@ -31,11 +40,9 @@ export const useBulkUpload = () => {
     }
 
     const batches = [];
-
     for (let i = 0; i < files.length; i += batchSize) {
       batches.push(files.slice(i, i + batchSize));
     }
-
     return batches;
   };
 
@@ -61,31 +68,30 @@ export const useBulkUpload = () => {
   });
 
   const validateBulkFile = (file) => {
-    if (!file || !file.name) {
-      return {
-        valid: false,
-        error: "File tidak valid.",
-      };
-    }
+  if (!file || !file.name) {
+    return {
+      valid: false,
+      error: "File tidak boleh kosong.",
+    };
+  }
 
-    const fileName = file.name.toLowerCase();
+  const fileName = file.name.toLowerCase();
+  if (
+    file.type !== "application/pdf" &&
+    !fileName.endsWith(".pdf")
+  ) {
+    return {
+      valid: false,
+      error: "Semua file harus berformat PDF.",
+    };
+  }
 
-    if (
-      file.type !== "application/pdf" &&
-      !fileName.endsWith(".pdf")
-    ) {
-      return {
-        valid: false,
-        error: "Format file harus PDF.",
-      };
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      return {
-        valid: false,
-        error: "Ukuran file melebihi batas maksimal 50 MB.",
-      };
-    }
+  if (file.size > MAX_FILE_SIZE) {
+    return {
+      valid: false,
+      error: "Ukuran setiap file maksimal 50MB.",
+    };
+  }
 
     return {
       valid: true,
@@ -97,7 +103,6 @@ export const useBulkUpload = () => {
     if (uploadLockRef.current) return;
 
     const files = Array.from(fileList || []);
-
     if (!files.length) return;
 
     const newItems = files.map((file) => {
@@ -143,7 +148,6 @@ export const useBulkUpload = () => {
     }
 
     const files = Array.from(event.target.files || []);
-
     if (!files.length) {
       setIsAddMenuOpen(false);
       return;
@@ -307,14 +311,28 @@ export const useBulkUpload = () => {
     };
   };
 
-  const getErrorMessage = (error) => {
-    return (
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
-      error?.message ||
-      "Upload gagal."
-    );
-  };
+const getErrorMessage = (error) => {
+  const data = error?.response?.data;
+
+  if (data?.errors) {
+    return Object.values(data.errors)
+      .flat()
+      .join(", ");
+  }
+
+  if (data?.files) {
+    return Object.values(data.files)
+      .flat()
+      .join(", ");
+  }
+
+  return (
+    data?.message ||
+    data?.error ||
+    error?.message ||
+    "Upload gagal."
+  );
+};
 
   const normalizeFileName = (value) => {
     return String(value || "")
@@ -328,94 +346,94 @@ export const useBulkUpload = () => {
   const findFileDetail = (batchItem, details) => {
     if (!Array.isArray(details)) return null;
 
-    const fileName =
-      batchItem?.name ||
-      batchItem?.file?.name ||
-      "";
+    const fileName = normalizeFileName(
+      batchItem?.file?.name || batchItem?.name
+    );
 
-    const normalizedFileName = normalizeFileName(fileName);
+    if (!fileName) return null;
 
     return details.find((detail) => {
-      const responseFileName =
-        detail?.originalfilename_ ||
+      const responseFileName = normalizeFileName(
+        detail?.original_filename ||
         detail?.filename ||
-        detail?.name ||
-        "";
-
-      return (
-        normalizeFileName(responseFileName) ===
-        normalizedFileName
+        detail?.name
       );
+
+      return responseFileName === fileName;
     });
   };
 
-  const applySuccessResponse = (batch, result) => {
-    const details = Array.isArray(result?.details)
-      ? result.details
-      : [];
+const applySuccessResponse = (batch, result) => {
+  const details = Array.isArray(result?.details)
+    ? result.details
+    : [];
 
-    setBulkFiles((prev) => {
-      const updated = prev.map((item) => {
-        const batchItem = batch.find(
-          (batchFile) => batchFile.id === item.id
-        );
+  console.log("[BULK UPLOAD] Response:", result);
 
-        if (!batchItem) return item;
+  console.log(
+    "[BULK UPLOAD] File dikirim:",
+    batch.map((item) => item.file?.name)
+  );
 
-        const detail = findFileDetail(batchItem, details);
+  setBulkFiles((prev) => {
+    const updated = prev.map((item) => {
+      const batchItem = batch.find(
+        (batchFile) => batchFile.id === item.id
+      );
 
-        if (detail) {
-          if (
-            String(detail.status || "").toLowerCase() ===
-            "success"
-          ) {
-            return {
-              ...item,
-              status: "Success",
-              progress: 100,
-              error: "",
-              extractedData: detail.extracteddata_ ?? null,
-              minioPath: detail.miniopath_ ?? "",
-              pagesDetected: detail.pagesdetected_ ?? null,
-            };
-          }
+      if (!batchItem) return item;
 
-          return {
-            ...item,
-            status: "Failed",
-            progress: 0,
-            error:
-              detail.message ||
-              detail.error ||
-              "File gagal diproses oleh backend.",
-            extractedData: detail.extracteddata_ ?? null,
-            minioPath: detail.miniopath_ ?? "",
-            pagesDetected: detail.pagesdetected_ ?? null,
-          };
-        }
+      const detail = findFileDetail(batchItem, details);
 
-        if (result?.success === true && details.length === 0) {
-          return {
-            ...item,
-            status: "Success",
-            progress: 100,
-            error: "",
-          };
-        }
-
+      if (!detail) {
         return {
           ...item,
           status: "Failed",
           progress: 0,
           error:
-            "Detail hasil file tidak ditemukan pada response backend.",
+            "Detail file tidak ditemukan pada response backend. Periksa nama file pada response.",
         };
-      });
+      }
 
-      setUploadSummary(calculateSummary(updated));
-      return updated;
+      const detailStatus = String(
+        detail.status || ""
+      )
+        .trim()
+        .toLowerCase();
+
+      if (detailStatus === "success") {
+        return {
+          ...item,
+          status: "Success",
+          progress: 100,
+          error: "",
+          extractedData: detail.extracted_data ?? null,
+          minioPath: detail.minio_path ?? "",
+          pagesDetected: detail.pages_detected ?? null,
+        };
+      }
+
+      return {
+        ...item,
+        status: "Failed",
+        progress: 0,
+        error:
+          detail.message ||
+          detail.error ||
+          `File gagal diproses. Status backend: ${
+            detail.status || "tidak diketahui"
+          }`,
+        extractedData: detail.extracted_data ?? null,
+        minioPath: detail.minio_path ?? "",
+        pagesDetected: detail.pages_detected ?? null,
+      };
     });
-  };
+
+    setUploadSummary(calculateSummary(updated));
+
+    return updated;
+  });
+};
 
   const applyFailedResponse = (batch, result) => {
     const message =
@@ -444,17 +462,20 @@ export const useBulkUpload = () => {
     });
   };
 
-  const uploadBulkFiles = async () => {
+  const uploadBulkFiles = async (retryOnly = false) => {
     if (uploadLockRef.current) return;
 
-    const validFiles = bulkFiles.filter((item) => {
-      const validation = validateBulkFile(item.file);
+  const validFiles = bulkFilesRef.current.filter((item) => {
+    const validation = validateBulkFile(item.file);
 
-      return (
-        item.status === "Pending" &&
-        validation.valid
-      );
-    });
+    if (!validation.valid) return false;
+
+    if (retryOnly) {
+      return item.status === "Failed";
+    }
+
+    return item.status === "Pending";
+  });
 
     if (!validFiles.length) {
       alert("Tidak ada file PDF yang siap diupload.");
@@ -522,82 +543,114 @@ export const useBulkUpload = () => {
 
       for (let i = 0; i < batches.length; i++) {
         const batch = batches[i];
-        const formData = new FormData();
+      const formData = new FormData();
 
-        batch.forEach((item) => {
-          formData.append("files[]", item.file);
-        });
+      batch.forEach((item) => {
+        formData.append(
+          "files[]",
+          item.file,
+          item.file.name
+        );
+      });
 
-        try {
-          const response = await axios.post(
-            `${apiBaseUrl}/archive/bulk-upload`,
-            formData,
-            {
-              headers: {
-                ...(accessToken
-                  ? {
-                      Authorization: `Bearer ${accessToken}`,
-                    }
-                  : {}),
-              },
-              onUploadProgress: (event) => {
-                if (!event.total) return;
+      // TAMBAHKAN DI SINI
+      console.log(
+        "JUMLAH FILE:",
+        formData.getAll("files[]").length
+      );
 
-                const batchProgress = Math.round(
-                  (event.loaded / event.total) * 100
-                );
+      console.log(
+        "ISI FORMDATA:",
+        [...formData.entries()].map(([key, value]) => ({
+          key,
+          name: value instanceof File ? value.name : value,
+          size: value instanceof File ? value.size : null,
+        }))
+      );
 
-                const overallProgress = Math.round(
-                  ((i + batchProgress / 100) /
-                    batches.length) *
-                    100
-                );
+// Cek apakah file masuk ke FormData
+console.log("[BULK UPLOAD] Isi FormData:");
 
-                toast.update(toastId, {
-                  render: `Mengunggah dokumen massal... ${overallProgress}%`,
-                  progress: overallProgress / 100,
-                  isLoading: true,
-                  autoClose: false,
-                });
-              },
+for (const [key, value] of formData.entries()) {
+  console.log({
+    key,
+    fileName: value instanceof File ? value.name : value,
+    fileSize: value instanceof File ? value.size : null,
+    fileType: value instanceof File ? value.type : null,
+  });
+}
+
+try {
+  const response = await axios.post(
+    `${apiBaseUrl}/archive/bulk-upload`,
+    formData,
+    {
+      headers: {
+        Accept: "application/json",
+        ...(accessToken
+          ? {
+              Authorization: `Bearer ${accessToken}`,
             }
-          );
+          : {}),
+      },
+      onUploadProgress: (event) => {
+        if (!event.total) return;
 
-          const result = response.data;
+        const batchProgress = Math.round(
+          (event.loaded / event.total) * 100
+        );
 
-          if (result?.success === true) {
-            applySuccessResponse(batch, result);
-          } else {
-            applyFailedResponse(batch, result);
-          }
-        } catch (batchError) {
-          console.error(
-            `Batch ${i + 1} gagal:`,
-            batchError
-          );
+        const overallProgress = Math.round(
+          ((i + batchProgress / 100) /
+            batches.length) *
+            100
+        );
 
-          const errorMessage = getErrorMessage(batchError);
+        toast.update(toastId, {
+          render: `Mengunggah dokumen massal... ${overallProgress}%`,
+          progress: overallProgress / 100,
+          isLoading: true,
+          autoClose: false,
+        });
+      },
+    }
+  );
 
-          setBulkFiles((prev) => {
-            const updated = prev.map((item) => {
-              const batchItem = batch.find(
-                (batchFile) => batchFile.id === item.id
-              );
+  const result = response.data;
 
-              if (!batchItem) return item;
+  console.log("[BULK UPLOAD] Response backend:", result);
 
-              return {
-                ...item,
-                status: "Failed",
-                progress: 0,
-                error: errorMessage,
-              };
-            });
+  if (result?.success === true) {
+    applySuccessResponse(batch, result);
+  } else {
+    applyFailedResponse(batch, result);
+  }
+} catch (batchError) {
+  console.error("[BULK UPLOAD] Request gagal:", batchError);
 
-            setUploadSummary(calculateSummary(updated));
-            return updated;
-          });
-        }
+  const errorMessage = getErrorMessage(batchError);
+
+  setBulkFiles((prev) => {
+    const updated = prev.map((item) => {
+      const batchItem = batch.find(
+        (batchFile) => batchFile.id === item.id
+      );
+
+      if (!batchItem) return item;
+
+      return {
+        ...item,
+        status: "Failed",
+        progress: 0,
+        error: errorMessage,
+      };
+    });
+
+    setUploadSummary(calculateSummary(updated));
+
+    return updated;
+  });
+}
 
         const progress = Math.round(
           ((i + 1) / batches.length) * 100
@@ -667,6 +720,23 @@ export const useBulkUpload = () => {
     }
   };
 
+  const retryFailedUploads = async () => {
+  if (uploadLockRef.current) return;
+
+  const failedItems = bulkFilesRef.current.filter(
+    (item) =>
+      item.status === "Failed" ||
+      item.status === "Error"
+  );
+
+  if (failedItems.length === 0) {
+    toast.info("Tidak ada file gagal yang perlu diupload ulang.");
+    return;
+  }
+
+  await uploadBulkFiles(true);
+};
+
   const retryBulkFile = (fileItem) => {
     if (uploadLockRef.current) return;
 
@@ -718,46 +788,48 @@ export const useBulkUpload = () => {
       : 0;
 
   return {
-    fileInputRef,
-    folderInputRef,
+  fileInputRef,
+  folderInputRef,
 
-    bulkFiles,
-    setBulkFiles,
-    isDragging,
-    isAddMenuOpen,
-    setIsAddMenuOpen,
-    isUploading,
+  bulkFiles,
+  setBulkFiles,
 
-    BATCH_SIZE,
-    MAX_FILE_SIZE,
+  isDragging,
+  isAddMenuOpen,
+  setIsAddMenuOpen,
+  isUploading,
 
-    uploadSummary,
+  BATCH_SIZE,
+  MAX_FILE_SIZE,
 
-    createBulkFileItem,
-    validateBulkFile,
-    handleBulkFiles,
-    handleBulkInputChange,
-    handleFolderInputChange,
+  uploadSummary,
 
-    handleDrop,
-    handleDragOver,
-    handleDragLeave,
+  createBulkFileItem,
+  validateBulkFile,
+  handleBulkFiles,
+  handleBulkInputChange,
+  handleFolderInputChange,
 
-    removeBulkFile,
-    clearBulkFiles,
-    retryBulkFile,
+  handleDrop,
+  handleDragOver,
+  handleDragLeave,
 
-    createBatches,
-    uploadBulkFiles,
+  removeBulkFile,
+  clearBulkFiles,
+  retryBulkFile,
+  retryFailedUploads,
 
-    formatFileSize,
-    getStatusStyle,
+  createBatches,
+  uploadBulkFiles,
 
-    totalFiles,
-    successFiles,
-    uploadingFiles,
-    pendingFiles,
-    failedFiles,
-    progressPercentage,
-  };
+  formatFileSize,
+  getStatusStyle,
+
+  totalFiles,
+  successFiles,
+  uploadingFiles,
+  pendingFiles,
+  failedFiles,
+  progressPercentage,
+};
 };

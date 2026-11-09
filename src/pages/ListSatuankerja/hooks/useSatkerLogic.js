@@ -27,13 +27,13 @@ export function useSatkerLogic() {
     getCurrentSatuanKerja(listMenu, location.pathname),
   );
 
-  const [filter, setFilter] = useState({
-    tahun: "",
-    searchKey: "",
-    startDate: null,
-    endDate: null,
-    status: null,
-  });
+const [filter, setFilter] = useState({
+  tahun: "",
+  searchKey: "",
+  startDate: null,
+  endDate: null,
+  status: null,
+});
 
 
   // Table & Pagination States
@@ -250,91 +250,102 @@ export function useSatkerLogic() {
   // ==========================================
   // 3. API CALLS
   // ==========================================
-    const fetchTable = async () => {
-      try {
-        const isPengajuan = isPengajuanPath(location.pathname);
+  const fetchTable = useCallback(async () => {
+    try {
+      const isPengajuan = isPengajuanPath(location.pathname);
 
-        const tahun = isPengajuan
-          ? new Date().getFullYear()
-          : filter.tahun;
+      const tahun = isPengajuan
+        ? new Date().getFullYear()
+        : filter.tahun;
 
-        const status = isPengajuan ? filter.status : "arsip";
+      const status = isPengajuan ? filter.status : "arsip";
+      const query = buildQueryString({
+        biro_code : currentMenu?.code ?? filter?.satker,
+        ...(tahun ? { tahun } : {}),
+        status,
+        search_key: filter.searchKey,
+        page: page + 1,
+        per_page: rowsPerPage,
+        sort_by: sortBy,
+        sort_dir: sortDir,
+        start_date: filter.startDate
+          ? moment(filter.startDate).format("YYYY-MM-DD")
+          : "",
+        end_date: filter.endDate
+          ? moment(filter.endDate).format("YYYY-MM-DD")
+          : "",
+      });
 
-        const query = buildQueryString({
-          biro_code: currentMenu?.code ?? filter?.satker,
-          tahun,
-          status,
-          search_key: filter.searchKey,
-          page: page + 1,
-          per_page: rowsPerPage,
-          sort_by: sortBy,
-          sort_dir: sortDir,
-          start_date: filter.startDate
-            ? moment(filter.startDate).format("YYYY-MM-DD")
-            : "",
-          end_date: filter.endDate
-            ? moment(filter.endDate).format("YYYY-MM-DD")
-            : "",
-        });
+      console.log("QUERY ARSIP:", query);
 
-        const data = await apiRequest({
-          url: `/archive/list?${query}`,
-          token: accessToken,
-        });
+      const data = await apiRequest({
+        url: `/archive/list?${query}`,
+        token: accessToken,
+      });
 
-        if (!data?.success) return;
+      if (!data?.success) return;
 
-        const rows = data?.data?.data || [];
-        const totalData = Number(data?.data?.total ?? rows.length);
+      const rows = data?.data?.data || [];
+      console.log("KEYS:", rows[0] && Object.keys(rows[0]));
+      console.log("ROW 0:", rows[0]);
+      const totalData = Number(data?.data?.total ?? rows.length);
 
-        const normalizeStatus = (value) =>
-          String(value || "")
-            .trim()
-            .toLowerCase()
-            .replace(/[\s_-]+/g, "");
+      const normalizeStatus = (value) =>
+        String(value || "")
+          .trim()
+          .toLowerCase()
+          .replace(/[\s_-]+/g, "");
 
-        const selectedStatus = normalizeStatus(filter?.status);
+      const selectedStatus = normalizeStatus(filter?.status);
 
-        const filteredRows = !selectedStatus
-          ? rows
-          : rows.filter((item) => {
-              const itemStatus = normalizeStatus(item?.status);
+      const filteredRows = !selectedStatus
+        ? rows
+        : rows.filter((item) => {
+            const itemStatus = normalizeStatus(item?.status);
 
-              if (selectedStatus === "diproses") {
-                return ["fix", "diproses"].includes(itemStatus);
-              }
+            if (selectedStatus === "diproses") {
+              return ["fix", "diproses"].includes(itemStatus);
+            }
 
-              if (
-                selectedStatus === "diproseslengkap" ||
-                selectedStatus === "approved"
-              ) {
-                return ["approved", "diproseslengkap"].includes(itemStatus);
-              }
+            if (
+              selectedStatus === "diproseslengkap" ||
+              selectedStatus === "approved"
+            ) {
+              return ["approved", "diproseslengkap"].includes(itemStatus);
+            }
 
-              if (
-                selectedStatus === "butuhperbaikan" ||
-                selectedStatus === "perludiperbaiki"
-              ) {
-                return [
-                  "fix",
-                  "butuhperbaikan",
-                  "perludiperbaiki",
-                ].includes(itemStatus);
-              }
+            if (
+              selectedStatus === "butuhperbaikan" ||
+              selectedStatus === "perludiperbaiki"
+            ) {
+              return [
+                "fix",
+                "butuhperbaikan",
+                "perludiperbaiki",
+              ].includes(itemStatus);
+            }
 
-              return itemStatus === selectedStatus;
-            });
+            return itemStatus === selectedStatus;
+          });
 
-        setDataTable(filteredRows);
+      setDataTable(filteredRows);
 
-        setTotalPages(
-          Math.max(1, Math.ceil(totalData / rowsPerPage))
-        );
-      } catch (error) {
-        console.error("Gagal mengambil data SPP:", error);
-      }
-    };
-
+      setTotalPages(
+        Math.max(1, Math.ceil(totalData / rowsPerPage))
+      );
+    } catch (error) {
+      console.error("Gagal mengambil data SPP:", error);
+    }
+  }, [
+    location.pathname,
+    filter,
+    currentMenu,
+    page,
+    rowsPerPage,
+    sortBy,
+    sortDir,
+    accessToken,
+  ]);
 
     const fetchType = useCallback(async (id) => {
       try {
@@ -392,8 +403,6 @@ const submitData = async (formDataToSubmit) => {
 const payload = new FormData();
 
 try {
-  let CryptoJS = require("crypto-js");
-
   let encryptedLink = CryptoJS.AES.encrypt(
     formDataToSubmit.link || "",
     ENCRYPTION_KEY,
