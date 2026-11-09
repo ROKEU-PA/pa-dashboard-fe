@@ -789,7 +789,7 @@ useEffect(() => {
                   </p>
 
                   <p className="mt-1 text-xs leading-relaxed text-blue-600/80 dark:text-blue-300/80">
-                    File PDF akan dikirim ke backend untuk diproses.
+                    File PDF akan diproses dan disimpan ke database.
                   </p>
                 </div>
               </div>
@@ -1088,7 +1088,7 @@ useEffect(() => {
                         </p>
 
                         <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-300/80">
-                          Dokumen sudah dikirim ke backend.
+                          Dokumen berhasil disimpan di database.
                         </p>
                       </div>
                     </div>

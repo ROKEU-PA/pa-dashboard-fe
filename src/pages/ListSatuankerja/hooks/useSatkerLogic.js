@@ -276,8 +276,6 @@ const [filter, setFilter] = useState({
           : "",
       });
 
-      console.log("QUERY ARSIP:", query);
-
       const data = await apiRequest({
         url: `/archive/list?${query}`,
         token: accessToken,
@@ -286,8 +284,6 @@ const [filter, setFilter] = useState({
       if (!data?.success) return;
 
       const rows = data?.data?.data || [];
-      console.log("KEYS:", rows[0] && Object.keys(rows[0]));
-      console.log("ROW 0:", rows[0]);
       const totalData = Number(data?.data?.total ?? rows.length);
 
       const normalizeStatus = (value) =>
@@ -755,8 +751,6 @@ if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  console.log("HANDLE SUBMIT TERPANGGIL");
-
     let isAnyFile = formData?.dokumen || formData?.document;
     try {
       if (
@@ -794,14 +788,6 @@ const handleSubmit = async (e) => {
           const jenisSPP = formData?.type_id || formData?.type || formData?.jenis_spp;
 
           if (!noSPP || !tahun || !String(jenisSPP ?? "").trim()) {
-            console.log("Validasi Edit SPP:", {
-              no_spp: noSPP,
-              tahun,
-              type: formData?.type,
-              type_id: formData?.type_id,
-              jenis_spp: formData?.jenis_spp,
-            });
-
             toast.error("No. SPP, Tahun, dan Jenis SPP wajib diisi.");
             return;
           }
@@ -826,7 +812,6 @@ const handleSubmit = async (e) => {
 
       if (isAnyFile && formData.dokumen) {
         const file = formData.dokumen;
-        // console.log(file)
         const acceptedExtension = getAcceptedFileType()
           .replace(/\s+/g, "")
           .split(",");
@@ -898,7 +883,6 @@ const handleSubmit = async (e) => {
       });
       await fetchTable();
     } catch (err) {
-      console.log(err);
       toast.error("Gagal menyimpan data. Silakan coba lagi. " + err);
     }
   };

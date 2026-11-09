@@ -37,7 +37,6 @@ function Arsip() {
   const navigate = useNavigate();
 
   const { listMenu, userData } = useContext(AppContext);
-  console.log("LIST MENU:", listMenu);
 
 const {
   openEditModal,
