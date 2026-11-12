@@ -38,24 +38,28 @@ function Arsip() {
 
   const { listMenu, userData } = useContext(AppContext);
 
-  const {
-    openEditModal,
-    formData,
-    setFormData,
-    fetchTable,
-    fetchType,
-    dataTable,
-    setFilter,
-    pdfToOpen,
-    setPDFtoOpen,
-    filter,
-    types,
-    handleChange,
-    handleSubmit,
-  } = useSatkerLogic();
+const {
+  openEditModal,
+  formData,
+  setFormData,
+  fetchTable,
+  fetchType,
+  dataTable,
+  setFilter,
+  pdfToOpen,
+  setPDFtoOpen,
+  filter,
+  types,
+  handleChange,
+  handleSubmit,
+  variantModal,
+  setVariantModal,
+  isOpenModal,
+  setIsOpenModal,
+} = useSatkerLogic();
 
   // STATE LOKAL UNTUK UI
-  const [isFiltered, setIsFiltered] = useState(() => {
+const [isFiltered, setIsFiltered] = useState(() => {
   try {
     const saved = sessionStorage.getItem("eArsipPageState");
     return saved ? Boolean(JSON.parse(saved).isFiltered) : false;
@@ -65,8 +69,6 @@ function Arsip() {
 });
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
-  const [variantModal, setVariantModal] = useState("");
-  const [isOpenModal, setIsOpenModal] = useState(false);
 
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
@@ -211,21 +213,22 @@ const handleApplyFilter = (e) => {
   const getAcceptedFileType = () =>
     ".pdf,.PDF,.rar,.RAR,.zip,.ZIP";
 
-  useEffect(() => {
-    if (isFiltered) fetchTable();
-  }, [
-    isFiltered,
-    filter.tahun,
-    filter.satker,
-    filter.searchKey,
-    filter.startDate,
-    filter.endDate,
-    page,
-    rowsPerPage,
-    sortBy,
-    sortDir,
-    fetchTable,
-  ]);
+useEffect(() => {
+  if (!isFiltered) return;
+
+  fetchTable();
+}, [
+  isFiltered,
+  filter.tahun,
+  filter.satker,
+  filter.searchKey,
+  filter.startDate,
+  filter.endDate,
+  page,
+  rowsPerPage,
+  sortBy,
+  sortDir,
+]);
 
 
   // Ambil tipe arsip tanpa bergantung pada perubahan filter.
@@ -452,13 +455,13 @@ const handleApplyFilter = (e) => {
               </span>
 
               <span className="text-lg font-black text-slate-800 dark:text-white">
-                {filter.satkerName}{" "}
+              {filter.satkerName || "Semua Biro"}{" "}
 
-                <span className="text-blue-500 font-black px-1.5 opacity-50">
-                  |
-                </span>{" "}
+              <span className="text-blue-500 font-black px-1.5 opacity-50">
+                |
+              </span>{" "}
 
-                {filter.tahun}
+              {filter.tahun || "Semua Tahun"}
               </span>
             </div>
 
@@ -501,6 +504,7 @@ const handleApplyFilter = (e) => {
                     setFormData((prev) => ({
                       ...prev,
                       tahun: filter.tahun,
+                      kode_biro: filter.satker,
                     }));
                     setVariantModal("Add");
                   }}
@@ -933,6 +937,7 @@ const handleApplyFilter = (e) => {
                 setFormData((prev) => ({
                   ...prev,
                   type_id: e.target.value,
+                  type: e.target.value,
                 }))
               }
               value={formData?.type_id || ""}

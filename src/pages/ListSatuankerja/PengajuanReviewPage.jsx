@@ -58,6 +58,18 @@ function PengajuanReviewPage() {
     jml_hal: 0,
   });
 
+const draftKey = `feedback_draft_${id}`;
+
+useEffect(() => {
+  if (!id || isReadOnly || !row) return;
+
+  const timeout = setTimeout(() => {
+    localStorage.setItem(draftKey, formData.catatan || "");
+  }, 500);
+
+  return () => clearTimeout(timeout);
+}, [formData.catatan, id, isReadOnly, row]);
+
   const [isPdfRead, setIsPdfRead] = useState(false);
 
   // ===============================================
@@ -75,7 +87,10 @@ function PengajuanReviewPage() {
         type_id: row.type_id,
         type: row.jenis_spp,
         status: row.status === "arsip" || !row.status ? "Diproses" : row.status,
-        catatan: row.feedback || "",
+        catatan:
+        !isReadOnly && localStorage.getItem(draftKey) !== null
+          ? localStorage.getItem(draftKey)
+          : row.feedback || "",
         link: row.document?.path || row.link || "",
         jml_hal: row.jml_hal || 0,
         kelengkapan_ids: row.question_checklist || [],
@@ -160,12 +175,15 @@ function PengajuanReviewPage() {
       return;
     }
 
-    try {
-      await editData(formData);
-      navigate(-1);
-    } catch (error) {
-      console.error("Gagal simpan:", error);
-    }
+  try {
+    await editData(formData);
+
+    localStorage.removeItem(draftKey);
+
+    navigate(-1);
+  } catch (error) {
+    console.error("Gagal simpan:", error);
+  }
   };
 
   const getStatusOptions = () => {
@@ -276,7 +294,7 @@ function PengajuanReviewPage() {
                   rel="noopener noreferrer"
                   className="w-full"
                 >
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-500/30 active:scale-95 text-white py-3 rounded-xl font-bold transition-all">
+                  <button className="w-full bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-500/30 active:scale-95 text-white py-3 rounded-xl font-bold transition-all">
                     Buka Link di Tab Baru
                   </button>
                 </a>
@@ -296,7 +314,7 @@ function PengajuanReviewPage() {
                   Silakan download untuk melihat isi file.
                 </p>
                 <button
-                  className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-500/30 active:scale-95 text-white font-bold rounded-xl transition-all"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 shadow-md shadow-blue-500/30 active:scale-95 text-white font-bold rounded-xl transition-all"
                   onClick={() => {
                     const link = document.createElement("a");
                     link.href = pdfToOpen;
@@ -335,7 +353,10 @@ function PengajuanReviewPage() {
                   options={statusOptions}
                   disabled={isReadOnly}
                   onChange={(e) =>
-                    setFormData({ ...formData, status: e.target.value })
+                    setFormData((prev) => ({
+                      ...prev,
+                      status: e.target.value,
+                    }))
                   }
                 />
               </div>
@@ -397,7 +418,7 @@ function PengajuanReviewPage() {
               <div className="p-5 border-t border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-[#0D1627] flex justify-end transition-colors">
                 <button
                   type="submit"
-                  className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-[220px]"
+                  className="w-full sm:w-auto px-6 py-3 bg-linear-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 active:scale-95 transition-all flex items-center justify-center gap-2 min-w-55"
                 >
                   <CheckCircle
                     size={18}

@@ -6,9 +6,7 @@ import React, {
 } from "react";
 
 import { useNavigate } from "react-router-dom";
-
 import { AppContext } from "@/contexts/AppContext";
-
 import {
   ArrowLeft,
   FileText,
@@ -40,20 +38,25 @@ function TambahArsip() {
   // LOGIC ARSIP TUNGGAL
   // =========================================================
 
-  const {
-    formData,
-    setFormData,
-    types,
-    fetchType,
-    handleChange,
-    handleSubmit,
-  } = useSatkerLogic();
+const {
+  formData,
+  setFormData,
+  types,
+  fetchType,
+  handleChange,
+  handleSubmit,
+  setVariantModal,
+} = useSatkerLogic();
 
-  useEffect(() => {
-    if (typeof fetchType === "function") {
-      fetchType();
-    }
-  }, [fetchType]);
+useEffect(() => {
+  if (typeof fetchType === "function") {
+    fetchType();
+  }
+}, [fetchType]);
+
+useEffect(() => {
+  setVariantModal("Add");
+}, [setVariantModal]);
 
   // =========================================================
   // SATUAN KERJA
@@ -109,6 +112,7 @@ function TambahArsip() {
     clearBulkFiles,
     uploadBulkFiles,
     retryBulkFile,
+    retryFailedUploads,
     formatFileSize,
     getStatusStyle,
     totalFiles,
@@ -172,7 +176,7 @@ function TambahArsip() {
     setFormData((previous) => ({
       ...previous,
       no_spp: "",
-      satker: "",
+      kode_biro: "",
       tahun: "",
       type_id: "",
       type: "",
@@ -412,41 +416,29 @@ function TambahArsip() {
                       />
                     </div>
 
-                    {/* SATUAN KERJA */}
-
+                    {/* KODE BIRO */}
                     <div>
                       <label className="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
-                        Satuan Kerja{" "}
-                        <span className="text-red-500">*</span>
+                        Kode Biro <span className="text-red-500">*</span>
                       </label>
 
-                      <div className="relative">
-                        <select
-                          name="satker"
-                          value={formData?.satker || ""}
-                          onChange={handleChange}
-                          required
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 pr-10 text-sm text-slate-600 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-[#263449] dark:bg-[#0b1220] dark:text-slate-100"
-                        >
-                          <option value="">
-                            Pilih Satuan Kerja
-                          </option>
-
-                          {satkerOptions.map((item, index) => (
-                            <option
-                              key={item.value || index}
-                              value={item.value || ""}
-                            >
-                              {item.label || "-"}
-                            </option>
-                          ))}
-                        </select>
-
-                        <ChevronDown
-                          size={16}
-                          className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-                      </div>
+                      <input
+                        type="text"
+                        name="kode_biro"
+                        value={formData?.kode_biro || ""}
+                        onChange={(e) =>
+                          handleChange({
+                            target: {
+                              name: "kode_biro",
+                              value: e.target.value.replace(/\D/g, ""),
+                            },
+                          })
+                        }
+                        required
+                        inputMode="numeric"
+                        placeholder="Contoh: "
+                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-[#263449] dark:bg-[#0b1220] dark:text-slate-100"
+                      />
                     </div>
 
                     {/* TAHUN */}
@@ -797,7 +789,7 @@ function TambahArsip() {
                   </p>
 
                   <p className="mt-1 text-xs leading-relaxed text-blue-600/80 dark:text-blue-300/80">
-                    File PDF akan dikirim ke backend untuk diproses.
+                    File PDF akan diproses dan disimpan ke database.
                   </p>
                 </div>
               </div>
@@ -877,17 +869,22 @@ function TambahArsip() {
 
               {totalFiles > 0 && (
                 <div className="mt-6">
-                  <div className="mb-3 flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                        Hasil Proses Dokumen
-                      </h3>
 
-                      <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
-                        Periksa status setiap dokumen.
-                      </p>
-                    </div>
+                {/* HEADER DAFTAR FILE */}
+                <div className="mb-3 flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                      Hasil Proses Dokumen
+                    </h3>
 
+                    <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                      Periksa status setiap dokumen.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+
+                    {/* BERSIHKAN */}
                     <button
                       type="button"
                       onClick={clearBulkFiles}
@@ -898,6 +895,7 @@ function TambahArsip() {
                       Bersihkan
                     </button>
                   </div>
+                </div>
 
                   <div className="overflow-hidden rounded-xl border border-slate-200 dark:border-[#263449]">
                     {bulkFiles.map((file, index) => {
@@ -1031,8 +1029,48 @@ function TambahArsip() {
                 </div>
               )}
 
-              {/* SEMUA FILE BERHASIL */}
+              {/* HASIL UPLOAD MASIH ADA YANG GAGAL */}
+              {totalFiles > 0 &&
+                pendingFiles === 0 &&
+                uploadingFiles === 0 &&
+                failedFiles > 0 &&
+                !isUploading && (
+                  <div className="mt-6 flex items-center justify-between gap-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3.5 dark:border-red-500/20 dark:bg-red-500/10">
+                    <div className="flex items-center gap-3">
+                      <AlertCircle
+                        size={18}
+                        className="text-red-600 dark:text-red-400"
+                      />
 
+                      <div>
+                        <p className="text-xs font-semibold text-red-700 dark:text-red-300">
+                          {failedFiles} file gagal diupload.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => navigate(-1)}
+                        className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Kembali
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={retryFailedUploads}
+                        className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white hover:bg-blue-700"
+                      >
+                        <RotateCcw size={14} />
+                        Upload Ulang
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+              {/* SEMUA FILE BERHASIL */}
               {totalFiles > 0 &&
                 pendingFiles === 0 &&
                 uploadingFiles === 0 &&
@@ -1050,7 +1088,7 @@ function TambahArsip() {
                         </p>
 
                         <p className="mt-0.5 text-xs text-emerald-600/80 dark:text-emerald-300/80">
-                          Dokumen sudah dikirim ke backend.
+                          Dokumen berhasil disimpan di database.
                         </p>
                       </div>
                     </div>

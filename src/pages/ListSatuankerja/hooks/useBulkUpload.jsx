@@ -7,15 +7,27 @@ export const useBulkUpload = () => {
   const fileInputRef = useRef(null);
   const folderInputRef = useRef(null);
   const uploadLockRef = useRef(false);
+  const [bulkFiles, setBulkFilesState] = useState([]);
+  const bulkFilesRef = useRef([]);
 
-  const [bulkFiles, setBulkFiles] = useState([]);
+  const setBulkFiles = (updater) => {
+    setBulkFilesState((prev) => {
+      const updated =
+        typeof updater === "function"
+          ? updater(prev)
+          : updater;
+
+      bulkFilesRef.current = updated;
+
+      return updated;
+    });
+  };
+
   const [isDragging, setIsDragging] = useState(false);
   const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-
   const BATCH_SIZE = 10;
   const MAX_FILE_SIZE = 50 * 1024 * 1024;
-
   const [uploadSummary, setUploadSummary] = useState({
     total: 0,
     success: 0,
@@ -31,11 +43,9 @@ export const useBulkUpload = () => {
     }
 
     const batches = [];
-
     for (let i = 0; i < files.length; i += batchSize) {
       batches.push(files.slice(i, i + batchSize));
     }
-
     return batches;
   };
 
@@ -64,26 +74,25 @@ export const useBulkUpload = () => {
     if (!file || !file.name) {
       return {
         valid: false,
-        error: "File tidak valid.",
+        error: "File tidak boleh kosong.",
       };
     }
 
     const fileName = file.name.toLowerCase();
-
     if (
       file.type !== "application/pdf" &&
       !fileName.endsWith(".pdf")
     ) {
       return {
         valid: false,
-        error: "Format file harus PDF.",
+        error: "Semua file harus berformat PDF.",
       };
     }
 
     if (file.size > MAX_FILE_SIZE) {
       return {
         valid: false,
-        error: "Ukuran file melebihi batas maksimal 50 MB.",
+        error: "Ukuran setiap file maksimal 50MB.",
       };
     }
 
@@ -97,7 +106,6 @@ export const useBulkUpload = () => {
     if (uploadLockRef.current) return;
 
     const files = Array.from(fileList || []);
-
     if (!files.length) return;
 
     const newItems = files.map((file) => {
@@ -143,7 +151,6 @@ export const useBulkUpload = () => {
     }
 
     const files = Array.from(event.target.files || []);
-
     if (!files.length) {
       setIsAddMenuOpen(false);
       return;
@@ -308,9 +315,23 @@ export const useBulkUpload = () => {
   };
 
   const getErrorMessage = (error) => {
+    const data = error?.response?.data;
+
+    if (data?.errors) {
+      return Object.values(data.errors)
+        .flat()
+        .join(", ");
+    }
+
+    if (data?.files) {
+      return Object.values(data.files)
+        .flat()
+        .join(", ");
+    }
+
     return (
-      error?.response?.data?.message ||
-      error?.response?.data?.error ||
+      data?.message ||
+      data?.error ||
       error?.message ||
       "Upload gagal."
     );
@@ -328,24 +349,20 @@ export const useBulkUpload = () => {
   const findFileDetail = (batchItem, details) => {
     if (!Array.isArray(details)) return null;
 
-    const fileName =
-      batchItem?.name ||
-      batchItem?.file?.name ||
-      "";
+    const fileName = normalizeFileName(
+      batchItem?.file?.name || batchItem?.name
+    );
 
-    const normalizedFileName = normalizeFileName(fileName);
+    if (!fileName) return null;
 
     return details.find((detail) => {
-      const responseFileName =
-        detail?.originalfilename_ ||
+      const responseFileName = normalizeFileName(
+        detail?.original_filename ||
         detail?.filename ||
-        detail?.name ||
-        "";
-
-      return (
-        normalizeFileName(responseFileName) ===
-        normalizedFileName
+        detail?.name
       );
+
+      return responseFileName === fileName;
     });
   };
 
@@ -364,42 +381,31 @@ export const useBulkUpload = () => {
 
         const detail = findFileDetail(batchItem, details);
 
-        if (detail) {
-          if (
-            String(detail.status || "").toLowerCase() ===
-            "success"
-          ) {
-            return {
-              ...item,
-              status: "Success",
-              progress: 100,
-              error: "",
-              extractedData: detail.extracteddata_ ?? null,
-              minioPath: detail.miniopath_ ?? "",
-              pagesDetected: detail.pagesdetected_ ?? null,
-            };
-          }
-
+        if (!detail) {
           return {
             ...item,
             status: "Failed",
             progress: 0,
             error:
-              detail.message ||
-              detail.error ||
-              "File gagal diproses oleh backend.",
-            extractedData: detail.extracteddata_ ?? null,
-            minioPath: detail.miniopath_ ?? "",
-            pagesDetected: detail.pagesdetected_ ?? null,
+              "Detail file tidak ditemukan pada response backend. Periksa nama file pada response.",
           };
         }
 
-        if (result?.success === true && details.length === 0) {
+        const detailStatus = String(
+          detail.status || ""
+        )
+          .trim()
+          .toLowerCase();
+
+        if (detailStatus === "success") {
           return {
             ...item,
             status: "Success",
             progress: 100,
             error: "",
+            extractedData: detail.extracted_data ?? null,
+            minioPath: detail.minio_path ?? "",
+            pagesDetected: detail.pages_detected ?? null,
           };
         }
 
@@ -408,11 +414,19 @@ export const useBulkUpload = () => {
           status: "Failed",
           progress: 0,
           error:
-            "Detail hasil file tidak ditemukan pada response backend.",
+            detail.message ||
+            detail.error ||
+            `File gagal diproses. Status backend: ${
+              detail.status || "tidak diketahui"
+            }`,
+          extractedData: detail.extracted_data ?? null,
+          minioPath: detail.minio_path ?? "",
+          pagesDetected: detail.pages_detected ?? null,
         };
       });
 
       setUploadSummary(calculateSummary(updated));
+
       return updated;
     });
   };
@@ -444,16 +458,19 @@ export const useBulkUpload = () => {
     });
   };
 
-  const uploadBulkFiles = async () => {
+  const uploadBulkFiles = async (retryOnly = false) => {
     if (uploadLockRef.current) return;
 
-    const validFiles = bulkFiles.filter((item) => {
+    const validFiles = bulkFilesRef.current.filter((item) => {
       const validation = validateBulkFile(item.file);
 
-      return (
-        item.status === "Pending" &&
-        validation.valid
-      );
+      if (!validation.valid) return false;
+
+      if (retryOnly) {
+        return item.status === "Failed";
+      }
+
+      return item.status === "Pending";
     });
 
     if (!validFiles.length) {
@@ -525,7 +542,11 @@ export const useBulkUpload = () => {
         const formData = new FormData();
 
         batch.forEach((item) => {
-          formData.append("files[]", item.file);
+          formData.append(
+            "files[]",
+            item.file,
+            item.file.name
+          );
         });
 
         try {
@@ -534,6 +555,7 @@ export const useBulkUpload = () => {
             formData,
             {
               headers: {
+                Accept: "application/json",
                 ...(accessToken
                   ? {
                       Authorization: `Bearer ${accessToken}`,
@@ -571,10 +593,7 @@ export const useBulkUpload = () => {
             applyFailedResponse(batch, result);
           }
         } catch (batchError) {
-          console.error(
-            `Batch ${i + 1} gagal:`,
-            batchError
-          );
+          console.error("[BULK UPLOAD] Request gagal:", batchError);
 
           const errorMessage = getErrorMessage(batchError);
 
@@ -595,6 +614,7 @@ export const useBulkUpload = () => {
             });
 
             setUploadSummary(calculateSummary(updated));
+
             return updated;
           });
         }
@@ -667,6 +687,23 @@ export const useBulkUpload = () => {
     }
   };
 
+  const retryFailedUploads = async () => {
+    if (uploadLockRef.current) return;
+
+    const failedItems = bulkFilesRef.current.filter(
+      (item) =>
+        item.status === "Failed" ||
+        item.status === "Error"
+    );
+
+    if (failedItems.length === 0) {
+      toast.info("Tidak ada file gagal yang perlu diupload ulang.");
+      return;
+    }
+
+    await uploadBulkFiles(true);
+  };
+
   const retryBulkFile = (fileItem) => {
     if (uploadLockRef.current) return;
 
@@ -723,6 +760,7 @@ export const useBulkUpload = () => {
 
     bulkFiles,
     setBulkFiles,
+
     isDragging,
     isAddMenuOpen,
     setIsAddMenuOpen,
@@ -746,6 +784,7 @@ export const useBulkUpload = () => {
     removeBulkFile,
     clearBulkFiles,
     retryBulkFile,
+    retryFailedUploads,
 
     createBatches,
     uploadBulkFiles,
