@@ -56,6 +56,14 @@ const {
   setVariantModal,
   isOpenModal,
   setIsOpenModal,
+  page,
+  setPage,
+  rowsPerPage,
+  setRowsPerPage,
+  totalPages,
+  sortBy,
+  sortDir,
+  handleSortChange,
 } = useSatkerLogic();
 
   // STATE LOKAL UNTUK UI
@@ -69,12 +77,6 @@ const [isFiltered, setIsFiltered] = useState(() => {
 });
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isOpenPDF, setIsOpenPDF] = useState(false);
-
-  const [sortBy, setSortBy] = useState("created_at");
-  const [sortDir, setSortDir] = useState("desc");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalPages] = useState(1);
 
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectOpenJenis, setSelectOpenJenis] = useState(false);
@@ -148,15 +150,6 @@ const isStateRestored = React.useRef(false);
   };
 
   const fileExtension = getFileExtension(pdfToOpen);
-
-  const handleSortChange = (key) => {
-    if (sortBy === key) {
-      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(key);
-      setSortDir("asc");
-    }
-  };
 
   const handleFilterChange = (key, value) => {
     setFilter((prev) => {
@@ -737,7 +730,7 @@ useEffect(() => {
                 onPageChange={setPage}
                 rowsPerPage={rowsPerPage}
                 onRowsPerPageChange={(value) => {
-                  setRowsPerPage(value);
+                  setRowsPerPage(Number(value));
                   setPage(0);
                 }}
               />
