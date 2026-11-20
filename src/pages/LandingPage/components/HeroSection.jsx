@@ -1,8 +1,5 @@
 import React from "react";
-
 const LOGIN_URL = "/login";
-
-// Ganti dengan route E-SPP aktif dari menu aplikasi.
 const ESPP_URL = "/e-spp";
 
 const services = [
@@ -177,7 +174,7 @@ const HeroSection = () => {
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-extrabold">
+                    <h3 className="text-sm font-extrabold text-slate-800">
                       {service.title}
                     </h3>
                     <p className="mt-1 text-xs leading-5 text-slate-500">
