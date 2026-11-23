@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTheme } from "../ThemeContext";
-import logoKemnaker from "../Gambar/kemnakerRI.png";
-
 const LOGIN_URL = "/login";
-
 const menuItems = [
   { label: "Beranda", href: "#beranda" },
   { label: "Layanan", href: "#layanan" },
@@ -73,7 +70,7 @@ const Navbar = () => {
           className="group flex shrink-0 items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <img
-            src={logoKemnaker}
+            src="/kemnaker-logo-darker.webp"
             alt="Logo Kementerian Ketenagakerjaan RI"
             className="h-12 w-12 shrink-0 object-contain transition duration-300 group-hover:scale-105 sm:h-14 sm:w-14"
           />
@@ -186,7 +183,6 @@ const Navbar = () => {
                 : "border-white/20 bg-white/10 text-white"
             }`}
           >
-            
             {menuOpen ? "✕" : "☰"}
           </button>
         </div>
