@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 // import LoginPage from "./pages/LoginPage";
 import AppLayout from "./Layouts/AppLayout";
+import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import ListSatuanKerjaPage from "./pages/ListSatuankerja";
 import { ToastContainer } from "react-toastify";
@@ -69,6 +70,16 @@ function App() {
       <Routes>
         <Route
           path="/"
+          element={
+            isInitializing ? null : isAuthenticated ? (
+              <Navigate to="/dashboard-utama" replace />
+            ) : (
+              <LandingPage />
+            )
+          }
+        />
+        <Route
+          path="/login"
           element={
             isInitializing ? null : isAuthenticated ? (
               <Navigate to="/dashboard-utama" replace />
