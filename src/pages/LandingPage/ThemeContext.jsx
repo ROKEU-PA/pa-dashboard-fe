@@ -4,7 +4,6 @@ import React, {
   useEffect,
   useState,
 } from "react";
-
 const ThemeContext = createContext(null);
 
 export const ThemeProvider = ({ children }) => {
@@ -13,15 +12,23 @@ export const ThemeProvider = ({ children }) => {
       return "light";
     }
 
-    const savedTheme = window.localStorage.getItem("landing-theme");
+    try {
+      const savedTheme = window.localStorage.getItem("landing-theme");
 
-    if (savedTheme === "dark" || savedTheme === "light") {
-      return savedTheme;
+      if (savedTheme === "dark" || savedTheme === "light") {
+        return savedTheme;
+      }
+    } catch (error) {
+      console.warn("Tema tidak dapat dibaca:", error);
     }
 
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
+    try {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    } catch (error) {
+      return "light";
+    }
   });
 
   useEffect(() => {
