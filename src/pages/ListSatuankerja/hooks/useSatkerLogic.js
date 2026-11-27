@@ -11,6 +11,10 @@ import {
   getCurrentSatuanKerja,
   isPengajuanPath,
 } from "@/pages/ListSatuankerja/satkerHooks";
+import {
+  archiveRequest,
+  uploadArchiveFile,
+} from "@/utils/archiveChunkUpload";
 
 export function useSatkerLogic() {
   let ENCRYPTION_KEY = import.meta.env.REACT_APP_ENCRYPTION_KEY;
@@ -27,14 +31,13 @@ export function useSatkerLogic() {
     getCurrentSatuanKerja(listMenu, location.pathname),
   );
 
-const [filter, setFilter] = useState({
-  tahun: "",
-  searchKey: "",
-  startDate: null,
-  endDate: null,
-  status: null,
-});
-
+  const [filter, setFilter] = useState({
+    tahun: "",
+    searchKey: "",
+    startDate: null,
+    endDate: null,
+    status: null,
+  });
 
   // Table & Pagination States
   const [dataTable, setDataTable] = useState([]);
@@ -44,13 +47,11 @@ const [filter, setFilter] = useState({
   const [sortBy, setSortBy] = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
   const [jumlahDiprosesPIC, setJumlahDiprosesPIC] = useState(0);
-  const [jumlahPerluDiperbaiki, setJumlahPerluDiperbaiki] =
-    useState(0);
+  const [jumlahPerluDiperbaiki, setJumlahPerluDiperbaiki] = useState(0);
   const [jumlahPerluDiperbaikiPAPIC, setJumlahPerluDiperbaikiPAPIC] =
     useState(0);
   const [canSubmitTest, setCanSubmitTest] = useState(null);
-  const [totalDiperbaikiRevGte1, setTotalDiperbaikiRevGte1] =
-    useState(0);
+  const [totalDiperbaikiRevGte1, setTotalDiperbaikiRevGte1] = useState(0);
   const [summaryNote, setSummaryNote] = useState("");
   // Summary khusus User
   const [canAddSubmission, setCanAddSubmission] = useState(null);
@@ -105,48 +106,48 @@ const [filter, setFilter] = useState({
     }
   };
 
-    const handleDateChange = (key, value) => {
-      if (key === "status") {
-        // sessionStorage.setItem("espp_status_filter", value);
-
-        setPage(0);
-        setFilter((prev) => ({
-          ...prev,
-          status: value,
-        }));
-
-        return;
-      }
-
-      setFilter((prev) => {
-        const newFilter = {
-          ...prev,
-          [key]: value,
-        };
-
-        if (
-          key === "startDate" &&
-          newFilter.endDate &&
-          value > newFilter.endDate
-        ) {
-          newFilter.endDate = "";
-        }
-
-        return newFilter;
-      });
-    };
-
-    const handleStatusChange = (value) => {
-      const status = value || "";
-
-      // sessionStorage.setItem("espp_status_filter", status);
+  const handleDateChange = (key, value) => {
+    if (key === "status") {
+      // sessionStorage.setItem("espp_status_filter", value);
 
       setPage(0);
-
       setFilter((prev) => ({
         ...prev,
-        status,
+        status: value,
       }));
+
+      return;
+    }
+
+    setFilter((prev) => {
+      const newFilter = {
+        ...prev,
+        [key]: value,
+      };
+
+      if (
+        key === "startDate" &&
+        newFilter.endDate &&
+        value > newFilter.endDate
+      ) {
+        newFilter.endDate = "";
+      }
+
+      return newFilter;
+    });
+  };
+
+  const handleStatusChange = (value) => {
+    const status = value || "";
+
+    // sessionStorage.setItem("espp_status_filter", status);
+
+    setPage(0);
+
+    setFilter((prev) => ({
+      ...prev,
+      status,
+    }));
     setPage(0);
   };
 
@@ -176,13 +177,9 @@ const [filter, setFilter] = useState({
 
       const summary = res.data;
 
-      setJumlahDiprosesPIC(
-        Number(summary.list_approve?.total) || 0
-      );
+      setJumlahDiprosesPIC(Number(summary.list_approve?.total) || 0);
 
-      setTotalDiperbaikiRevGte1(
-        Number(summary.total_fix) || 0
-      );
+      setTotalDiperbaikiRevGte1(Number(summary.total_fix) || 0);
 
       setSummaryNote(summary.note || "");
     } catch (error) {
@@ -192,60 +189,48 @@ const [filter, setFilter] = useState({
 
   // TAMBAHAN BARU
   const getRevision = (item) =>
-    Number(
-      item?.rev_ ??
-        item?.rev__ ??
-        item?.revisi_ ??
-        item?.revision_ ??
-        0
-    );
+    Number(item?.rev_ ?? item?.rev__ ?? item?.revisi_ ?? item?.revision_ ?? 0);
 
-    const getUpdater = (item) => {
-      const updater =
-        item?.updated_by ??
-        item?.update_by ??
-        item?.updated_by__ ??
-        item?.updated_by_ ??
-        item?.update_by__ ??
-        item?.update_by_ ??
-        item?.diperbaiki_oleh__ ??
-        item?.diperbaiki_oleh_;
+  const getUpdater = (item) => {
+    const updater =
+      item?.updated_by ??
+      item?.update_by ??
+      item?.updated_by__ ??
+      item?.updated_by_ ??
+      item?.update_by__ ??
+      item?.update_by_ ??
+      item?.diperbaiki_oleh__ ??
+      item?.diperbaiki_oleh_;
 
-      const updaterName =
-        typeof updater === "object" && updater !== null
-          ? updater.name
-          : updater;
+    const updaterName =
+      typeof updater === "object" && updater !== null ? updater.name : updater;
 
-      return String(updaterName ?? "")
-        .trim()
-        .toUpperCase();
-    };
+    return String(updaterName ?? "")
+      .trim()
+      .toUpperCase();
+  };
 
-      // Summary untuk User
-      const fetchUserSummary = async () => {
-        try {
-          const res = await apiRequest({
-            url: "/archive/user-summary",
-            token: accessToken,
-          });
+  // Summary untuk User
+  const fetchUserSummary = async () => {
+    try {
+      const res = await apiRequest({
+        url: "/archive/user-summary",
+        token: accessToken,
+      });
 
-          if (!res?.success || !res?.data) return;
+      if (!res?.success || !res?.data) return;
 
-          const summary = res.data;
+      const summary = res.data;
 
-          setJumlahPerluDiperbaikiPAPIC(
-            Number(summary.total_fix_pic) || 0
-          );
+      setJumlahPerluDiperbaikiPAPIC(Number(summary.total_fix_pic) || 0);
 
-          setCanAddSubmission(
-            summary.can_add_submission ?? null
-          );
+      setCanAddSubmission(summary.can_add_submission ?? null);
 
-          setUserSummaryNote(summary.note || "");
-        } catch (error) {
-          console.error("Gagal mengambil summary User:", error);
-        }
-      };
+      setUserSummaryNote(summary.note || "");
+    } catch (error) {
+      console.error("Gagal mengambil summary User:", error);
+    }
+  };
 
   // ==========================================
   // 3. API CALLS
@@ -254,13 +239,11 @@ const [filter, setFilter] = useState({
     try {
       const isPengajuan = isPengajuanPath(location.pathname);
 
-      const tahun = isPengajuan
-        ? new Date().getFullYear()
-        : filter.tahun;
+      const tahun = isPengajuan ? new Date().getFullYear() : filter.tahun;
 
       const status = isPengajuan ? filter.status : "arsip";
       const query = buildQueryString({
-        biro_code : currentMenu?.code ?? filter?.satker,
+        biro_code: currentMenu?.code ?? filter?.satker,
         ...(tahun ? { tahun } : {}),
         status,
         search_key: filter.searchKey,
@@ -314,11 +297,9 @@ const [filter, setFilter] = useState({
               selectedStatus === "butuhperbaikan" ||
               selectedStatus === "perludiperbaiki"
             ) {
-              return [
-                "fix",
-                "butuhperbaikan",
-                "perludiperbaiki",
-              ].includes(itemStatus);
+              return ["fix", "butuhperbaikan", "perludiperbaiki"].includes(
+                itemStatus,
+              );
             }
 
             return itemStatus === selectedStatus;
@@ -326,9 +307,7 @@ const [filter, setFilter] = useState({
 
       setDataTable(filteredRows);
 
-      setTotalPages(
-        Math.max(1, Math.ceil(totalData / rowsPerPage))
-      );
+      setTotalPages(Math.max(1, Math.ceil(totalData / rowsPerPage)));
     } catch (error) {
       console.error("Gagal mengambil data SPP:", error);
     }
@@ -343,39 +322,38 @@ const [filter, setFilter] = useState({
     accessToken,
   ]);
 
-    const fetchType = useCallback(async (id) => {
-      try {
-        if (id) {
-          const data = await apiRequest({
-            url: `/pa/spp/type?id=` + id,
-          });
+  const fetchType = useCallback(async (id) => {
+    try {
+      if (id) {
+        const data = await apiRequest({
+          url: `/pa/spp/type?id=` + id,
+        });
 
-          const verif = await apiRequest({
-            url: `/pa/spp/type?id=verifikasi`,
-          });
+        const verif = await apiRequest({
+          url: `/pa/spp/type?id=verifikasi`,
+        });
 
-          if (data.success) {
-            setQuestions(data.data[0].questions);
-            setVerifications(verif.data[0].questions);
-          }
-        } else {
-          const data = await apiRequest({
-            url: `/pa/spp/type?id=`,
-          });
-
-          if (data.success) {
-            const filteredResult = data.data.filter(
-              (item) => item.type_id !== "verifikasi",
-            );
-
-            setTypes(filteredResult);
-          }
+        if (data.success) {
+          setQuestions(data.data[0].questions);
+          setVerifications(verif.data[0].questions);
         }
-      } catch (error) {
-        console.error(error);
-      }
-    }, []);
+      } else {
+        const data = await apiRequest({
+          url: `/pa/spp/type?id=`,
+        });
 
+        if (data.success) {
+          const filteredResult = data.data.filter(
+            (item) => item.type_id !== "verifikasi",
+          );
+
+          setTypes(filteredResult);
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
 
   const fetchCategories = async (id) => {
     try {
@@ -395,54 +373,261 @@ const [filter, setFilter] = useState({
     }
   };
 
-const submitData = async (formDataToSubmit) => {
-const payload = new FormData();
+  const submitDataV2 = async (formDataToSubmit) => {
+    let toastId;
+    let uploadId;
+    let saveStarted = false;
+    let baseUrl;
+    let token;
 
-try {
-  let encryptedLink = CryptoJS.AES.encrypt(
-    formDataToSubmit.link || "",
-    ENCRYPTION_KEY,
-  ).toString();
+    try {
+      const kodeBiro =
+        currentMenu?.code ||
+        formDataToSubmit?.kode_biro ||
+        "";
 
-const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
+      const noSPP =
+        formDataToSubmit?.no_spp ||
+        formDataToSubmit?.nospp ||
+        "";
 
-const kodeBiro =
-  currentMenu?.code || formDataToSubmit?.kode_biro || "";
+      const jenisSPP =
+        formDataToSubmit?.type_id ||
+        formDataToSubmit?.type ||
+        formDataToSubmit?.jenis_spp ||
+        "";
 
-const noSPP =
-  formDataToSubmit?.no_spp || formDataToSubmit?.nospp || "";
+      const tahun = formDataToSubmit?.tahun || "";
 
-const jenisSPP =
-  formDataToSubmit?.type_id ||
-  formDataToSubmit?.type ||
-  formDataToSubmit?.jenis_spp ||
-  "";
+      if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
+        toast.error(
+          "Kode biro, No. SPP, Jenis SPP, dan Tahun wajib diisi.",
+        );
+        return;
+      }
 
-const tahun = formDataToSubmit?.tahun || "";
+      baseUrl =
+        import.meta.env.REACT_APP_API_BASE_URL ||
+        import.meta.env.VITE_API_BASE_URL;
 
-// Validasi field wajib
-if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
-  console.error("Data pengajuan tidak lengkap:", {
-    kode_biro: kodeBiro,
-    no_spp: noSPP,
-    jenis_spp: jenisSPP,
-    tahun,
-    currentMenu,
-    formDataToSubmit,
-  });
+      token = JSON.parse(
+        sessionStorage.getItem("auth") || "null",
+      )?.accessToken;
 
-  toast.error("Kode biro, No. SPP, Jenis SPP, dan Tahun wajib diisi.");
-  return;
-}
+      if (!baseUrl) {
+        throw new Error("Alamat API belum dikonfigurasi.");
+      }
+
+      if (!token) {
+        throw new Error(
+          "Sesi login sudah berakhir. Silakan login ulang.",
+        );
+      }
+
+      const file =
+        formDataToSubmit?.dokumen instanceof File
+          ? formDataToSubmit.dokumen
+          : formDataToSubmit?.dokumen?.[0];
+
+      if (file && !(file instanceof File)) {
+        throw new Error("Dokumen yang dipilih tidak valid.");
+      }
+
+      // Siapkan metadata sebelum mulai mengunggah file.
+      const payload = new FormData();
+
+      payload.append("kode_biro", String(kodeBiro));
+      payload.append("no_spp", String(noSPP));
+      payload.append("jenis_spp", String(jenisSPP));
+
+      payload.append(
+        "employee_status",
+        formDataToSubmit?.status_pegawai ?? "",
+      );
+
+      for (
+        const category of
+        formDataToSubmit?.kategori_penerima || []
+      ) {
+        payload.append("category[]", category);
+      }
+
+      payload.append("tahun", String(tahun));
+
+      payload.append(
+        "link",
+        CryptoJS.AES.encrypt(
+          formDataToSubmit.link || "",
+          ENCRYPTION_KEY,
+        ).toString(),
+      );
+
+      payload.append(
+        "jml_hal",
+        String(Number(formDataToSubmit.jml_hal) || 0),
+      );
+
+      payload.append(
+        "feedback",
+        formDataToSubmit?.catatan ??
+          formDataToSubmit?.feedback ??
+          "",
+      );
+
+      if (!isPengajuanPath(location.pathname)) {
+        payload.append("status", "arsip");
+      }
+
+      const uploadedBy =
+        formDataToSubmit?.uploaded_by ||
+        userData?.name ||
+        "";
+
+      if (uploadedBy) {
+        payload.append("uploaded_by", uploadedBy);
+      }
+
+      toastId = toast.info(
+        file ? "Menyiapkan upload..." : "Menyimpan arsip...",
+        {
+          progress: 0,
+          autoClose: false,
+          closeButton: false,
+          isLoading: true,
+        },
+      );
+
+      if (file) {
+        let displayedProgress = 0;
+
+        uploadId = await uploadArchiveFile({
+          baseUrl,
+          token,
+          file,
+          onProgress: (percent, label) => {
+            displayedProgress = Math.max(
+              displayedProgress,
+              Math.floor(percent),
+            );
+
+            toast.update(toastId, {
+              render: `${label} (${displayedProgress}%)`,
+              progress: displayedProgress / 100,
+            });
+          },
+        });
+
+        // Request simpan cukup membawa ID file yang sudah diunggah.
+        payload.append("upload_id", uploadId);
+      }
+
+      saveStarted = true;
+
+      const result = await archiveRequest({
+        baseUrl,
+        token,
+        path: "/archive/create",
+        body: payload,
+
+        // Upload ID yang sudah sukses akan mengembalikan hasil tersimpan.
+        retry: Boolean(uploadId),
+      });
+
+      toast.update(toastId, {
+        render: "Arsip berhasil disimpan!",
+        type: "success",
+        progress: 1,
+        isLoading: false,
+        autoClose: 3000,
+      });
+
+      // Mengikuti bentuk hasil fungsi lama:
+      // upload file mengembalikan string JSON.
+      return file ? JSON.stringify(result) : result;
+    } catch (error) {
+      const definiteRejection = [
+        400, 403, 413, 415, 422,
+      ].includes(error.status);
+
+      if (
+        uploadId &&
+        (!saveStarted || definiteRejection)
+      ) {
+        try {
+          await archiveRequest({
+            baseUrl,
+            token,
+            path: `/archive/uploads/${uploadId}/cancel`,
+            body: {},
+          });
+        } catch {
+          // Sesi tersisa mengikuti pembersihan upload kedaluwarsa.
+        }
+      }
+
+      const message =
+        error.message || "Gagal mengunggah data.";
+
+      if (toastId !== undefined) {
+        toast.update(toastId, {
+          render: message,
+          type: "error",
+          isLoading: false,
+          autoClose: 5000,
+        });
+      } else {
+        toast.error(message);
+      }
+
+      console.error("Pengajuan arsip gagal:", message);
+
+      throw error;
+    }
+  };
+
+  const submitData = async (formDataToSubmit) => {
+    const payload = new FormData();
+
+    try {
+      let encryptedLink = CryptoJS.AES.encrypt(
+        formDataToSubmit.link || "",
+        ENCRYPTION_KEY,
+      ).toString();
+
+      const finalJmlHal = Number(formDataToSubmit.jml_hal) || 0;
+
+      const kodeBiro = currentMenu?.code || formDataToSubmit?.kode_biro || "";
+
+      const noSPP = formDataToSubmit?.no_spp || formDataToSubmit?.nospp || "";
+
+      const jenisSPP =
+        formDataToSubmit?.type_id ||
+        formDataToSubmit?.type ||
+        formDataToSubmit?.jenis_spp ||
+        "";
+
+      const tahun = formDataToSubmit?.tahun || "";
+
+      // Validasi field wajib
+      if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
+        console.error("Data pengajuan tidak lengkap:", {
+          kode_biro: kodeBiro,
+          no_spp: noSPP,
+          jenis_spp: jenisSPP,
+          tahun,
+          currentMenu,
+          formDataToSubmit,
+        });
+
+        toast.error("Kode biro, No. SPP, Jenis SPP, dan Tahun wajib diisi.");
+        return;
+      }
 
       // Field wajib
       payload.append("kode_biro", String(kodeBiro));
       payload.append("no_spp", String(noSPP));
       payload.append("jenis_spp", String(jenisSPP));
-      payload.append(
-        "employee_status",
-        formDataToSubmit?.status_pegawai ?? ""
-      );
+      payload.append("employee_status", formDataToSubmit?.status_pegawai ?? "");
 
       // Kategori penerima
       if (
@@ -461,17 +646,14 @@ if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
 
       payload.append(
         "feedback",
-        formDataToSubmit?.catatan ?? formDataToSubmit?.feedback ?? ""
+        formDataToSubmit?.catatan ?? formDataToSubmit?.feedback ?? "",
       );
 
       if (!isPengajuanPath(location.pathname)) {
         payload.append("status", "arsip");
       }
 
-      const uploadedBy =
-        formDataToSubmit?.uploaded_by ||
-        userData?.name ||
-        "";
+      const uploadedBy = formDataToSubmit?.uploaded_by || userData?.name || "";
 
       if (uploadedBy) {
         payload.append("uploaded_by", uploadedBy);
@@ -748,8 +930,8 @@ if (!kodeBiro || !noSPP || !jenisSPP || !tahun) {
   };
 
   // HANYA UNTUK MODAL ADD/EDIT
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
     let isAnyFile = formData?.dokumen || formData?.document;
     try {
@@ -758,15 +940,15 @@ const handleSubmit = async (e) => {
         isAnyFile &&
         isPengajuanPath(location.pathname)
       ) {
-      if (
-        !formData?.no_spp ||
-        !formData.tahun ||
-        !(formData.type_id || formData.type) ||
-        !formData.dokumen
-      ) {
-        toast.error("Mohon lengkapi semua field yang diperlukan.");
-        return;
-      }
+        if (
+          !formData?.no_spp ||
+          !formData.tahun ||
+          !(formData.type_id || formData.type) ||
+          !formData.dokumen
+        ) {
+          toast.error("Mohon lengkapi semua field yang diperlukan.");
+          return;
+        }
       } else if (
         variantModal === "Add" &&
         isAnyFile &&
@@ -781,17 +963,27 @@ const handleSubmit = async (e) => {
           toast.error("Mohon lengkapi semua field yang diperlukan.");
           return;
         }
+      } else if (variantModal === "Edit") {
+        const noSPP = String(formData?.no_spp ?? formData?.nospp ?? "").trim();
+        const tahun = String(formData?.tahun ?? "").trim();
+        const jenisSPP =
+          formData?.type_id || formData?.type || formData?.jenis_spp;
 
-        } else if (variantModal === "Edit") {
-          const noSPP = String(formData?.no_spp ?? formData?.nospp ?? "").trim();
-          const tahun = String(formData?.tahun ?? "").trim();
-          const jenisSPP = formData?.type_id || formData?.type || formData?.jenis_spp;
+        if (!noSPP || !tahun || !String(jenisSPP ?? "").trim()) {
+          console.log("Validasi Edit SPP:", {
+            no_spp: noSPP,
+            tahun,
+            type: formData?.type,
+            type_id: formData?.type_id,
+            jenis_spp: formData?.jenis_spp,
+          });
 
           if (!noSPP || !tahun || !String(jenisSPP ?? "").trim()) {
             toast.error("No. SPP, Tahun, dan Jenis SPP wajib diisi.");
             return;
           }
         }
+      }
 
       const typeName =
         (types || [])
@@ -828,17 +1020,17 @@ const handleSubmit = async (e) => {
           return;
         }
 
-        const isArchive =
-          fileName.endsWith(".zip") || fileName.endsWith(".rar");
-        const sizeInBytes = file[0].size;
-        const sizeInMB = sizeInBytes / (1024 * 1024);
+        // const isArchive =
+        //   fileName.endsWith(".zip") || fileName.endsWith(".rar");
+        // const sizeInBytes = file[0].size;
+        // const sizeInMB = sizeInBytes / (1024 * 1024);
 
-        if (isArchive && sizeInMB < 50) {
-          toast.error(
-            "Jika ukuran file di bawah 50MB, mohon unggah langsung dalam format PDF (jangan di-ZIP/RAR). Bisa gunakan fitur Gabungkan PDF dibawah tombol tambah pengajuan",
-          );
-          return;
-        }
+        // if (isArchive && sizeInMB < 50) {
+        //   toast.error(
+        //     "Jika ukuran file di bawah 50MB, mohon unggah langsung dalam format PDF (jangan di-ZIP/RAR). Bisa gunakan fitur Gabungkan PDF dibawah tombol tambah pengajuan",
+        //   );
+        //   return;
+        // }
 
         const maxSize =
           formData.type_id === "ptup" ||
@@ -859,7 +1051,7 @@ const handleSubmit = async (e) => {
       }
 
       if (variantModal === "Add") {
-        await submitData(formData);
+        await submitDataV2(formData);
       } else {
         await editData(formData);
       }

@@ -786,10 +786,6 @@ function ListSatuanKerjaPage() {
                   * Maksimal 1,5 GB untuk jenis GUP & PTUP. Di luar jenis
                   tersebut maksimal 200 MB.
                 </p>
-
-                <p className="text-xs text-red-500 font-medium italic ml-1">
-                  * Untuk file dibawah 50 MB Wajib berformat PDF.
-                </p>
               </div>
             )}
 
